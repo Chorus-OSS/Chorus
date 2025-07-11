@@ -51,7 +51,6 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.TakeItemEntityPacket
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ChorusRandom
 import org.chorus_oss.chorus.utils.TradeRecipeBuildUtils
@@ -912,9 +911,10 @@ class EntityVillagerV2(chunk: IChunk?, nbt: CompoundTag?) : EntityMob(chunk, nbt
                     ) {
                         val slice = InventorySlice(inventory, 1, inventory.size)
                         if (slice.canAddItem(item)) {
-                            val pk = TakeItemEntityPacket()
-                            pk.entityId = this.getRuntimeID()
-                            pk.target = i.getRuntimeID()
+                            val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
+                                i.getRuntimeID().toULong(),
+                                this.getRuntimeID().toULong()
+                            )
                             Server.broadcastPacket(viewers.values, pk)
                             slice.addItem(item)
                             i.close()

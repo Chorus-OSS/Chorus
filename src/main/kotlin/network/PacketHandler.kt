@@ -60,8 +60,6 @@ interface PacketHandler {
 
     fun handle(pk: StructureBlockUpdatePacket) {}
 
-    fun handle(pk: TakeItemEntityPacket) {}
-
     fun handle(pk: TextPacket) {}
 
     fun handle(pk: UpdateAttributesPacket) {}

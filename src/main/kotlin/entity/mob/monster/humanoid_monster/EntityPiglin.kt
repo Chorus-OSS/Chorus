@@ -40,7 +40,6 @@ import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.TakeItemEntityPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
@@ -367,10 +366,11 @@ open class EntityPiglin(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                             }
                         }
                         if (pickup) {
-                            val pk = TakeItemEntityPacket()
-                            pk.entityId = entity.getRuntimeID()
-                            pk.target = i.getRuntimeID()
-                            Server.broadcastPacket(entity.viewers.values, pk)
+                            val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
+                                entity.getRuntimeID().toULong(),
+                                i.getRuntimeID().toULong()
+                            )
+                            Server.broadcastPacket(entity.viewers.values,pk)
                             i.close()
                         }
                     }

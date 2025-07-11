@@ -38,7 +38,6 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.TakeItemEntityPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
@@ -225,9 +224,10 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                         val item = i.item
                         if (item.isArmor || item.isTool) {
                             if (entity.equip(item)) {
-                                val pk = TakeItemEntityPacket()
-                                pk.entityId = entity.getRuntimeID()
-                                pk.target = i.getRuntimeID()
+                                val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
+                                    entity.getRuntimeID().toULong(),
+                                    i.getRuntimeID().toULong()
+                                )
                                 Server.broadcastPacket(entity.viewers.values, pk)
                                 i.close()
                             }

@@ -138,6 +138,7 @@ class Network @JvmOverloads constructor(
     val download: Double
         get() = (netWorkStatisticDataList[1].download - netWorkStatisticDataList[0].download).toDouble()
 
+
     fun resetStatistics() {
         var upload: Long = 0
         var download: Long = 0
@@ -151,6 +152,7 @@ class Network @JvmOverloads constructor(
                 download += networkIF.bytesRecv
             }
         }
+
         netWorkStatisticDataList.add(NetWorkStatisticData(upload, download))
     }
 
