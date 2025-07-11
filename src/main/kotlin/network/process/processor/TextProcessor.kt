@@ -24,7 +24,7 @@ class TextProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protoco
             return
         }
 
-        if ((pk.packet.parameters?.size ?: 0) > 1) {
+        if (!pk.packet.parameters.isNullOrEmpty()) {
             player.player.close("§cPacket handling error")
             return
         }
@@ -39,8 +39,7 @@ class TextProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protoco
         }
     }
 
-    override val packetId: Int
-        get() = org.chorus_oss.protocol.packets.TextPacket.id
+    override val packetId: Int = org.chorus_oss.protocol.packets.TextPacket.id
 
     companion object : Loggable
 }

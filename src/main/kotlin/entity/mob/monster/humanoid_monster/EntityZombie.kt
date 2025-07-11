@@ -225,8 +225,8 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                         if (item.isArmor || item.isTool) {
                             if (entity.equip(item)) {
                                 val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
-                                    entity.getRuntimeID().toULong(),
-                                    i.getRuntimeID().toULong()
+                                    itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                                    takerEntityRuntimeID = i.getRuntimeID().toULong()
                                 )
                                 Server.broadcastPacket(entity.viewers.values, pk)
                                 i.close()

@@ -912,8 +912,8 @@ class EntityVillagerV2(chunk: IChunk?, nbt: CompoundTag?) : EntityMob(chunk, nbt
                         val slice = InventorySlice(inventory, 1, inventory.size)
                         if (slice.canAddItem(item)) {
                             val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
-                                i.getRuntimeID().toULong(),
-                                this.getRuntimeID().toULong()
+                                itemEntityRuntimeID = i.getRuntimeID().toULong(),
+                                takerEntityRuntimeID = this.getRuntimeID().toULong()
                             )
                             Server.broadcastPacket(viewers.values, pk)
                             slice.addItem(item)

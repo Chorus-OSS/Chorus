@@ -9,7 +9,6 @@ import com.google.common.collect.HashBiMap
 import com.google.common.collect.Sets
 import io.netty.util.internal.EmptyArrays
 import io.netty.util.internal.PlatformDependent
-import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.block.*
 import org.chorus_oss.chorus.block.customblock.CustomBlock
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
@@ -58,7 +57,6 @@ import org.chorus_oss.chorus.lang.LangCode.Companion.from
 import org.chorus_oss.chorus.lang.TextContainer
 import org.chorus_oss.chorus.lang.TranslationContainer
 import org.chorus_oss.chorus.level.*
-import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Level.Companion.chunkHash
 import org.chorus_oss.chorus.level.Level.Companion.generateChunkLoaderId
 import org.chorus_oss.chorus.level.Level.Companion.getHashX
@@ -76,6 +74,7 @@ import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.*
 import org.chorus_oss.chorus.network.protocol.types.GameType
+import org.chorus_oss.chorus.network.protocol.types.GameType.Companion.from
 import org.chorus_oss.chorus.network.protocol.types.PlayerBlockActionData
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -90,22 +89,43 @@ import org.chorus_oss.chorus.scheduler.TaskHandler
 import org.chorus_oss.chorus.scoreboard.IScoreboard
 import org.chorus_oss.chorus.scoreboard.IScoreboardLine
 import org.chorus_oss.chorus.scoreboard.data.DisplaySlot
+import org.chorus_oss.chorus.scoreboard.data.SortOrder
 import org.chorus_oss.chorus.scoreboard.displayer.IScoreboardViewer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.chorus.utils.Binary.writeUUID
+import org.chorus_oss.chorus.utils.Identifier.Companion.tryParse
 import org.chorus_oss.chorus.utils.PortalHelper.moveToTheEnd
 import org.chorus_oss.chorus.utils.TextFormat.Companion.clean
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.CameraShakePacket
+import org.chorus_oss.protocol.packets.ChangeDimensionPacket
+import org.chorus_oss.protocol.packets.ChunkRadiusUpdatedPacket
 import org.chorus_oss.protocol.packets.ClientboundCloseFormPacket
+import org.chorus_oss.protocol.packets.CommandOutputPacket
+import org.chorus_oss.protocol.packets.CompletedUsingItemPacket
+import org.chorus_oss.protocol.packets.DeathInfoPacket
+import org.chorus_oss.protocol.packets.DisconnectPacket
+import org.chorus_oss.protocol.packets.GameRulesChangedPacket
+import org.chorus_oss.protocol.packets.ModalFormRequestPacket
+import org.chorus_oss.protocol.packets.OpenSignPacket
 import org.chorus_oss.protocol.packets.PlayStatusPacket
+import org.chorus_oss.protocol.packets.PlayerFogPacket
 import org.chorus_oss.protocol.packets.SetActorMotionPacket
-import org.chorus_oss.protocol.types.*
+import org.chorus_oss.protocol.packets.SetSpawnPositionPacket
+import org.chorus_oss.protocol.packets.SetTimePacket
+import org.chorus_oss.protocol.packets.ShowCreditsPacket
+import org.chorus_oss.protocol.packets.TakeItemEntityPacket
+import org.chorus_oss.protocol.packets.ToastRequestPacket
+import org.chorus_oss.protocol.packets.TransferPacket
+import org.chorus_oss.protocol.packets.UpdateBlockPacket
+import org.chorus_oss.protocol.packets.UpdatePlayerGameTypePacket
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.CommandOriginData
+import org.chorus_oss.protocol.types.CommandOutputMessage
+import org.chorus_oss.protocol.types.CommandOutputType
+import org.chorus_oss.protocol.types.DisconnectFailReason
 import org.chorus_oss.protocol.types.Vector3f
-import org.chorus_oss.protocol.types.camera.preset.CameraPreset
-import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlot
-import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlotOrder
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.UnmodifiableView
 import java.net.InetSocketAddress
@@ -422,9 +442,9 @@ open class Player(
         set(value) {
             field = value
             if (value) {
-                val pk = org.chorus_oss.protocol.packets.ShowCreditsPacket(
+                val pk = ShowCreditsPacket(
                     playerRuntimeID = this.getRuntimeID().toULong(),
-                    statusType = org.chorus_oss.protocol.packets.ShowCreditsPacket.Companion.StatusType.Start
+                    statusType = ShowCreditsPacket.Companion.StatusType.Start
                 )
                 this.sendPacket(pk)
             }
@@ -645,12 +665,12 @@ open class Player(
         Server.instance.pluginManager.callEvent(playerInteractEvent)
         if (playerInteractEvent.cancelled) {
             inventory.sendHeldItem(this)
-            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), false)
+            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), false)
             if (target.getLevelBlockAtLayer(1) is BlockLiquid) {
                 level!!.sendBlocks(
                     arrayOf(this), arrayOf(
                         target.getLevelBlockAtLayer(1)
-                    ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 1
+                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 1
                 )
             }
             return
@@ -756,7 +776,7 @@ open class Player(
             } else if (handItem == null) level!!.sendBlocks(
                 arrayOf(this), arrayOf(
                     level!!.getBlock(blockPos.asVector3())
-                ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
+                ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
             )
             return
         }
@@ -766,7 +786,7 @@ open class Player(
 
         if (blockPos.distanceSquared(this.position) < 100) {
             val target = level!!.getBlock(blockPos.asVector3())
-            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt())
+            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt())
 
             val blockEntity = level!!.getBlockEntity(blockPos.asVector3())
             if (blockEntity is BlockEntitySpawnable) {
@@ -785,7 +805,7 @@ open class Player(
     //todo a lot on dimension
     private fun setDimension(dimension: Int) {
         this.sendPacket(
-            org.chorus_oss.protocol.packets.ChangeDimensionPacket(
+            ChangeDimensionPacket(
                 dimension = dimension,
                 position = Vector3f(position),
                 respawn = false,
@@ -866,7 +886,7 @@ open class Player(
 
         this.enableClientCommand = true
 
-        val setTimePacket = org.chorus_oss.protocol.packets.SetTimePacket(
+        val setTimePacket = SetTimePacket(
             time = level!!.getTime()
         )
         this.sendPacket(setTimePacket)
@@ -909,8 +929,8 @@ open class Player(
             this.setSpawn(this.level!!.safeSpawn, SpawnPointType.WORLD)
         } else {
             //update compass
-            val pk = org.chorus_oss.protocol.packets.SetSpawnPositionPacket(
-                spawnType = org.chorus_oss.protocol.packets.SetSpawnPositionPacket.Companion.SpawnType.World,
+            val pk = SetSpawnPositionPacket(
+                spawnType = SetSpawnPositionPacket.Companion.SpawnType.World,
                 position = BlockPos(spawn.first!!.position),
                 dimension = spawn.first!!.level.dimension,
                 spawnPosition = BlockPos(spawn.first!!.position)
@@ -1794,19 +1814,11 @@ open class Player(
         val chunkPositionZ = position.floorZ shr 4
         for (x in -chunkRadius..<chunkRadius) {
             for (z in -chunkRadius..<chunkRadius) {
-                val chunk = org.chorus_oss.protocol.packets.LevelChunkPacket(
-                    position = ChunkPos(
-                        chunkPositionX + x,
-                        chunkPositionZ + z
-                    ),
-                    dimension = this.level!!.dimension,
-                    subChunkCount = 0u,
-                    subChunkLimit = 0u,
-                    cacheEnabled = false,
-                    blobHashes = emptyList(),
-                    data = ByteString(),
-                )
-                this.sendPacket(chunk)
+                val chunk = LevelChunkPacket()
+                chunk.chunkX = chunkPositionX + x
+                chunk.chunkZ = chunkPositionZ + z
+                chunk.data = EmptyArrays.EMPTY_BYTES
+                this.dataPacket(chunk)
             }
         }
     }
@@ -1962,7 +1974,7 @@ open class Player(
 
             if (this.isSpectator) {
                 //发送旁观者的游戏模式给对方，使得对方客户端正确渲染玩家实体
-                val pk = org.chorus_oss.protocol.packets.UpdatePlayerGameTypePacket(
+                val pk = UpdatePlayerGameTypePacket(
                     gameType = org.chorus_oss.protocol.types.GameType.Spectator,
                     playerUniqueID = this.getUniqueID(),
                     tick = 0uL
@@ -2228,12 +2240,11 @@ open class Player(
      * @param itemId       the item id
      */
     fun setItemCoolDown(coolDownTick: Int, itemId: Identifier) {
-        val pk = org.chorus_oss.protocol.packets.PlayerStartItemCoolDownPacket(
-            category = itemId.toString(),
-            duration = coolDownTick,
-        )
+        val pk = PlayerStartItemCoolDownPacket()
+        pk.coolDownDuration = coolDownTick
+        pk.itemCategory = itemId.toString()
         cooldownTickMap[itemId.toString()] = level!!.tick + coolDownTick
-        this.sendPacket(pk)
+        this.dataPacket(pk)
     }
 
     /**
@@ -2252,12 +2263,11 @@ open class Player(
     }
 
     fun setItemCoolDown(coolDown: Int, category: String) {
-        val pk = org.chorus_oss.protocol.packets.PlayerStartItemCoolDownPacket(
-            category = category,
-            duration = coolDown,
-        )
+        val pk = PlayerStartItemCoolDownPacket()
+        pk.coolDownDuration = coolDown
+        pk.itemCategory = category
         cooldownTickMap[category] = level!!.tick + coolDown
-        this.sendPacket(pk)
+        this.dataPacket(pk)
     }
 
     fun isItemCoolDownEnd(category: String): Boolean {
@@ -2338,8 +2348,8 @@ open class Player(
             level!!
         )
         this.spawnPointType = spawnPointType
-        val pk = org.chorus_oss.protocol.packets.SetSpawnPositionPacket(
-            spawnType = org.chorus_oss.protocol.packets.SetSpawnPositionPacket.Companion.SpawnType.Player,
+        val pk = SetSpawnPositionPacket(
+            spawnType = SetSpawnPositionPacket.Companion.SpawnType.Player,
             position = BlockPos(spawnPoint!!.position),
             dimension = spawnPoint!!.level.dimension,
             spawnPosition = BlockPos(spawnPoint!!.position),
@@ -2363,10 +2373,6 @@ open class Player(
                 }
             }
         }
-    }
-
-    fun sendChunk(x: Int, z: Int, packet: Packet) {
-        sendChunk(x, z, MigrationPacket(packet))
     }
 
 
@@ -2587,7 +2593,7 @@ open class Player(
 
         if (!serverSide) {
             val networkGamemode = toNetworkGamemode(gamemode)
-            val pk = org.chorus_oss.protocol.packets.UpdatePlayerGameTypePacket(
+            val pk = UpdatePlayerGameTypePacket(
                 gameType = org.chorus_oss.protocol.types.GameType.entries[networkGamemode],
                 playerUniqueID = this.getUniqueID(),
                 tick = 0uL,
@@ -2600,10 +2606,9 @@ open class Player(
             //eg: 观察者模式玩家对于gm 0 1 2的玩家不可见
             Server.broadcastPacket(players, pk)
             //对于自身，我们使用SetPlayerGameTypePacket来确保与WaterDog的兼容
-            val pk2 = org.chorus_oss.protocol.packets.SetPlayerGameTypePacket(
-                gameType = org.chorus_oss.protocol.types.GameType.entries[networkGamemode],
-            )
-            this.sendPacket(pk2)
+            val pk2 = SetPlayerGameTypePacket()
+            pk2.gamemode = networkGamemode
+            this.dataPacket(pk2)
         }
 
         this.resetFallDistance()
@@ -2763,7 +2768,7 @@ open class Player(
      * Send the fog settings to the client
      */
     fun sendFogStack() {
-        val pk = org.chorus_oss.protocol.packets.PlayerFogPacket(
+        val pk = PlayerFogPacket(
             stack = this.fogStack.map { it.second }
         )
         this.sendPacket(pk)
@@ -2773,9 +2778,9 @@ open class Player(
      * Send camera presets to cilent
      */
     fun sendCameraPresets() {
-        sendPacket(
-            org.chorus_oss.protocol.packets.CameraPresetsPacket(
-                presets = presets.values.map(CameraPreset::invoke)
+        dataPacket(
+            CameraPresetsPacket(
+                presets = presets.values.toMutableList()
             )
         )
     }
@@ -3223,7 +3228,7 @@ open class Player(
         this.chunkRadius = distance
 
         this.sendPacket(
-            org.chorus_oss.protocol.packets.ChunkRadiusUpdatedPacket(
+            ChunkRadiusUpdatedPacket(
                 radius = distance
             )
         )
@@ -3260,7 +3265,7 @@ open class Player(
     @OptIn(ExperimentalUuidApi::class)
     override fun sendCommandOutput(container: CommandOutputContainer) {
         if (level!!.gameRules.getBoolean(GameRule.SEND_COMMAND_FEEDBACK)) {
-            val pk = org.chorus_oss.protocol.packets.CommandOutputPacket(
+            val pk = CommandOutputPacket(
                 originData = CommandOriginData(
                     CommandOriginData.Companion.Origin.Player,
                     Uuid(getUUID()), "", null
@@ -3631,7 +3636,7 @@ open class Player(
             reason1 = BedrockDisconnectReasons.DISCONNECTED
         }
 
-        val packet = org.chorus_oss.protocol.packets.DisconnectPacket(
+        val packet = DisconnectPacket(
             reason = DisconnectFailReason.Unknown,
             hideDisconnectionScreen,
             message = reason1,
@@ -3696,18 +3701,12 @@ open class Player(
                 val chunkX = getHashX(l)
                 val chunkZ = getHashZ(l)
                 if (level!!.unregisterChunkLoader(this, chunkX, chunkZ, false)) {
-                    val pk = org.chorus_oss.protocol.packets.LevelChunkPacket(
-                        position = ChunkPos(
-                            chunkX,
-                            chunkZ,
-                        ),
-                        dimension = level!!.dimension,
-                        subChunkCount = 0u,
-                        subChunkLimit = 0u,
-                        cacheEnabled = false,
-                        blobHashes = emptyList(),
-                        data = ByteString(),
-                    )
+                    val pk = LevelChunkPacket()
+                    pk.chunkX = chunkX
+                    pk.chunkZ = chunkZ
+                    pk.dimension = level!!.dimension
+                    pk.subChunkCount = 0
+                    pk.data = ByteArray(0)
                     this.sendChunk(chunkX, chunkZ, pk)
                     for (entity in level!!.getChunkEntities(chunkX, chunkZ).values) {
                         if (entity !== this) {
@@ -3974,7 +3973,7 @@ open class Player(
 
             this.timeSinceRest = 0
 
-            val deathInfo = org.chorus_oss.protocol.packets.DeathInfoPacket(
+            val deathInfo = DeathInfoPacket(
                 cause = ev.translationDeathMessage.text,
                 messages = ev.translationDeathMessage.parameters.toList()
             )
@@ -3989,12 +3988,14 @@ open class Player(
                 )
             )
 
-            val pk = org.chorus_oss.protocol.packets.RespawnPacket(
-                position = Vector3f(spawn.first!!.position),
-                state = org.chorus_oss.protocol.packets.RespawnPacket.Companion.State.SearchingForSpawn,
-                entityRuntimeID = this.getRuntimeID().toULong(),
-            )
-            this.sendPacket(pk)
+            val pk = RespawnPacket()
+            val pos = spawn.first
+            pk.x = pos!!.position.x.toFloat()
+            pk.y = pos.position.y.toFloat()
+            pk.z = pos.position.z.toFloat()
+            pk.respawnState = RespawnPacket.STATE_SEARCHING_FOR_SPAWN
+            pk.runtimeEntityId = this.getRuntimeID()
+            this.dataPacket(pk)
         }
     }
 
@@ -4494,18 +4495,18 @@ open class Player(
         level!!.scheduler.scheduleDelayedTask(InternalPlugin.INSTANCE, {
             for (b in level!!.getBlockEntities().values) {
                 if (b is BlockEntitySpawnable) {
-                    val setAir = org.chorus_oss.protocol.packets.UpdateBlockPacket(
+                    val setAir = UpdateBlockPacket(
                         position = BlockPos(b.position),
                         newBlockRuntimeID = BlockAir.STATE.blockStateHash().toUInt(),
-                        flags = org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NETWORK,
+                        flags = UpdateBlockPacket.FLAG_NETWORK,
                         layer = 0u
                     )
                     this.sendPacket(setAir)
 
-                    val revertAir = org.chorus_oss.protocol.packets.UpdateBlockPacket(
+                    val revertAir = UpdateBlockPacket(
                         position = BlockPos(b.position),
                         newBlockRuntimeID = b.block.runtimeId.toUInt(),
-                        flags = org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NETWORK,
+                        flags = UpdateBlockPacket.FLAG_NETWORK,
                         layer = 0u
                     )
                     this.sendPacket(revertAir)
@@ -4543,7 +4544,7 @@ open class Player(
             form.viewers.add(this)
         }
 
-        val packet = org.chorus_oss.protocol.packets.ModalFormRequestPacket(
+        val packet = ModalFormRequestPacket(
             formID = id.toUInt(),
             formData = form.toJson()
         )
@@ -4563,12 +4564,12 @@ open class Player(
             .filter { f: Map.Entry<Int, Form<*>> -> f.value == form }
             .map { it.key }
             .findFirst()
-            .ifPresent { id ->
-                val packet = org.chorus_oss.protocol.packets.ServerSettingsResponsePacket(
-                    formID = id,
-                    formData = form.toJson(),
-                ) // Exploiting some (probably unintended) protocol features here
-                this.sendPacket(packet)
+            .ifPresent { id: Int? ->
+                val packet =
+                    ServerSettingsResponsePacket() // Exploiting some (probably unintended) protocol features here
+                packet.formId = id!!
+                packet.data = form.toJson()
+                this.dataPacket(packet)
             }
     }
 
@@ -4604,19 +4605,15 @@ open class Player(
         dialog.bindEntity!!.setDataProperty(EntityDataTypes.ACTIONS, actionJson!!)
         dialog.bindEntity!!.setDataProperty(EntityDataTypes.INTERACT_TEXT, dialog.content!!)
 
-        val packet = org.chorus_oss.protocol.packets.NPCDialoguePacket(
-            entityUniqueID = dialog.entityId,
-            actionType = org.chorus_oss.protocol.packets.NPCDialoguePacket.Companion.ActionType.Open,
-            dialogue = dialog.content ?: "",
-            sceneName = when (book) {
-                true -> dialog.sceneName
-                false -> ""
-            },
-            npcName = dialog.title ?: "",
-            actionJSON = dialog.buttonJSONData ?: ""
-        )
+        val packet = NPCDialoguePacket()
+        packet.runtimeEntityId = dialog.entityId
+        packet.action = NPCDialoguePacket.NPCDialogAction.OPEN
+        packet.dialogue = dialog.content!!
+        packet.npcName = dialog.title!!
+        if (book) packet.sceneName = dialog.sceneName
+        packet.actionJson = dialog.buttonJSONData!!
         if (book) dialogWindows.put(dialog.sceneName, dialog)
-        this.sendPacket(packet)
+        this.dataPacket(packet)
     }
 
     /**
@@ -4915,8 +4912,8 @@ open class Player(
     public override fun switchLevel(targetLevel: Level): Boolean {
         if (super.switchLevel(targetLevel)) {
             clientMovements.clear()
-            val spawnPosition = org.chorus_oss.protocol.packets.SetSpawnPositionPacket(
-                spawnType = org.chorus_oss.protocol.packets.SetSpawnPositionPacket.Companion.SpawnType.World,
+            val spawnPosition = SetSpawnPositionPacket(
+                spawnType = SetSpawnPositionPacket.Companion.SpawnType.World,
                 position = BlockPos(targetLevel.spawnLocation.position),
                 dimension = targetLevel.dimension,
                 spawnPosition = BlockPos(targetLevel.spawnLocation.position),
@@ -4926,12 +4923,12 @@ open class Player(
             // Remove old chunks
             this.forceSendEmptyChunks()
 
-            val setTime = org.chorus_oss.protocol.packets.SetTimePacket(
+            val setTime = SetTimePacket(
                 time = targetLevel.getTime()
             )
             this.sendPacket(setTime)
 
-            val gameRulesChanged = org.chorus_oss.protocol.packets.GameRulesChangedPacket(
+            val gameRulesChanged = GameRulesChangedPacket(
                 gameRules = targetLevel.gameRules.getGameRules()
                     .map { org.chorus_oss.protocol.types.GameRule(it.toPair()) }
             )
@@ -4939,7 +4936,7 @@ open class Player(
 
             if (targetLevel.dimension == this.level!!.dimension) {
                 this.sendPacket(
-                    org.chorus_oss.protocol.packets.ChangeDimensionPacket(
+                    ChangeDimensionPacket(
                         dimension = when (this.level!!.dimension) {
                             Level.DIMENSION_NETHER -> Level.DIMENSION_OVERWORLD
                             else -> Level.DIMENSION_NETHER
@@ -4999,7 +4996,7 @@ open class Player(
     fun transfer(address: InetSocketAddress) {
         val hostName = address.address.hostAddress
         val port = address.port
-        val packet = org.chorus_oss.protocol.packets.TransferPacket(
+        val packet = TransferPacket(
             address = hostName,
             port = port.toUShort(),
             reloadWorld = false,
@@ -5041,11 +5038,12 @@ open class Player(
                     return false
                 }
 
-                val pk = TakeItemEntityPacket()
-                pk.entityId = this.getRuntimeID()
-                pk.target = entity.getRuntimeID()
+                val pk = TakeItemEntityPacket(
+                    itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                    takerEntityRuntimeID = this.getRuntimeID().toULong(),
+                )
                 Server.broadcastPacket(entity.viewers.values, pk)
-                this.dataPacket(pk)
+                this.sendPacket(pk)
 
                 if (!this.isCreative) {
                     inventory.addItem(item.clone())
@@ -5085,11 +5083,12 @@ open class Player(
                     return false
                 }
 
-                val pk = TakeItemEntityPacket()
-                pk.entityId = this.getRuntimeID()
-                pk.target = entity.getRuntimeID()
-                Server.broadcastPacket(entity.viewers.values, pk)
-                this.dataPacket(pk)
+                val pk = TakeItemEntityPacket(
+                    itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                    takerEntityRuntimeID = this.getRuntimeID().toULong()
+                )
+                Server.broadcastPacket(players = entity.viewers.values, packet = pk)
+                this.sendPacket(pk)
 
                 if (!entity.isCreative) {
                     if (inventory!!.getItem(entity.getFavoredSlot()).isNothing) {
@@ -5122,11 +5121,12 @@ open class Player(
                         this.awardAchievement("diamond")
                     }
 
-                    val pk = TakeItemEntityPacket()
-                    pk.entityId = this.getRuntimeID()
-                    pk.target = entity.getRuntimeID()
+                    val pk = TakeItemEntityPacket(
+                        itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                        takerEntityRuntimeID = this.getRuntimeID().toULong()
+                    )
                     Server.broadcastPacket(entity.viewers.values, pk)
-                    this.dataPacket(pk)
+                    this.sendPacket(pk)
 
                     this.inventory.addItem(item.clone())
                     entity.close()
@@ -5213,11 +5213,10 @@ open class Player(
      *
      * @param xuid XUID
      */
-    fun showXboxProfile(xuid: String) {
-        val pk = org.chorus_oss.protocol.packets.ShowProfilePacket(
-            xuid = xuid
-        )
-        this.sendPacket(pk)
+    fun showXboxProfile(xuid: String?) {
+        val pk = ShowProfilePacket()
+        pk.xuid = xuid
+        this.dataPacket(pk)
     }
 
     /**
@@ -5371,10 +5370,10 @@ open class Player(
 
     fun completeUsingItem(
         itemId: Short,
-        action: org.chorus_oss.protocol.packets.CompletedUsingItemPacket.Companion.ItemUseMethod
+        action: CompletedUsingItemPacket.Companion.ItemUseMethod
     ) {
         this.sendPacket(
-            org.chorus_oss.protocol.packets.CompletedUsingItemPacket(
+            CompletedUsingItemPacket(
                 itemID = itemId,
                 itemUseMethod = action
             )
@@ -5455,7 +5454,7 @@ open class Player(
      * @param content the content
      */
     fun sendToast(title: String, content: String) {
-        val pk = org.chorus_oss.protocol.packets.ToastRequestPacket(
+        val pk = ToastRequestPacket(
             title = title,
             message = content,
         )
@@ -5489,14 +5488,13 @@ open class Player(
     }
 
     override fun display(scoreboard: IScoreboard, slot: DisplaySlot?) {
-        val pk = org.chorus_oss.protocol.packets.SetDisplayObjectivePacket(
-            displaySlot = ScoreboardSlot.entries[slot!!.ordinal],
-            objectiveName = scoreboard.objectiveName,
-            displayName = scoreboard.displayName ?: "",
-            criteriaName = scoreboard.criteriaName ?: "",
-            sortOrder = ScoreboardSlotOrder.entries[scoreboard.sortOrder!!.ordinal],
-        )
-        this.sendPacket(pk)
+        val pk = SetDisplayObjectivePacket()
+        pk.displaySlot = slot
+        pk.objectiveName = scoreboard.objectiveName
+        pk.displayName = scoreboard.displayName
+        pk.criteriaName = scoreboard.criteriaName
+        pk.sortOrder = scoreboard.sortOrder
+        this.dataPacket(pk)
 
         //client won't storage the score of a scoreboard,so we should send the score to client
         val pk2 = SetScorePacket()
@@ -5513,14 +5511,13 @@ open class Player(
     }
 
     override fun hide(slot: DisplaySlot?) {
-        val pk = org.chorus_oss.protocol.packets.SetDisplayObjectivePacket(
-            displaySlot = ScoreboardSlot.entries[slot!!.ordinal],
-            objectiveName = "",
-            displayName = "",
-            criteriaName = "",
-            sortOrder = ScoreboardSlotOrder.Ascending,
-        )
-        this.sendPacket(pk)
+        val pk = SetDisplayObjectivePacket()
+        pk.displaySlot = slot
+        pk.objectiveName = ""
+        pk.displayName = ""
+        pk.criteriaName = ""
+        pk.sortOrder = SortOrder.ASCENDING
+        this.dataPacket(pk)
 
         if (slot == DisplaySlot.BELOW_NAME) {
             this.setScoreTag("")
@@ -5528,10 +5525,10 @@ open class Player(
     }
 
     override fun removeScoreboard(scoreboard: IScoreboard) {
-        val pk = org.chorus_oss.protocol.packets.RemoveObjectivePacket(
-            objectiveName = scoreboard.objectiveName,
-        )
-        this.sendPacket(pk)
+        val pk = RemoveObjectivePacket()
+        pk.objectiveName = scoreboard.objectiveName
+
+        this.dataPacket(pk)
     }
 
     /**
@@ -5543,7 +5540,7 @@ open class Player(
             if (blockEntity is BlockEntitySign) {
                 if (blockEntity.editorEntityRuntimeId == -1L) {
                     blockEntity.editorEntityRuntimeId = this.getRuntimeID()
-                    val openSignPacket = org.chorus_oss.protocol.packets.OpenSignPacket(
+                    val openSignPacket = OpenSignPacket(
                         position = BlockPos(position),
                         frontSide = frontSide,
                     )
