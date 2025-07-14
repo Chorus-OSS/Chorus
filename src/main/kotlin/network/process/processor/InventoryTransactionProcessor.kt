@@ -12,94 +12,105 @@ import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
 import org.chorus_oss.chorus.event.player.*
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
-import org.chorus_oss.chorus.network.ProtocolInfo
+import org.chorus_oss.chorus.math.BlockFace
+import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.InventoryTransactionPacket
-import org.chorus_oss.chorus.network.protocol.types.inventory.transaction.InventorySource
-import org.chorus_oss.chorus.network.protocol.types.inventory.transaction.ReleaseItemData
-import org.chorus_oss.chorus.network.protocol.types.inventory.transaction.UseItemData
-import org.chorus_oss.chorus.network.protocol.types.inventory.transaction.UseItemOnEntityData
+import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.InventoryTransactionPacket
+import org.chorus_oss.protocol.types.inventory.transaction.InventoryAction
+import org.chorus_oss.protocol.types.inventory.transaction.ReleaseItemTransactionData
+import org.chorus_oss.protocol.types.inventory.transaction.UseItemOnEntityTransactionData
+import org.chorus_oss.protocol.types.inventory.transaction.UseItemTransactionData
 import java.util.*
+import kotlin.math.abs
 
-class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPacket>() {
+class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<InventoryTransactionPacket>>() {
     private var lastUsedItem: Item? = null
 
-    override fun handle(player: Player, pk: InventoryTransactionPacket) {
+    override fun handle(player: Player, pk: MigrationPacket<InventoryTransactionPacket>) {
+        val packet = pk.packet
+
         val player = player.player
         if (player.isSpectator) {
             player.sendAllInventories()
             return
         }
-        if (pk.transactionType == InventoryTransactionPacket.TransactionType.USE_ITEM) {
-            handleUseItem(player, pk)
-        } else if (pk.transactionType == InventoryTransactionPacket.TransactionType.USE_ITEM_ON_ENTITY) {
-            handleUseItemOnEntity(player, pk)
-        } else if (pk.transactionType == InventoryTransactionPacket.TransactionType.RELEASE_ITEM) {
-            val releaseItemData = pk.transactionData as ReleaseItemData
-            try {
-                val type = releaseItemData.actionType
-                when (type) {
-                    InventoryTransactionPacket.RELEASE_ITEM_ACTION_RELEASE -> {
-                        val lastUseTick = player.getLastUseTick(releaseItemData.itemInHand.id)
-                        if (lastUseTick != -1) {
-                            val item = player.inventory.itemInHand
 
-                            val ticksUsed = player.level!!.tick - lastUseTick
-                            if (!item.onRelease(player, ticksUsed)) {
+        when (packet.transactionType) {
+            InventoryTransactionPacket.Companion.TransactionType.UseItem -> handleUseItem(player, packet)
+            InventoryTransactionPacket.Companion.TransactionType.UseItemOnEntity -> handleUseItemOnEntity(player, packet)
+            InventoryTransactionPacket.Companion.TransactionType.ReleaseItem -> {
+                val releaseItemData = packet.transactionData as ReleaseItemTransactionData
+                val itemInHandID = Registries.ITEM_RUNTIMEID.getIdentifier(releaseItemData.itemInHand.item.netID)
+
+                try {
+                    val type = releaseItemData.actionType
+                    when (type) {
+                        ReleaseItemTransactionData.Companion.ActionType.Release -> {
+                            val lastUseTick = player.getLastUseTick(itemInHandID)
+                            if (lastUseTick != -1) {
+                                val item = player.inventory.itemInHand
+
+                                val ticksUsed = player.level!!.tick - lastUseTick
+                                if (!item.onRelease(player, ticksUsed)) {
+                                    player.inventory.sendContents(player)
+                                }
+
+                                player.removeLastUseTick(itemInHandID)
+                            } else {
                                 player.inventory.sendContents(player)
                             }
+                        }
 
-                            player.removeLastUseTick(releaseItemData.itemInHand.id)
-                        } else {
-                            player.inventory.sendContents(player)
+                        ReleaseItemTransactionData.Companion.ActionType.Consume -> {
+                            log.debug(
+                                "Unexpected release item action consume from {}",
+                                player.getEntityName()
+                            )
                         }
                     }
-
-                    InventoryTransactionPacket.RELEASE_ITEM_ACTION_CONSUME -> {
-                        log.debug(
-                            "Unexpected release item action consume from {}",
-                            player.getEntityName()
-                        )
-                    }
+                } finally {
+                    player.removeLastUseTick(itemInHandID)
                 }
-            } finally {
-                player.removeLastUseTick(releaseItemData.itemInHand.id)
             }
-        } else if (pk.transactionType == InventoryTransactionPacket.TransactionType.NORMAL) {
-            if (pk.actions.size == 2 && pk.actions[0].inventorySource.type == InventorySource.Type.WORLD_INTERACTION &&
-                pk.actions[0].inventorySource.flag == InventorySource.Flag.DROP_ITEM &&
-                pk.actions[1].inventorySource.type == InventorySource.Type.CONTAINER
-                && pk.actions[1].inventorySource.flag == InventorySource.Flag.NONE
-            ) { //handle throw hotbar item for player
-                dropHotBarItemForPlayer(pk.actions[1].inventorySlot, pk.actions[0].newItem.count, player)
+            InventoryTransactionPacket.Companion.TransactionType.Normal -> {
+                if (packet.actions.size == 2 && packet.actions[0].sourceType == InventoryAction.Companion.Type.WorldInteraction &&
+                    packet.actions[0].sourceFlags == InventoryAction.Companion.Flag.DropItem &&
+                    packet.actions[1].sourceType == InventoryAction.Companion.Type.Container
+                    && packet.actions[1].sourceFlags == InventoryAction.Companion.Flag.None
+                ) { //handle throw hotbar item for player
+                    dropHotBarItemForPlayer(packet.actions[1].inventorySlot.toInt(), packet.actions[0].newItem.item.count.toInt(), player)
+                }
             }
+            else -> {}
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.INVENTORY_TRANSACTION_PACKET
+    override val packetId: Int = InventoryTransactionPacket.id
 
     private fun handleUseItemOnEntity(player: Player, pk: InventoryTransactionPacket) {
         val player = player.player
-        val useItemOnEntityData = pk.transactionData as UseItemOnEntityData
-        val target = player.level!!.getEntity(useItemOnEntityData.entityRuntimeId) ?: return
+        val useItemOnEntityData = pk.transactionData as UseItemOnEntityTransactionData
+        val target = player.level!!.getEntity(useItemOnEntityData.entityRuntimeID.toLong()) ?: return
         val type = useItemOnEntityData.actionType
-        if (!useItemOnEntityData.itemInHand.equalsExact(player.inventory.itemInHand)) {
+        if (!Item.invoke(useItemOnEntityData.itemInHand.item).equalsExact(player.inventory.itemInHand)) {
             player.inventory.sendHeldItem(player)
         }
         var item = player.inventory.itemInHand
         when (type) {
-            InventoryTransactionPacket.USE_ITEM_ON_ENTITY_ACTION_INTERACT -> {
+            UseItemOnEntityTransactionData.Companion.ActionType.Interact -> {
                 val playerInteractEntityEvent =
-                    PlayerInteractEntityEvent(player, target, item, useItemOnEntityData.clickPos)
+                    PlayerInteractEntityEvent(player, target, item, Vector3(useItemOnEntityData.clickPos))
                 if (player.isSpectator) playerInteractEntityEvent.cancelled = true
                 Server.instance.pluginManager.callEvent(playerInteractEntityEvent)
                 if (playerInteractEntityEvent.cancelled) {
@@ -125,7 +136,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                 if (target.onInteract(
                         player,
                         item,
-                        useItemOnEntityData.clickPos
+                        Vector3(useItemOnEntityData.clickPos)
                     ) && (player.isSurvival || player.isAdventure)
                 ) {
                     if (item.isTool) {
@@ -152,7 +163,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                 }
             }
 
-            InventoryTransactionPacket.USE_ITEM_ON_ENTITY_ACTION_ATTACK -> {
+            UseItemOnEntityTransactionData.Companion.ActionType.Attack -> {
                 if (target is Player && !player.adventureSettings[AdventureSettings.Type.ATTACK_PLAYERS]
                     || target !is Player && !player.adventureSettings[AdventureSettings.Type.ATTACK_MOBS]
                 ) return
@@ -243,13 +254,15 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
 
     private fun handleUseItem(player: Player, pk: InventoryTransactionPacket) {
         val player = player.player
-        val useItemData = pk.transactionData as UseItemData
-        val blockVector = useItemData.blockPos
-        val face = useItemData.face
+        val useItemData = pk.transactionData as UseItemTransactionData
+        val blockVector = Vector3(useItemData.blockPosition).asBlockVector3()
+        val face = BlockFace.entries[abs(useItemData.blockFace % BlockFace.entries.size)]
 
         val type = useItemData.actionType
         when (type) {
-            InventoryTransactionPacket.USE_ITEM_ACTION_CLICK_BLOCK -> {
+            UseItemTransactionData.Companion.ActionType.ClickBlock -> {
+                val itemInHand = Item(useItemData.itemInHand.item)
+
                 // Remove if client bug is ever fixed
                 val spamBug =
                     (player.player.lastRightClickPos != null && System.currentTimeMillis() - player.player.lastRightClickTime < 100.0 && blockVector.distanceSquared(
@@ -260,7 +273,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                 if (spamBug) {
                     return
                 }
-                if (!useItemData.itemInHand.canBeActivated()) player.setDataFlag(EntityFlag.USING_ITEM, false)
+                if (!itemInHand.canBeActivated()) player.setDataFlag(EntityFlag.USING_ITEM, false)
                 if (player.canInteract(blockVector.add(0.5, 0.5, 0.5), (if (player.isCreative) 13 else 7).toDouble())) {
                     if (player.isCreative) {
                         val i = player.inventory.itemInHand
@@ -268,25 +281,25 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                                 blockVector.asVector3(),
                                 i,
                                 face,
-                                useItemData.clickPos.x,
-                                useItemData.clickPos.y,
-                                useItemData.clickPos.z,
+                                useItemData.clickPosition.x,
+                                useItemData.clickPosition.y,
+                                useItemData.clickPosition.z,
                                 player
                             ) != null
                         ) {
                             return
                         }
-                    } else if (player.inventory.itemInHand.equals(useItemData.itemInHand, true, false)) {
+                    } else if (player.inventory.itemInHand.equals(itemInHand, true, false)) {
                         var i: Item? = player.inventory.itemInHand
                         val oldItem: Item = i!!.clone()
-                        //TODO: Implement adventure mode checks
+                        // TODO: Implement adventure mode checks
                         if ((player.level!!.useItemOn(
                                 blockVector.asVector3(),
                                 i,
                                 face,
-                                useItemData.clickPos.x,
-                                useItemData.clickPos.y,
-                                useItemData.clickPos.z,
+                                useItemData.clickPosition.x,
+                                useItemData.clickPosition.y,
+                                useItemData.clickPosition.z,
                                 player
                             ).also { i = it }) != null
                         ) {
@@ -320,7 +333,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                 )
             }
 
-            InventoryTransactionPacket.USE_ITEM_ACTION_BREAK_BLOCK -> {
+            UseItemTransactionData.Companion.ActionType.BreakBlock -> {
                 //Creative mode use PlayerActionPacket.ACTION_CREATIVE_PLAYER_DESTROY_BLOCK
                 if (!player.spawned || !player.isAlive() || player.isCreative) {
                     return
@@ -367,9 +380,9 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                 }
             }
 
-            InventoryTransactionPacket.USE_ITEM_ACTION_CLICK_AIR -> {
+            UseItemTransactionData.Companion.ActionType.ClickAir -> {
                 val item: Item
-                val useItemDataItem = useItemData.itemInHand
+                val useItemDataItem = Item(useItemData.itemInHand.item)
                 val serverItemInHand = player.inventory.itemInHand
                 val directionVector = player.getDirectionVector()
                 // Removes Damage Tag that the client adds, but we do not store.
@@ -423,8 +436,6 @@ class InventoryTransactionProcessor : DataPacketProcessor<InventoryTransactionPa
                     }
                 }
             }
-
-            else -> Unit
         }
     }
 

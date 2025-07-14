@@ -14,7 +14,6 @@ class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, Pac
         if (initialized.getAndSet(true)) return
 
         // Register all packets that are Client -> Server
-        register(ProtocolInfo.INVENTORY_TRANSACTION_PACKET, InventoryTransactionPacket)
         register(ProtocolInfo.ANIMATE_PACKET, AnimatePacket)
         register(ProtocolInfo.ENTITY_EVENT_PACKET, EntityEventPacket)
         register(ProtocolInfo.LOGIN_PACKET, LoginPacket)
