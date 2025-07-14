@@ -408,7 +408,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                 item = if (player.isCreative) {
                     serverItemInHand
                 } else if (player.inventory.itemInHand != useItemDataItem) {
-                    Server.instance.logger.warning("Item received did not match item in hand.")
+                    log.warn("Item received did not match item in hand.")
                     player.inventory.sendHeldItem(player)
                     return
                 } else {

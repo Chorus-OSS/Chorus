@@ -3,14 +3,16 @@ package org.chorus_oss.chorus.registry
 import com.google.gson.Gson
 import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.block.BlockAir
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.nbt.NBTIO.read
-import org.chorus_oss.chorus.network.protocol.types.inventory.creative.CreativeItemCategory
 import org.chorus_oss.chorus.network.protocol.types.inventory.creative.CreativeItemData
-import org.chorus_oss.chorus.network.protocol.types.inventory.creative.CreativeItemGroup
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.creative.CreativeCategory
+import org.chorus_oss.protocol.types.creative.CreativeGroup
+import org.chorus_oss.protocol.types.item.ItemInstance
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.ByteOrder
@@ -37,7 +39,13 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
                     val name = tag["name"] as String
                     val iconMap = tag["icon"] as Map<*, *>
                     val icon = get(iconMap["id"] as String)
-                    creativeGroups.add(CreativeItemGroup(CreativeItemCategory.VALUES[creativeCategory], name, icon))
+                    creativeGroups.add(
+                        CreativeGroup(
+                            category = CreativeCategory.entries[creativeCategory],
+                            name = name,
+                            icon = ItemInstance(icon)
+                        )
+                    )
                 }
 
                 val items = data["items"] as List<*>?
@@ -77,7 +85,12 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
                         INTERNAL_DIFF_ITEM[i] = item.clone()
                         item.blockState = null
                     }
-                    creativeItemData.add(CreativeItemData(item, groupIndex))
+                    creativeItemData.add(
+                        CreativeItemData(
+                            item,
+                            groupIndex
+                        )
+                    )
 
                     register(i, item)
                 }
@@ -199,7 +212,6 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
     override fun register(key: Int, value: Item) {
         if (MAP.putIfAbsent(key, value) != null || creativeItemData.any { it.item == value }) {
             return
-            //throw new RegisterException("This creative item has already been registered with the identifier: " + key);
         } else {
             creativeItemData.add(CreativeItemData(value, 111))
         }
@@ -211,7 +223,7 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
         val INTERNAL_DIFF_ITEM: MutableMap<Int, Item> = mutableMapOf()
         val isLoad: AtomicBoolean = AtomicBoolean(false)
 
-        val creativeGroups: MutableList<CreativeItemGroup> = mutableListOf()
+        val creativeGroups: MutableList<CreativeGroup> = mutableListOf()
         val creativeItemData: MutableList<CreativeItemData> = mutableListOf()
     }
 }

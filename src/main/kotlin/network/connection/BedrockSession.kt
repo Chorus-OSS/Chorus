@@ -84,11 +84,11 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         log.debug("creating session {}", peer.socketAddress.toString())
         val cfg = StateMachineConfig<SessionState, SessionState>()
 
-        cfg.configure(SessionState.START)
+        cfg.configure(SessionState.Start)
             .onExit(Action { this.onSessionStartSuccess() })
-            .permit(SessionState.LOGIN, SessionState.LOGIN)
+            .permit(SessionState.Login, SessionState.Login)
 
-        cfg.configure(SessionState.LOGIN).onEntry(Action {
+        cfg.configure(SessionState.Login).onEntry(Action {
             this.packetHandler = (
                     LoginHandler(
                         this
@@ -98,25 +98,25 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         })
             .onExit(Action { this.onServerLoginSuccess() })
             .permitIf(
-                SessionState.ENCRYPTION, SessionState.ENCRYPTION
+                SessionState.Encryption, SessionState.Encryption
             ) { Server.instance.enabledNetworkEncryption }
-            .permit(SessionState.RESOURCE_PACK, SessionState.RESOURCE_PACK)
+            .permit(SessionState.ResourcePack, SessionState.ResourcePack)
 
-        cfg.configure(SessionState.ENCRYPTION)
+        cfg.configure(SessionState.Encryption)
             .onEntry(Action {
                 log.debug("Player {} enter ENCRYPTION stage", peer.socketAddress.toString())
                 this.packetHandler = (HandshakePacketHandler(this))
             })
-            .permit(SessionState.RESOURCE_PACK, SessionState.RESOURCE_PACK)
+            .permit(SessionState.ResourcePack, SessionState.ResourcePack)
 
-        cfg.configure(SessionState.RESOURCE_PACK)
+        cfg.configure(SessionState.ResourcePack)
             .onEntry(Action {
                 log.debug("Player {} enter RESOURCE_PACK stage", peer.socketAddress.toString())
                 this.packetHandler = (ResourcePackHandler(this))
             })
-            .permit(SessionState.PRE_SPAWN, SessionState.PRE_SPAWN)
+            .permit(SessionState.PreSpawn, SessionState.PreSpawn)
 
-        cfg.configure(SessionState.PRE_SPAWN)
+        cfg.configure(SessionState.PreSpawn)
             .onEntry(Action {
                 // now the main thread owns the session
                 this.setNettyThreadOwned(false)
@@ -136,18 +136,18 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
                 player.setImmobile(true) // TODO: HACK: fix client-side falling pre-spawn
             })
             .onExit(Action { this.onClientSpawned() })
-            .permit(SessionState.IN_GAME, SessionState.IN_GAME)
+            .permit(SessionState.InGame, SessionState.InGame)
 
-        cfg.configure(SessionState.IN_GAME)
+        cfg.configure(SessionState.InGame)
             .onEntry(Action { this.packetHandler = (InGamePacketHandler(this)) })
             .onExit(Action { this.onServerDeath() })
-            .permit(SessionState.DEATH, SessionState.DEATH)
+            .permit(SessionState.Death, SessionState.Death)
 
-        cfg.configure(SessionState.DEATH) //.onEntry(()->this.setPacketHandler(new DeathHandler()))
+        cfg.configure(SessionState.Death) //.onEntry(()->this.setPacketHandler(new DeathHandler()))
             .onExit(Action { this.onClientRespawn() })
-            .permit(SessionState.IN_GAME, SessionState.IN_GAME)
+            .permit(SessionState.InGame, SessionState.InGame)
 
-        machine = StateMachine(SessionState.START, cfg)
+        machine = StateMachine(SessionState.Start, cfg)
         this.packetHandler = (SessionStartHandler(this))
     }
 
@@ -429,7 +429,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     fun notifyTerrainReady() {
         log.debug("Sending spawn notification, waiting for spawn response")
         val state = machine.state
-        check(state == SessionState.PRE_SPAWN) { "attempt to notifyTerrainReady when the state is " + state.name }
+        check(state == SessionState.PreSpawn) { "attempt to notifyTerrainReady when the state is " + state.name }
         player!!.doFirstSpawn()
     }
 
@@ -527,7 +527,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
     fun syncCreativeContent() {
         val pk = org.chorus_oss.protocol.packets.CreativeContentPacket(
-            groups = CreativeItemRegistry.creativeGroups.map(org.chorus_oss.protocol.types.creative.CreativeGroup::invoke),
+            groups = CreativeItemRegistry.creativeGroups,
             items = CreativeItemRegistry.creativeItemData.map(org.chorus_oss.protocol.types.creative.CreativeItem::invoke)
         )
         this.sendPacket(pk)

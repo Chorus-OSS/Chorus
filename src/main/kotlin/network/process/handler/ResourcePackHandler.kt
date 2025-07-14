@@ -93,7 +93,7 @@ class ResourcePackHandler(session: BedrockSession) : BedrockSessionPacketHandler
 
             org.chorus_oss.protocol.packets.ResourcePackClientResponsePacket.Companion.Response.Completed -> {
                 log.debug("ResourcePackClientResponsePacket STATUS_COMPLETED")
-                session.machine.fire(SessionState.PRE_SPAWN)
+                session.machine.fire(SessionState.PreSpawn)
             }
         }
     }

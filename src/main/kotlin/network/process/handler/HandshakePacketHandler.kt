@@ -10,6 +10,6 @@ class HandshakePacketHandler(session: BedrockSession) : BedrockSessionPacketHand
         val packet = pk.packet
         if (packet !is ClientToServerHandshakePacket) return
 
-        session.machine.fire(SessionState.RESOURCE_PACK)
+        session.machine.fire(SessionState.ResourcePack)
     }
 }

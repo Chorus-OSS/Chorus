@@ -55,6 +55,6 @@ class SessionStartHandler(session: BedrockSession) : BedrockSessionPacketHandler
         }
 
         session.setCompression(algorithm) //so send the NetworkSettingsPacket packet before set the session compression
-        session.machine.fire(SessionState.LOGIN)
+        session.machine.fire(SessionState.Login)
     }
 }

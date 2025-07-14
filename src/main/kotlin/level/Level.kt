@@ -549,7 +549,7 @@ class Level(
         if (force && Server.instance.settings.levelSettings.levelThread) {
             Server.instance.scheduler.scheduleDelayedTask({
                 if (baseTickThread.isAlive) {
-                    Server.instance.logger.critical(getLevelName() + " failed to unload. Trying to stop the thread.")
+                    log.error(getLevelName() + " failed to unload. Trying to stop the thread.")
                     baseTickThread.interrupt()
                 }
             }, 100)
@@ -3441,7 +3441,7 @@ class Level(
                 doLevelGarbageCollection(false)
             }
         } catch (e: Exception) {
-            Server.instance.logger.error("Subtick Thread for level $folderName failed.", e)
+            log.error("Subtick Thread for level $folderName failed.", e)
         }
     }
 

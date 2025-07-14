@@ -165,7 +165,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
         if (server.enabledNetworkEncryption) {
             this.enableEncryption(chainData)
         } else {
-            session.machine.fire(SessionState.RESOURCE_PACK)
+            session.machine.fire(SessionState.ResourcePack)
         }
     }
 
@@ -218,7 +218,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             session.sendPacketImmediately(pk)
             session.enableEncryption(encryptionKey)
 
-            session.machine.fire(SessionState.ENCRYPTION)
+            session.machine.fire(SessionState.Encryption)
         } catch (e: Exception) {
             log.error("Failed to prepare encryption", e)
             session.close("encryption error")

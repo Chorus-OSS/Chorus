@@ -1804,9 +1804,6 @@ class Server internal constructor(
     val apiVersion: String
         get() = Chorus.API_VERSION
 
-    val logger: MainLogger
-        get() = MainLogger.logger
-
     fun getPositionTrackingService(): PositionTrackingService {
         return positionTrackingService!!
     }

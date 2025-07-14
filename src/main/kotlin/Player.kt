@@ -967,7 +967,7 @@ open class Player(
 
 
         this.level!!.scheduler.scheduleDelayedTask(InternalPlugin.INSTANCE, {
-            session.machine.fire(SessionState.IN_GAME)
+            session.machine.fire(SessionState.InGame)
         }, 5)
     }
 
@@ -3783,7 +3783,7 @@ open class Player(
                 }
             }
         } catch (e: Exception) {
-            Server.instance.logger.error("Failed to unload all used chunks.", e)
+            log.error("Failed to unload all used chunks.", e)
         } finally {
             playerChunkManager.usedChunks.clear()
         }

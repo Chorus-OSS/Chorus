@@ -13,9 +13,6 @@ import org.chorus_oss.chorus.item.ItemDurable
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.GameRules
-import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
-import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO.read
 import org.chorus_oss.chorus.nbt.NBTIO.write
@@ -37,7 +34,6 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.function.BiConsumer
-import java.util.function.Function
 
 class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
     private val buf: ByteBuf = ObjectUtil.checkNotNull(buf, "buf")
@@ -812,7 +808,7 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         skin.setSkinData(this.readImage())
 
         val animationCount = this.readIntLE()
-        for (i in 0..<animationCount) {
+        (0..<animationCount).forEach { _ ->
             val image = this.readImage()
             val type = this.readIntLE()
             val frames = this.readFloatLE()
@@ -830,7 +826,7 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         skin.setSkinColor(this.readString())
 
         val piecesLength = this.readIntLE()
-        for (i in 0..<piecesLength) {
+        (0..<piecesLength).forEach { _ ->
             val pieceId = this.readString()
             val pieceType = this.readString()
             val packId = this.readString()
@@ -840,13 +836,11 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         }
 
         val tintsLength = this.readIntLE()
-        for (i in 0..<tintsLength) {
+        (0..<tintsLength).forEach { _ ->
             val pieceType = this.readString()
             val colors: MutableList<String> = ArrayList()
             val colorsLength = this.readIntLE()
-            for (i2 in 0..<colorsLength) {
-                colors.add(this.readString())
-            }
+            (0..<colorsLength).forEach { _ -> colors.add(this.readString()) }
             skin.getTintColors().add(PersonaPieceTint(pieceType, colors))
         }
 
@@ -886,10 +880,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         ByteBufVarInt.writeLong(this, value)
     }
 
-    fun readVarLong(): Long {
-        return ByteBufVarInt.readLong(this)
-    }
-
     fun readSlot(): Item {
         return this.readSlot(false)
     }
@@ -912,7 +902,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         }
         val blockRuntimeId = this.readVarInt()
 
-        var blockingTicks: Long = 0
         var compoundTag: CompoundTag? = null
         val canPlace: Array<String>
         val canBreak: Array<String>
@@ -957,11 +946,11 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
                 }
 
                 if (item.id == ItemID.SHIELD) {
-                    blockingTicks = stream.readLong() // blockingTicks
+                    stream.readLong() // blockingTicks
                 }
                 if (compoundTag != null) {
-                    if (compoundTag!!.contains("__DamageConflict__")) {
-                        compoundTag!!.put("Damage", compoundTag!!.removeAndGet("__DamageConflict__")!!)
+                    if (compoundTag.contains("__DamageConflict__")) {
+                        compoundTag.put("Damage", compoundTag.removeAndGet("__DamageConflict__")!!)
                     }
                     item.setCompoundTag(compoundTag)
                 }
@@ -1102,14 +1091,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         this.writeVarInt(itemDescriptor.count)
     }
 
-    fun readBlockVector3(): BlockVector3 {
-        return BlockVector3(this.readVarInt(), this.readUnsignedVarInt(), this.readVarInt())
-    }
-
-    fun writeBlockVector3(v: BlockVector3) {
-        this.writeBlockVector3(v.x, v.y, v.z)
-    }
-
     fun writeBlockVector3(x: Int, y: Int, z: Int) {
         this.writeVarInt(x)
         this.writeUnsignedVarInt(y)
@@ -1120,10 +1101,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         return Vector3f(this.readFloatLE(), this.readFloatLE(), this.readFloatLE())
     }
 
-    fun writeVector3f(v: Vector3f) {
-        this.writeVector3f(v.x, v.y, v.z)
-    }
-
     fun writeVector3f(x: Float, y: Float, z: Float) {
         this.writeFloatLE(x)
         this.writeFloatLE(y)
@@ -1131,7 +1108,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
     }
 
     fun writeGameRules(gameRules: GameRules) {
-        // LinkedHashMap gives mutability and is faster in iteration
         val rules = gameRules.getGameRules().toMutableMap()
         rules.keys.removeIf(GameRule::isDeprecated)
 
@@ -1154,30 +1130,12 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         this.writeUnsignedVarLong(actorRuntimeID)
     }
 
-    fun readBlockFace(): BlockFace {
-        return fromIndex(this.readVarInt())
-    }
-
-    fun writeBlockFace(face: BlockFace) {
-        this.writeVarInt(face.index)
-    }
-
     fun <T> writeArray(array: Collection<T>, biConsumer: BiConsumer<HandleByteBuf, T>) {
         this.writeUnsignedVarInt(array.size)
         for (`val` in array) {
             biConsumer.accept(this, `val`)
         }
     }
-
-    fun <T : Any> readArray(clazz: Class<T>, function: Function<HandleByteBuf, T>): Array<T> {
-        val deque = ArrayDeque<T>()
-        val count = readUnsignedVarInt()
-        for (i in 0..<count) {
-            deque.add(function.apply(this))
-        }
-        return deque.toArray(java.lang.reflect.Array.newInstance(clazz, 0) as Array<T>)
-    }
-
 
     override fun indexOf(fromIndex: Int, toIndex: Int, value: Byte): Int {
         return buf.indexOf(fromIndex, toIndex, value)
