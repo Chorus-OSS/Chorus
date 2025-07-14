@@ -1,6 +1,9 @@
 package org.chorus_oss.chorus.network.protocol
 
-import org.chorus_oss.chorus.network.*
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketDecoder
+import org.chorus_oss.chorus.network.PacketEncoder
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.network.protocol.types.ActorRuntimeID
 
@@ -49,10 +52,6 @@ data class AnimatePacket(
 
     override fun pid(): Int {
         return ProtocolInfo.ANIMATE_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object : PacketDecoder<AnimatePacket> {

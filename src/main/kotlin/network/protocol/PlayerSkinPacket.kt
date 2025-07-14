@@ -4,10 +4,8 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.PacketDecoder
-import org.chorus_oss.chorus.network.PacketHandler
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
-
 import java.util.*
 
 
@@ -27,10 +25,6 @@ class PlayerSkinPacket : DataPacket() {
 
     override fun pid(): Int {
         return ProtocolInfo.PLAYER_SKIN_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object : PacketDecoder<PlayerSkinPacket> {

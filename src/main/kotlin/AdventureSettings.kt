@@ -68,7 +68,7 @@ class AdventureSettings : Cloneable {
         }
     }
 
-    operator fun set(ability: org.chorus_oss.protocol.types.PlayerAbility, value: Boolean): AdventureSettings {
+    operator fun set(ability: PlayerAbility, value: Boolean): AdventureSettings {
         val type = ability2TypeMap[ability]
         if (type != null) {
             values[type] = value
@@ -81,7 +81,7 @@ class AdventureSettings : Cloneable {
         return this
     }
 
-    fun get(ability: org.chorus_oss.protocol.types.PlayerAbility): Boolean {
+    fun get(ability: PlayerAbility): Boolean {
         val type = ability2TypeMap[ability]
         requireNotNull(type) { "Unknown ability: $ability" }
         return values.getOrDefault(type, type.defaultValue)
@@ -207,26 +207,26 @@ class AdventureSettings : Cloneable {
     enum class Type {
         WORLD_IMMUTABLE(false),
         NO_PVM(false),
-        NO_MVP(org.chorus_oss.protocol.types.PlayerAbility.Invulnerable, false),
+        NO_MVP(PlayerAbility.Invulnerable, false),
         SHOW_NAME_TAGS(false),
         AUTO_JUMP(true),
-        ALLOW_FLIGHT(org.chorus_oss.protocol.types.PlayerAbility.MayFly, false),
-        NO_CLIP(org.chorus_oss.protocol.types.PlayerAbility.NoClip, false),
-        WORLD_BUILDER(org.chorus_oss.protocol.types.PlayerAbility.WorldBuilder, false),
-        FLYING(org.chorus_oss.protocol.types.PlayerAbility.Flying, false),
-        MUTED(org.chorus_oss.protocol.types.PlayerAbility.Muted, false),
-        MINE(org.chorus_oss.protocol.types.PlayerAbility.Mine, true),
-        DOORS_AND_SWITCHED(org.chorus_oss.protocol.types.PlayerAbility.DoorsAndSwitches, true),
-        OPEN_CONTAINERS(org.chorus_oss.protocol.types.PlayerAbility.OpenContainers, true),
-        ATTACK_PLAYERS(org.chorus_oss.protocol.types.PlayerAbility.AttackPlayers, true),
-        ATTACK_MOBS(org.chorus_oss.protocol.types.PlayerAbility.AttackMobs, true),
-        OPERATOR(org.chorus_oss.protocol.types.PlayerAbility.OperatorCommands, false),
-        TELEPORT(org.chorus_oss.protocol.types.PlayerAbility.Teleport, false),
-        BUILD(org.chorus_oss.protocol.types.PlayerAbility.Build, true),
-        PRIVILEGED_BUILDER(org.chorus_oss.protocol.types.PlayerAbility.PrivilegedBuilder, false),
-        VERTICAL_FLY_SPEED(org.chorus_oss.protocol.types.PlayerAbility.VerticalFlySpeed, true);
+        ALLOW_FLIGHT(PlayerAbility.MayFly, false),
+        NO_CLIP(PlayerAbility.NoClip, false),
+        WORLD_BUILDER(PlayerAbility.WorldBuilder, false),
+        FLYING(PlayerAbility.Flying, false),
+        MUTED(PlayerAbility.Muted, false),
+        MINE(PlayerAbility.Mine, true),
+        DOORS_AND_SWITCHED(PlayerAbility.DoorsAndSwitches, true),
+        OPEN_CONTAINERS(PlayerAbility.OpenContainers, true),
+        ATTACK_PLAYERS(PlayerAbility.AttackPlayers, true),
+        ATTACK_MOBS(PlayerAbility.AttackMobs, true),
+        OPERATOR(PlayerAbility.OperatorCommands, false),
+        TELEPORT(PlayerAbility.Teleport, false),
+        BUILD(PlayerAbility.Build, true),
+        PRIVILEGED_BUILDER(PlayerAbility.PrivilegedBuilder, false),
+        VERTICAL_FLY_SPEED(PlayerAbility.VerticalFlySpeed, true);
 
-        val ability: org.chorus_oss.protocol.types.PlayerAbility?
+        val ability: PlayerAbility?
         val defaultValue: Boolean
 
         constructor(defaultValue: Boolean) {
@@ -234,7 +234,7 @@ class AdventureSettings : Cloneable {
             this.ability = null
         }
 
-        constructor(ability: org.chorus_oss.protocol.types.PlayerAbility?, defaultValue: Boolean) {
+        constructor(ability: PlayerAbility?, defaultValue: Boolean) {
             this.ability = ability
             this.defaultValue = defaultValue
             if (this.ability != null) {
@@ -258,6 +258,6 @@ class AdventureSettings : Cloneable {
         const val KEY_PLAYER_PERMISSION: String = "PlayerPermission"
         const val KEY_COMMAND_PERMISSION: String = "CommandPermission"
 
-        private val ability2TypeMap: MutableMap<org.chorus_oss.protocol.types.PlayerAbility, Type> = mutableMapOf()
+        private val ability2TypeMap: MutableMap<PlayerAbility, Type> = mutableMapOf()
     }
 }

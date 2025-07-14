@@ -8,10 +8,9 @@ import org.chorus_oss.chorus.inventory.HumanInventory
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.enchantment.Enchantment.Companion.getEnchantments
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.protocol.packets.MobEquipmentPacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.MobEquipmentPacket
 
 
 class MobEquipmentProcessor : DataPacketProcessor<MigrationPacket<MobEquipmentPacket>>() {

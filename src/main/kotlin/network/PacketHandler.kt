@@ -1,44 +1,10 @@
 package org.chorus_oss.chorus.network
 
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.LoginPacket
 
 interface PacketHandler {
     fun handle(pk: MigrationPacket<*>) {}
 
-    fun handle(pk: AnimatePacket) {}
-
-    fun handle(pk: EntityEventPacket) {}
-
-    fun handle(pk: LevelEventGenericPacket) {}
-
-    fun handle(pk: LevelEventPacket) {}
-
-    fun handle(pk: LevelSoundEventPacket) {}
-
     fun handle(pk: LoginPacket) {}
-
-    fun handle(pk: MobEffectPacket) {}
-
-    fun handle(pk: ModalFormResponsePacket) {}
-
-    fun handle(pk: MoveEntityAbsolutePacket) {}
-
-    fun handle(pk: MoveEntityDeltaPacket) {}
-
-    fun handle(pk: MovePlayerPacket) {}
-
-    fun handle(pk: PlayerEnchantOptionsPacket) {}
-
-    fun handle(pk: PlayerListPacket) {}
-
-    fun handle(pk: PlayerSkinPacket) {}
-
-    fun handle(pk: SetScorePacket) {}
-
-    fun handle(pk: SetTitlePacket) {}
-
-    fun handle(pk: StartGamePacket) {}
-
-    fun handle(pk: UpdateAttributesPacket) {}
 }

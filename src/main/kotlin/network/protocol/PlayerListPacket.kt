@@ -3,11 +3,9 @@ package org.chorus_oss.chorus.network.protocol
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.PacketHandler
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import java.awt.Color
-
 import java.util.*
 
 
@@ -83,10 +81,6 @@ class PlayerListPacket : DataPacket() {
 
     override fun pid(): Int {
         return ProtocolInfo.PLAYER_LIST_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object {

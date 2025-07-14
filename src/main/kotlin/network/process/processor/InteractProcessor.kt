@@ -16,7 +16,6 @@ import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.InteractPacket
-import org.chorus_oss.protocol.packets.TextPacket
 
 class InteractProcessor : DataPacketProcessor<MigrationPacket<InteractPacket>>() {
     override fun handle(player: Player, pk: MigrationPacket<InteractPacket>) {

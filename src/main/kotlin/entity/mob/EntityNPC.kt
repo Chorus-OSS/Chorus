@@ -105,23 +105,27 @@ class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Entit
 
         dialog.addHandler { player, response ->
             when (response.requestType) {
-                NPCRequestPacket.Companion.RequestType.SetActions ->  {
+                NPCRequestPacket.Companion.RequestType.SetActions -> {
                     if (!response.data.isEmpty()) {
                         this.dialog.buttonJSONData = response.data
                         this.setDataProperty(EntityDataTypes.ACTIONS, response.data)
                     }
                 }
+
                 NPCRequestPacket.Companion.RequestType.SetInteractText -> {
                     this.dialog.content = response.data
                     this.setDataProperty(EntityDataTypes.INTERACT_TEXT, response.data)
                 }
+
                 NPCRequestPacket.Companion.RequestType.SetName -> {
                     this.dialog.title = response.data
                     this.setNameTag(response.data)
                 }
+
                 NPCRequestPacket.Companion.RequestType.SetSkin -> {
                     this.variant = response.skinType
                 }
+
                 NPCRequestPacket.Companion.RequestType.ExecuteAction -> {
                     val clickedButton = response.clickedButton
                     if (clickedButton != null) {
@@ -130,6 +134,7 @@ class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Entit
                         }
                     }
                 }
+
                 NPCRequestPacket.Companion.RequestType.ExecuteOpeningCommands -> {
                     for (button in this.dialog.getButtons()) {
                         if (button.getMode() == ElementDialogButton.Mode.ON_ENTER) {
@@ -139,6 +144,7 @@ class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Entit
                         }
                     }
                 }
+
                 NPCRequestPacket.Companion.RequestType.ExecuteClosingCommands -> {
                     for (button in this.dialog.getButtons()) {
                         if (button.getMode() == ElementDialogButton.Mode.ON_EXIT) {

@@ -6,7 +6,6 @@ import org.chorus_oss.chorus.blockentity.BlockEntityStructBlock
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.protocol.packets.StructureBlockUpdatePacket
 

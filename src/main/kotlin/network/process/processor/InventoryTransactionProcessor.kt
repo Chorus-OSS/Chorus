@@ -48,7 +48,11 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
 
         when (packet.transactionType) {
             InventoryTransactionPacket.Companion.TransactionType.UseItem -> handleUseItem(player, packet)
-            InventoryTransactionPacket.Companion.TransactionType.UseItemOnEntity -> handleUseItemOnEntity(player, packet)
+            InventoryTransactionPacket.Companion.TransactionType.UseItemOnEntity -> handleUseItemOnEntity(
+                player,
+                packet
+            )
+
             InventoryTransactionPacket.Companion.TransactionType.ReleaseItem -> {
                 val releaseItemData = packet.transactionData as ReleaseItemTransactionData
                 val itemInHandID = Registries.ITEM_RUNTIMEID.getIdentifier(releaseItemData.itemInHand.item.netID)
@@ -83,15 +87,21 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                     player.removeLastUseTick(itemInHandID)
                 }
             }
+
             InventoryTransactionPacket.Companion.TransactionType.Normal -> {
                 if (packet.actions.size == 2 && packet.actions[0].sourceType == InventoryAction.Companion.Type.WorldInteraction &&
                     packet.actions[0].sourceFlags == InventoryAction.Companion.Flag.DropItem &&
                     packet.actions[1].sourceType == InventoryAction.Companion.Type.Container
                     && packet.actions[1].sourceFlags == InventoryAction.Companion.Flag.None
                 ) { //handle throw hotbar item for player
-                    dropHotBarItemForPlayer(packet.actions[1].inventorySlot.toInt(), packet.actions[0].newItem.item.count.toInt(), player)
+                    dropHotBarItemForPlayer(
+                        packet.actions[1].inventorySlot.toInt(),
+                        packet.actions[0].newItem.item.count.toInt(),
+                        player
+                    )
                 }
             }
+
             else -> {}
         }
     }

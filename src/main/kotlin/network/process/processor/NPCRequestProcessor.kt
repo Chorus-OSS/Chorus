@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.dialog.window.FormWindowDialog
 import org.chorus_oss.chorus.entity.mob.EntityNPC
 import org.chorus_oss.chorus.event.player.PlayerDialogRespondedEvent
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.protocol.packets.NPCRequestPacket
 

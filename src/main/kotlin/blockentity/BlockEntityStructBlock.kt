@@ -9,11 +9,7 @@ import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.packets.StructureBlockUpdatePacket
-import org.chorus_oss.protocol.types.structure.StructureAnimationMode
-import org.chorus_oss.protocol.types.structure.StructureBlockType
-import org.chorus_oss.protocol.types.structure.StructureMirror
-import org.chorus_oss.protocol.types.structure.StructureRedstoneSaveMode
-import org.chorus_oss.protocol.types.structure.StructureRotation
+import org.chorus_oss.protocol.types.structure.*
 
 class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), IStructBlock,
     BlockEntityInventoryHolder {
@@ -86,7 +82,8 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)) {
             this.redstoneSaveMode =
-                StructureRedstoneSaveMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE).toInt()]
+                StructureRedstoneSaveMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)
+                    .toInt()]
         } else {
             this.redstoneSaveMode = StructureRedstoneSaveMode.entries[0]
         }

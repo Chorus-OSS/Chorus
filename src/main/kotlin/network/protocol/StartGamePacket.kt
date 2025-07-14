@@ -1,17 +1,15 @@
 package org.chorus_oss.chorus.network.protocol
 
+
 import org.chorus_oss.chorus.block.customblock.CustomBlockDefinition
 import org.chorus_oss.chorus.level.GameRules
 import org.chorus_oss.chorus.nbt.NBTIO.write
 import org.chorus_oss.chorus.nbt.NBTIO.writeNetwork
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.PacketHandler
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.utils.Loggable
-
-
 import java.io.IOException
 import java.nio.ByteOrder
 import java.util.*
@@ -228,10 +226,6 @@ class StartGamePacket : DataPacket() {
 
     override fun pid(): Int {
         return ProtocolInfo.START_GAME_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object : Loggable {

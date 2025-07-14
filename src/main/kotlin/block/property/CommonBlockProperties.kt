@@ -1,12 +1,12 @@
 package org.chorus_oss.chorus.block.property
 
 import org.chorus_oss.chorus.block.property.enums.*
-import org.chorus_oss.protocol.types.structure.StructureBlockType
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType
 import org.chorus_oss.chorus.block.property.type.BooleanPropertyType
 import org.chorus_oss.chorus.block.property.type.EnumPropertyType
 import org.chorus_oss.chorus.block.property.type.IntPropertyType
 import org.chorus_oss.chorus.math.BlockFace
+import org.chorus_oss.protocol.types.structure.StructureBlockType
 
 interface CommonBlockProperties {
     companion object {
