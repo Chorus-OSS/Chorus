@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.block
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
-import org.chorus_oss.chorus.block.property.enums.StructureBlockType
+import org.chorus_oss.protocol.types.structure.StructureBlockType
 import org.chorus_oss.chorus.blockentity.BlockEntityID
 import org.chorus_oss.chorus.blockentity.BlockEntityStructBlock
 import org.chorus_oss.chorus.item.Item

@@ -40,7 +40,5 @@ interface PacketHandler {
 
     fun handle(pk: StartGamePacket) {}
 
-    fun handle(pk: StructureBlockUpdatePacket) {}
-
     fun handle(pk: UpdateAttributesPacket) {}
 }

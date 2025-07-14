@@ -24,7 +24,6 @@ class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, Pac
         register(ProtocolInfo.SET_TITLE_PACKET, SetTitlePacket)
         register(ProtocolInfo.MOVE_ENTITY_DELTA_PACKET, MoveEntityDeltaPacket)
         register(ProtocolInfo.LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket)
-        register(ProtocolInfo.STRUCTURE_BLOCK_UPDATE_PACKET, StructureBlockUpdatePacket)
     }
 
     override operator fun get(key: Int): PacketDecoder<out DataPacket>? {
