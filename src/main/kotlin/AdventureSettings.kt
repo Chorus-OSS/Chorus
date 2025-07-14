@@ -5,6 +5,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag
 import org.chorus_oss.chorus.network.protocol.types.CommandPermission
 import org.chorus_oss.protocol.types.AbilitiesData
+import org.chorus_oss.protocol.types.PlayerAbility
 import org.chorus_oss.protocol.types.PlayerAbilitySet
 import java.util.*
 
@@ -93,7 +94,7 @@ class AdventureSettings : Cloneable {
     fun update() {
         //Permission to send to all players so they can see each other
         //Make sure it will be sent to yourself (eg: there is no such player among the online players when the player enters the server)
-        val players: MutableCollection<Player> = HashSet<Player>(Server.instance.onlinePlayers.values)
+        val players = Server.instance.onlinePlayers.values.toMutableSet()
         players.add(this.player)
         sendAbilities(players)
         updateAdventureSettings()
@@ -107,7 +108,7 @@ class AdventureSettings : Cloneable {
      */
     fun onOpChange(op: Boolean) {
         if (op) {
-            for (controllableAbility in org.chorus_oss.protocol.types.PlayerAbility.Controllable) {
+            for (controllableAbility in PlayerAbility.Controllable) {
                 set(controllableAbility, true)
             }
         }
@@ -129,27 +130,27 @@ class AdventureSettings : Cloneable {
     fun sendAbilities(players: Collection<Player>) {
         val packet = org.chorus_oss.protocol.packets.UpdateAbilitiesPacket(
             abilitiesData = AbilitiesData(
-                targetPlayerRawID = player.getUniqueID(),
-                playerPermissions = org.chorus_oss.protocol.types.PlayerPermission.entries[playerPermission!!.ordinal],
+                targetPlayerRawID = player.getRuntimeID(),
+                playerPermissions = playerPermission!!,
                 commandPermissions = org.chorus_oss.protocol.types.CommandPermission.entries[commandPermission!!.ordinal],
                 layers = listOf(
                     org.chorus_oss.protocol.types.AbilityLayer(
                         layerType = org.chorus_oss.protocol.types.AbilityLayer.Companion.Type.Base,
                         abilitiesSet = PlayerAbilitySet(
-                            flags = org.chorus_oss.protocol.types.PlayerAbility.entries.toMutableSet()
+                            flags = PlayerAbility.entries.toMutableSet()
                         ),
                         abilityValues = PlayerAbilitySet(
                             flags = listOf(
                                 Type.entries
                                     .filter { it.isAbility() && get(it) }
-                                    .map { org.chorus_oss.protocol.types.PlayerAbility.entries[it.ability!!.ordinal] },
+                                    .map { it.ability!! },
                                 when (player.isCreative) {
-                                    true -> listOf(org.chorus_oss.protocol.types.PlayerAbility.Instabuild)
+                                    true -> listOf(PlayerAbility.Instabuild)
                                     false -> emptyList()
                                 },
                                 listOf(
-                                    org.chorus_oss.protocol.types.PlayerAbility.WalkSpeed,
-                                    org.chorus_oss.protocol.types.PlayerAbility.FlySpeed,
+                                    PlayerAbility.WalkSpeed,
+                                    PlayerAbility.FlySpeed,
                                 )
                             ).flatten().toMutableSet()
                         ),

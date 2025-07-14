@@ -173,7 +173,7 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
                     playerGameType = Server.instance.gamemode,
                     actorData = ActorDataMap(this.entityDataMap),
                     abilitiesData = AbilitiesData(
-                        this.getUniqueID(),
+                        this.getRuntimeID(),
                         PlayerPermission.Visitor,
                         CommandPermission.Any,
                         listOf(

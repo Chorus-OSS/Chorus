@@ -2055,14 +2055,10 @@ open class Player(
     override var isOp: Boolean
         get() = Server.instance.isOp(this.getEntityName())
         set(value) {
-            if (value == isOp) {
-                return
-            }
-
-            if (value) {
-                Server.instance.addOp(this.getEntityName())
-            } else {
-                Server.instance.removeOp(this.getEntityName())
+            when (value) {
+                isOp -> return
+                true -> Server.instance.addOp(this.getEntityName())
+                false -> Server.instance.removeOp(this.getEntityName())
             }
         }
 
