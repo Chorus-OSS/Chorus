@@ -1,6 +1,7 @@
 package org.chorus_oss.chorus.event.vehicle
 
 import org.chorus_oss.chorus.entity.Entity
+import org.chorus_oss.chorus.event.HandlerList
 
 class VehicleDestroyByEntityEvent
 /**
@@ -16,5 +17,8 @@ class VehicleDestroyByEntityEvent
      * @return destroying entity
      */
     val destroyer: Entity
-) :
-    VehicleDestroyEvent(vehicle)
+) : VehicleDestroyEvent(vehicle) {
+    companion object {
+        val handlers: HandlerList = HandlerList()
+    }
+}

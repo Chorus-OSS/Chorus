@@ -38,7 +38,7 @@ class WorldCommand(name: String) : VanillaCommand(name, "chorus.command.world.de
                     strBuilder.append(", ")
                 })
                 log.addMessage(
-                    TextFormat.WHITE.toString() + "%nukkit.command.world.availableLevels",
+                    TextFormat.WHITE.toString() + "%chorus.command.world.availableLevels",
                     strBuilder.toString()
                 ).output()
                 return 1
@@ -56,7 +56,7 @@ class WorldCommand(name: String) : VanillaCommand(name, "chorus.command.world.de
                     }
                 }
                 sender.asEntity()!!.teleport(level!!.safeSpawn)
-                log.addMessage(TextFormat.WHITE.toString() + "%nukkit.command.world.successTp", levelName).output()
+                log.addMessage(TextFormat.WHITE.toString() + "%chorus.command.world.successTp", levelName).output()
                 return 1
             }
 

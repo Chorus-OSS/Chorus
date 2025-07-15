@@ -13,11 +13,9 @@ import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.registry.Registries
 import java.util.concurrent.atomic.AtomicLong
 import java.util.function.BiPredicate
-import javax.annotation.concurrent.NotThreadSafe
 import kotlin.math.max
 import kotlin.math.min
 
-@NotThreadSafe
 @JvmRecord
 data class SubChunk(
     val y: Byte,

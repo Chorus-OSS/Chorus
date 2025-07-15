@@ -2,35 +2,35 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.TextPacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.TextPacket
 
-class TextProcessor : DataPacketProcessor<TextPacket>() {
-    override fun handle(player: Player, pk: TextPacket) {
+class TextProcessor : DataPacketProcessor<MigrationPacket<TextPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<TextPacket>) {
         if (!player.player.spawned || !player.player.isAlive()) {
             return
         }
 
         val isXboxAuth = Server.instance.settings.serverSettings.xboxAuth
-        if (isXboxAuth && pk.xboxUserId != player.player.loginChainData.xuid) {
+        if (isXboxAuth && pk.packet.xuid != player.player.loginChainData.xuid) {
             log.warn(
                 "{} sent TextPacket with invalid xuid : {} != {}",
                 player.player.getEntityName(),
-                pk.xboxUserId,
+                pk.packet.xuid,
                 player.player.loginChainData.xuid
             )
             return
         }
 
-        if (pk.parameters.size > 1) {
+        if (!pk.packet.parameters.isNullOrEmpty()) {
             player.player.close("§cPacket handling error")
             return
         }
 
-        if (pk.type == TextPacket.TYPE_CHAT) {
-            var chatMessage = pk.message
+        if (pk.packet.textType == TextPacket.Companion.TextType.Chat) {
+            var chatMessage = pk.packet.message
             val breakLine = chatMessage.indexOf('\n')
             // Chat messages shouldn't contain break lines so ignore text afterward
             if (breakLine != -1) {
@@ -40,8 +40,7 @@ class TextProcessor : DataPacketProcessor<TextPacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.TEXT_PACKET
+    override val packetId: Int = TextPacket.id
 
     companion object : Loggable
 }

@@ -8,20 +8,20 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.CraftGrindstoneAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.CraftGrindstoneRequestAction
 import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Stream
 import kotlin.math.ceil
 import kotlin.math.max
 
-class CraftGrindstoneActionProcessor : ItemStackRequestActionProcessor<CraftGrindstoneAction?> {
+class CraftGrindstoneActionProcessor : ItemStackRequestActionProcessor<CraftGrindstoneRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.CRAFT_REPAIR_AND_DISENCHANT
 
     override fun handle(
-        action: CraftGrindstoneAction?,
+        action: CraftGrindstoneRequestAction,
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {

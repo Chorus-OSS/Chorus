@@ -42,15 +42,15 @@ class BlockRedstoneWire @JvmOverloads constructor(blockState: BlockState = prope
 
             val pos = this.locator
 
-            for (blockFace in BlockFace.Plane.VERTICAL) {
+            for (blockFace in BlockFace.Plane.VERTICAL_FACES) {
                 RedstoneComponent.updateAroundRedstone(pos.getSide(blockFace), blockFace.getOpposite())
             }
 
-            for (blockFace in BlockFace.Plane.VERTICAL) {
+            for (blockFace in BlockFace.Plane.VERTICAL_FACES) {
                 this.updateAround(pos.getSide(blockFace), blockFace.getOpposite())
             }
 
-            for (blockFace in BlockFace.Plane.HORIZONTAL) {
+            for (blockFace in BlockFace.Plane.HORIZONTAL_FACES) {
                 val p = pos.getSide(blockFace)
 
                 if (level.getBlock(p.position).isNormalBlock) {
@@ -89,7 +89,7 @@ class BlockRedstoneWire @JvmOverloads constructor(blockState: BlockState = prope
 
         var strength = 0
 
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             val v = pos.getSide(face)
 
             if (v.x == this.x && v.z == this.z) {
@@ -165,7 +165,7 @@ class BlockRedstoneWire @JvmOverloads constructor(blockState: BlockState = prope
                 RedstoneComponent.updateAroundRedstone(pos.getSide(blockFace))
             }
 
-            for (blockFace in BlockFace.Plane.HORIZONTAL) {
+            for (blockFace in BlockFace.Plane.HORIZONTAL_FACES) {
                 val p = pos.getSide(blockFace)
 
                 if (level.getBlock(p.position).isNormalBlock) {
@@ -229,7 +229,7 @@ class BlockRedstoneWire @JvmOverloads constructor(blockState: BlockState = prope
             } else {
                 val faces: EnumSet<BlockFace> = EnumSet.noneOf(BlockFace::class.java)
 
-                for (face in BlockFace.Plane.HORIZONTAL) {
+                for (face in BlockFace.Plane.HORIZONTAL_FACES) {
                     if (this.isPowerSourceAt(face)) {
                         faces.add(face)
                     }

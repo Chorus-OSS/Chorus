@@ -1,24 +1,22 @@
 package org.chorus_oss.chorus
 
+import org.chorus_oss.chorus.experimental.network.protocol.utils.Controllable
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag
-import org.chorus_oss.chorus.network.protocol.RequestPermissionsPacket
-import org.chorus_oss.chorus.network.protocol.UpdateAbilitiesPacket
-import org.chorus_oss.chorus.network.protocol.UpdateAdventureSettingsPacket
-import org.chorus_oss.chorus.network.protocol.types.AbilityLayer
 import org.chorus_oss.chorus.network.protocol.types.CommandPermission
-import org.chorus_oss.chorus.network.protocol.types.PlayerAbility
-import org.chorus_oss.chorus.network.protocol.types.PlayerPermission
+import org.chorus_oss.protocol.types.AbilitiesData
+import org.chorus_oss.protocol.types.PlayerAbility
+import org.chorus_oss.protocol.types.PlayerAbilitySet
 import java.util.*
 
 class AdventureSettings : Cloneable {
     val values: MutableMap<Type, Boolean> = EnumMap(
         Type::class.java
     )
-    var playerPermission: PlayerPermission? = null
+    var playerPermission: org.chorus_oss.protocol.types.PlayerPermission? = null
         set(value) {
             field = value
-            player.isOp = value == PlayerPermission.OPERATOR
+            player.isOp = value == org.chorus_oss.protocol.types.PlayerPermission.Operator
         }
 
     var commandPermission: CommandPermission? = null
@@ -27,11 +25,6 @@ class AdventureSettings : Cloneable {
     constructor(player: Player) {
         this.player = player
         init(null)
-    }
-
-    constructor(player: Player, nbt: CompoundTag?) {
-        this.player = player
-        init(nbt)
     }
 
     fun init(nbt: CompoundTag?) {
@@ -46,17 +39,18 @@ class AdventureSettings : Cloneable {
             set(Type.TELEPORT, player.isOp)
 
             commandPermission = if (player.isOp) CommandPermission.GAME_DIRECTOR else CommandPermission.ANY
-            playerPermission = if (player.isOp) PlayerPermission.OPERATOR else PlayerPermission.MEMBER
+            playerPermission =
+                if (player.isOp) org.chorus_oss.protocol.types.PlayerPermission.Operator else org.chorus_oss.protocol.types.PlayerPermission.Member
         } else {
             readNBT(nbt)
         }
 
         //Offline deop
-        if (playerPermission == PlayerPermission.OPERATOR && !player.isOp) {
+        if (playerPermission == org.chorus_oss.protocol.types.PlayerPermission.Operator && !player.isOp) {
             onOpChange(false)
         }
         //Offline by op
-        if (playerPermission != PlayerPermission.OPERATOR && player.isOp) {
+        if (playerPermission != org.chorus_oss.protocol.types.PlayerPermission.Operator && player.isOp) {
             onOpChange(true)
         }
     }
@@ -100,7 +94,7 @@ class AdventureSettings : Cloneable {
     fun update() {
         //Permission to send to all players so they can see each other
         //Make sure it will be sent to yourself (eg: there is no such player among the online players when the player enters the server)
-        val players: MutableCollection<Player> = HashSet<Player>(Server.instance.onlinePlayers.values)
+        val players = Server.instance.onlinePlayers.values.toMutableSet()
         players.add(this.player)
         sendAbilities(players)
         updateAdventureSettings()
@@ -114,7 +108,7 @@ class AdventureSettings : Cloneable {
      */
     fun onOpChange(op: Boolean) {
         if (op) {
-            for (controllableAbility in RequestPermissionsPacket.CONTROLLABLE_ABILITIES) {
+            for (controllableAbility in PlayerAbility.Controllable) {
                 set(controllableAbility, true)
             }
         }
@@ -125,43 +119,48 @@ class AdventureSettings : Cloneable {
         commandPermission = if (op) CommandPermission.GAME_DIRECTOR else CommandPermission.ANY
 
         //Don't override customization/guest status
-        if (op && playerPermission != PlayerPermission.OPERATOR) {
-            playerPermission = PlayerPermission.OPERATOR
+        if (op && playerPermission != org.chorus_oss.protocol.types.PlayerPermission.Operator) {
+            playerPermission = org.chorus_oss.protocol.types.PlayerPermission.Operator
         }
-        if (!op && playerPermission == PlayerPermission.OPERATOR) {
-            playerPermission = PlayerPermission.MEMBER
+        if (!op && playerPermission == org.chorus_oss.protocol.types.PlayerPermission.Operator) {
+            playerPermission = org.chorus_oss.protocol.types.PlayerPermission.Member
         }
     }
 
     fun sendAbilities(players: Collection<Player>) {
-        val packet = UpdateAbilitiesPacket()
-        packet.entityId = player.getRuntimeID()
-        packet.commandPermission = commandPermission
-        packet.playerPermission = playerPermission
-
-        val layer = AbilityLayer()
-        layer.verticalFlySpeed = 1f
-        layer.layerType = AbilityLayer.Type.BASE
-        layer.abilitiesSet.addAll(PlayerAbility.VALUES)
-
-        for (type in Type.entries) {
-            if (type.isAbility() && get(type)) {
-                layer.abilityValues.add(type.ability!!)
-            }
-        }
-
-        if (player.isCreative) {
-            layer.abilityValues.add(PlayerAbility.INSTABUILD)
-        }
-
-        layer.abilityValues.add(PlayerAbility.WALK_SPEED)
-        layer.abilityValues.add(PlayerAbility.FLY_SPEED)
-
-        layer.walkSpeed = Player.DEFAULT_SPEED
-        layer.flySpeed = Player.DEFAULT_FLY_SPEED
-
-        packet.abilityLayers.add(layer)
-
+        val packet = org.chorus_oss.protocol.packets.UpdateAbilitiesPacket(
+            abilitiesData = AbilitiesData(
+                targetPlayerRawID = player.getRuntimeID(),
+                playerPermissions = playerPermission!!,
+                commandPermissions = org.chorus_oss.protocol.types.CommandPermission.entries[commandPermission!!.ordinal],
+                layers = listOf(
+                    org.chorus_oss.protocol.types.AbilityLayer(
+                        layerType = org.chorus_oss.protocol.types.AbilityLayer.Companion.Type.Base,
+                        abilitiesSet = PlayerAbilitySet(
+                            flags = PlayerAbility.entries.toMutableSet()
+                        ),
+                        abilityValues = PlayerAbilitySet(
+                            flags = listOf(
+                                Type.entries
+                                    .filter { it.isAbility() && get(it) }
+                                    .map { it.ability!! },
+                                when (player.isCreative) {
+                                    true -> listOf(PlayerAbility.Instabuild)
+                                    false -> emptyList()
+                                },
+                                listOf(
+                                    PlayerAbility.WalkSpeed,
+                                    PlayerAbility.FlySpeed,
+                                )
+                            ).flatten().toMutableSet()
+                        ),
+                        flySpeed = Player.DEFAULT_FLY_SPEED,
+                        verticalFlySpeed = 1f,
+                        walkSpeed = Player.DEFAULT_SPEED,
+                    )
+                )
+            )
+        )
         Server.broadcastPacket(players, packet)
     }
 
@@ -174,9 +173,9 @@ class AdventureSettings : Cloneable {
         values.forEach { (type, bool) ->
             abilityTag.put(type.name, IntTag(if (bool) 1 else 0))
         }
-        nbt!!.put(KEY_ABILITIES, abilityTag)
-        nbt.putString(KEY_PLAYER_PERMISSION, playerPermission!!.name)
-        nbt.putString(KEY_COMMAND_PERMISSION, commandPermission!!.name)
+        nbt.put(KEY_ABILITIES, abilityTag)
+        nbt.putInt(KEY_PLAYER_PERMISSION, playerPermission!!.ordinal)
+        nbt.putInt(KEY_COMMAND_PERMISSION, commandPermission!!.ordinal)
     }
 
     /**
@@ -189,46 +188,43 @@ class AdventureSettings : Cloneable {
                 set(Type.valueOf(key), value.data == 1)
             }
         }
-        playerPermission = PlayerPermission.valueOf(nbt.getString(KEY_PLAYER_PERMISSION))
-        commandPermission = CommandPermission.valueOf(
-            nbt.getString(
-                KEY_COMMAND_PERMISSION
-            )
-        )
+        playerPermission = org.chorus_oss.protocol.types.PlayerPermission.entries[nbt.getInt(KEY_PLAYER_PERMISSION)]
+        commandPermission = CommandPermission.entries[nbt.getInt(KEY_COMMAND_PERMISSION)]
     }
 
     fun updateAdventureSettings() {
-        val adventurePacket = UpdateAdventureSettingsPacket()
-        adventurePacket.autoJump = get(Type.AUTO_JUMP)
-        adventurePacket.immutableWorld = get(Type.WORLD_IMMUTABLE)
-        adventurePacket.noMvP = get(Type.NO_MVP)
-        adventurePacket.noPvM = get(Type.NO_PVM)
-        adventurePacket.showNameTags = get(Type.SHOW_NAME_TAGS)
-        player.dataPacket(adventurePacket)
+        val adventurePacket = org.chorus_oss.protocol.packets.UpdateAdventureSettingsPacket(
+            noPvM = get(Type.NO_PVM),
+            noMvP = get(Type.NO_MVP),
+            immutableWorld = get(Type.WORLD_IMMUTABLE),
+            showNameTags = get(Type.SHOW_NAME_TAGS),
+            autoJump = get(Type.AUTO_JUMP)
+        )
+        player.sendPacket(adventurePacket)
         player.resetInAirTicks()
     }
 
     enum class Type {
         WORLD_IMMUTABLE(false),
         NO_PVM(false),
-        NO_MVP(PlayerAbility.INVULNERABLE, false),
+        NO_MVP(PlayerAbility.Invulnerable, false),
         SHOW_NAME_TAGS(false),
         AUTO_JUMP(true),
-        ALLOW_FLIGHT(PlayerAbility.MAY_FLY, false),
-        NO_CLIP(PlayerAbility.NO_CLIP, false),
-        WORLD_BUILDER(PlayerAbility.WORLD_BUILDER, false),
-        FLYING(PlayerAbility.FLYING, false),
-        MUTED(PlayerAbility.MUTED, false),
-        MINE(PlayerAbility.MINE, true),
-        DOORS_AND_SWITCHED(PlayerAbility.DOORS_AND_SWITCHES, true),
-        OPEN_CONTAINERS(PlayerAbility.OPEN_CONTAINERS, true),
-        ATTACK_PLAYERS(PlayerAbility.ATTACK_PLAYERS, true),
-        ATTACK_MOBS(PlayerAbility.ATTACK_MOBS, true),
-        OPERATOR(PlayerAbility.OPERATOR_COMMANDS, false),
-        TELEPORT(PlayerAbility.TELEPORT, false),
-        BUILD(PlayerAbility.BUILD, true),
-        PRIVILEGED_BUILDER(PlayerAbility.PRIVILEGED_BUILDER, false),
-        VERTICAL_FLY_SPEED(PlayerAbility.VERTICAL_FLY_SPEED, true);
+        ALLOW_FLIGHT(PlayerAbility.MayFly, false),
+        NO_CLIP(PlayerAbility.NoClip, false),
+        WORLD_BUILDER(PlayerAbility.WorldBuilder, false),
+        FLYING(PlayerAbility.Flying, false),
+        MUTED(PlayerAbility.Muted, false),
+        MINE(PlayerAbility.Mine, true),
+        DOORS_AND_SWITCHED(PlayerAbility.DoorsAndSwitches, true),
+        OPEN_CONTAINERS(PlayerAbility.OpenContainers, true),
+        ATTACK_PLAYERS(PlayerAbility.AttackPlayers, true),
+        ATTACK_MOBS(PlayerAbility.AttackMobs, true),
+        OPERATOR(PlayerAbility.OperatorCommands, false),
+        TELEPORT(PlayerAbility.Teleport, false),
+        BUILD(PlayerAbility.Build, true),
+        PRIVILEGED_BUILDER(PlayerAbility.PrivilegedBuilder, false),
+        VERTICAL_FLY_SPEED(PlayerAbility.VerticalFlySpeed, true);
 
         val ability: PlayerAbility?
         val defaultValue: Boolean
@@ -262,6 +258,6 @@ class AdventureSettings : Cloneable {
         const val KEY_PLAYER_PERMISSION: String = "PlayerPermission"
         const val KEY_COMMAND_PERMISSION: String = "CommandPermission"
 
-        private val ability2TypeMap: MutableMap<PlayerAbility, Type> = EnumMap(PlayerAbility::class.java)
+        private val ability2TypeMap: MutableMap<PlayerAbility, Type> = mutableMapOf()
     }
 }

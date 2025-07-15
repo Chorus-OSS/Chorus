@@ -91,37 +91,35 @@ class BlockBell @JvmOverloads constructor(blockState: BlockState = properties.de
     }
 
     override fun onEntityCollide(entity: Entity) {
-        if (entity != null) {
-            if (entity.positionChanged) {
-                val boundingBox = entity.getBoundingBox()
-                val blockBoundingBox = this.collisionBoundingBox
-                if (boundingBox.intersectsWith(blockBoundingBox!!)) {
-                    val entityCenter = Vector3(
-                        (boundingBox.maxX - boundingBox.minX) / 2,
-                        (boundingBox.maxY - boundingBox.minY) / 2,
-                        (boundingBox.maxZ - boundingBox.minZ) / 2
-                    )
+        if (entity.positionChanged) {
+            val boundingBox = entity.getBoundingBox()
+            val blockBoundingBox = this.collisionBoundingBox
+            if (boundingBox.intersectsWith(blockBoundingBox!!)) {
+                val entityCenter = Vector3(
+                    (boundingBox.maxX - boundingBox.minX) / 2,
+                    (boundingBox.maxY - boundingBox.minY) / 2,
+                    (boundingBox.maxZ - boundingBox.minZ) / 2
+                )
 
-                    val blockCenter = Vector3(
-                        (blockBoundingBox.maxX - blockBoundingBox.minX) / 2,
-                        (blockBoundingBox.maxY - blockBoundingBox.minY) / 2,
-                        (blockBoundingBox.maxZ - blockBoundingBox.minZ) / 2
-                    )
-                    val entityPos = entity.position.add(entityCenter)
-                    val blockPos = position.add(
-                        blockBoundingBox.minX - position.x + blockCenter.x,
-                        blockBoundingBox.minY - position.y + blockCenter.y,
-                        blockBoundingBox.minZ - position.z + blockCenter.z
-                    )
+                val blockCenter = Vector3(
+                    (blockBoundingBox.maxX - blockBoundingBox.minX) / 2,
+                    (blockBoundingBox.maxY - blockBoundingBox.minY) / 2,
+                    (blockBoundingBox.maxZ - blockBoundingBox.minZ) / 2
+                )
+                val entityPos = entity.position.add(entityCenter)
+                val blockPos = position.add(
+                    blockBoundingBox.minX - position.x + blockCenter.x,
+                    blockBoundingBox.minY - position.y + blockCenter.y,
+                    blockBoundingBox.minZ - position.z + blockCenter.z
+                )
 
 
-                    if (ring(entity, RingCause.DROPPED_ITEM)) {
-                        if (entity is EntityItem) {
-                            var entityVector = entityPos.subtract(blockPos)
-                            entityVector = entityVector.normalize().multiply(0.4)
-                            entityVector.y = max(0.15, entityVector.y)
-                            entity.setMotion(entityVector)
-                        }
+                if (ring(entity, RingCause.DROPPED_ITEM)) {
+                    if (entity is EntityItem) {
+                        var entityVector = entityPos.subtract(blockPos)
+                        entityVector = entityVector.normalize().multiply(0.4)
+                        entityVector.y = max(0.15, entityVector.y)
+                        entity.setMotion(entityVector)
                     }
                 }
             }

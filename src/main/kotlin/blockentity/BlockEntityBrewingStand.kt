@@ -17,7 +17,6 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.protocol.ContainerSetDataPacket
 import org.chorus_oss.chorus.recipe.ContainerRecipe
 import org.chorus_oss.chorus.recipe.MixRecipe
 import org.chorus_oss.chorus.registry.Registries
@@ -269,19 +268,19 @@ class BlockEntityBrewingStand(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpaw
         for (p in inventory.viewers) {
             val windowId = p.getWindowId(inventory)
             if (windowId > 0) {
-                val pk1 = ContainerSetDataPacket(
+                val pk1 = org.chorus_oss.protocol.packets.ContainerSetDataPacket(
                     containerID = windowId.toByte(),
-                    property = ContainerSetDataPacket.PROPERTY_BREWING_STAND_FUEL_AMOUNT,
+                    property = org.chorus_oss.protocol.packets.ContainerSetDataPacket.BREWING_STAND_FUEL_AMOUNT,
                     value = this.fuel
                 )
-                p.dataPacket(pk1)
+                p.sendPacket(pk1)
 
-                val pk2 = ContainerSetDataPacket(
+                val pk2 = org.chorus_oss.protocol.packets.ContainerSetDataPacket(
                     containerID = windowId.toByte(),
-                    property = ContainerSetDataPacket.PROPERTY_BREWING_STAND_FUEL_TOTAL,
+                    property = org.chorus_oss.protocol.packets.ContainerSetDataPacket.BREWING_STAND_FUEL_TOTAL,
                     value = this.fuelTotal
                 )
-                p.dataPacket(pk2)
+                p.sendPacket(pk2)
             }
         }
     }
@@ -292,12 +291,12 @@ class BlockEntityBrewingStand(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpaw
         for (p in inventory.viewers) {
             val windowId = p.getWindowId(inventory)
             if (windowId > 0) {
-                val pk = ContainerSetDataPacket(
+                val pk = org.chorus_oss.protocol.packets.ContainerSetDataPacket(
                     containerID = windowId.toByte(),
-                    property = ContainerSetDataPacket.PROPERTY_BREWING_STAND_BREW_TIME,
+                    property = org.chorus_oss.protocol.packets.ContainerSetDataPacket.BREWING_STAND_BREW_TIME,
                     value = brewTime,
                 )
-                p.dataPacket(pk)
+                p.sendPacket(pk)
             }
         }
     }

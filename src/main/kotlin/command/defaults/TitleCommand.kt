@@ -57,7 +57,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
             "clear" -> {
                 for (player in players) {
                     player.clearTitle()
-                    log.addMessage(TextFormat.WHITE.toString() + "%nukkit.command.title.clear", player.getEntityName())
+                    log.addMessage(TextFormat.WHITE.toString() + "%chorus.command.title.clear", player.getEntityName())
                 }
                 log.output()
                 return 1
@@ -66,7 +66,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
             "reset" -> {
                 for (player in players) {
                     player.resetTitleSettings()
-                    log.addMessage(TextFormat.WHITE.toString() + "%nukkit.command.title.reset", player.getEntityName())
+                    log.addMessage(TextFormat.WHITE.toString() + "%chorus.command.title.reset", player.getEntityName())
                 }
                 log.output()
                 return 1
@@ -80,7 +80,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
                         for (player in players) {
                             player.sendTitle(titleText)
                             log.addMessage(
-                                TextFormat.WHITE.toString() + "%nukkit.command.title.title",
+                                TextFormat.WHITE.toString() + "%chorus.command.title.title",
                                 TextFormat.clean(titleText),
                                 player.getEntityName()
                             )
@@ -92,7 +92,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
                         for (player in players) {
                             player.setSubtitle(titleText)
                             log.addMessage(
-                                TextFormat.WHITE.toString() + "%nukkit.command.title.subtitle",
+                                TextFormat.WHITE.toString() + "%chorus.command.title.subtitle",
                                 TextFormat.clean(titleText),
                                 player.getEntityName()
                             )
@@ -104,7 +104,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
                         for (player in players) {
                             player.sendActionBar(titleText)
                             log.addMessage(
-                                TextFormat.WHITE.toString() + "%nukkit.command.title.actionbar",
+                                TextFormat.WHITE.toString() + "%chorus.command.title.actionbar",
                                 TextFormat.clean(titleText),
                                 player.getEntityName()
                             )
@@ -131,7 +131,7 @@ class TitleCommand(name: String) : VanillaCommand(name, "commands.title.descript
                 val fadeOut = list.getResult<Int>(4)!!
                 for (player in players) {
                     log.addMessage(
-                        TextFormat.WHITE.toString() + "%nukkit.command.title.times.success",
+                        TextFormat.WHITE.toString() + "%chorus.command.title.times.success",
                         fadeIn.toString(),
                         stay.toString(),
                         fadeOut.toString(),

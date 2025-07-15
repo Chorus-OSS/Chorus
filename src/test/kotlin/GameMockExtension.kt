@@ -17,7 +17,8 @@ import org.chorus_oss.chorus.inventory.HumanOffHandInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
-import org.chorus_oss.chorus.level.*
+import org.chorus_oss.chorus.level.DimensionEnum
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.format.LevelConfig
 import org.chorus_oss.chorus.level.format.LevelConfig.GeneratorConfig
 import org.chorus_oss.chorus.level.format.LevelProvider
@@ -26,6 +27,7 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.DataPacketManager
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.permission.BanList
 import org.chorus_oss.chorus.plugin.JavaPluginLoader
@@ -34,6 +36,7 @@ import org.chorus_oss.chorus.registry.BlockRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.ClientChainData
+import org.chorus_oss.protocol.core.Packet
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolutionException
@@ -42,7 +45,9 @@ import org.mockito.MockedStatic
 import org.mockito.MockedStatic.Verification
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
-import java.io.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.net.InetSocketAddress
 import java.nio.file.Path
 import java.util.*
@@ -276,8 +281,10 @@ class GameMockExtension : MockitoExtension() {
             )
             val dataPacketManager = DataPacketManager()
             Mockito.`when`(serverSession.dataPacketManager).thenReturn(dataPacketManager)
-            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any())
-            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any())
+            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any<DataPacket>())
+            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any<Packet>())
+            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any<DataPacket>())
+            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any<Packet>())
             player = TestPlayer(serverSession, info)
             player.adventureSettings = AdventureSettings(player)
             player.loggedIn = true

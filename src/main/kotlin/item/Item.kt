@@ -1096,7 +1096,13 @@ abstract class Item : Cloneable, ItemID, Loggable {
     }
 
     override fun toString(): String {
-        return "Item(name=\"${idConvertToName()}\", id=\"${this.id}\", meta=${this.meta}, count=${this.count}${if (this.hasCompoundTag()) ", tags=0x${Binary.bytesToHexString(compoundTag)}" else ")"}"
+        return "Item(name=\"${idConvertToName()}\", id=\"${this.id}\", meta=${this.meta}, count=${this.count}${
+            if (this.hasCompoundTag()) ", tags=0x${
+                Binary.bytesToHexString(
+                    compoundTag
+                )
+            }" else ")"
+        }"
     }
 
     /**

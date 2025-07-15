@@ -41,8 +41,8 @@ class BlockUpdateEntry : Comparable<BlockUpdateEntry> {
     }
 
     override fun compareTo(other: BlockUpdateEntry): Int {
-        return if (this.delay < other.delay) -1 else (if (this.delay > other.delay) 1 else (if (this.priority != other.priority) this.priority - other.priority else java.lang.Long.compare(
-            this.id, other.id
+        return if (this.delay < other.delay) -1 else (if (this.delay > other.delay) 1 else (if (this.priority != other.priority) this.priority - other.priority else this.id.compareTo(
+            other.id
         )))
     }
 

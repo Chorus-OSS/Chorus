@@ -2,8 +2,9 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.Entity
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.MobEquipmentPacket
+import org.chorus_oss.protocol.types.item.ItemStack
 
 class EntityEquipmentInventory(holder: InventoryHolder) :
     BaseInventory(holder, InventoryType.INVENTORY, 9 + 27) {
@@ -20,13 +21,14 @@ class EntityEquipmentInventory(holder: InventoryHolder) :
     }
 
     override fun sendSlot(index: Int, player: Player) {
-        val mobEquipmentPacket = MobEquipmentPacket()
-        mobEquipmentPacket.eid = entity.getRuntimeID()
-        mobEquipmentPacket.selectedSlot = index
-        mobEquipmentPacket.slot =
-            mobEquipmentPacket.selectedSlot //todo check inventorySlot and hotbarSlot for MobEquipmentPacket
-        mobEquipmentPacket.item = this.getItem(index)
-        player.dataPacket(mobEquipmentPacket)
+        val mobEquipmentPacket = org.chorus_oss.protocol.packets.MobEquipmentPacket(
+            entityRuntimeID = entity.getRuntimeID().toULong(),
+            newItem = ItemStack(this.getItem(index)),
+            inventorySlot = index.toByte(),
+            hotbarSlot = index.toByte(), // TODO: check inventorySlot and hotbarSlot for MobEquipmentPacket
+            windowID = 0
+        )
+        player.sendPacket(mobEquipmentPacket)
     }
 
     override val viewers: MutableSet<Player> = super.viewers

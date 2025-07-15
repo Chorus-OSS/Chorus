@@ -26,7 +26,6 @@ import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.scoreboard.manager.IScoreboardManager
 import org.chorus_oss.chorus.utils.TickCachedBlockIterator
 import java.util.*
-import kotlin.math.round
 import kotlin.math.sqrt
 
 abstract class EntityLiving(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt), EntityDamageable {

@@ -163,7 +163,7 @@ class BlockBed @JvmOverloads constructor(blockstate: BlockState = properties.def
                 .addCoord(footPart.xOffset.toDouble(), 0.0, footPart.zOffset.toDouble())
 
             for (entity in level.getCollidingEntities(checkMonsterArea)) {
-                if (entity != null && !entity.isClosed() && entity.isPreventingSleep(player)) {
+                if (!entity.isClosed() && entity.isPreventingSleep(player)) {
                     player.sendTranslation(TextFormat.GRAY.toString() + "%tile.bed.notSafe")
                     return true
                 }
@@ -189,7 +189,7 @@ class BlockBed @JvmOverloads constructor(blockstate: BlockState = properties.def
         player: Player?
     ): Boolean {
         val down = this.down()
-        if (down != null && !(BlockLever.isSupportValid(down, BlockFace.UP) || down is BlockCauldron)) {
+        if (!(BlockLever.isSupportValid(down, BlockFace.UP) || down is BlockCauldron)) {
             return false
         }
 
@@ -197,10 +197,10 @@ class BlockBed @JvmOverloads constructor(blockstate: BlockState = properties.def
         val next = this.getSide(direction)
         val downNext = next.down()
 
-        if (downNext != null && (!next.canBeReplaced() || !(BlockLever.isSupportValid(
+        if (!next.canBeReplaced() || !(BlockLever.isSupportValid(
                 downNext,
                 BlockFace.UP
-            ) || downNext is BlockCauldron))
+            ) || downNext is BlockCauldron)
         ) {
             return false
         }

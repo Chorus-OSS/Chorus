@@ -26,9 +26,9 @@ import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.enchantment.Enchantment
+import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
-import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
@@ -129,7 +129,7 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
         behaviorGroup.save(this)
 
         if (activeEffects != null) namedTag!!.putList(TAG_ACTIVE_EFFECTS, ListTag(activeEffects!!))
-        namedTag!!.putShort(TAG_AIR, air.toInt())
+        namedTag!!.putShort(TAG_AIR, getAirTicks())
         namedTag!!.putList(
             TAG_ARMOR, ListTag(
                 Tag.TAG_COMPOUND.toInt(),
@@ -365,9 +365,14 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
         this.scheduleUpdate()
     }
 
-    fun setPositionAndRotation(pos: IVector3?, yaw: Double, pitch: Double, headYaw: Double): Boolean {
+    fun setPositionAndRotation(pos: Vector3, yaw: Double, pitch: Double, headYaw: Double): Boolean {
         this.setRotation(yaw, pitch, headYaw)
-        return this.setPosition(pos!!)
+        return this.setPosition(pos)
+    }
+
+    fun setPositionAndRotation(pos: Locator, yaw: Double, pitch: Double, headYaw: Double): Boolean {
+        this.setRotation(yaw, pitch, headYaw)
+        return this.setPosition(pos)
     }
 
     override fun getExperienceDrops(): Int {
@@ -388,7 +393,6 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
             TAG_ACTIVE_EFFECTS,
             CompoundTag::class.java
         ).all
-        this.air = nbt.getShort(TAG_AIR)
         equipment.setArmor(
             Stream.concat(
                 nbt.getList(

@@ -6,33 +6,38 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockFrame
 import org.chorus_oss.chorus.block.BlockLectern
 import org.chorus_oss.chorus.event.player.*
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
-import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
-import org.chorus_oss.chorus.network.protocol.PlayerActionPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.PlayerActionPacket
+import org.chorus_oss.protocol.types.PlayerActionType
 
 
-class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
-    override fun handle(player: Player, pk: PlayerActionPacket) {
-        val player = player.player
-        if (!player.spawned || (!player.isAlive() && pk.action != PlayerActionPacket.ACTION_RESPAWN && pk.action != PlayerActionPacket.ACTION_DIMENSION_CHANGE_ACK)) {
+class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<PlayerActionPacket>) {
+        val packet = pk.packet
+
+        if (!player.spawned || (!player.isAlive() && packet.actionType != PlayerActionType.Respawn && packet.actionType != PlayerActionType.ChangeDimensionACK)) {
             return
         }
 
-        pk.entityId = player.getRuntimeID()
-        val pos = Vector3(pk.x.toDouble(), pk.y.toDouble(), pk.z.toDouble())
-        val face = fromIndex(pk.face)
+        if (packet.entityRuntimeID != player.getRuntimeID().toULong()) {
+            return
+        }
+
+        val pos = Vector3(packet.blockPosition)
+        val face = fromIndex(packet.blockFace)
 
         run switch@{
-            when (pk.action) {
-                PlayerActionPacket.ACTION_START_BREAK -> {
+            when (packet.actionType) {
+                PlayerActionType.StartDestroyBlock -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -40,7 +45,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     player.player.onBlockBreakStart(pos, face)
                 }
 
-                PlayerActionPacket.ACTION_ABORT_BREAK, PlayerActionPacket.ACTION_STOP_BREAK -> {
+                PlayerActionType.AbortDestroyBlock, PlayerActionType.StopDestroyBlock -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -48,7 +53,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     player.player.onBlockBreakAbort(pos)
                 }
 
-                PlayerActionPacket.ACTION_CREATIVE_PLAYER_DESTROY_BLOCK -> {
+                PlayerActionType.CreativeDestroyBlock -> {
                     // Used by client to get book from lecterns and items from item frame in creative mode since 1.20.70
                     val blockLectern = player.player.level!!.getBlock(pos)
                     if (blockLectern is BlockLectern && blockLectern.position.distance(player.player.position) <= 6) {
@@ -59,10 +64,10 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                     if (Server.instance.getServerAuthoritativeMovement() > 0) return@switch //ServerAuthorInput not use player
 
-                    player.player.onBlockBreakComplete(BlockVector3(pk.x, pk.y, pk.z), face)
+                    player.player.onBlockBreakComplete(Vector3(packet.blockPosition).asBlockVector3(), face)
                 }
 
-                PlayerActionPacket.ACTION_CONTINUE_BREAK -> {
+                PlayerActionType.ContinueDestroyBlock -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -70,23 +75,23 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     player.player.onBlockBreakContinue(pos, face)
                 }
 
-                PlayerActionPacket.ACTION_GET_UPDATED_BLOCK -> {
-                    //TODO
+                PlayerActionType.GetUpdatedBlock -> {
+                    // TODO
                 }
 
-                PlayerActionPacket.ACTION_DROP_ITEM -> {
-                    //TODO
+                PlayerActionType.DropItem -> {
+                    // TODO
                 }
 
-                PlayerActionPacket.ACTION_STOP_SLEEPING -> player.stopSleep()
-                PlayerActionPacket.ACTION_RESPAWN -> {
+                PlayerActionType.StopSleeping -> player.stopSleep()
+                PlayerActionType.Respawn -> {
                     if (!player.spawned || player.isAlive() || !player.isOnline) {
                         return
                     }
-                    player.player.respawn()
+                    player.respawn()
                 }
 
-                PlayerActionPacket.ACTION_JUMP -> {
+                PlayerActionType.StartJump -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -95,7 +100,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     Server.instance.pluginManager.callEvent(playerJumpEvent)
                 }
 
-                PlayerActionPacket.ACTION_START_SPRINT -> {
+                PlayerActionType.StartSprinting -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -109,7 +114,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_SPRINT -> {
+                PlayerActionType.StopSprinting -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -123,7 +128,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_START_SNEAK -> {
+                PlayerActionType.StartSneaking -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -137,7 +142,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_SNEAK -> {
+                PlayerActionType.StopSneaking -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -151,14 +156,14 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_DIMENSION_CHANGE_ACK -> player.sendPosition(
+                PlayerActionType.ChangeDimensionACK -> player.sendPosition(
                     player.position,
                     player.rotation.yaw,
                     player.rotation.pitch,
                     MovePlayerPacket.MODE_NORMAL
                 )
 
-                PlayerActionPacket.ACTION_START_GLIDE -> {
+                PlayerActionType.StartGliding -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -172,7 +177,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_GLIDE -> {
+                PlayerActionType.StopGliding -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -186,7 +191,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_START_SWIMMING -> {
+                PlayerActionType.StartSwimming -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -201,7 +206,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_SWIMMING -> {
+                PlayerActionType.StopSwimming -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -216,7 +221,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_START_SPIN_ATTACK -> {
+                PlayerActionType.StartSpinAttack -> {
                     if (player.inventory.itemInHand.id != ItemID.TRIDENT) {
                         player.sendPosition(
                             player.position,
@@ -272,7 +277,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_SPIN_ATTACK -> {
+                PlayerActionType.StopSpinAttack -> {
                     val playerToggleSpinAttackEvent = PlayerToggleSpinAttackEvent(player, false)
                     Server.instance.pluginManager.callEvent(playerToggleSpinAttackEvent)
 
@@ -283,7 +288,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_START_FLYING -> {
+                PlayerActionType.StartFlying -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -302,7 +307,7 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_STOP_FLYING -> {
+                PlayerActionType.StopFlying -> {
                     if (Server.instance.getServerAuthoritativeMovement() > 0) {
                         return
                     }
@@ -316,21 +321,20 @@ class PlayerActionProcessor : DataPacketProcessor<PlayerActionPacket>() {
                     }
                 }
 
-                PlayerActionPacket.ACTION_START_ITEM_USE_ON, PlayerActionPacket.ACTION_STOP_ITEM_USE_ON -> {
+                PlayerActionType.StartItemUseOn, PlayerActionType.StopItemUseOn -> {
                     // TODO
                 }
 
                 else -> log.warn(
-                    "{} sent invalid action id {}",
+                    "{} sent invalid action: {}",
                     player.getEntityName(),
-                    pk.action
+                    packet.actionType
                 )
             }
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.PLAYER_ACTION_PACKET
+    override val packetId: Int = PlayerActionPacket.id
 
     companion object : Loggable
 }

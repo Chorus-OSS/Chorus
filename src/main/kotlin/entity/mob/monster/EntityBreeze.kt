@@ -38,14 +38,14 @@ class EntityBreeze(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
             this.tickSpread,
             setOf<IBehavior>(
                 Behavior(
-                    BreezeShootExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.4f, 15, true, 30, 20),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    BreezeShootExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.4f, 15, true, 30, 20),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     2,
                     1
                 ),
                 Behavior(
-                    BreezeShootExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.4f, 15, true, 30, 20),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    BreezeShootExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.4f, 15, true, 30, 20),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     2,
                     1
                 )
@@ -70,19 +70,19 @@ class EntityBreeze(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                         IBehaviorEvaluator { entity: EntityMob? -> !isInsideOfLava() }), 5, 1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 1.2f, true),
+                    MoveToTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 1.2f, true),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET, 24.0)
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.ATTACK_TARGET, 24.0)
                     ),
                     4,
                     1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 1.2f, true),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 1.2f, true),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 24.0)
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 24.0)
                     ),
                     3,
                     1

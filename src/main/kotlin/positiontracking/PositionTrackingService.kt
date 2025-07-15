@@ -8,8 +8,12 @@ import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.ItemLodestoneCompass
-import org.chorus_oss.chorus.network.protocol.PositionTrackingDBServerBroadcastPacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.nbt.tags.ByteTag
+import org.chorus_oss.nbt.tags.CompoundTag
+import org.chorus_oss.nbt.tags.IntTag
+import org.chorus_oss.nbt.tags.ListTag
+import org.chorus_oss.protocol.packets.PositionTrackingDBServerBroadcastPacket
 import java.io.*
 import java.lang.ref.WeakReference
 import java.util.*
@@ -85,13 +89,24 @@ class PositionTrackingService(folder: File) : Closeable {
 
     private fun sendTrackingUpdate(player: Player, trackingHandler: Int, pos: PositionTracking) {
         if (player.locator.levelName == pos.levelName) {
-            val packet = PositionTrackingDBServerBroadcastPacket()
-            packet.action = (PositionTrackingDBServerBroadcastPacket.Action.UPDATE)
-            packet.setPosition(pos)
-            packet.dimension = player.level!!.dimension
-            packet.trackingId = (trackingHandler)
-            packet.status = 0
-            player.dataPacket(packet)
+            val packet = PositionTrackingDBServerBroadcastPacket(
+                broadcastAction = PositionTrackingDBServerBroadcastPacket.Companion.Action.Update,
+                trackingID = trackingHandler,
+                payload = CompoundTag(
+                    mapOf(
+                        "pos" to ListTag(
+                            listOf(
+                                IntTag(pos.floorX),
+                                IntTag(pos.floorY),
+                                IntTag(pos.floorZ)
+                            )
+                        ),
+                        "status" to ByteTag(0),
+                        "dimension" to IntTag(player.level!!.dimension)
+                    )
+                )
+            )
+            player.sendPacket(packet)
         } else {
             sendTrackingDestroy(player, trackingHandler)
         }
@@ -99,7 +114,7 @@ class PositionTrackingService(folder: File) : Closeable {
 
     private fun sendTrackingDestroy(player: Player, trackingHandler: Int) {
         val packet = destroyPacket(trackingHandler)
-        player.dataPacket(packet)
+        player.sendPacket(packet)
     }
 
     @Synchronized
@@ -130,12 +145,23 @@ class PositionTrackingService(folder: File) : Closeable {
     }
 
     private fun destroyPacket(trackingHandler: Int): PositionTrackingDBServerBroadcastPacket {
-        val packet = PositionTrackingDBServerBroadcastPacket()
-        packet.action = (PositionTrackingDBServerBroadcastPacket.Action.DESTROY)
-        packet.trackingId = (trackingHandler)
-        packet.dimension = 0
-        packet.setPosition(0, 0, 0)
-        packet.status = 2
+        val packet = PositionTrackingDBServerBroadcastPacket(
+            broadcastAction = PositionTrackingDBServerBroadcastPacket.Companion.Action.Destroy,
+            trackingID = trackingHandler,
+            payload = CompoundTag(
+                mapOf(
+                    "pos" to ListTag(
+                        listOf(
+                            IntTag(0),
+                            IntTag(0),
+                            IntTag(0)
+                        )
+                    ),
+                    "status" to ByteTag(2),
+                    "dimension" to IntTag(0)
+                )
+            )
+        )
         return packet
     }
 
@@ -143,10 +169,9 @@ class PositionTrackingService(folder: File) : Closeable {
     fun stopTracking(player: Player): Boolean {
         val toRemove = tracking.remove(player)
         if (toRemove != null && player.isOnline) {
-            val packets =
-                toRemove.values.flatMap { it.toIntArray().asSequence() }.map { this.destroyPacket(it) }.toTypedArray()
+            val packets = toRemove.values.flatMap { it }.map { this.destroyPacket(it) }
             for (p in packets) {
-                player.dataPacket(p)
+                player.sendPacket(p)
             }
         }
         return toRemove != null
@@ -161,7 +186,7 @@ class PositionTrackingService(folder: File) : Closeable {
                 if (value.isEmpty()) {
                     tracking.remove(key)
                 }
-                player.dataPacket(destroyPacket(trackingHandler))
+                player.sendPacket(destroyPacket(trackingHandler))
                 return true
             }
         }

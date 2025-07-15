@@ -4,10 +4,10 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.event.player.PlayerAnimationEvent
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import org.chorus_oss.chorus.network.protocol.AnimatePacket.Action
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 
 class AnimateProcessor : DataPacketProcessor<AnimatePacket>() {
     override fun handle(player: Player, pk: AnimatePacket) {

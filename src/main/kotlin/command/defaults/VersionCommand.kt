@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.command.CommandSender
 import org.chorus_oss.chorus.command.data.CommandParamType
 import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.lang.TranslationContainer
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.TextFormat
 import java.io.IOException
 import java.net.URI
@@ -25,8 +24,8 @@ import java.util.function.Consumer
 
 class VersionCommand(name: String) : Command(
     name,
-    "%nukkit.command.version.description",
-    "%nukkit.command.version.usage",
+    "%chorus.command.version.description",
+    "%chorus.command.version.usage",
     arrayOf<String>("ver", "about")
 ), CoreCommand {
     private val queryQueue: MutableList<Query> = LinkedList<Query>()
@@ -124,7 +123,7 @@ class VersionCommand(name: String) : Command(
                     Server.instance.chorusVersion + " (" + Server.instance.gitCommit + ")",
                     Server.instance.apiVersion,
                     Server.instance.version,
-                    ProtocolInfo.PROTOCOL_VERSION.toString()
+                    org.chorus_oss.protocol.ProtocolInfo.VERSION.toString()
                 )
             )
         } else {

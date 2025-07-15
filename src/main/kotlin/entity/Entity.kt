@@ -22,6 +22,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
 import org.chorus_oss.chorus.event.entity.EntityPortalEnterEvent.PortalType
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent.TeleportCause
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemTotemOfUndying
 import org.chorus_oss.chorus.item.enchantment.Enchantment
@@ -36,24 +37,24 @@ import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.AnimateEntityPacket.Animation
-import org.chorus_oss.chorus.network.protocol.types.EntityLink
 import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
-import org.chorus_oss.chorus.utils.ChunkException
-import org.chorus_oss.chorus.utils.Identifier
-import org.chorus_oss.chorus.utils.Loggable
-import org.chorus_oss.chorus.utils.PortalHelper
-import org.chorus_oss.chorus.utils.TextFormat
+import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.SetActorDataPacket
+import org.chorus_oss.protocol.packets.SetActorMotionPacket
+import org.chorus_oss.protocol.types.ActorLink
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.awt.Color
 import java.util.*
 import java.util.Objects.requireNonNull
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
-import java.util.function.Consumer
 import kotlin.concurrent.Volatile
 import kotlin.math.*
 import kotlin.random.Random
@@ -250,7 +251,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     var scale: Float = 1f
 
     @JvmField
-    var namedTag: CompoundTag? = null
+    var namedTag: CompoundTag = CompoundTag()
 
     @JvmField
     var isCollided: Boolean = false
@@ -418,8 +419,8 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      */
     protected open fun initEntity() {
         if (this !is Player) {
-            if (namedTag!!.contains(TAG_UNIQUE_ID)) {
-                this.uniqueId = namedTag!!.getLong(TAG_UNIQUE_ID)
+            if (namedTag.contains(TAG_UNIQUE_ID)) {
+                this.uniqueId = namedTag.getLong(TAG_UNIQUE_ID)
             } else {
                 this.uniqueId = Random.nextLong()
             }
@@ -459,11 +460,11 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
         this.runtimeId = entityCount.getAndIncrement()
         this.justCreated = true
-        this.namedTag = nbt
+        this.namedTag = nbt ?: CompoundTag()
         this.chunk = chunk
         this.level = (chunk.provider.level)
 
-        this.chested = namedTag!!.getBoolean(TAG_CHESTED)
+        this.chested = namedTag.getBoolean(TAG_CHESTED)
         this.color = namedTag!!.getByte(TAG_COLOR)
         this.color2 = namedTag!!.getByte(TAG_COLOR2)
         this.customName = if (namedTag!!.contains(TAG_CUSTOM_NAME)) namedTag!!.getString(TAG_CUSTOM_NAME) else null
@@ -926,45 +927,50 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             )
         ) {
             hasSpawned[player.loaderId] = player
-            player.dataPacket(createAddEntityPacket())
+            player.sendPacket(createAddEntityPacket())
         }
 
         if (this.riding != null) {
             riding!!.spawnTo(player)
 
-            val pkk = SetEntityLinkPacket()
-            pkk.vehicleUniqueId = riding!!.getRuntimeID()
-            pkk.riderUniqueId = this.getRuntimeID()
-            pkk.type = EntityLink.Type.RIDER
-            pkk.immediate = 1
-
-            player.dataPacket(pkk)
+            val packet = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+                actorLink = ActorLink(
+                    riddenActorUniqueID = riding!!.getUniqueID(),
+                    riderActorUniqueID = this.getUniqueID(),
+                    type = ActorLink.Companion.Type.Rider,
+                    immediate = true,
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f,
+                )
+            )
+            player.sendPacket(packet)
         }
     }
 
-    protected open fun createAddEntityPacket(): DataPacket {
-        return AddActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
+    protected open fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
-            position = this.position.asVector3f(),
-            velocity = this.motion.asVector3f(),
-            rotation = this.rotation.asVector2f(),
-            yHeadRotation = when (this) {
+            position = org.chorus_oss.protocol.types.Vector3f(this.position),
+            velocity = org.chorus_oss.protocol.types.Vector3f(this.motion),
+            rotation = org.chorus_oss.protocol.types.Vector2f(this.rotation),
+            headYaw = when (this) {
                 is EntityMob -> this.headYaw.toFloat()
                 else -> this.rotation.yaw.toFloat()
             },
-            yBodyRotation = this.rotation.yaw.toFloat(),
-            attributeList = this.attributes.values.toList(),
-            actorData = this.entityDataMap,
-            syncedProperties = this.propertySyncData(),
+            bodyYaw = this.rotation.yaw.toFloat(),
+            attributes = this.attributes.values.map(AttributeValue::invoke),
+            actorData = ActorDataMap(this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
             actorLinks = List(passengers.size) { i ->
-                EntityLink(
-                    this.uniqueId,
-                    passengers[i].uniqueId,
-                    if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                ActorLink(
+                    riddenActorUniqueID = this.uniqueId,
+                    riderActorUniqueID = passengers[i].uniqueId,
+                    type = if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                     immediate = false,
-                    riderInitiated = false
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f
                 )
             }
         )
@@ -988,37 +994,40 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     @JvmOverloads
     fun sendData(player: Player, data: EntityDataMap? = null) {
-        val pk = SetEntityDataPacket()
-        pk.eid = this.getRuntimeID()
-        pk.entityData = data ?: this.entityDataMap
-        pk.syncedProperties = this.propertySyncData()
-
-        player.dataPacket(pk)
+        val pk = SetActorDataPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            actorDataMap = ActorDataMap(data ?: this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
+            tick = 0uL
+        )
+        player.sendPacket(pk)
     }
 
     @JvmOverloads
     fun sendData(players: Array<Player>, data: EntityDataMap? = null) {
-        val pk = SetEntityDataPacket()
-        pk.eid = this.getRuntimeID()
-        pk.entityData = data ?: this.entityDataMap
-        pk.syncedProperties = this.propertySyncData()
-
+        val pk = SetActorDataPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            actorDataMap = ActorDataMap(data ?: this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
+            tick = 0uL
+        )
         for (player: Player in players) {
             if (player === this) {
                 continue
             }
-            player.dataPacket(pk)
+            player.sendPacket(pk)
         }
         if (this is Player) {
-            player.dataPacket(pk)
+            player.sendPacket(pk)
         }
     }
 
     open fun despawnFrom(player: Player) {
         if (hasSpawned.containsKey(player.loaderId)) {
-            val pk = RemoveActorPacket()
-            pk.actorUniqueID = this.getUniqueID()
-            player.dataPacket(pk)
+            val pk = org.chorus_oss.protocol.packets.RemoveActorPacket(
+                actorUniqueID = this.getUniqueID()
+            )
+            player.sendPacket(pk)
             hasSpawned.remove(player.loaderId)
         }
     }
@@ -1567,12 +1576,15 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * 对于玩家实体，你不应该使用此方法！
      */
     fun addMotion(motionX: Double, motionY: Double, motionZ: Double) {
-        val pk = SetEntityMotionPacket()
-        pk.eid = this.getRuntimeID()
-        pk.motionX = motionX.toFloat()
-        pk.motionY = motionY.toFloat()
-        pk.motionZ = motionZ.toFloat()
-
+        val pk = SetActorMotionPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            motion = org.chorus_oss.protocol.types.Vector3f(
+                motionX.toFloat(),
+                motionY.toFloat(),
+                motionZ.toFloat()
+            ),
+            tick = 0uL,
+        )
         Server.broadcastPacket(hasSpawned.values, pk)
     }
 
@@ -1635,7 +1647,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     open fun mountEntity(entity: Entity): Boolean {
-        return mountEntity(entity, EntityLink.Type.RIDER)
+        return mountEntity(entity, ActorLink.Companion.Type.Rider)
     }
 
     /**
@@ -1644,7 +1656,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @param entity The target Entity
      * @return `true` if the mounting successful
      */
-    open fun mountEntity(entity: Entity, mode: EntityLink.Type): Boolean {
+    open fun mountEntity(entity: Entity, mode: ActorLink.Companion.Type): Boolean {
         requireNonNull(entity, "The target of the mounting entity can't be null")
 
         if (isPassenger(entity) || entity.riding != null && !entity.riding!!.dismountEntity(entity, false)) {
@@ -1681,15 +1693,15 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         if (ev.cancelled) {
             val seatIndex: Int = passengers.indexOf(entity)
             if (seatIndex == 0) {
-                this.broadcastLinkPacket(entity, EntityLink.Type.RIDER)
+                this.broadcastLinkPacket(entity, ActorLink.Companion.Type.Rider)
             } else if (seatIndex != -1) {
-                this.broadcastLinkPacket(entity, EntityLink.Type.PASSENGER)
+                this.broadcastLinkPacket(entity, ActorLink.Companion.Type.Passenger)
             }
             return false
         }
 
         if (sendLinks) {
-            broadcastLinkPacket(entity, EntityLink.Type.REMOVE)
+            broadcastLinkPacket(entity, ActorLink.Companion.Type.Remove)
         }
 
         // refresh the entity
@@ -1706,12 +1718,17 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         return true
     }
 
-    protected fun broadcastLinkPacket(rider: Entity, type: EntityLink.Type) {
-        val pk = SetEntityLinkPacket()
-        pk.vehicleUniqueId = getRuntimeID() // To what?
-        pk.riderUniqueId = rider.getRuntimeID() // From who?
-        pk.type = type
-        pk.riderInitiated = type != EntityLink.Type.REMOVE
+    protected fun broadcastLinkPacket(rider: Entity, type: ActorLink.Companion.Type) {
+        val pk = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+            actorLink = ActorLink(
+                riddenActorUniqueID = this.getUniqueID(),
+                riderActorUniqueID = rider.getUniqueID(),
+                type = type,
+                immediate = false,
+                riderInitiated = type != ActorLink.Companion.Type.Remove,
+                vehicleAngularVelocity = 0f,
+            )
+        )
         Server.broadcastPacket(hasSpawned.values, pk)
     }
 
@@ -2451,12 +2468,47 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 this.previousCurrentMotion.z = 0.0
             }
         }
-        else (this as EntityPhysical).addPreviousLiquidMovement()
+        else if (this is EntityPhysical) this.addPreviousLiquidMovement()
     }
 
     fun setPositionAndRotation(pos: Vector3, yaw: Double, pitch: Double): Boolean {
         this.setRotation(yaw, pitch)
         return this.setPosition(pos)
+    }
+
+    fun setPositionAndRotation(pos: Locator, yaw: Double, pitch: Double): Boolean {
+        this.setRotation(yaw, pitch)
+        return this.setPosition(pos)
+    }
+
+    fun setPosition(pos: Locator): Boolean {
+        if (this.closed) {
+            return false
+        }
+
+        if (pos.level !== this.level) {
+            if (!this.switchLevel(pos.level)) {
+                return false
+            }
+        }
+
+        return setPosition(pos.position)
+    }
+
+    fun setPosition(pos: Vector3): Boolean {
+        if (this.closed) {
+            return false
+        }
+
+        position.x = pos.x
+        position.y = pos.y
+        position.z = pos.z
+
+        this.recalculateBoundingBox(false) // Don't need to send BB height/width to client on position change
+
+        this.checkChunks()
+
+        return true
     }
 
     fun setRotation(yaw: Double, pitch: Double) {
@@ -2511,30 +2563,6 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
             chunk!!.addEntity(this)
         }
-    }
-
-    fun setPosition(pos: IVector3): Boolean {
-        if (this.closed) {
-            return false
-        }
-
-        if (pos is Locator && pos.level !== this.level) {
-            if (!this.switchLevel(pos.level)) {
-                return false
-            }
-        }
-
-        val vPos: Vector3 = pos.vector3
-
-        position.x = vPos.x
-        position.y = vPos.y
-        position.z = vPos.z
-
-        this.recalculateBoundingBox(false) // Don't need to send BB height/width to client on position change
-
-        this.checkChunks()
-
-        return true
     }
 
     fun getMotion(): Vector3 {
@@ -2641,7 +2669,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
         this.setMotion(Vector3())
 
-        if (this.setPositionAndRotation(to.position, yaw, pitch)) {
+        if (this.setPositionAndRotation(to.locator, yaw, pitch)) {
             this.resetFallDistance()
             this.onGround = !this.noClip
             this.updateMovement()
@@ -2975,28 +3003,6 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     fun setAmbientSoundEventName(eventName: String) {
         this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, eventName)
-    }
-
-
-    fun playAnimation(animation: Animation) {
-        val viewers: HashSet<Player> = HashSet(viewers.values)
-        if (this.isPlayer) viewers.add(this as Player)
-        playAnimation(animation, viewers)
-    }
-
-    /**
-     * Play the animation of this entity to a specified group of players
-     *
-     *
-     * 向指定玩家群体播放此实体的动画
-     *
-     * @param animation 动画对象 Animation objects
-     * @param players   可视玩家 Visible Player
-     */
-    fun playAnimation(animation: Animation, players: Collection<Player>) {
-        val pk = AnimateEntityPacket.fromAnimation(animation)
-        pk.runtimeIDs.add(this.getRuntimeID())
-        Server.broadcastPacket(players, pk)
     }
 
 
@@ -3375,34 +3381,13 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 )
         }
 
-        /**
-         * Batch play animation on entity groups<br></br>
-         * This method is recommended if you need to play the same animation on a large number of entities at the same time, as it only sends packets once for each player, which greatly reduces bandwidth pressure
-         *
-         *
-         * 在实体群上批量播放动画<br></br>
-         * 若你需要同时在大量实体上播放同一动画，建议使用此方法，因为此方法只会针对每个玩家发送一次包，这能极大地缓解带宽压力
-         *
-         * @param animation 动画对象 Animation objects
-         * @param entities  需要播放动画的实体群 Group of entities that need to play animations
-         * @param players   可视玩家 Visible Player
-         */
-        fun playAnimationOnEntities(animation: Animation, entities: Collection<Entity>, players: Collection<Player>) {
-            val pk = AnimateEntityPacket.fromAnimation(animation)
-            entities.forEach(Consumer { entity: Entity -> pk.runtimeIDs.add(entity.getRuntimeID()) })
-            Server.broadcastPacket(players, pk)
-        }
-
-        /**
-         * @see .playAnimationOnEntities
-         */
-        fun playAnimationOnEntities(animation: Animation, entities: Collection<Entity>) {
-            val viewers: HashSet<Player> = HashSet()
-            entities.forEach(Consumer { entity: Entity ->
-                viewers.addAll(entity.viewers.values)
-                if (entity.isPlayer) viewers.add(entity as Player)
-            })
-            playAnimationOnEntities(animation, entities, viewers)
+        fun playAnimationOnEntities(
+            animation: org.chorus_oss.protocol.packets.AnimateEntityPacket,
+            entities: List<Entity>
+        ) {
+            val viewers =
+                entities.flatMap { it.viewers.values + if (it.isPlayer) listOf(it as Player) else emptyList() }.toSet()
+            Server.broadcastPacket(viewers, animation)
         }
     }
 }

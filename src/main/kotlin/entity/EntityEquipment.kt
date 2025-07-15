@@ -1,12 +1,12 @@
 package org.chorus_oss.chorus.entity
 
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.BaseInventory
 import org.chorus_oss.chorus.inventory.InventoryHolder
 import org.chorus_oss.chorus.inventory.InventoryType
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.MobArmorEquipmentPacket
-import org.chorus_oss.chorus.network.protocol.MobEquipmentPacket
+import org.chorus_oss.protocol.types.item.ItemStack
 
 class EntityEquipment(holder: InventoryHolder) : BaseInventory(holder, InventoryType.INVENTORY, 6) {
     private val entity: Entity
@@ -176,19 +176,27 @@ class EntityEquipment(holder: InventoryHolder) : BaseInventory(holder, Inventory
     override fun sendSlot(index: Int, player: Player) {
         when (index) {
             MAIN_HAND, OFF_HAND -> {
-                val packet = MobEquipmentPacket()
-                packet.eid = entity.getRuntimeID()
-                packet.slot = index - 4
-                packet.selectedSlot = 0
-                packet.item = this.getItem(index)
-                player.dataPacket(packet)
+                val packet = org.chorus_oss.protocol.packets.MobEquipmentPacket(
+                    entityRuntimeID = entity.getRuntimeID().toULong(),
+                    newItem = ItemStack(this.getItem(index)),
+                    inventorySlot = (index - 4).toByte(),
+                    hotbarSlot = 0,
+                    windowID = 0
+                )
+                player.sendPacket(packet)
             }
 
             HEAD, CHEST, LEGS, FEET -> {
-                val packet = MobArmorEquipmentPacket()
-                packet.eid = entity.getRuntimeID()
-                packet.slots = getArmor().toTypedArray()
-                player.dataPacket(packet)
+                val armor = getArmor()
+                val packet = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+                    entityRuntimeID = entity.getRuntimeID().toULong(),
+                    head = ItemStack(armor[0]),
+                    torso = ItemStack(armor[1]),
+                    legs = ItemStack(armor[2]),
+                    feet = ItemStack(armor[3]),
+                    body = ItemStack(Item.AIR)
+                )
+                player.sendPacket(packet)
             }
 
             else -> throw IllegalStateException("Unexpected value: $index")

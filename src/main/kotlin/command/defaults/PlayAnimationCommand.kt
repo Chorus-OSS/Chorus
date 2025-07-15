@@ -6,7 +6,6 @@ import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.utils.CommandLogger
 import org.chorus_oss.chorus.entity.Entity
-import org.chorus_oss.chorus.network.protocol.AnimateEntityPacket
 
 class PlayAnimationCommand(name: String) : VanillaCommand(name, "commands.playanimation.description") {
     init {
@@ -35,28 +34,29 @@ class PlayAnimationCommand(name: String) : VanillaCommand(name, "commands.playan
             log.addNoTargetMatch().output()
             return 0
         }
-        val animationBuilder = AnimateEntityPacket.Animation(
+        val packet = org.chorus_oss.protocol.packets.AnimateEntityPacket(
             animation = list.getResult(1)!!,
             nextState = when (list.hasResult(2)) {
                 true -> list.getResult(2)!!
-                else -> AnimateEntityPacket.Animation.DEFAULT_NEXT_STATE
-            },
-            blendOutTime = when (list.hasResult(2)) {
-                true -> list.getResult(2)!!
-                else -> AnimateEntityPacket.Animation.DEFAULT_BLEND_OUT_TIME
+                else -> "default"
             },
             stopExpression = when (list.hasResult(2)) {
                 true -> list.getResult(2)!!
-                else -> AnimateEntityPacket.Animation.DEFAULT_STOP_EXPRESSION
+                else -> "query.any_animation_finished"
             },
+            stopExpressionVersion = 16777216,
             controller = when (list.hasResult(2)) {
                 true -> list.getResult(2)!!
-                else -> AnimateEntityPacket.Animation.DEFAULT_CONTROLLER
+                else -> "__runtime_controller"
             },
-            stopExpressionVersion = AnimateEntityPacket.Animation.DEFAULT_STOP_EXPRESSION_VERSION
+            blendOutTime = when (list.hasResult(2)) {
+                true -> list.getResult(2)!!
+                else -> 0.0f
+            },
+            runtimeIDs = entities.map { it.getRuntimeID().toULong() }
         )
         // send animation
-        Entity.playAnimationOnEntities(animationBuilder, entities)
+        Entity.playAnimationOnEntities(packet, entities)
         log.addSuccess("commands.playanimation.success").output()
         return 1
     }

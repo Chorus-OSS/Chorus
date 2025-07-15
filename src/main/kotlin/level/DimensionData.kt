@@ -39,6 +39,13 @@ class DimensionData @JvmOverloads constructor(
     val maxSectionY: Int
         get() = this.maxHeight shr 4
 
+    val suffix: String
+        get() = when (dimensionId) {
+            1 -> "_the_nether"
+            2 -> "_the_end"
+            else -> ""
+        }
+
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o !is DimensionData) return false

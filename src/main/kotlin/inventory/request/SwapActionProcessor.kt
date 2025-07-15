@@ -3,30 +3,30 @@ package org.chorus_oss.chorus.inventory.request
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.SwapAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseSlot
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.SwapRequestAction
 
-class SwapActionProcessor : ItemStackRequestActionProcessor<SwapAction> {
+class SwapActionProcessor : ItemStackRequestActionProcessor<SwapRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.SWAP
 
-    override fun handle(action: SwapAction, player: Player, context: ItemStackRequestContext): ActionResponse {
-        val sourceSlotType = action.source.containerName.container
-        val destinationSlotType = action.destination.containerName.container
+    override fun handle(action: SwapRequestAction, player: Player, context: ItemStackRequestContext): ActionResponse {
+        val sourceSlotType = action.source.container.container
+        val destinationSlotType = action.destination.container.container
         val source: Inventory = NetworkMapping.getInventory(player, sourceSlotType)
         val destination: Inventory = NetworkMapping.getInventory(player, destinationSlotType)
 
-        val sourceSlot = source.fromNetworkSlot(action.source.slot)
-        val destinationSlot = destination.fromNetworkSlot(action.destination.slot)
+        val sourceSlot = source.fromNetworkSlot(action.source.slot.toInt())
+        val destinationSlot = destination.fromNetworkSlot(action.destination.slot.toInt())
         val sourceItem = source.getItem(sourceSlot)
         val destinationItem = destination.getItem(destinationSlot)
-        if (validateStackNetworkId(sourceItem.getNetId(), action.source.stackNetworkId)) {
+        if (validateStackNetworkId(sourceItem.getNetId(), action.source.stackNetworkID)) {
             log.warn("mismatch stack network id!")
             return context.error()
         }
-        if (validateStackNetworkId(destinationItem.getNetId(), action.destination.stackNetworkId)) {
+        if (validateStackNetworkId(destinationItem.getNetId(), action.destination.stackNetworkID)) {
             log.warn("mismatch stack network id!")
             return context.error()
         }
@@ -35,7 +35,6 @@ class SwapActionProcessor : ItemStackRequestActionProcessor<SwapAction> {
         return context.success(
             listOf(
                 ItemStackResponseContainer(
-                    source.getSlotType(sourceSlot),
                     mutableListOf(
                         ItemStackResponseSlot(
                             source.toNetworkSlot(sourceSlot),
@@ -46,10 +45,9 @@ class SwapActionProcessor : ItemStackRequestActionProcessor<SwapAction> {
                             destinationItem.damage
                         )
                     ),
-                    action.source.containerName
+                    action.source.container
                 ),
                 ItemStackResponseContainer(
-                    destination.getSlotType(destinationSlot),
                     mutableListOf(
                         ItemStackResponseSlot(
                             destination.toNetworkSlot(destinationSlot),
@@ -60,7 +58,7 @@ class SwapActionProcessor : ItemStackRequestActionProcessor<SwapAction> {
                             sourceItem.damage
                         )
                     ),
-                    action.destination.containerName
+                    action.destination.container
                 )
             )
         )

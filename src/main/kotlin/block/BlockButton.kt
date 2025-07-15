@@ -94,7 +94,7 @@ abstract class BlockButton(meta: BlockState) : BlockFlowable(meta), RedstoneComp
             val thisFace = facing
             val touchingFace = thisFace.getOpposite()
             val side = this.getSide(touchingFace)
-            if (side != null && !BlockLever.isSupportValid(side, thisFace)) {
+            if (!BlockLever.isSupportValid(side, thisFace)) {
                 level.useBreakOn(this.position, Item.get(ItemID.WOODEN_PICKAXE))
                 return Level.BLOCK_UPDATE_NORMAL
             }

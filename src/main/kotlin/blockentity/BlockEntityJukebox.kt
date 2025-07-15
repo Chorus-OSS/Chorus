@@ -1,13 +1,13 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemMusicDisc
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.PlaySoundPacket
-import org.chorus_oss.chorus.network.protocol.StopSoundPacket
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.*
 
 
@@ -40,13 +40,12 @@ class BlockEntityJukebox(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable
     fun play() {
         if (recordItem is ItemMusicDisc) {
             val disc = recordItem as ItemMusicDisc
-            val packet = PlaySoundPacket()
-            packet.name = disc.soundId
-            packet.volume = 1f
-            packet.pitch = 1f
-            packet.x = position.floorX
-            packet.y = position.floorY
-            packet.z = position.floorZ
+            val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
+                soundName = disc.soundId,
+                position = Vector3f(position),
+                volume = 1f,
+                pitch = 1f,
+            )
             level.addChunkPacket(
                 position.floorX shr 4,
                 position.floorZ shr 4, packet
@@ -58,9 +57,11 @@ class BlockEntityJukebox(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable
     fun stop() {
         if (recordItem is ItemMusicDisc) {
             val disc = recordItem as ItemMusicDisc
-            val packet = StopSoundPacket()
-            packet.name = disc.soundId
-            packet.stopAll = false
+            val packet = org.chorus_oss.protocol.packets.StopSoundPacket(
+                soundName = disc.soundId,
+                stopAll = false,
+                stopLegacyMusic = false,
+            )
             level.addChunkPacket(
                 position.floorX shr 4,
                 position.floorZ shr 4, packet

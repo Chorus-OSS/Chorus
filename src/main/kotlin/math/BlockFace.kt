@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.math
 
-import com.google.common.collect.Iterators
 import org.chorus_oss.chorus.utils.ChorusRandom
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -12,7 +11,7 @@ enum class BlockFace(
     /**
      * Ordering index for D-U-N-S-W-E
      */
-    @JvmField val index: Int,
+    val index: Int,
     /**
      * Index of the opposite BlockFace in the VALUES array
      */
@@ -20,29 +19,17 @@ enum class BlockFace(
     /**
      * Ordering index for the HORIZONTALS field (S-W-N-E)
      */
-    @JvmField val horizontalIndex: Int,
+    val horizontalIndex: Int,
     /**
      * The name of this BlockFace (up, down, north, etc.)
      */
     val faceName: String,
-
-    /**
-     * Get the Axis of this BlockFace
-     *
-     * @return axis
-     */
     val axis: Axis,
-    /**
-     * Get the AxisDirection of this BlockFace
-     *
-     * @return axis direction
-     */
-    @JvmField val axisDirection: AxisDirection,
-
+    val axisDirection: AxisDirection,
     /**
      * Normalized vector that points in the direction of this BlockFace
      */
-    @JvmField val unitVector: Vector3
+    val unitVector: Vector3
 ) {
     DOWN(0, 1, -1, "down", Axis.Y, AxisDirection.NEGATIVE, Vector3(0.0, -1.0, 0.0)),
     UP(1, 0, -1, "up", Axis.Y, AxisDirection.POSITIVE, Vector3(0.0, 1.0, 0.0)),
@@ -171,10 +158,10 @@ enum class BlockFace(
         get() {
             val blockFaces = EnumSet.noneOf(BlockFace::class.java)
             if (axis.isVertical) {
-                Collections.addAll(blockFaces, *Plane.HORIZONTAL.faces)
+                Collections.addAll(blockFaces, *Plane.HORIZONTAL_FACES.toTypedArray())
                 return blockFaces
             }
-            Collections.addAll(blockFaces, *Plane.VERTICAL.faces)
+            Collections.addAll(blockFaces, *Plane.VERTICAL_FACES.toTypedArray())
             val edgeAxis =
                 if (axis == Axis.X) Axis.Z else Axis.X
             blockFaces.add(fromAxis(AxisDirection.NEGATIVE, edgeAxis))
@@ -227,7 +214,7 @@ enum class BlockFace(
         }
     }
 
-    enum class Plane(val faces: Array<BlockFace>) : Predicate<BlockFace?>, Iterable<BlockFace> {
+    enum class Plane(val faces: Array<BlockFace>) : Predicate<BlockFace?> {
         HORIZONTAL(arrayOf(NORTH, EAST, SOUTH, WEST)),
         VERTICAL(arrayOf(UP, DOWN));
 
@@ -243,8 +230,20 @@ enum class BlockFace(
             return face != null && face.axis.plane == this
         }
 
-        override fun iterator(): MutableIterator<BlockFace> {
-            return faces.toMutableList().iterator()
+        companion object {
+            val HORIZONTAL_FACES
+                get() = listOf(
+                    NORTH,
+                    EAST,
+                    SOUTH,
+                    WEST,
+                )
+
+            val VERTICAL_FACES
+                get() = listOf(
+                    UP,
+                    DOWN,
+                )
         }
     }
 

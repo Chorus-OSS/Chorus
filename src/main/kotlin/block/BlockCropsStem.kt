@@ -70,7 +70,7 @@ abstract class BlockCropsStem(blockstate: BlockState) : BlockCrops(blockstate), 
 
     fun growFruit(): Boolean {
         val fruitId = fruitId
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             val b = this.getSide(face)
             if (b.id == fruitId) {
                 return false

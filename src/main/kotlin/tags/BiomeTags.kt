@@ -2,8 +2,6 @@ package org.chorus_oss.chorus.tags
 
 import org.chorus_oss.chorus.registry.BiomeRegistry.BiomeDefinition
 import org.chorus_oss.chorus.registry.Registries
-import org.jetbrains.annotations.UnmodifiableView
-import java.util.*
 
 object BiomeTags {
     const val ANIMAL: String = "animal"

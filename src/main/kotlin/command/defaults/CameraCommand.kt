@@ -2,12 +2,6 @@ package org.chorus_oss.chorus.command.defaults
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.camera.data.CameraPreset.Companion.getPreset
-import org.chorus_oss.chorus.camera.data.Ease
-import org.chorus_oss.chorus.camera.data.EaseType
-import org.chorus_oss.chorus.camera.data.Time
-import org.chorus_oss.chorus.camera.instruction.impl.ClearInstruction
-import org.chorus_oss.chorus.camera.instruction.impl.FadeInstruction
-import org.chorus_oss.chorus.camera.instruction.impl.SetInstruction
 import org.chorus_oss.chorus.command.CommandSender
 import org.chorus_oss.chorus.command.data.CommandEnum
 import org.chorus_oss.chorus.command.data.CommandParamType
@@ -17,11 +11,11 @@ import org.chorus_oss.chorus.command.tree.node.FloatNode
 import org.chorus_oss.chorus.command.tree.node.PlayersNode
 import org.chorus_oss.chorus.command.tree.node.RelativeFloatNode
 import org.chorus_oss.chorus.command.utils.CommandLogger
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Locator
-import org.chorus_oss.chorus.math.Vector2f
-import org.chorus_oss.chorus.math.Vector3f
-import org.chorus_oss.chorus.network.protocol.CameraInstructionPacket
-import java.awt.Color
+import org.chorus_oss.protocol.types.camera.CameraEase
+import org.chorus_oss.protocol.types.camera.instruction.CameraFadeInstruction
+import org.chorus_oss.protocol.types.camera.instruction.CameraSetInstruction
 
 /**
  * TODO: The multilingual text of this command does not seem to work properly
@@ -100,7 +94,7 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_TYPES),
+            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
             CommandParameter.Companion.newEnum("default", true, arrayOf("default"))
         )
         commandParameters["set-ease-rot"] = arrayOf(
@@ -114,7 +108,7 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_TYPES),
+            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
             CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
             CommandParameter.Companion.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
             CommandParameter.Companion.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
@@ -130,7 +124,7 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_TYPES),
+            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
             CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
             CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
         )
@@ -145,7 +139,7 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_TYPES),
+            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
             CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
             CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
             CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
@@ -167,189 +161,192 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
             log.addNoTargetMatch().output()
             return 0
         }
-        val playerNames =
-            players.stream().map { obj: Player -> obj.getEntityName() }.reduce { a: String, b: String -> "$a $b" }
-                .orElse("")
-        val pk = CameraInstructionPacket()
+        val playerNames = players.map { it.getEntityName() }.reduceOrNull { a, b -> "$a $b" } ?: ""
+
         val senderLocation = sender.transform
+
+        var set: CameraSetInstruction? = null
+        var clear: Boolean? = null
+        var fade: CameraFadeInstruction? = null
+
         when (result.key) {
-            "clear" -> {
-                pk.setInstruction(ClearInstruction)
-            }
+            "clear" -> clear = true
 
-            "fade" -> {
-                pk.setInstruction(FadeInstruction())
-            }
+            "fade" -> fade = CameraFadeInstruction()
 
-            "fade-color" -> {
-                pk.setInstruction(
-                    FadeInstruction(
-                        Color(getFloat(list, 3), getFloat(list, 4), getFloat(list, 5))
-                    )
+            "fade-color" -> fade = CameraFadeInstruction(
+                color = org.chorus_oss.protocol.types.Color(
+                    r = (list[3].get<Float>()!! * 255f).toInt().toByte(),
+                    g = (list[4].get<Float>()!! * 255f).toInt().toByte(),
+                    b = (list[5].get<Float>()!! * 255f).toInt().toByte(),
                 )
-            }
+            )
 
-            "fade-time-color" -> {
-                pk.setInstruction(
-                    FadeInstruction(
-                        time = Time(list[3].get()!!, list[4].get()!!, list[5].get()!!),
-                        color = Color(getFloat(list, 7), getFloat(list, 8), getFloat(list, 9))
-                    )
+            "fade-time-color" -> fade = CameraFadeInstruction(
+                timeData = CameraFadeInstruction.Companion.TimeData(
+                    fadeInDuration = list[3].get()!!,
+                    waitDuration = list[4].get()!!,
+                    fadeOutDuration = list[5].get()!!
+                ),
+                color = org.chorus_oss.protocol.types.Color(
+                    r = (list[7].get<Float>()!! * 255f).toInt().toByte(),
+                    g = (list[8].get<Float>()!! * 255f).toInt().toByte(),
+                    b = (list[9].get<Float>()!! * 255f).toInt().toByte(),
                 )
-            }
+            )
 
-            "set-default" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-default" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                pk.setInstruction(SetInstruction(preset = preset))
-            }
+                },
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-rot" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-rot" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        rot = Vector2f(
-                            (list[4] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
-                            (list[5] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
-                        )
-                    )
-                )
-            }
+                },
+                rotation = org.chorus_oss.protocol.types.Vector2f(
+                    (list[4] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
+                    (list[5] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
+                ),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-pos" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-pos" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val locator = list[4].get<Locator>()
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        pos = Vector3f(locator!!.x.toFloat(), locator.y.toFloat(), locator.z.toFloat())
-                    )
-                )
-            }
+                },
+                position = org.chorus_oss.protocol.types.Vector3f(list[4].get<Locator>()!!.vector3),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-pos-rot" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-pos-rot" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val locator = list[4].get<Locator>()
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        pos = Vector3f(locator!!.x.toFloat(), locator.y.toFloat(), locator.z.toFloat()),
-                        rot = Vector2f(
-                            (list[6] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
-                            (list[7] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
-                        )
-                    )
-                )
-            }
+                },
+                position = org.chorus_oss.protocol.types.Vector3f(list[4].get<Locator>()!!.vector3),
+                rotation = org.chorus_oss.protocol.types.Vector2f(
+                    (list[6] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
+                    (list[7] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
+                ),
+                removeIgnoreStartingValuesComponent = false
+            )
 
-            "set-ease-default" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-ease-default" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val easeTime = list[4].get<Float>()!!
-                val easeType: EaseType = EaseType.valueOf((list[5].get<Any>() as String).uppercase())
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        ease = Ease(easeTime, easeType)
-                    )
-                )
-            }
+                },
+                ease = CameraEase(
+                    type = EASE_MAP.getValue(list[5].get<String>()!!),
+                    duration = list[4].get<Float>()!!
+                ),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-ease-rot" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-ease-rot" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val easeTime = list[4].get<Float>()!!
-                val easeType: EaseType = EaseType.valueOf((list[5].get<Any>() as String).uppercase())
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        ease = Ease(easeTime, easeType),
-                        rot = Vector2f(
-                            (list[7] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
-                            (list[8] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
-                        )
-                    )
-                )
-            }
+                },
+                ease = CameraEase(
+                    type = EASE_MAP.getValue(list[5].get<String>()!!),
+                    duration = list[4].get<Float>()!!
+                ),
+                rotation = org.chorus_oss.protocol.types.Vector2f(
+                    (list[7] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
+                    (list[8] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
+                ),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-ease-pos" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-ease-pos" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val easeTime = list[4].get<Float>()!!
-                val easeType: EaseType = EaseType.valueOf((list[5].get<Any>() as String).uppercase())
-                val locator = list[7].get<Locator>()
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        ease = Ease(easeTime, easeType),
-                        pos = Vector3f(locator!!.x.toFloat(), locator.y.toFloat(), locator.z.toFloat())
-                    )
-                )
-            }
+                },
+                ease = CameraEase(
+                    type = EASE_MAP.getValue(list[5].get<String>()!!),
+                    duration = list[4].get<Float>()!!
+                ),
+                position = org.chorus_oss.protocol.types.Vector3f(list[7].get<Locator>()!!.vector3),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            "set-ease-pos-rot" -> {
-                val preset = getPreset(list[2].get()!!)
-                if (preset == null) {
+            "set-ease-pos-rot" -> set = CameraSetInstruction(
+                preset = getPreset(list[2].get()!!)?.getId()?.toUInt() ?: run {
                     log.addError("commands.camera.invalid-preset").output()
                     return 0
-                }
-                val easeTime = list[4].get<Float>()!!
-                val easeType: EaseType = EaseType.valueOf((list[5].get<Any>() as String).uppercase())
-                val locator = list[7].get<Locator>()
-                pk.setInstruction(
-                    SetInstruction(
-                        preset = preset,
-                        ease = Ease(easeTime, easeType),
-                        pos = Vector3f(locator!!.x.toFloat(), locator.y.toFloat(), locator.z.toFloat()),
-                        rot = Vector2f(
-                            (list[9] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
-                            (list[10] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
-                        )
-                    )
-                )
-            }
+                },
+                ease = CameraEase(
+                    type = EASE_MAP.getValue(list[5].get<String>()!!),
+                    duration = list[4].get<Float>()!!
+                ),
+                position = org.chorus_oss.protocol.types.Vector3f(list[7].get<Locator>()!!.vector3),
+                rotation = org.chorus_oss.protocol.types.Vector2f(
+                    (list[9] as RelativeFloatNode).get(senderLocation.pitch.toFloat()),
+                    (list[10] as RelativeFloatNode).get(senderLocation.yaw.toFloat())
+                ),
+                removeIgnoreStartingValuesComponent = false,
+            )
 
-            else -> {
-                return 0
-            }
+            else -> return 0
         }
+
+        val packet = org.chorus_oss.protocol.packets.CameraInstructionPacket(
+            set = set,
+            clear = clear,
+            fade = fade,
+            target = null,
+            removeTarget = null
+        )
+
         for (player in players) {
-            player.dataPacket(pk)
+            player.sendPacket(packet)
         }
         log.addSuccess("commands.camera.success", playerNames).output()
         return 1
     }
 
     companion object {
-        val EASE_TYPES = EaseType.entries.map(EaseType::type).toTypedArray()
-
-        private fun getFloat(list: ParamList, index: Int): Float {
-            return list[index].get()!!
-        }
+        val EASE_MAP = mapOf(
+            "linear" to CameraEase.Companion.Type.Linear,
+            "spring" to CameraEase.Companion.Type.Spring,
+            "in_quad" to CameraEase.Companion.Type.InQuad,
+            "out_quad" to CameraEase.Companion.Type.OutQuad,
+            "in_out_quad" to CameraEase.Companion.Type.InOutQuad,
+            "in_cubic" to CameraEase.Companion.Type.InCubic,
+            "out_cubic" to CameraEase.Companion.Type.OutCubic,
+            "in_out_cubic" to CameraEase.Companion.Type.InOutCubic,
+            "in_quart" to CameraEase.Companion.Type.InQuart,
+            "out_quart" to CameraEase.Companion.Type.OutQuart,
+            "in_out_quart" to CameraEase.Companion.Type.InOutQuart,
+            "in_quint" to CameraEase.Companion.Type.InQuint,
+            "out_quint" to CameraEase.Companion.Type.OutQuint,
+            "in_out_quint" to CameraEase.Companion.Type.InOutQuint,
+            "in_sine" to CameraEase.Companion.Type.InSine,
+            "out_sine" to CameraEase.Companion.Type.OutSine,
+            "in_out_sine" to CameraEase.Companion.Type.InOutSine,
+            "in_expo" to CameraEase.Companion.Type.InExpo,
+            "out_expo" to CameraEase.Companion.Type.OutExpo,
+            "in_out_expo" to CameraEase.Companion.Type.InOutExpo,
+            "in_circ" to CameraEase.Companion.Type.InCirc,
+            "out_circ" to CameraEase.Companion.Type.OutCirc,
+            "in_out_circ" to CameraEase.Companion.Type.InOutCirc,
+            "in_bounce" to CameraEase.Companion.Type.InBounce,
+            "out_bounce" to CameraEase.Companion.Type.OutBounce,
+            "in_out_bounce" to CameraEase.Companion.Type.InOutBounce,
+            "in_back" to CameraEase.Companion.Type.InBack,
+            "out_back" to CameraEase.Companion.Type.OutBack,
+            "in_out_back" to CameraEase.Companion.Type.InOutBack,
+            "in_elastic" to CameraEase.Companion.Type.InElastic,
+            "out_elastic" to CameraEase.Companion.Type.OutElastic,
+            "in_out_elastic" to CameraEase.Companion.Type.InOutElastic,
+        )
     }
 }

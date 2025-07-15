@@ -46,7 +46,7 @@ class Watchdog(private val server: Server, private val time: Long) : Thread() {
                         "--------- Server stopped responding --------- (" + Math.round(diff / 1000.0) + "s)"
                     ).append('\n')
                         .append("Please report this to Chorus:").append('\n')
-                        .append(" - https://github.com/Enderverse-Creations/Chorus/issues/new").append('\n')
+                        .append(" - https://github.com/Chorus-OSS/Chorus/issues/new").append('\n')
                         .append("---------------- Main thread ----------------").append('\n')
 
                     dumpThread(

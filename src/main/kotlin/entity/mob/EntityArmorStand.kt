@@ -11,6 +11,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.player.PlayerChangeArmorStandEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.BaseInventory
 import org.chorus_oss.chorus.inventory.EntityArmorInventory
 import org.chorus_oss.chorus.item.Item
@@ -24,8 +25,9 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.SetEntityDataPacket
-import java.util.function.Consumer
+import org.chorus_oss.protocol.packets.SetActorDataPacket
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import kotlin.math.abs
 
 class EntityArmorStand(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), EntityInteractable, EntityNameable {
@@ -234,29 +236,28 @@ class EntityArmorStand(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt)
     }
 
     private fun getPose(): Int {
-        return entityDataMap.getType<Int>(EntityDataTypes.ARMOR_STAND_POSE_INDEX)
+        return entityDataMap.getType(EntityDataTypes.ARMOR_STAND_POSE_INDEX)
     }
 
     private fun setPose(pose: Int) {
         entityDataMap.put(EntityDataTypes.ARMOR_STAND_POSE_INDEX, pose)
-        val setEntityDataPacket: SetEntityDataPacket = SetEntityDataPacket()
-        setEntityDataPacket.eid = this.getRuntimeID()
-        setEntityDataPacket.entityData = this.getEntityDataMap()
-        Server.instance.onlinePlayers.values.forEach(Consumer { all: Player ->
-            all.dataPacket(
-                setEntityDataPacket
-            )
-        })
+        val setEntityDataPacket = SetActorDataPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            actorDataMap = ActorDataMap(this.getEntityDataMap()),
+            actorProperties = ActorProperties(emptyList(), emptyList()),
+            tick = 0uL
+        )
+        Server.instance.onlinePlayers.values.forEach { it.sendPacket(setEntityDataPacket) }
     }
 
     override fun saveNBT() {
         super.saveNBT()
 
-        val Pose: CompoundTag = CompoundTag()
-        Pose.putInt(TAG_POSE_INDEX, this.getPose())
-        Pose.putInt(TAG_LAST_SIGNAL, 0)
+        val pose = CompoundTag()
+        pose.putInt(TAG_POSE_INDEX, this.getPose())
+        pose.putInt(TAG_LAST_SIGNAL, 0)
 
-        namedTag!!.putCompound(TAG_POSE, Pose)
+        namedTag.putCompound(TAG_POSE, pose)
     }
 
     override fun fall(fallDistance: Float) {

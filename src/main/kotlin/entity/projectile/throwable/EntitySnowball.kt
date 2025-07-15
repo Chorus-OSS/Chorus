@@ -9,7 +9,7 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.level.particle.GenericParticle
 import org.chorus_oss.chorus.level.particle.Particle
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.chorus.network.DataPacket
 import java.util.concurrent.ThreadLocalRandom
 
 

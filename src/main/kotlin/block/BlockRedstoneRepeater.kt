@@ -42,7 +42,7 @@ abstract class BlockRedstoneRepeater(blockState: BlockState) : BlockRedstoneDiod
         fz: Double,
         player: Player?
     ): Boolean {
-        if (!isSupportValid(down())) {
+        if (!isSupportValid(block.down())) {
             return false
         }
         val blockFace = if (player != null) fromHorizontalIndex(

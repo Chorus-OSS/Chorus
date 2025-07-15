@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.entity.data.EntityFlag
-import org.chorus_oss.chorus.entity.projectile.EntityProjectile
 import org.chorus_oss.chorus.entity.weather.EntityLightningBolt
 import org.chorus_oss.chorus.event.entity.EntityDamageByChildEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent

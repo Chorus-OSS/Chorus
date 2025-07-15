@@ -35,20 +35,20 @@ class EntitySilverfish(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, 
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.4f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.4f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     4,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_GOLEM, 0.3f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_GOLEM),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_GOLEM, 0.3f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_GOLEM),
                     3,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.4f, 40, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.4f, 40, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     2,
                     1
                 ),
@@ -56,7 +56,7 @@ class EntitySilverfish(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, 
             ),
             setOf<ISensor>(
                 NearestPlayerSensor(40.0, 0.0, 20),
-                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.Companion.NEAREST_GOLEM, 42.0, 0.0)
+                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.NEAREST_GOLEM, 42.0, 0.0)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),

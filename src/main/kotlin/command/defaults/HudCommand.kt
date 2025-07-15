@@ -7,9 +7,6 @@ import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.tree.node.PlayersNode
 import org.chorus_oss.chorus.command.utils.CommandLogger
-import org.chorus_oss.chorus.network.protocol.SetHudPacket
-import org.chorus_oss.chorus.network.protocol.types.hud.HudElement
-import org.chorus_oss.chorus.network.protocol.types.hud.HudVisibility
 
 class HudCommand(name: String) : VanillaCommand(name, "commands.hud.description", "%commands.hud.usage") {
     init {
@@ -56,23 +53,23 @@ class HudCommand(name: String) : VanillaCommand(name, "commands.hud.description"
         }
 
         val visibility = when (list.getResult<Any>(1) as String) {
-            "hide" -> HudVisibility.HIDE
-            "reset" -> HudVisibility.RESET
+            "hide" -> org.chorus_oss.protocol.types.hud.HudVisibility.Hide
+            "reset" -> org.chorus_oss.protocol.types.hud.HudVisibility.Reset
             else -> null
         }
 
         val element = when (list.getResult<Any>(2) as String) {
-            "armor" -> HudElement.ARMOR
-            "air_bubbles_bar" -> HudElement.AIR_BUBBLES_BAR
-            "crosshair" -> HudElement.CROSSHAIR
-            "food_bar" -> HudElement.FOOD_BAR
-            "health" -> HudElement.HEALTH
-            "hotbar" -> HudElement.HOTBAR
-            "paper_doll" -> HudElement.PAPER_DOLL
-            "tool_tips" -> HudElement.TOOL_TIPS
-            "progress_bar" -> HudElement.PROGRESS_BAR
-            "touch_controls" -> HudElement.TOUCH_CONTROLS
-            "vehicle_health" -> HudElement.VEHICLE_HEALTH
+            "armor" -> org.chorus_oss.protocol.types.hud.HudElement.Armor
+            "air_bubbles_bar" -> org.chorus_oss.protocol.types.hud.HudElement.AirBubblesBar
+            "crosshair" -> org.chorus_oss.protocol.types.hud.HudElement.Crosshair
+            "food_bar" -> org.chorus_oss.protocol.types.hud.HudElement.Hunger
+            "health" -> org.chorus_oss.protocol.types.hud.HudElement.Health
+            "hotbar" -> org.chorus_oss.protocol.types.hud.HudElement.Hotbar
+            "paper_doll" -> org.chorus_oss.protocol.types.hud.HudElement.PaperDoll
+            "tool_tips" -> org.chorus_oss.protocol.types.hud.HudElement.ToolTips
+            "progress_bar" -> org.chorus_oss.protocol.types.hud.HudElement.ProgressBar
+            "touch_controls" -> org.chorus_oss.protocol.types.hud.HudElement.TouchControls
+            "vehicle_health" -> org.chorus_oss.protocol.types.hud.HudElement.VehicleHealth
             else -> null
         }
 
@@ -82,10 +79,11 @@ class HudCommand(name: String) : VanillaCommand(name, "commands.hud.description"
 
 
         for (player in players) {
-            val packet = SetHudPacket()
-            packet.elements.add(element)
-            packet.visibility = visibility
-            player.dataPacket(packet)
+            val packet = org.chorus_oss.protocol.packets.SetHudPacket(
+                elements = listOf(element),
+                visibility = visibility,
+            )
+            player.sendPacket(packet)
 
             return 1
         }

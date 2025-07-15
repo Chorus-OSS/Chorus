@@ -68,7 +68,7 @@ abstract class BlockDoublePlant(blockstate: BlockState) : BlockFlowable(blocksta
     ): Boolean {
         val up = up()
 
-        if (up.isAir && isSupportValid(down())) {
+        if (up.isAir && isSupportValid(block.down())) {
             isTopHalf = false
             level.setBlock(
                 block.position,

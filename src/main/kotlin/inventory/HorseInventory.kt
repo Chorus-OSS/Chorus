@@ -1,21 +1,22 @@
 package org.chorus_oss.chorus.inventory
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.data.EntityFlag
 import org.chorus_oss.chorus.entity.mob.animal.EntityHorse
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.ContainerClosePacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.MobArmorEquipmentPacket
-import org.chorus_oss.chorus.network.protocol.UpdateEquipmentPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
-import java.io.IOException
+import org.chorus_oss.nbt.TagSerialization
+import org.chorus_oss.protocol.types.ContainerType
+import org.chorus_oss.protocol.types.item.ItemStack
 
 class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.HORSE, 2) {
     var saddle: Item
@@ -55,11 +56,13 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
             if (!horseArmor.isNothing) {
                 holder.level!!.addSound(holder.vector3, Sound.MOB_HORSE_ARMOR)
             }
-            val mobArmorEquipmentPacket = MobArmorEquipmentPacket()
-            mobArmorEquipmentPacket.eid = (holder as EntityHorse).getUniqueID()
-            mobArmorEquipmentPacket.slots = arrayOf(
-                Item.AIR,
-                horseArmor, Item.AIR, Item.AIR
+            val mobArmorEquipmentPacket = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+                entityRuntimeID = (holder as EntityHorse).getRuntimeID().toULong(),
+                head = ItemStack(Item.AIR),
+                torso = ItemStack(horseArmor),
+                legs = ItemStack(Item.AIR),
+                feet = ItemStack(Item.AIR),
+                body = ItemStack(Item.AIR),
             )
             Server.broadcastPacket(this.viewers, mobArmorEquipmentPacket)
         }
@@ -67,10 +70,10 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
 
     override fun onClose(who: Player) {
         val containerId = who.getWindowId(this)
-        who.dataPacket(
-            ContainerClosePacket(
-                containerID = containerId,
-                containerType = type,
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerClosePacket(
+                containerID = containerId.toByte(),
+                containerType = ContainerType(type),
                 serverInitiatedClose = who.closingWindowId != containerId
             )
         )
@@ -79,11 +82,11 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
 
     override fun onOpen(who: Player) {
         super.onOpen(who)
-        who.dataPacket(createUpdateEquipmentPacket(who))
+        who.sendPacket(createUpdateEquipmentPacket(who))
         sendContents(this.viewers)
     }
 
-    protected fun createUpdateEquipmentPacket(who: Player): UpdateEquipmentPacket {
+    protected fun createUpdateEquipmentPacket(who: Player): org.chorus_oss.protocol.packets.UpdateEquipmentPacket {
         val slots = ListTag<CompoundTag>()
         val saddle = saddle
         val horseArmor = horseArmor
@@ -104,15 +107,19 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
             )
         } else slots.add(slot1.copy())
         val nbt = CompoundTag().putList("slots", slots)
-        val updateEquipmentPacket = UpdateEquipmentPacket()
-        updateEquipmentPacket.windowId = who.getWindowId(this)
-        updateEquipmentPacket.windowType = type.networkType
-        updateEquipmentPacket.eid = (holder as EntityHorse).getUniqueID()
-        try {
-            updateEquipmentPacket.namedtag = NBTIO.writeNetwork(nbt)
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
+        val updateEquipmentPacket = org.chorus_oss.protocol.packets.UpdateEquipmentPacket(
+            windowID = who.getWindowId(this).toByte(),
+            windowType = type.networkType.toByte(),
+            size = 0,
+            entityUniqueID = (holder as EntityHorse).getUniqueID(),
+            serializedInventoryData = Buffer().apply {
+                org.chorus_oss.nbt.Tag.serialize(
+                    org.chorus_oss.nbt.tags.CompoundTag(nbt),
+                    this,
+                    TagSerialization.NetLE
+                )
+            }.readByteString()
+        )
         return updateEquipmentPacket
     }
 

@@ -34,7 +34,7 @@ class BlockShortGrass(blockState: BlockState = properties.defaultState) : BlockF
     ): Boolean {
         if (level.getBlock(this.position).id == BlockID.SHORT_GRASS) return false
 
-        if (BlockSweetBerryBush.Companion.isSupportValid(down())) {
+        if (BlockSweetBerryBush.Companion.isSupportValid(block.down())) {
             level.setBlock(block.position, this, true)
             return true
         }

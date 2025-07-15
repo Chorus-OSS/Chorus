@@ -1,8 +1,6 @@
 package org.chorus_oss.chorus.entity.data
 
-import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockAir
-import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.BlockState
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3f

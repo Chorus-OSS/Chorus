@@ -1,5 +1,8 @@
 package org.chorus_oss.chorus.network.protocol
 
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketDecoder
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.network.protocol.types.ActorUniqueID
 import org.chorus_oss.chorus.utils.Utils
@@ -26,11 +29,7 @@ open class LevelSoundEventPacket : DataPacket() {
     }
 
     override fun pid(): Int {
-        return ProtocolInfo.Companion.LEVEL_SOUND_EVENT_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
+        return ProtocolInfo.LEVEL_SOUND_EVENT_PACKET
     }
 
     companion object : PacketDecoder<LevelSoundEventPacket> {

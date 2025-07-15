@@ -128,7 +128,7 @@ abstract class BlockPistonBase(blockstate: BlockState) : BlockTransparent(blocks
             this.updateAroundRedstoneTorches(powered)
             if (arm.state % 2 == 0 && arm.powered != powered && checkState(powered)) {
                 arm.powered = powered
-                if (arm.chunk != null) arm.chunk.setChanged()
+                arm.chunk.setChanged()
                 if (powered && !isExtended)  //推出未成功,下一个计划刻再次自检
                 //TODO: 这里可以记录阻挡的方块并在阻挡因素移除后同步更新到活塞，而不是使用计划刻
                     level.scheduleUpdate(this, 2)

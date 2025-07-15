@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.compression
 
-import org.chorus_oss.chorus.utils.ThreadCache
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.zip.DataFormatException
 import java.util.zip.Deflater
@@ -12,9 +12,8 @@ class ZlibOriginal : ZlibProvider {
         val deflater = Deflater(level, raw)
         deflater.setInput(data)
         deflater.finish()
-        val bos = ThreadCache.fbaos.get()!!
-        bos.reset()
         val buf = ByteArray(1024)
+        val bos = ByteArrayOutputStream(1024)
         try {
             while (!deflater.finished()) {
                 val i = deflater.deflate(buf)
@@ -31,10 +30,8 @@ class ZlibOriginal : ZlibProvider {
         val inflater = Inflater(raw)
         inflater.setInput(data)
         inflater.finished()
-        val bos = ThreadCache.fbaos.get()!!
-        bos.reset()
-
         val buffer = ByteArray(1024)
+        val bos = ByteArrayOutputStream(1024)
         try {
             var length = 0
             while (!inflater.finished()) {
@@ -48,6 +45,8 @@ class ZlibOriginal : ZlibProvider {
             return bos.toByteArray()
         } catch (e: DataFormatException) {
             throw IOException("Unable to inflate zlib stream", e)
+        } finally {
+            inflater.end()
         }
     }
 }

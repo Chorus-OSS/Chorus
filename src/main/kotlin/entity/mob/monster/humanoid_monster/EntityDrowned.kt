@@ -49,8 +49,8 @@ class EntityDrowned(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt
                 Behavior(
                     NearestBlockIncementExecutor(),
                     { entity: EntityMob? ->
-                        !memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_BLOCK) && memoryStorage.get<Block>(
-                            CoreMemoryTypes.Companion.NEAREST_BLOCK
+                        !memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_BLOCK) && memoryStorage.get<Block>(
+                            CoreMemoryTypes.NEAREST_BLOCK
                         ) is BlockTurtleEgg
                     }, 1, 1
                 )
@@ -68,74 +68,74 @@ class EntityDrowned(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt
                 ),
                 Behavior(
                     JumpExecutor(), all(
-                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_BLOCK) },
+                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_BLOCK) },
                         IBehaviorEvaluator { entity: EntityMob ->
                             entity.getCollisionBlocks()!!.stream().anyMatch { block: Block? -> block is BlockTurtleEgg }
                         }), 9, 1, 10
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_BLOCK, 0.3f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_BLOCK, 0.3f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK),
                     8,
                     1
                 ),
                 Behavior(
-                    TridentThrowExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 15, true, 30, 20), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET, 32.0, 3.0),
+                    TridentThrowExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 15, true, 30, 20), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.ATTACK_TARGET, 32.0, 3.0),
                         IBehaviorEvaluator { entity: EntityMob? -> itemInHand.id == ItemID.TRIDENT }
                     ), 7, 1),
                 Behavior(
-                    TridentThrowExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 15, false, 30, 20), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 32.0, 3.0),
+                    TridentThrowExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 15, false, 30, 20), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 32.0, 3.0),
                         IBehaviorEvaluator { itemInHand.id == ItemID.TRIDENT },
                         any(
                             IBehaviorEvaluator { level!!.isNight },
                             IBehaviorEvaluator {
-                                memoryStorage[CoreMemoryTypes.Companion.NEAREST_PLAYER]?.isInsideOfWater() ?: false
+                                memoryStorage[CoreMemoryTypes.NEAREST_PLAYER]?.isInsideOfWater() ?: false
                             }
                         )
                     ), 6, 1),
                 Behavior(
                     TridentThrowExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         15,
                         false,
                         30,
                         20
                     ), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 32.0, 3.0),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 32.0, 3.0),
                         IBehaviorEvaluator { itemInHand.id == ItemID.TRIDENT }
                     ), 5, 1),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     4,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 40, false, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 40, false, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                         any(
                             IBehaviorEvaluator {
                                 level!!.isNight
                             },
                             IBehaviorEvaluator {
-                                memoryStorage[CoreMemoryTypes.Companion.NEAREST_PLAYER]?.isInsideOfWater() ?: false
+                                memoryStorage[CoreMemoryTypes.NEAREST_PLAYER]?.isInsideOfWater() ?: false
                             }
                         )
                     ), 3, 1),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         40,
                         true,
                         30
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, false, 10), none(), 1, 1)
             ),
@@ -143,13 +143,13 @@ class EntityDrowned(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt
                 NearestPlayerSensor(64.0, 0.0, 0),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
                         )
                     }),
-                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 11, 15, 10)
+                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.NEAREST_BLOCK, 11, 15, 10)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
@@ -159,9 +159,9 @@ class EntityDrowned(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt
 
     override fun getFloatingForceFactor(): Double {
         if (any(
-                EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK)
+                EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK)
             ).evaluate(this)
         ) {
             if (hasWaterAt(this.getFloatingHeight())) {
@@ -176,7 +176,7 @@ class EntityDrowned(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt
         this.maxHealth = 20
         this.diffHandDamage = floatArrayOf(2.5f, 3f, 4.5f)
         super.initEntity()
-        memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.ENABLE_DIVE_FORCE, true)
+        memoryStorage.set<Boolean>(CoreMemoryTypes.ENABLE_DIVE_FORCE, true)
         val random = Utils.rand(0, 10000)
         if (random < 85) {
             setItemInHand(Item.get(ItemID.FISHING_ROD))

@@ -14,6 +14,11 @@ import org.chorus_oss.chorus.event.player.PlayerCreationEvent
 import org.chorus_oss.chorus.event.server.DataPacketDecodeEvent
 import org.chorus_oss.chorus.event.server.DataPacketReceiveEvent
 import org.chorus_oss.chorus.event.server.DataPacketSendEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketHandler
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.netty.BedrockBatchWrapper
 import org.chorus_oss.chorus.network.connection.netty.BedrockPacketWrapper
 import org.chorus_oss.chorus.network.connection.netty.codec.packet.BedrockPacketCodec
@@ -21,13 +26,16 @@ import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.network.process.DataPacketManager
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.process.handler.*
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.AvailableCommandsPacket
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.plugin.InternalPlugin
+import org.chorus_oss.chorus.registry.CreativeItemRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.DisconnectFailReason
 import org.jetbrains.annotations.ApiStatus
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -76,11 +84,11 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         log.debug("creating session {}", peer.socketAddress.toString())
         val cfg = StateMachineConfig<SessionState, SessionState>()
 
-        cfg.configure(SessionState.START)
+        cfg.configure(SessionState.Start)
             .onExit(Action { this.onSessionStartSuccess() })
-            .permit(SessionState.LOGIN, SessionState.LOGIN)
+            .permit(SessionState.Login, SessionState.Login)
 
-        cfg.configure(SessionState.LOGIN).onEntry(Action {
+        cfg.configure(SessionState.Login).onEntry(Action {
             this.packetHandler = (
                     LoginHandler(
                         this
@@ -90,25 +98,25 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         })
             .onExit(Action { this.onServerLoginSuccess() })
             .permitIf(
-                SessionState.ENCRYPTION, SessionState.ENCRYPTION
+                SessionState.Encryption, SessionState.Encryption
             ) { Server.instance.enabledNetworkEncryption }
-            .permit(SessionState.RESOURCE_PACK, SessionState.RESOURCE_PACK)
+            .permit(SessionState.ResourcePack, SessionState.ResourcePack)
 
-        cfg.configure(SessionState.ENCRYPTION)
+        cfg.configure(SessionState.Encryption)
             .onEntry(Action {
                 log.debug("Player {} enter ENCRYPTION stage", peer.socketAddress.toString())
                 this.packetHandler = (HandshakePacketHandler(this))
             })
-            .permit(SessionState.RESOURCE_PACK, SessionState.RESOURCE_PACK)
+            .permit(SessionState.ResourcePack, SessionState.ResourcePack)
 
-        cfg.configure(SessionState.RESOURCE_PACK)
+        cfg.configure(SessionState.ResourcePack)
             .onEntry(Action {
                 log.debug("Player {} enter RESOURCE_PACK stage", peer.socketAddress.toString())
                 this.packetHandler = (ResourcePackHandler(this))
             })
-            .permit(SessionState.PRE_SPAWN, SessionState.PRE_SPAWN)
+            .permit(SessionState.PreSpawn, SessionState.PreSpawn)
 
-        cfg.configure(SessionState.PRE_SPAWN)
+        cfg.configure(SessionState.PreSpawn)
             .onEntry(Action {
                 // now the main thread owns the session
                 this.setNettyThreadOwned(false)
@@ -125,21 +133,21 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
                 this.packetHandler = (SpawnResponseHandler(this))
                 // The reason why teleport player to their position is for gracefully client-side spawn,
                 // although we need some hacks, It is definitely a fairly worthy trade.
-                player!!.setImmobile(true) // TODO: HACK: fix client-side falling pre-spawn
+                player.setImmobile(true) // TODO: HACK: fix client-side falling pre-spawn
             })
             .onExit(Action { this.onClientSpawned() })
-            .permit(SessionState.IN_GAME, SessionState.IN_GAME)
+            .permit(SessionState.InGame, SessionState.InGame)
 
-        cfg.configure(SessionState.IN_GAME)
+        cfg.configure(SessionState.InGame)
             .onEntry(Action { this.packetHandler = (InGamePacketHandler(this)) })
             .onExit(Action { this.onServerDeath() })
-            .permit(SessionState.DEATH, SessionState.DEATH)
+            .permit(SessionState.Death, SessionState.Death)
 
-        cfg.configure(SessionState.DEATH) //.onEntry(()->this.setPacketHandler(new DeathHandler()))
+        cfg.configure(SessionState.Death) //.onEntry(()->this.setPacketHandler(new DeathHandler()))
             .onExit(Action { this.onClientRespawn() })
-            .permit(SessionState.IN_GAME, SessionState.IN_GAME)
+            .permit(SessionState.InGame, SessionState.InGame)
 
-        machine = StateMachine(SessionState.START, cfg)
+        machine = StateMachine(SessionState.Start, cfg)
         this.packetHandler = (SessionStartHandler(this))
     }
 
@@ -175,9 +183,14 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         this.logOutbound(packet)
     }
 
-    fun sendPlayStatus(status: Int, immediate: Boolean) {
-        val pk = PlayStatusPacket()
-        pk.status = status
+    fun sendPacket(packet: Packet) {
+        this.sendPacket(MigrationPacket(packet))
+    }
+
+    fun sendPlayStatus(status: org.chorus_oss.protocol.packets.PlayStatusPacket.Companion.Status, immediate: Boolean) {
+        val pk = org.chorus_oss.protocol.packets.PlayStatusPacket(
+            status = status
+        )
         if (immediate) {
             this.sendPacketImmediately(pk)
         } else {
@@ -216,6 +229,10 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         this.logOutbound(packet)
     }
 
+    fun sendPacketImmediately(packet: Packet) {
+        sendPacketImmediately(MigrationPacket(packet))
+    }
+
     fun sendPacketSync(packet: DataPacket) {
         if (isDisconnected) {
             return
@@ -229,11 +246,15 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         this.logOutbound(packet)
     }
 
-    fun sendNetworkSettingsPacket(pk: NetworkSettingsPacket) {
+    fun sendPacketSync(packet: Packet) {
+        sendPacketSync(MigrationPacket(packet))
+    }
+
+    fun sendNetworkSettingsPacket(pk: org.chorus_oss.protocol.packets.NetworkSettingsPacket) {
         val alloc = peer.channel.alloc()
         val buf1 = alloc.buffer(16)
         val header = alloc.ioBuffer(5)
-        val msg = BedrockPacketWrapper(0, subClientId, 0, pk, null)
+        val msg = BedrockPacketWrapper(0, subClientId, 0, MigrationPacket(pk), null)
         try {
             val bedrockPacketCodec = peer.channel.pipeline().get(BedrockPacketCodec.NAME) as BedrockPacketCodec
             val packet = msg.packet
@@ -299,12 +320,12 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     protected fun logOutbound(packet: DataPacket) {
-        if (Server.instance.isLoggedPacket(packet.javaClass)) {
+        if (Server.instance.isLoggedPacket(packet)) {
             log.info(
                 "Outbound {}({}): {}",
                 socketAddress, this.subClientId, packet
             )
-        } else if (log.isTraceEnabled && !Server.instance.isIgnoredPacket(packet.javaClass)) {
+        } else if (log.isTraceEnabled && !Server.instance.isIgnoredPacket(packet)) {
             log.trace(
                 "Outbound {}({}): {}",
                 socketAddress, this.subClientId, packet
@@ -313,12 +334,12 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     protected fun logInbound(packet: DataPacket) {
-        if (Server.instance.isLoggedPacket(packet.javaClass)) {
+        if (Server.instance.isLoggedPacket(packet)) {
             log.info(
                 "Inbound {}({}): {}",
                 socketAddress, this.subClientId, packet
             )
-        } else if (log.isTraceEnabled && !Server.instance.isIgnoredPacket(packet.javaClass)) {
+        } else if (log.isTraceEnabled && !Server.instance.isIgnoredPacket(packet)) {
             log.trace(
                 "Inbound {}({}): {}",
                 socketAddress, this.subClientId, packet
@@ -348,8 +369,12 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
         //when a player haven't login,it only hold a BedrockSession,and Player Instance is null
         if (reason != null) {
-            val packet = DisconnectPacket()
-            packet.message = reason
+            val packet = org.chorus_oss.protocol.packets.DisconnectPacket(
+                reason = DisconnectFailReason.Unknown,
+                hideDisconnectionScreen = false,
+                message = reason,
+                filteredMessage = reason,
+            )
             this.sendPacketImmediately(packet)
         }
 
@@ -404,7 +429,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     fun notifyTerrainReady() {
         log.debug("Sending spawn notification, waiting for spawn response")
         val state = machine.state
-        check(state == SessionState.PRE_SPAWN) { "attempt to notifyTerrainReady when the state is " + state.name }
+        check(state == SessionState.PreSpawn) { "attempt to notifyTerrainReady when the state is " + state.name }
         player!!.doFirstSpawn()
     }
 
@@ -429,7 +454,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
     private fun onServerLoginSuccess() {
         log.debug("Login completed")
-        this.sendPlayStatus(PlayStatusPacket.LOGIN_SUCCESS, false)
+        this.sendPlayStatus(org.chorus_oss.protocol.packets.PlayStatusPacket.Companion.Status.LoginSuccess, false)
     }
 
     private fun onClientSpawned() {
@@ -460,10 +485,10 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     fun tick() {
-        var packet: DataPacket
         val c = consumer.get()
         if (c != null) {
-            while ((inbound.poll().also { packet = it }) != null) {
+            while (true) {
+                val packet = inbound.poll() ?: break
                 c.accept(packet)
             }
         } else {
@@ -501,8 +526,10 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     fun syncCreativeContent() {
-        val pk = CreativeContentPacket()
-
+        val pk = org.chorus_oss.protocol.packets.CreativeContentPacket(
+            groups = CreativeItemRegistry.creativeGroups,
+            items = CreativeItemRegistry.creativeItemData.map(org.chorus_oss.protocol.types.creative.CreativeItem::invoke)
+        )
         this.sendPacket(pk)
     }
 
@@ -519,8 +546,9 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     fun setEnableClientCommand(enable: Boolean) {
-        val pk = SetCommandsEnabledPacket()
-        pk.enabled = enable
+        val pk = org.chorus_oss.protocol.packets.SetCommandsEnabledPacket(
+            enabled = enable
+        )
         this.sendPacket(pk)
         if (enable) {
             this.syncAvailableCommands()

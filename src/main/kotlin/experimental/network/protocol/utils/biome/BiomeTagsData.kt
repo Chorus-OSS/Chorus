@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ShortTag
 import org.chorus_oss.protocol.types.biome.BiomeTagsData
 
-fun BiomeTagsData.Companion.fromNBT(nbt: CompoundTag): BiomeTagsData {
+operator fun BiomeTagsData.Companion.invoke(nbt: CompoundTag): BiomeTagsData {
     return BiomeTagsData(
         tags = nbt.getList("tags", ShortTag::class.java).all.map { it.data }
     )

@@ -52,9 +52,9 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
                         PassByTimeEvaluator(
-                            CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME,
+                            CoreMemoryTypes.LAST_IN_LOVE_TIME,
                             6000,
                             Int.MAX_VALUE
                         ),  //只有拥有主人的狼才能交配
@@ -68,61 +68,61 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                         val storage = memoryStorage
                         val hasOwner = hasOwner()
                         var attackTarget: Entity? = null
-                        val attackEvent = storage.get<EntityDamageEvent>(CoreMemoryTypes.Companion.BE_ATTACKED_EVENT)
+                        val attackEvent = storage.get<EntityDamageEvent>(CoreMemoryTypes.BE_ATTACKED_EVENT)
                         var attackByEntityEvent: EntityDamageByEntityEvent? = null
                         if (attackEvent is EntityDamageByEntityEvent) attackByEntityEvent = attackEvent
                         val validAttacker =
                             attackByEntityEvent != null && attackByEntityEvent.damager.isAlive() && (attackByEntityEvent.damager !is Player || (attackByEntityEvent.damager as Player).isSurvival)
                         if (hasOwner) {
                             //已驯服
-                            if (storage.notEmpty(CoreMemoryTypes.Companion.ENTITY_ATTACKING_OWNER) && storage.get<Entity>(
-                                    CoreMemoryTypes.Companion.ENTITY_ATTACKING_OWNER
+                            if (storage.notEmpty(CoreMemoryTypes.ENTITY_ATTACKING_OWNER) && storage.get<Entity>(
+                                    CoreMemoryTypes.ENTITY_ATTACKING_OWNER
                                 )!!
-                                    .isAlive() && (storage.get<Entity>(CoreMemoryTypes.Companion.ENTITY_ATTACKING_OWNER) != this)
+                                    .isAlive() && (storage.get<Entity>(CoreMemoryTypes.ENTITY_ATTACKING_OWNER) != this)
                             ) {
                                 //攻击攻击主人的生物(排除自己)
-                                attackTarget = storage.get<Entity>(CoreMemoryTypes.Companion.ENTITY_ATTACKING_OWNER)
-                                storage.clear(CoreMemoryTypes.Companion.ENTITY_ATTACKING_OWNER)
-                            } else if (storage.notEmpty(CoreMemoryTypes.Companion.ENTITY_ATTACKED_BY_OWNER) && storage.get<Entity>(
-                                    CoreMemoryTypes.Companion.ENTITY_ATTACKED_BY_OWNER
+                                attackTarget = storage.get<Entity>(CoreMemoryTypes.ENTITY_ATTACKING_OWNER)
+                                storage.clear(CoreMemoryTypes.ENTITY_ATTACKING_OWNER)
+                            } else if (storage.notEmpty(CoreMemoryTypes.ENTITY_ATTACKED_BY_OWNER) && storage.get<Entity>(
+                                    CoreMemoryTypes.ENTITY_ATTACKED_BY_OWNER
                                 )!!
-                                    .isAlive() && (storage.get<Entity>(CoreMemoryTypes.Companion.ENTITY_ATTACKED_BY_OWNER) != this)
+                                    .isAlive() && (storage.get<Entity>(CoreMemoryTypes.ENTITY_ATTACKED_BY_OWNER) != this)
                             ) {
                                 //攻击主人攻击的生物
-                                attackTarget = storage.get<Entity>(CoreMemoryTypes.Companion.ENTITY_ATTACKED_BY_OWNER)
-                                storage.clear(CoreMemoryTypes.Companion.ENTITY_ATTACKED_BY_OWNER)
+                                attackTarget = storage.get<Entity>(CoreMemoryTypes.ENTITY_ATTACKED_BY_OWNER)
+                                storage.clear(CoreMemoryTypes.ENTITY_ATTACKED_BY_OWNER)
                             } else if (attackByEntityEvent != null && validAttacker && (attackByEntityEvent.damager != owner)) {
                                 //攻击攻击自己的生物（主人例外）
                                 attackTarget = attackByEntityEvent.damager
-                                storage.clear(CoreMemoryTypes.Companion.BE_ATTACKED_EVENT)
-                            } else if (storage.notEmpty(CoreMemoryTypes.Companion.NEAREST_SKELETON) && storage.get<Entity>(
-                                    CoreMemoryTypes.Companion.NEAREST_SKELETON
+                                storage.clear(CoreMemoryTypes.BE_ATTACKED_EVENT)
+                            } else if (storage.notEmpty(CoreMemoryTypes.NEAREST_SKELETON) && storage.get<Entity>(
+                                    CoreMemoryTypes.NEAREST_SKELETON
                                 )!!.isAlive()
                             ) {
                                 //攻击最近的骷髅
-                                attackTarget = storage.get<Entity>(CoreMemoryTypes.Companion.NEAREST_SKELETON)
-                                storage.clear(CoreMemoryTypes.Companion.NEAREST_SKELETON)
+                                attackTarget = storage.get<Entity>(CoreMemoryTypes.NEAREST_SKELETON)
+                                storage.clear(CoreMemoryTypes.NEAREST_SKELETON)
                             }
                         } else {
                             //未驯服
                             if (validAttacker) {
                                 //攻击攻击自己的生物
                                 attackTarget = attackByEntityEvent!!.damager
-                                storage.clear(CoreMemoryTypes.Companion.BE_ATTACKED_EVENT)
-                            } else if (storage.notEmpty(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET) && storage.get<Entity>(
-                                    CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET
+                                storage.clear(CoreMemoryTypes.BE_ATTACKED_EVENT)
+                            } else if (storage.notEmpty(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET) && storage.get<Entity>(
+                                    CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET
                                 )!!.isAlive()
                             ) {
                                 //攻击最近的合适生物
                                 attackTarget =
-                                    storage.get<Entity>(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET)
-                                storage.clear(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET)
+                                    storage.get<Entity>(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET)
+                                storage.clear(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET)
                             }
                         }
                         storage.set(CoreMemoryTypes.ATTACK_TARGET, attackTarget)
                         false
                     },
-                    { entity: EntityMob? -> this.memoryStorage.isEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET) }, 1
+                    { entity: EntityMob? -> this.memoryStorage.isEmpty(CoreMemoryTypes.ATTACK_TARGET) }, 1
                 )
             ),
             setOf<IBehavior>( //坐下锁定
@@ -131,13 +131,13 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                     { entity: EntityMob? -> this.isSitting() }, 7
                 ),  //攻击仇恨目标 todo 召集同伴
                 Behavior(
-                    WolfAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.7f, 33, true, 20),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    WolfAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.7f, 33, true, 20),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     6, 1
                 ),
                 Behavior(
                     EntityBreedingExecutor<EntityWolf>(EntityWolf::class.java, 16, 100, 0.35f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     5,
                     1
                 ),
@@ -151,12 +151,12 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                 }, 4, 1),
                 Behavior(
                     LookAtFeedingPlayerExecutor(),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                     3,
                     1
                 ),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ConditionalProbabilityEvaluator(
                         3, 7,
                         { entity: Entity? -> hasOwner(false) }, 10
@@ -176,8 +176,8 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                 NearestTargetEntitySensor<Entity>(
                     0.0, 20.0, 20,
                     listOf(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
-                        CoreMemoryTypes.Companion.NEAREST_SKELETON
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SKELETON
                     ),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
@@ -288,8 +288,8 @@ class EntityWolf(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), E
                 this.setHealthSafe(max(maxHealth.toDouble(), (this.health + healable).toDouble()).toFloat())
             }
 
-            memoryStorage.set(CoreMemoryTypes.Companion.LAST_FEED_PLAYER, player)
-            memoryStorage.set<Int>(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, level!!.tick)
+            memoryStorage.set(CoreMemoryTypes.LAST_FEED_PLAYER, player)
+            memoryStorage.set<Int>(CoreMemoryTypes.LAST_BE_FEED_TIME, level!!.tick)
             return true
         } else if (this.hasOwner() && player.getEntityName() == getOwnerName() && !this.isTouchingWater()) {
             this.setSitting(!this.isSitting())

@@ -13,7 +13,6 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.ContainerSetDataPacket
 import org.chorus_oss.chorus.recipe.SmeltingRecipe
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
@@ -338,19 +337,19 @@ open class BlockEntityFurnace(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpaw
         for (player in inventory.viewers) {
             val windowId = player.getWindowId(this.inventory)
             if (windowId > 0) {
-                var pk = ContainerSetDataPacket(
+                var pk = org.chorus_oss.protocol.packets.ContainerSetDataPacket(
                     containerID = windowId.toByte(),
-                    property = ContainerSetDataPacket.PROPERTY_FURNACE_TICK_COUNT,
+                    property = org.chorus_oss.protocol.packets.ContainerSetDataPacket.FURNACE_TICK_COUNT,
                     value = cookTime,
                 )
-                player.dataPacket(pk)
+                player.sendPacket(pk)
 
-                pk = ContainerSetDataPacket(
+                pk = org.chorus_oss.protocol.packets.ContainerSetDataPacket(
                     containerID = windowId.toByte(),
-                    property = ContainerSetDataPacket.PROPERTY_FURNACE_LIT_TIME,
+                    property = org.chorus_oss.protocol.packets.ContainerSetDataPacket.FURNACE_LIT_TIME,
                     value = burnDuration,
                 )
-                player.dataPacket(pk)
+                player.sendPacket(pk)
             }
         }
 

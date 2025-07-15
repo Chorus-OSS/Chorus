@@ -1034,7 +1034,6 @@
   "chorus.server.defaultGameMode": "Varsayılan oyun modu: {%0}",
   "chorus.server.info": "Bu sunucu, {%0} {%1} (API {%2}) yazılımında çalışıyor",
   "chorus.server.info.extended": "Bu sunucu, Minecraft: Bedrock Edition {%2} {%3} için {%0} {%1} yazılımında çalışıyor (protokol versiyonu: {%4})",
-  "chorus.server.license": "PowerNukkitX LGPL lisansı ile korunmaktadır",
   "chorus.server.networkError": "[Ağ] {%0} adlı arayüz {%1} nedeniyle durduruldu",
   "chorus.server.networkStart": "Sunucu {%0}:{%1} adresinde açılıyor",
   "chorus.server.query.info": "Query portu {%0} olarak ayarlanıyor",

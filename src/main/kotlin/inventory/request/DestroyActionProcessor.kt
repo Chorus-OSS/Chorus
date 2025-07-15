@@ -2,17 +2,21 @@ package org.chorus_oss.chorus.inventory.request
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.DestroyAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseSlot
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.DestroyRequestAction
 
-class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyAction> {
+class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.DESTROY
 
-    override fun handle(action: DestroyAction, player: Player, context: ItemStackRequestContext): ActionResponse? {
+    override fun handle(
+        action: DestroyRequestAction,
+        player: Player,
+        context: ItemStackRequestContext
+    ): ActionResponse? {
         val noResponseForDestroyAction =
             context.get<Boolean>(CraftResultDeprecatedActionProcessor.Companion.NO_RESPONSE_DESTROY_KEY)
         if (noResponseForDestroyAction != null && noResponseForDestroyAction) {
@@ -22,12 +26,12 @@ class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyAction> {
             log.warn("only creative mode can destroy item")
             return context.error()
         }
-        val container = action.source.containerName.container
+        val container = action.source.container.container
         val sourceInventory: Inventory = NetworkMapping.getInventory(player, container)
         val count = action.count
-        val slot = sourceInventory.fromNetworkSlot(action.source.slot)
+        val slot = sourceInventory.fromNetworkSlot(action.source.slot.toInt())
         var item = sourceInventory.getItem(slot)
-        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkId)) {
+        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkID)) {
             log.warn("mismatch stack network id!")
             return context.error()
         }
@@ -49,7 +53,6 @@ class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyAction> {
         return context.success(
             listOf(
                 ItemStackResponseContainer(
-                    sourceInventory.getSlotType(slot),
                     mutableListOf(
                         ItemStackResponseSlot(
                             sourceInventory.toNetworkSlot(slot),
@@ -60,7 +63,7 @@ class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyAction> {
                             item.damage
                         )
                     ),
-                    action.source.containerName
+                    action.source.container
                 )
             )
         )

@@ -4,10 +4,11 @@ import com.google.common.collect.Sets
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerChunkRequestEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockVector3
-import org.chorus_oss.chorus.network.protocol.NetworkChunkPublisherUpdatePacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.BlockPos
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -164,10 +165,12 @@ class PlayerChunkManager(private val player: Player) {
 
     private fun sendChunk() {
         if (chunkReadyToSend.isNotEmpty()) {
-            val ncp = NetworkChunkPublisherUpdatePacket()
-            ncp.position = player.position.asBlockVector3()
-            ncp.radius = player.viewDistance shl 4
-            player.dataPacket(ncp)
+            val ncp = org.chorus_oss.protocol.packets.NetworkChunkPublisherUpdatePacket(
+                position = BlockPos(player.position),
+                radius = (player.viewDistance shl 4).toUInt(),
+                savedChunks = emptyList(),
+            )
+            player.sendPacket(ncp)
             for (e in chunkReadyToSend.keys) {
                 val chunkX: Int = Level.getHashX(e)
                 val chunkZ: Int = Level.getHashZ(e)

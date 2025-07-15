@@ -117,7 +117,7 @@ class WhitelistCommand(name: String) :
 
     private fun badPerm(log: CommandLogger, sender: CommandSender, perm: String): Boolean {
         if (!sender.hasPermission("chorus.command.whitelist.$perm") && !sender.hasPermission("chorus.command.allowlist.$perm")) {
-            log.addMessage(TextFormat.RED.toString() + "%nukkit.command.generic.permission").output()
+            log.addMessage(TextFormat.RED.toString() + "%chorus.command.generic.permission").output()
             return true
         }
         return false

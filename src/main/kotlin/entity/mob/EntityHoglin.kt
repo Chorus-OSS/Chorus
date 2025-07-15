@@ -51,8 +51,8 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
                     ), 1, 1
                 )
             ),
@@ -60,7 +60,7 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
                 Behavior(
                     EntityBreedingExecutor<EntityHoglin>(EntityHoglin::class.java, 16, 100, 0.5f),
                     IBehaviorEvaluator { entity: EntityMob ->
-                        entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE)
+                        entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE)
                     }, 9, 1
                 ),
                 Behavior(
@@ -80,10 +80,10 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
                         IBehaviorEvaluator { entity: EntityMob? -> !isAngry() }), 6, 1
                 ),
                 Behavior(
-                    HoglinMeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.5f, 40, true, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    HoglinMeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.5f, 40, true, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                         not(IBehaviorEvaluator { entity: EntityMob? ->
-                            val player = memoryStorage.get<Entity>(CoreMemoryTypes.Companion.ATTACK_TARGET)
+                            val player = memoryStorage.get<Entity>(CoreMemoryTypes.ATTACK_TARGET)
                             player is Player && isBreedingItem(
                                 player.inventory.itemInHand
                             )
@@ -91,10 +91,10 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
                     ), 5, 1
                 ),
                 Behavior(
-                    HoglinMeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.5f, 40, false, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    HoglinMeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.5f, 40, false, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                         not(IBehaviorEvaluator { entity: EntityMob? ->
-                            val player = memoryStorage[CoreMemoryTypes.Companion.NEAREST_PLAYER]
+                            val player = memoryStorage[CoreMemoryTypes.NEAREST_PLAYER]
                             player is Player && isBreedingItem(
                                 player.inventory.itemInHand
                             )
@@ -102,23 +102,23 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
                     ), 4, 1
                 ),
                 Behavior(
-                    HoglinFleeFromTargetExecutor(CoreMemoryTypes.Companion.NEAREST_BLOCK), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK)
+                    HoglinFleeFromTargetExecutor(CoreMemoryTypes.NEAREST_BLOCK), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK)
                     ), 3, 1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.PARENT, 0.7f, true, 64f, 3f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.PARENT),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.PARENT, 5.0),
+                    MoveToTargetExecutor(CoreMemoryTypes.PARENT, 0.7f, true, 64f, 3f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.PARENT),
+                        DistanceEvaluator(CoreMemoryTypes.PARENT, 5.0),
                         IBehaviorEvaluator { entity: EntityMob? -> isBaby() }
                     ), 2, 1),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
             setOf<ISensor>(
                 NearestPlayerSensor(40.0, 0.0, 20),
-                BlockSensor(BlockPortal::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 8, 2, 20),
-                BlockSensor(BlockWarpedFungus::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 8, 2, 20),
-                BlockSensor(BlockRespawnAnchor::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 8, 2, 20)
+                BlockSensor(BlockPortal::class.java, CoreMemoryTypes.NEAREST_BLOCK, 8, 2, 20),
+                BlockSensor(BlockWarpedFungus::class.java, CoreMemoryTypes.NEAREST_BLOCK, 8, 2, 20),
+                BlockSensor(BlockRespawnAnchor::class.java, CoreMemoryTypes.NEAREST_BLOCK, 8, 2, 20)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
@@ -185,8 +185,8 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
     override fun onInteract(player: Player, item: Item, clickedPos: Vector3): Boolean {
         val superResult: Boolean = super.onInteract(player, item, clickedPos)
         if (isBreedingItem(item)) {
-            memoryStorage[CoreMemoryTypes.Companion.LAST_FEED_PLAYER] = player
-            memoryStorage[CoreMemoryTypes.Companion.LAST_BE_FEED_TIME] = level!!.tick
+            memoryStorage[CoreMemoryTypes.LAST_FEED_PLAYER] = player
+            memoryStorage[CoreMemoryTypes.LAST_BE_FEED_TIME] = level!!.tick
             sendBreedingAnimation(item)
             item.count--
             return player.inventory.setItemInHand(item) && superResult

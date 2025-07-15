@@ -20,7 +20,10 @@ import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
 import org.chorus_oss.chorus.recipe.descriptor.ItemDescriptor
 import org.chorus_oss.chorus.recipe.descriptor.ItemDescriptorType
 import org.chorus_oss.chorus.recipe.descriptor.ItemTagDescriptor
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.Config
+import org.chorus_oss.chorus.utils.Identifier
+import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.chorus.utils.Utils
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -1058,29 +1061,10 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         }
     }
 
-    class Entry(
-        val resultItemId: Int,
-        val resultMeta: Int,
-        val ingredientItemId: Int,
-        val ingredientMeta: Int,
-        val recipeShape: String,
-        val resultAmount: Int
-    )
-
     companion object : Loggable {
         private val isLoad = AtomicBoolean(false)
         var recipeCount: Int = 0
             private set
-        val recipeComparator: Comparator<Item> = Comparator { i1: Item, i2: Item ->
-            val i = MinecraftNamespaceComparator.compareFNV(i1.id, i2.id)
-            if (i == 0) {
-                if (i1.damage > i2.damage) {
-                    return@Comparator 1
-                } else if (i1.damage < i2.damage) {
-                    return@Comparator -1
-                } else return@Comparator i1.getCount().compareTo(i2.getCount())
-            } else return@Comparator i
-        }
 
         /**
          * 缓存着配方数据包

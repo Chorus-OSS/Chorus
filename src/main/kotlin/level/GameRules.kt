@@ -138,7 +138,8 @@ class GameRules private constructor() {
     }
 
     class Value<T>(val type: Type, var value: T) {
-        private var isCanBeChanged: Boolean = false
+        var isCanBeChanged: Boolean = false
+            private set
 
         fun setValue(value: T, type: Type) {
             if (this.type !== type) {

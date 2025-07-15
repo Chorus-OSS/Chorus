@@ -29,7 +29,7 @@ class BlockChorusPlant(blockState: BlockState = properties.defaultState) : Block
             var horizontal = false
             var horizontalSupported = false
             val down = down()
-            for (face in BlockFace.Plane.HORIZONTAL) {
+            for (face in BlockFace.Plane.HORIZONTAL_FACES) {
                 val side = getSide(face)
                 if (side.id == BlockID.CHORUS_PLANT) {
                     if (!horizontal) {

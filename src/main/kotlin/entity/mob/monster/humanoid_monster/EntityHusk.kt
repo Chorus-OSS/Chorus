@@ -55,34 +55,34 @@ class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
                 ),
                 Behavior(
                     JumpExecutor(), all(
-                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_BLOCK) },
+                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_BLOCK) },
                         IBehaviorEvaluator { entity: EntityMob ->
                             entity.getCollisionBlocks()!!.stream().anyMatch { block: Block? -> block is BlockTurtleEgg }
                         }), 6, 1, 10
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_BLOCK, 0.3f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_BLOCK, 0.3f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK),
                     5,
                     1
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 40, true, 10, Effect.get(
+                        CoreMemoryTypes.ATTACK_TARGET, 0.3f, 40, true, 10, Effect.get(
                             EffectType.HUNGER
                         ).setDuration(140)
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), 4, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), 4, 1
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 40, false, 10, Effect.get(
+                        CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 40, false, 10, Effect.get(
                             EffectType.HUNGER
                         ).setDuration(140)
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER), 3, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER), 3, 1
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         40,
                         true,
@@ -90,7 +90,7 @@ class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
                         Effect.get(
                             EffectType.HUNGER
                         ).setDuration(140)
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
@@ -98,13 +98,13 @@ class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
                 NearestPlayerSensor(40.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
                         )
                     }),
-                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 11, 15, 10)
+                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.NEAREST_BLOCK, 11, 15, 10)
 
             ),
             setOf<IController>(WalkController(), LookController(true, true)),

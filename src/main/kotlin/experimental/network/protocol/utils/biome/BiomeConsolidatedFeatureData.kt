@@ -4,9 +4,9 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.types.biome.BiomeConsolidatedFeatureData
 import org.chorus_oss.protocol.types.biome.BiomeScatterParamData
 
-fun BiomeConsolidatedFeatureData.Companion.fromNBT(nbt: CompoundTag): BiomeConsolidatedFeatureData {
+operator fun BiomeConsolidatedFeatureData.Companion.invoke(nbt: CompoundTag): BiomeConsolidatedFeatureData {
     return BiomeConsolidatedFeatureData(
-        scatter = BiomeScatterParamData.fromNBT(nbt.getCompound("scatter")),
+        scatter = BiomeScatterParamData.invoke(nbt.getCompound("scatter")),
         feature = nbt.getShort("feature"),
         identifier = nbt.getShort("identifier"),
         pass = nbt.getShort("pass"),

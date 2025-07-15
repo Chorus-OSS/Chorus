@@ -3,14 +3,13 @@ package org.chorus_oss.chorus.level.generator.`object`
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockState
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.level.format.UnsafeChunk
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.UpdateSubChunkBlocksPacket
-import org.chorus_oss.chorus.network.protocol.types.BlockChangeEntry
+import org.chorus_oss.protocol.types.BlockPos
 import java.util.function.Consumer
 import java.util.function.Predicate
 
@@ -109,42 +108,45 @@ class BlockManager(val level: Level) {
             blockList1 = blockList1.stream().filter(predicate).toList()
         }
         val chunks: MutableMap<IChunk, ArrayList<Block>> = HashMap()
-        val batchs: MutableMap<SubChunkEntry, UpdateSubChunkBlocksPacket> =
+        val batches: MutableMap<SubChunkEntry, org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket> =
             HashMap()
         for (b in blockList1) {
             val chunk = chunks.computeIfAbsent(
                 level.getChunk(b.position.chunkX, b.position.chunkZ, true)
             ) { _: IChunk? -> ArrayList() }
             chunk.add(b)
-            val batch: UpdateSubChunkBlocksPacket = batchs.computeIfAbsent(
+            batches.computeIfAbsent(
                 SubChunkEntry(b.position.chunkX shl 4, (b.position.floorY shr 4) shl 4, b.position.chunkZ shl 4)
             ) { s: SubChunkEntry ->
-                val pk = UpdateSubChunkBlocksPacket()
-                pk.chunkX = s.x
-                pk.chunkY = s.y
-                pk.chunkZ = s.z
+                val pk = org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket(
+                    position = BlockPos(s.x, s.y, s.z),
+                    blocks = when (b.layer) {
+                        0 -> listOf(
+                            org.chorus_oss.protocol.types.BlockChangeEntry(
+                                blockPos = BlockPos(b.position),
+                                blockRuntimeID = b.blockState.blockStateHash().toUInt(),
+                                flags = 21u,
+                                syncedUpdateEntityUniqueID = -1,
+                                syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
+                            )
+                        )
+
+                        else -> emptyList()
+                    },
+                    extra = when (b.layer) {
+                        0 -> emptyList()
+                        else -> listOf(
+                            org.chorus_oss.protocol.types.BlockChangeEntry(
+                                blockPos = BlockPos(b.position),
+                                blockRuntimeID = b.blockState.blockStateHash().toUInt(),
+                                flags = 21u,
+                                syncedUpdateEntityUniqueID = -1,
+                                syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
+                            )
+                        )
+                    }
+                )
                 pk
-            }
-            if (b.layer == 1) {
-                batch.extraBlocks.add(
-                    BlockChangeEntry(
-                        b.position.asBlockVector3(),
-                        b.blockState.unsignedBlockStateHash(),
-                        ProtocolInfo.UPDATE_BLOCK_PACKET,
-                        -1,
-                        BlockChangeEntry.MessageType.NONE
-                    )
-                )
-            } else {
-                batch.standardBlocks.add(
-                    BlockChangeEntry(
-                        b.position.asBlockVector3(),
-                        b.blockState.unsignedBlockStateHash(),
-                        ProtocolInfo.UPDATE_BLOCK_PACKET,
-                        -1,
-                        BlockChangeEntry.MessageType.NONE
-                    )
-                )
             }
         }
         chunks.entries.parallelStream()
@@ -165,7 +167,7 @@ class BlockManager(val level: Level) {
                 }
                 key.reObfuscateChunk()
             }
-        for (p in batchs.values) {
+        for (p in batches.values) {
             Server.broadcastPacket(level.players.values, p)
         }
         places.clear()

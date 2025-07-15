@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.compression
 
-import org.chorus_oss.chorus.utils.ThreadCache
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.zip.DataFormatException
 import java.util.zip.Deflater
@@ -10,76 +10,41 @@ class ZlibSingleThreadLowMem : ZlibProvider {
     @Synchronized
     @Throws(IOException::class)
     override fun deflate(data: ByteArray, level: Int, raw: Boolean): ByteArray {
-        if (raw) {
-            DEFLATER_RAW.reset()
-            DEFLATER_RAW.setLevel(level)
-            DEFLATER_RAW.setInput(data)
-            DEFLATER_RAW.finish()
-            val bos = ThreadCache.fbaos.get()!!
-            bos.reset()
-            while (!DEFLATER_RAW.finished()) {
-                val i = DEFLATER_RAW.deflate(BUFFER)
-                bos.write(BUFFER, 0, i)
-            }
-            return bos.toByteArray()
-        } else {
-            DEFLATER.reset()
-            DEFLATER.setLevel(level)
-            DEFLATER.setInput(data)
-            DEFLATER.finish()
-            val bos = ThreadCache.fbaos.get()!!
-            bos.reset()
-            while (!DEFLATER.finished()) {
-                val i = DEFLATER.deflate(BUFFER)
-                bos.write(BUFFER, 0, i)
-            }
-            return bos.toByteArray()
+        val deflater = if (raw) DEFLATER_RAW else DEFLATER
+        deflater.reset()
+        deflater.setLevel(level)
+        deflater.setInput(data)
+        deflater.finish()
+
+        val bos = ByteArrayOutputStream(1024)
+        while (!deflater.finished()) {
+            val i = deflater.deflate(BUFFER)
+            bos.write(BUFFER, 0, i)
         }
+        return bos.toByteArray()
     }
 
     @Synchronized
     @Throws(IOException::class)
     override fun inflate(data: ByteArray, maxSize: Int, raw: Boolean): ByteArray {
-        if (raw) {
-            INFLATER_RAW.reset()
-            INFLATER_RAW.setInput(data)
-            INFLATER_RAW.finished()
-            val bos = ThreadCache.fbaos.get()!!
-            bos.reset()
-            try {
-                var length = 0
-                while (!INFLATER_RAW.finished()) {
-                    val i = INFLATER_RAW.inflate(BUFFER)
-                    length += i
-                    if (maxSize in 1..<length) {
-                        throw IOException("Inflated data exceeds maximum size")
-                    }
-                    bos.write(BUFFER, 0, i)
+        val inflater = if (raw) INFLATER_RAW else INFLATER
+        inflater.reset()
+        inflater.setInput(data)
+
+        val bos = ByteArrayOutputStream(1024)
+        try {
+            var length = 0
+            while (!inflater.finished()) {
+                val i = inflater.inflate(BUFFER)
+                length += i
+                if (maxSize in 1..<length) {
+                    throw IOException("Inflated data exceeds maximum size")
                 }
-                return bos.toByteArray()
-            } catch (e: DataFormatException) {
-                throw IOException("Unable to inflate zlib stream", e)
+                bos.write(BUFFER, 0, i)
             }
-        } else {
-            INFLATER.reset()
-            INFLATER.setInput(data)
-            INFLATER.finished()
-            val bos = ThreadCache.fbaos.get()!!
-            bos.reset()
-            try {
-                var length = 0
-                while (!INFLATER.finished()) {
-                    val i = INFLATER.inflate(BUFFER)
-                    length += i
-                    if (maxSize in 1..<length) {
-                        throw IOException("Inflated data exceeds maximum size")
-                    }
-                    bos.write(BUFFER, 0, i)
-                }
-                return bos.toByteArray()
-            } catch (e: DataFormatException) {
-                throw IOException("Unable to inflate zlib stream", e)
-            }
+            return bos.toByteArray()
+        } catch (e: DataFormatException) {
+            throw IOException("Unable to inflate zlib stream", e)
         }
     }
 

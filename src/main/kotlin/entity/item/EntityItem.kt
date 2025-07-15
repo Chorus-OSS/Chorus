@@ -9,14 +9,17 @@ import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.ItemDespawnEvent
 import org.chorus_oss.chorus.event.entity.ItemSpawnEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.AddItemActorPacket
-import org.chorus_oss.chorus.network.protocol.DataPacket
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.Vector3f
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.item.ItemStack
 import kotlin.math.abs
 
 class EntityItem(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt) {
@@ -294,14 +297,14 @@ class EntityItem(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt) {
         return false
     }
 
-    public override fun createAddEntityPacket(): DataPacket {
-        return AddItemActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
-            position = this.position.asVector3f(),
-            velocity = this.motion.asVector3f(),
-            item = this.item,
-            entityData = this.entityDataMap,
+    public override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddItemActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
+            position = Vector3f(this.position),
+            velocity = Vector3f(this.motion),
+            item = ItemStack(this.item),
+            actorData = ActorDataMap(this.entityDataMap),
             fromFishing = false
         )
     }

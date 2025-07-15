@@ -2,10 +2,12 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.AdventureSettings
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.ContainerOpenPacket
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ContainerType
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -15,12 +17,15 @@ abstract class ContainerInventory(holder: InventoryHolder, type: InventoryType, 
     override fun onOpen(who: Player) {
         if (!who.adventureSettings[AdventureSettings.Type.OPEN_CONTAINERS]) return
         super.onOpen(who)
-        who.dataPacket(
-            ContainerOpenPacket(
-                containerID = who.getWindowId(this),
-                containerType = type.networkType,
-                position = holder.vector3.asBlockVector3(),
-                targetActorID = who.getRuntimeID()
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerOpenPacket(
+                containerID = who.getWindowId(this).toByte(),
+                containerType = ContainerType(type),
+                position = BlockPos(holder.vector3),
+                targetActorID = when (type) {
+                    InventoryType.CONTAINER -> -1
+                    else -> who.getUniqueID()
+                }
             )
         )
         this.sendContents(who)

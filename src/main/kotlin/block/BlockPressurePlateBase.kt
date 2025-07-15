@@ -108,7 +108,7 @@ abstract class BlockPressurePlateBase(blockState: BlockState) : BlockFlowable(bl
         fz: Double,
         player: Player?
     ): Boolean {
-        if (!isSupportValid(down(), BlockFace.UP)) {
+        if (!isSupportValid(block.down(), BlockFace.UP)) {
             return false
         }
 

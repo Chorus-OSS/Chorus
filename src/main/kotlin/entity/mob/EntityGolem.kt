@@ -14,7 +14,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 abstract class EntityGolem(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), EntityWalkable, EntityCanAttack {
     override fun attack(source: EntityDamageEvent): Boolean {
         if (source is EntityDamageByEntityEvent && source.damager !is EntityCreeper) {
-            memoryStorage[CoreMemoryTypes.Companion.ATTACK_TARGET] = source.damager
+            memoryStorage[CoreMemoryTypes.ATTACK_TARGET] = source.damager
         }
         return super.attack(source)
     }

@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.*
@@ -25,6 +26,10 @@ import org.chorus_oss.chorus.event.block.BlockUpdateEvent
 import org.chorus_oss.chorus.event.level.*
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
 import org.chorus_oss.chorus.event.weather.LightningStrikeEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL
+import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemBucket
@@ -48,13 +53,18 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.types.PlayerAbility
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
+import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
 import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ChunkPos
 import java.awt.Color
 import java.io.File
 import java.lang.ref.SoftReference
@@ -67,7 +77,10 @@ import java.util.function.Function
 import java.util.function.Predicate
 import java.util.stream.IntStream
 import java.util.stream.Stream
-import kotlin.math.*
+import kotlin.math.ceil
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.sin
 
 
 class Level(
@@ -247,7 +260,7 @@ class Level(
         log.info(
             Server.instance.lang.tr(
                 "chorus.level.init",
-                TextFormat.GREEN.toString() + this.folderName + TextFormat.RESET
+                TextFormat.GREEN.toString() + this.name + TextFormat.RESET
             )
         )
     }
@@ -264,8 +277,7 @@ class Level(
     fun requireProvider(): LevelProvider {
         val levelProvider = getProvider()
         if (levelProvider == null) {
-            val levelException: LevelException =
-                LevelException("The level \"$folderPath\" is already closed (have no providers)")
+            val levelException = LevelException("The level \"$folderPath\" is already closed (have no providers)")
             try {
                 close()
             } catch (e: Exception) {
@@ -313,18 +325,17 @@ class Level(
         Preconditions.checkArgument(volume in 0.0..1.0, "Sound volume must be between 0 and 1")
         Preconditions.checkArgument(pitch >= 0, "Sound pitch must be higher than 0")
 
-        val packet: PlaySoundPacket = PlaySoundPacket()
-        packet.name = sound.sound
-        packet.volume = volume
-        packet.pitch = pitch
-        packet.x = pos.floorX
-        packet.y = pos.floorY
-        packet.z = pos.floorZ
+        val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
+            soundName = sound.sound,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            volume = volume,
+            pitch = pitch,
+        )
 
         if (players.isEmpty()) {
             addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, packet)
         } else {
-            Server.broadcastPacket(players.toList().toTypedArray(), packet)
+            Server.broadcastPacket(players.toList(), packet)
         }
     }
 
@@ -489,16 +500,18 @@ class Level(
         dimensionId: Int,
         vararg players: Player
     ) {
-        val pk: SpawnParticleEffectPacket = SpawnParticleEffectPacket()
-        pk.identifier = identifier
-        pk.uniqueEntityId = uniqueEntityId
-        pk.dimensionId = dimensionId
-        pk.position = pos
+        val pk = org.chorus_oss.protocol.packets.SpawnParticleEffectPacket(
+            dimension = dimensionId.toByte(),
+            entityUniqueID = uniqueEntityId,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            identifier = identifier,
+            moLangVariablesJSON = null
+        )
 
         if (players.isEmpty()) {
             addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
         } else {
-            Server.broadcastPacket(players.toList().toTypedArray(), pk)
+            Server.broadcastPacket(players.toList(), pk)
         }
     }
 
@@ -536,7 +549,7 @@ class Level(
         if (force && Server.instance.settings.levelSettings.levelThread) {
             Server.instance.scheduler.scheduleDelayedTask({
                 if (baseTickThread.isAlive) {
-                    Server.instance.logger.critical(getLevelName() + " failed to unload. Trying to stop the thread.")
+                    log.error(getLevelName() + " failed to unload. Trying to stop the thread.")
                     baseTickThread.interrupt()
                 }
             }, 100)
@@ -579,6 +592,10 @@ class Level(
             index
         ) { ConcurrentLinkedDeque<DataPacket>() }
         packets.add(packet)
+    }
+
+    fun addChunkPacket(x: Int, z: Int, packet: Packet) {
+        addChunkPacket(x, z, MigrationPacket(packet))
     }
 
     @JvmOverloads
@@ -641,10 +658,10 @@ class Level(
     }
 
     fun sendTime(vararg players: Player) {
-        val pk: SetTimePacket = SetTimePacket()
-        pk.time = time.toInt()
-
-        Server.broadcastPacket(players.toList().toTypedArray(), pk)
+        val pk = org.chorus_oss.protocol.packets.SetTimePacket(
+            time = time.toInt()
+        )
+        Server.broadcastPacket(players.toList(), pk)
     }
 
     fun sendTime() {
@@ -800,7 +817,11 @@ class Level(
                                         val hash = getBlockXYZ(index, blockHash, this)
                                         blocksArray[i++] = hash
                                     }
-                                    this.sendBlocks(playerArray, blocksArray, UpdateBlockPacket.FLAG_ALL)
+                                    this.sendBlocks(
+                                        playerArray,
+                                        blocksArray,
+                                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+                                    )
                                 }
                             }
                         }
@@ -826,9 +847,10 @@ class Level(
             chunkPackets.clear()
 
             if (gameRules.isStale) {
-                val packet: GameRulesChangedPacket = GameRulesChangedPacket()
-                packet.gameRules = gameRules
-                Server.broadcastPacket(players.values.toTypedArray(), packet)
+                val packet = org.chorus_oss.protocol.packets.GameRulesChangedPacket(
+                    gameRules = gameRules.getGameRules().map { org.chorus_oss.protocol.types.GameRule(it.toPair()) }
+                )
+                Server.broadcastPacket(players.values, packet)
                 gameRules.refresh()
             }
         } catch (e: Exception) {
@@ -1052,8 +1074,8 @@ class Level(
     }
 
     fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3>) {
-        this.sendBlocks(target, blocks, UpdateBlockPacket.FLAG_NONE, 0)
-        this.sendBlocks(target, blocks, UpdateBlockPacket.FLAG_NONE, 1)
+        this.sendBlocks(target, blocks, 0, 0)
+        this.sendBlocks(target, blocks, 0, 1)
     }
 
     fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: Int) {
@@ -1078,7 +1100,7 @@ class Level(
         for (block in blocks) {
             if (block != null) size++
         }
-        val packets: ArrayList<UpdateBlockPacket> = ArrayList<UpdateBlockPacket>(size)
+        val packets: MutableList<org.chorus_oss.protocol.packets.UpdateBlockPacket> = mutableListOf()
         var chunks: MutableSet<Long>? = null
         if (optimizeRebuilds) {
             chunks = mutableSetOf()
@@ -1099,33 +1121,30 @@ class Level(
             }
 
             val bPos = pos.asBlockVector3()
-            val updateBlockPacket = UpdateBlockPacket()
-            updateBlockPacket.x = bPos.x
-            updateBlockPacket.y = bPos.y
-            updateBlockPacket.z = bPos.z
-            updateBlockPacket.flags = if (first) flags else UpdateBlockPacket.FLAG_NONE
-            updateBlockPacket.dataLayer = dataLayer
-            val runtimeId: Int
-            if (b is Block) {
-                runtimeId = b.runtimeId
-            } else if (b is Vector3WithRuntimeId) {
-                runtimeId = if (dataLayer == 0) {
-                    b.runtimeIdLayer0
+            val updateBlockPacket = org.chorus_oss.protocol.packets.UpdateBlockPacket(
+                position = BlockPos(pos),
+                newBlockRuntimeID = (if (b is Block) {
+                    b.runtimeId
+                } else if (b is Vector3WithRuntimeId) {
+                    if (dataLayer == 0) {
+                        b.runtimeIdLayer0
+                    } else {
+                        b.runtimeIdLayer1
+                    }
                 } else {
-                    b.runtimeIdLayer1
-                }
-            } else {
-                val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
-                if (hash == Integer.MIN_VALUE) {
-                    continue
-                }
-                runtimeId = hash
-            }
-            updateBlockPacket.blockRuntimeId = runtimeId
+                    val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
+                    if (hash == Integer.MIN_VALUE) {
+                        continue
+                    }
+                    hash
+                }).toUInt(),
+                flags = if (first) flags.toUInt() else 0u,
+                layer = dataLayer.toUInt(),
+            )
             packets.add(updateBlockPacket)
         }
         for (p in packets) {
-            Server.broadcastPacket(target, p)
+            Server.broadcastPacket(target.toList(), p)
         }
     }
 
@@ -1249,7 +1268,7 @@ class Level(
     }
 
     fun updateComparatorOutputLevelSelective(v: Vector3, observer: Boolean) {
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             temporalVector.setComponentsAdding(v, face)
 
             if (!this.isChunkLoaded(temporalVector.x.toInt() shr 4, temporalVector.z.toInt() shr 4)) {
@@ -1276,7 +1295,7 @@ class Level(
             return
         }
 
-        for (face in BlockFace.Plane.VERTICAL) {
+        for (face in BlockFace.Plane.VERTICAL_FACES) {
             val block1 = this.getBlock(temporalVector.setComponentsAdding(v, face))
 
             if (BlockID.OBSERVER == block1.id) {
@@ -2183,13 +2202,13 @@ class Level(
                         block.position.add(0.0, 0.0, 1.0),
                         block.position.add(0.0, 0.0, -1.0)
                     ),
-                    UpdateBlockPacket.FLAG_ALL_PRIORITY
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
                 )
             }
             this.sendBlocks(
                 getChunkPlayers(cx, cz).values.toTypedArray(),
                 arrayOf<Block?>(block),
-                UpdateBlockPacket.FLAG_ALL_PRIORITY,
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
                 block.layer
             )
         } else {
@@ -2436,7 +2455,7 @@ class Level(
             if (immediateDestroy) {
                 drops = eventDrops
             } else {
-                if (!player.adventureSettings.get(PlayerAbility.MINE)) return null
+                if (!player.adventureSettings.get(org.chorus_oss.protocol.types.PlayerAbility.Mine)) return null
 
                 //使用calculateBreakTimeNotInAir目的是获取玩家在陆地上的挖掘时间，如果挖掘时间小于这个时间才认为玩家作弊。
                 var breakTime = target.calculateBreakTimeNotInAir(item, player)
@@ -2676,7 +2695,7 @@ class Level(
                     player.level!!.sendBlocks(
                         arrayOf<Player>(player),
                         arrayOf<Block?>(Block.get(BlockID.AIR, target)),
-                        UpdateBlockPacket.FLAG_ALL_PRIORITY,
+                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
                         1
                     )
                 }
@@ -2774,7 +2793,7 @@ class Level(
 
         if (player != null) {
             val canChangeBlock = block.isBlockChangeAllowed(player)
-            if ((!player.adventureSettings.get(PlayerAbility.BUILD) && !canChangeBlock) || !canChangeBlock) return null
+            if ((!player.adventureSettings.get(org.chorus_oss.protocol.types.PlayerAbility.Build) && !canChangeBlock) || !canChangeBlock) return null
 
             val event: BlockPlaceEvent = BlockPlaceEvent(player, hand, block, target, item1)
             if (player.isAdventure) {
@@ -3164,12 +3183,10 @@ class Level(
             throw LevelException("Constructor of $provider failed", e)
         }
         val levelProvider = requireProvider()
-        //to be changed later as the Dim0 will be deleted to be put in a config.json file of the world
-        val levelNameDim = levelProvider.name.replace(" Dim0", "")
         log.info(
             Server.instance.lang.tr(
                 "chorus.level.preparing",
-                TextFormat.GREEN.toString() + levelNameDim + TextFormat.RESET
+                TextFormat.GREEN.toString() + levelProvider.name + TextFormat.RESET
             )
         )
         levelProvider.updateLevelName(name)
@@ -3205,12 +3222,8 @@ class Level(
         this.currentTick = levelProvider.currentTick
         this.updateQueue = BlockUpdateScheduler(this, currentTick)
 
-        this.chunkTickRadius = Math.min(
-            Server.instance.viewDistance, Math.max(
-                1,
-                Server.instance.settings.chunkSettings.tickRadius
-            )
-        )
+        this.chunkTickRadius =
+            Server.instance.viewDistance.coerceAtMost(1.coerceAtLeast(Server.instance.settings.chunkSettings.tickRadius))
         this.chunkGenerationQueueSize = Server.instance.settings.chunkSettings.generationQueueSize
         this.chunksPerTicks = Server.instance.settings.chunkSettings.chunksPerTicks
         this.clearChunksOnTick = Server.instance.settings.chunkSettings.clearTickList
@@ -3427,7 +3440,7 @@ class Level(
                 doLevelGarbageCollection(false)
             }
         } catch (e: Exception) {
-            Server.instance.logger.error("Subtick Thread for level $folderName failed.", e)
+            log.error("Subtick Thread for level $folderName failed.", e)
         }
     }
 
@@ -3441,17 +3454,22 @@ class Level(
                 val pair = requireProvider().requestChunkData(x, z)
                 for (player in players.values) {
                     if (player.isConnected()) {
-                        val ncp = NetworkChunkPublisherUpdatePacket()
-                        ncp.position = player.position.asBlockVector3()
-                        ncp.radius = player.viewDistance shl 4
-                        player.dataPacket(ncp)
+                        val ncp = org.chorus_oss.protocol.packets.NetworkChunkPublisherUpdatePacket(
+                            position = BlockPos(player.position),
+                            radius = (player.viewDistance shl 4).toUInt(),
+                            savedChunks = emptyList(),
+                        )
+                        player.sendPacket(ncp)
 
-                        val pk = LevelChunkPacket()
-                        pk.chunkX = x
-                        pk.chunkZ = z
-                        pk.dimension = dimensionData.dimensionId
-                        pk.data = pair.first
-                        pk.subChunkCount = pair.second
+                        val pk = org.chorus_oss.protocol.packets.LevelChunkPacket(
+                            position = ChunkPos(x, z),
+                            dimension = dimensionData.dimensionId,
+                            subChunkCount = pair.second.toUInt(),
+                            subChunkLimit = 0u,
+                            cacheEnabled = false,
+                            blobHashes = emptyList(),
+                            data = ByteString(pair.first)
+                        )
                         player.sendChunk(x, z, pk)
                     }
                 }
@@ -3465,10 +3483,12 @@ class Level(
         val chunkPositionZ = player.position.chunkZ
         val chunkRadius = player.viewDistance
 
-        val ncp = NetworkChunkPublisherUpdatePacket()
-        ncp.position = player.position.asBlockVector3()
-        ncp.radius = player.viewDistance shl 4
-        player.dataPacket(ncp)
+        val ncp = org.chorus_oss.protocol.packets.NetworkChunkPublisherUpdatePacket(
+            position = BlockPos(player.position),
+            radius = (player.viewDistance shl 4).toUInt(),
+            savedChunks = emptyList(),
+        )
+        player.sendPacket(ncp)
 
         for (x in -chunkRadius..<chunkRadius) {
             for (z in -chunkRadius..<chunkRadius) {
@@ -3477,12 +3497,15 @@ class Level(
 
                 val pair = requireProvider().requestChunkData(chunkX, chunkZ)
 
-                val pk = LevelChunkPacket()
-                pk.chunkX = chunkX
-                pk.chunkZ = chunkZ
-                pk.dimension = dimensionData.dimensionId
-                pk.data = pair.first
-                pk.subChunkCount = pair.second
+                val pk = org.chorus_oss.protocol.packets.LevelChunkPacket(
+                    position = ChunkPos(chunkX, chunkZ),
+                    dimension = dimensionData.dimensionId,
+                    subChunkCount = pair.second.toUInt(),
+                    subChunkLimit = 0u,
+                    cacheEnabled = false,
+                    blobHashes = emptyList(),
+                    data = ByteString(pair.first)
+                )
                 player.sendChunk(chunkX, chunkZ, pk)
             }
         }
@@ -4588,6 +4611,7 @@ class Level(
         const val DIMENSION_OVERWORLD: Int = 0
         const val DIMENSION_NETHER: Int = 1
         const val DIMENSION_THE_END: Int = 2
+        const val DIMENSION_UNDEFINED: Int = 3
         const val MAX_BLOCK_CACHE: Int = 512 // Lower values use less memory
         private const val LCG_CONSTANT = 1013904223
         var COMPRESSION_LEVEL: Int = 8

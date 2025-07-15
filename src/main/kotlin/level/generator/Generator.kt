@@ -33,19 +33,19 @@ abstract class Generator(val dimensionData: DimensionData, val settings: Map<Str
         var future = start.scope.async {
             start.apply(context)
         }
-        var now: GenerateStage? = start
-        while ((now?.nextStage.also { now = it }) != null) {
-            val finalNow = now!!
-            if (finalNow.name() == to) {
-                future = finalNow.scope.async {
+        var now: GenerateStage = start
+        while (true) {
+            now = now.nextStage ?: break
+            if (now.name() == to) {
+                future = now.scope.async {
                     future.await()
-                    finalNow.apply(context)
+                    now.apply(context)
                 }
                 break
             }
-            future = finalNow.scope.async {
+            future = now.scope.async {
                 future.await()
-                finalNow.apply(context)
+                now.apply(context)
             }
         }
         runBlocking { future.await() }

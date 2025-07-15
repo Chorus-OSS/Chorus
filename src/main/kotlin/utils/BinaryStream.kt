@@ -2,16 +2,7 @@ package org.chorus_oss.chorus.utils
 
 
 import io.netty.util.internal.EmptyArrays
-import org.chorus_oss.chorus.nbt.NBTIO.read
-import org.chorus_oss.chorus.nbt.NBTIO.write
-import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
-import java.util.*
-import java.util.function.BiConsumer
-import java.util.function.Consumer
-import java.util.function.Function
-import java.util.function.ToLongFunction
 import kotlin.math.min
 
 
@@ -50,11 +41,6 @@ class BinaryStream {
         this.count = buffer.size
     }
 
-    fun setBuffer(buffer: ByteArray, offset: Int) {
-        this.setBuffer(buffer)
-        this.offset = offset
-    }
-
     @JvmOverloads
     operator fun get(len: Int = this.count - this.offset): ByteArray {
         var len1 = len
@@ -64,7 +50,7 @@ class BinaryStream {
         }
         len1 = min(len1.toDouble(), (this.count - this.offset).toDouble()).toInt()
         this.offset += len1
-        return Arrays.copyOfRange(this.buffer, this.offset - len1, this.offset)
+        return this.buffer.copyOfRange(this.offset - len1, this.offset)
     }
 
     fun put(bytes: ByteArray?) {
@@ -78,119 +64,16 @@ class BinaryStream {
         this.count += bytes.size
     }
 
-    val long: Long
-        get() = Binary.readLong(this[8])
-
-    fun putLong(l: Long) {
-        this.put(Binary.writeLong(l))
-    }
-
-    val int: Int
-        get() = Binary.readInt(this[4])
-
-    fun putInt(i: Int) {
-        this.put(Binary.writeInt(i))
-    }
-
-    fun putMedium(i: Int) {
-        putByte((i ushr 16).toByte())
-        putByte((i ushr 8).toByte())
-        putByte(i.toByte())
-    }
-
-    val medium: Int
-        get() {
-            var value = (byte.toInt() and 0xff) shl 16 or (
-                    (byte.toInt() and 0xff) shl 8) or (
-                    byte.toInt() and 0xff)
-            if ((value and 0x800000) != 0) {
-                value = value or -0x1000000
-            }
-            return value
-        }
-
-    val lLong: Long
-        get() = Binary.readLLong(this[8])
-
-    fun putLLong(l: Long) {
-        this.put(Binary.writeLLong(l))
-    }
-
     val lInt: Int
         get() = Binary.readLInt(this[4])
-
-    fun putLInt(i: Int) {
-        this.put(Binary.writeLInt(i))
-    }
-
-    fun <T> putNotNull(data: T?, consumer: Consumer<T?>) {
-        val present = data != null
-        putBoolean(present)
-        if (present) {
-            consumer.accept(data)
-        }
-    }
-
-    fun <T> putOptional(data: OptionalValue<T>, consumer: Consumer<T?>) {
-        val present = data.isPresent
-        putBoolean(present)
-        if (present) {
-            consumer.accept(data.get())
-        }
-    }
-
-    val short: Int
-        get() = Binary.readShort(this[2])
-
-    fun putShort(s: Int) {
-        this.put(Binary.writeShort(s))
-    }
-
-    val lShort: Int
-        get() = Binary.readLShort(this[2])
 
     fun putLShort(s: Int) {
         this.put(Binary.writeLShort(s))
     }
 
-    val float: Float
-        get() = getFloat(-1)
-
-    fun getFloat(accuracy: Int): Float {
-        return Binary.readFloat(this[4], accuracy)
-    }
-
-    fun putFloat(v: Float) {
-        this.put(Binary.writeFloat(v))
-    }
-
-    val lFloat: Float
-        get() = getLFloat(-1)
-
-    fun getLFloat(accuracy: Int): Float {
-        return Binary.readLFloat(this[4], accuracy)
-    }
-
     fun putLFloat(v: Float) {
         this.put(Binary.writeLFloat(v))
     }
-
-    val triad: Int
-        get() = Binary.readTriad(this[3])
-
-    fun putTriad(triad: Int) {
-        this.put(Binary.writeTriad(triad))
-    }
-
-    val lTriad: Int
-        get() = Binary.readLTriad(this[3])
-
-    fun putLTriad(triad: Int) {
-        this.put(Binary.writeLTriad(triad))
-    }
-
-    val boolean: Boolean
-        get() = byte.toInt() == 0x01
 
     fun putBoolean(bool: Boolean) {
         this.putByte((if (bool) 1 else 0).toByte())
@@ -203,16 +86,10 @@ class BinaryStream {
         this.put(byteArrayOf(b))
     }
 
-    val byteArray: ByteArray
-        get() = this[unsignedVarInt.toInt()]
-
     fun putByteArray(b: ByteArray) {
         this.putUnsignedVarInt(b.size.toLong())
         this.put(b)
     }
-
-    val string: String
-        get() = String(this.byteArray, StandardCharsets.UTF_8)
 
     fun putString(string: String) {
         val b = string.toByteArray(StandardCharsets.UTF_8)
@@ -226,98 +103,12 @@ class BinaryStream {
         VarInt.writeUnsignedVarInt(this, v)
     }
 
-    val varInt: Int
-        get() = VarInt.readVarInt(this)
-
     fun putVarInt(v: Int) {
         VarInt.writeVarInt(this, v)
     }
 
-    val varLong: Long
-        get() = VarInt.readVarLong(this)
-
     fun putVarLong(v: Long) {
         VarInt.writeVarLong(this, v)
-    }
-
-    val unsignedVarLong: Long
-        get() = VarInt.readUnsignedVarLong(this)
-
-    fun putUnsignedVarLong(v: Long) {
-        VarInt.writeUnsignedVarLong(this, v)
-    }
-
-    fun <T> putArray(collection: Collection<T>?, writer: Consumer<T>?) {
-        if (collection == null) {
-            putUnsignedVarInt(0)
-            return
-        }
-        putUnsignedVarInt(collection.size.toLong())
-        collection.forEach(writer)
-    }
-
-    fun <T> putArray(collection: Array<T>?, writer: Consumer<T>) {
-        if (collection == null) {
-            putUnsignedVarInt(0)
-            return
-        }
-        putUnsignedVarInt(collection.size.toLong())
-        for (t in collection) {
-            writer.accept(t)
-        }
-    }
-
-    fun <T> putArray(array: Collection<T>, biConsumer: BiConsumer<BinaryStream?, T>) {
-        this.putUnsignedVarInt(array.size.toLong())
-        for (`val` in array) {
-            biConsumer.accept(this, `val`)
-        }
-    }
-
-    fun <T> getArray(clazz: Class<T>?, function: Function<BinaryStream?, T>): Array<T> {
-        val deque = ArrayDeque<T>()
-        val count = unsignedVarInt.toInt()
-        for (i in 0..<count) {
-            deque.add(function.apply(this)!!)
-        }
-        return deque.toArray(java.lang.reflect.Array.newInstance(clazz, 0) as Array<T>)
-    }
-
-    fun <T> getArray(array: MutableCollection<T>, function: Function<BinaryStream?, T>) {
-        getArray(
-            array,
-            { obj: BinaryStream -> obj.unsignedVarInt }, function
-        )
-    }
-
-    fun <T> getArray(
-        array: MutableCollection<T>,
-        lengthReader: ToLongFunction<BinaryStream>,
-        function: Function<BinaryStream?, T>
-    ) {
-        val length = lengthReader.applyAsLong(this)
-        for (i in 0..<length) {
-            array.add(function.apply(this))
-        }
-    }
-
-    fun feof(): Boolean {
-        return this.offset < 0 || this.offset >= buffer.size
-    }
-
-    val tag: CompoundTag
-        get() {
-            val `is` = ByteArrayInputStream(buffer, offset, buffer.size)
-            val initial = `is`.available()
-            try {
-                return read(`is`)
-            } finally {
-                offset += initial - `is`.available()
-            }
-        }
-
-    fun putTag(tag: CompoundTag) {
-        put(write(tag))
     }
 
     private fun ensureCapacity(minCapacity: Int) {

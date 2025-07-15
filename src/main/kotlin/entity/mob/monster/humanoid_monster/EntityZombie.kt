@@ -38,7 +38,6 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.TakeItemEntityPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
@@ -58,8 +57,8 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                 Behavior(
                     NearestBlockIncementExecutor(),
                     { entity: EntityMob? ->
-                        !memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_BLOCK) && memoryStorage.get<Block>(
-                            CoreMemoryTypes.Companion.NEAREST_BLOCK
+                        !memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_BLOCK) && memoryStorage.get<Block>(
+                            CoreMemoryTypes.NEAREST_BLOCK
                         ) is BlockTurtleEgg
                     }, 1, 1
                 )
@@ -76,37 +75,37 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                 ),
                 Behavior(
                     JumpExecutor(), all(
-                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_BLOCK) },
+                        IBehaviorEvaluator { entity: EntityMob? -> !memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_BLOCK) },
                         IBehaviorEvaluator { entity: EntityMob ->
                             entity.getCollisionBlocks()!!.stream().anyMatch { block: Block? -> block is BlockTurtleEgg }
                         }), 6, 1, 10
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_BLOCK, 0.3f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_BLOCK, 0.3f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK),
                     5,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     4,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 40, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 40, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     3,
                     1
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         40,
                         true,
                         30
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
@@ -114,13 +113,13 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                 NearestPlayerSensor(40.0, 0.0, 0),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
                         )
                     }),
-                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 11, 15, 10)
+                BlockSensor(BlockTurtleEgg::class.java, CoreMemoryTypes.NEAREST_BLOCK, 11, 15, 10)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
@@ -225,9 +224,10 @@ open class EntityZombie(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
                         val item = i.item
                         if (item.isArmor || item.isTool) {
                             if (entity.equip(item)) {
-                                val pk = TakeItemEntityPacket()
-                                pk.entityId = entity.getRuntimeID()
-                                pk.target = i.getRuntimeID()
+                                val pk = org.chorus_oss.protocol.packets.TakeItemEntityPacket(
+                                    itemEntityRuntimeID = i.getRuntimeID().toULong(),
+                                    takerEntityRuntimeID = entity.getRuntimeID().toULong(),
+                                )
                                 Server.broadcastPacket(entity.viewers.values, pk)
                                 i.close()
                             }

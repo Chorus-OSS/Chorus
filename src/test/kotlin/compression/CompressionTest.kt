@@ -1,7 +1,8 @@
 package org.chorus_oss.chorus.compression
 
 import org.apache.commons.lang3.reflect.FieldUtils
-import org.chorus_oss.chorus.*
+import org.chorus_oss.chorus.GameMockExtension
+import org.chorus_oss.chorus.Server
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import java.io.IOException

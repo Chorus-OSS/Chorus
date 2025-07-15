@@ -6,9 +6,9 @@ import org.chorus_oss.protocol.types.biome.BiomeScatterParamData
 import org.chorus_oss.protocol.types.biome.CoordinateEvaluationOrder
 import org.chorus_oss.protocol.types.biome.ExpressionOp
 
-fun BiomeScatterParamData.Companion.fromNBT(nbt: CompoundTag): BiomeScatterParamData {
+operator fun BiomeScatterParamData.Companion.invoke(nbt: CompoundTag): BiomeScatterParamData {
     return BiomeScatterParamData(
-        coordinate = nbt.getList("coordinates", CompoundTag::class.java).all.map { BiomeCoordinateData.fromNBT(it) },
+        coordinate = nbt.getList("coordinates", CompoundTag::class.java).all.map { BiomeCoordinateData.invoke(it) },
         evalOrder = CoordinateEvaluationOrder.entries[nbt.getInt("evalOrder")],
         chancePercentType = ExpressionOp.entries[nbt.getInt("changePercentType")],
         chancePercent = nbt.getShort("changePercent"),

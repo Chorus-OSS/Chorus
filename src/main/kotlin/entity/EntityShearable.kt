@@ -27,10 +27,10 @@ interface EntityShearable : EntityComponent {
     }
 
     fun isSheared(): Boolean {
-        return memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_SHEARED)
+        return memoryStorage.get<Boolean>(CoreMemoryTypes.IS_SHEARED)
     }
 
     fun setIsSheared(isSheared: Boolean) {
-        memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.IS_SHEARED, isSheared)
+        memoryStorage.set<Boolean>(CoreMemoryTypes.IS_SHEARED, isSheared)
     }
 }

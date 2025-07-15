@@ -38,6 +38,6 @@ class WolfNearestFeedingPlayerSensor @JvmOverloads constructor(range: Double, mi
             entity.memoryStorage[CoreMemoryTypes.NEAREST_FEEDING_PLAYER] = player
             return
         }
-        entity.memoryStorage.clear(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)
+        entity.memoryStorage.clear(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)
     }
 }

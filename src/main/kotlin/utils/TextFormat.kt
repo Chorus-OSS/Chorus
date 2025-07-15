@@ -13,7 +13,7 @@ const val ESCAPE: Char = '\u00A7'
  * All supported formatting values for chat and console.
  */
 enum class TextFormat(
-    code: Char, private val intCode: Int,
+    val char: Char, private val intCode: Int,
     /**
      * Checks if this code is a format code as opposed to a color code.
      */
@@ -300,17 +300,8 @@ enum class TextFormat(
         }
     }
 
-    /**
-     * Gets the char value associated with this color
-     *
-     * @return A char value of this color code
-     */
-    val char: Char = code
-
-    private val toString: String = String(charArrayOf(ESCAPE, code))
-
     override fun toString(): String {
-        return toString
+        return "$ESCAPE$char"
     }
 
     val isColor: Boolean

@@ -434,8 +434,8 @@ class ServerScheduler {
 
     fun mainThreadHeartbeat(currentTick: Int) {
         // Accepts pending.
-        var task: TaskHandler
-        while ((pending.poll().also { task = it }) != null) {
+        while (true) {
+            val task = pending.poll() ?: break
             val tick = max(currentTick.toDouble(), task.nextRunTick.toDouble()).toInt() // Do not schedule in the past
             val queue = Utils.getOrCreate(
                 queueMap,

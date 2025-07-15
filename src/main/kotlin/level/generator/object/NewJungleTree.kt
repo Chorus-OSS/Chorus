@@ -183,7 +183,7 @@ class NewJungleTree(
                     //Add cocoa beans
                     if (rand.nextInt(5) == 0 && i > 5) {
                         for (l3 in 0..1) {
-                            for (enumfacing in BlockFace.Plane.HORIZONTAL) {
+                            for (enumfacing in BlockFace.Plane.HORIZONTAL_FACES) {
                                 if (rand.nextInt(4 - l3) == 0) {
                                     val enumfacing1: BlockFace = enumfacing.getOpposite()
                                     this.placeCocoa(

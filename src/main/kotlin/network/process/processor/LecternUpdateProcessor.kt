@@ -5,16 +5,20 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockLectern
 import org.chorus_oss.chorus.blockentity.BlockEntityLectern
 import org.chorus_oss.chorus.event.block.LecternPageChangeEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.LecternUpdatePacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
+import org.chorus_oss.protocol.packets.LecternUpdatePacket
 
-class LecternUpdateProcessor : DataPacketProcessor<LecternUpdatePacket>() {
-    override fun handle(player: Player, pk: LecternUpdatePacket) {
-        val blockPosition = pk.blockPosition
+class LecternUpdateProcessor : DataPacketProcessor<MigrationPacket<LecternUpdatePacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<LecternUpdatePacket>) {
+        val packet = pk.packet
+
+        val blockPosition = Vector3(packet.blockPosition)
         val blockEntityLectern = player.player.level!!.getBlockEntity(blockPosition)
         if (blockEntityLectern is BlockEntityLectern) {
-            val lecternPageChangeEvent = LecternPageChangeEvent(player.player, blockEntityLectern, pk.page)
+            val lecternPageChangeEvent = LecternPageChangeEvent(player.player, blockEntityLectern, packet.page.toInt())
             Server.instance.pluginManager.callEvent(lecternPageChangeEvent)
             if (!lecternPageChangeEvent.cancelled) {
                 blockEntityLectern.rawPage = lecternPageChangeEvent.newRawPage
@@ -27,6 +31,5 @@ class LecternUpdateProcessor : DataPacketProcessor<LecternUpdatePacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.LECTERN_UPDATE_PACKET
+    override val packetId: Int = LecternUpdatePacket.id
 }

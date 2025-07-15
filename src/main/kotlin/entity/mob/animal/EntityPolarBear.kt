@@ -39,12 +39,12 @@ class EntityPolarBear(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nb
             setOf<IBehavior>(
                 Behavior(
                     FlatRandomRoamExecutor(0.4f, 12, 40, true, 100, true, 10),
-                    PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 100),
+                    PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100),
                     4,
                     1
                 ),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     1,
                     1,

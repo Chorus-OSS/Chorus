@@ -98,7 +98,7 @@ class UsePotionExecutor
         } else if (entity.health < entity.maxHealth) {
             return ItemPotion.fromPotion(PotionType.Companion.HEALING)
         } else if (entity is EntityMob) {
-            if (entity.memoryStorage.notEmpty(CoreMemoryTypes.Companion.BE_ATTACKED_EVENT)) {
+            if (entity.memoryStorage.notEmpty(CoreMemoryTypes.BE_ATTACKED_EVENT)) {
                 val event = entity.memoryStorage.get(CoreMemoryTypes.BE_ATTACKED_EVENT)
                 if (event is EntityDamageByEntityEvent) {
                     if (event.damager.position.distance(entity.position) > 11) {

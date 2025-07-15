@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.entity
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.entity.data.EntityFlag
-import org.chorus_oss.chorus.entity.data.PlayerFlag
 import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.inventory.*
 import org.chorus_oss.chorus.item.Item
@@ -21,7 +20,6 @@ import java.util.stream.Collectors
 
 interface IHuman : InventoryHolder {
     fun initHumanEntity(human: Entity) {
-        human.setPlayerFlag(PlayerFlag.SLEEP)
         human.setDataFlag(EntityFlag.HAS_GRAVITY)
         human.setDataProperty(EntityDataTypes.BED_POSITION, BlockVector3(0, 0, 0), false)
 

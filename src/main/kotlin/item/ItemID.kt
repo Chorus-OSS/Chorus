@@ -1046,5 +1046,7 @@ interface ItemID {
         const val HARNESS_GREEN: String = "minecraft:green_harness"
         const val HARNESS_RED: String = "minecraft:red_harness"
         const val HARNESS_BLACK: String = "minecraft:black_harness"
+
+        const val MUSIC_DISC_LAVA_CHICKEN: String = "minecraft:music_disc_lava_chicken"
     }
 }

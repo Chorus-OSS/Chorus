@@ -16,19 +16,18 @@ import org.chorus_oss.chorus.network.protocol.PlayerEnchantOptionsPacket
 import org.chorus_oss.chorus.network.protocol.types.TrimData
 import org.chorus_oss.chorus.network.protocol.types.TrimMaterial
 import org.chorus_oss.chorus.network.protocol.types.TrimPattern
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ConsumeAction
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.CraftRecipeAction
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.recipe.SmithingTransformRecipe
 import org.chorus_oss.chorus.recipe.SmithingTrimRecipe
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.TradeRecipeBuildUtils
+import org.chorus_oss.protocol.types.itemstack.request.action.ConsumeRequestAction
+import org.chorus_oss.protocol.types.itemstack.request.action.CraftRecipeRequestAction
 import java.util.*
 import kotlin.math.max
 
-class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAction> {
+class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeRequestAction> {
     fun checkTrade(recipeInput: CompoundTag, input: Item, subtract: Int): Boolean {
         val id = input.id
         val damage = input.damage
@@ -60,10 +59,14 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
         return false
     }
 
-    override fun handle(action: CraftRecipeAction, player: Player, context: ItemStackRequestContext): ActionResponse? {
+    override fun handle(
+        action: CraftRecipeRequestAction,
+        player: Player,
+        context: ItemStackRequestContext
+    ): ActionResponse? {
         val inventory = player.topWindow.orElseGet { player.craftingGrid }
-        if (action.recipeNetworkId >= PlayerEnchantOptionsPacket.ENCH_RECIPEID) {  //handle ench recipe
-            val enchantOptionData = PlayerEnchantOptionsPacket.RECIPE_MAP[action.recipeNetworkId]
+        if (action.recipeNetworkId.toInt() >= PlayerEnchantOptionsPacket.ENCH_RECIPEID) {  //handle ench recipe
+            val enchantOptionData = PlayerEnchantOptionsPacket.RECIPE_MAP[action.recipeNetworkId.toInt()]
             if (enchantOptionData == null) {
                 log.error("Can't find enchant recipe from netId " + action.recipeNetworkId)
                 return context.error()
@@ -90,13 +93,13 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
                     player.setExperience(player.experience, player.experienceLevel - (enchantOptionData.entry + 1))
                 }
                 player.creativeOutputInventory.setItem(item)
-                PlayerEnchantOptionsPacket.RECIPE_MAP.remove(action.recipeNetworkId)
+                PlayerEnchantOptionsPacket.RECIPE_MAP.remove(action.recipeNetworkId.toInt())
                 player.regenerateEnchantmentSeed()
                 context.put(ENCH_RECIPE_KEY, true)
             }
             return null
-        } else if (action.recipeNetworkId >= TradeRecipeBuildUtils.TRADE_RECIPE_ID) { //handle village trade recipe
-            val tradeRecipe = TradeRecipeBuildUtils.RECIPE_MAP[action.recipeNetworkId]
+        } else if (action.recipeNetworkId.toInt() >= TradeRecipeBuildUtils.TRADE_RECIPE_ID) { //handle village trade recipe
+            val tradeRecipe = TradeRecipeBuildUtils.RECIPE_MAP[action.recipeNetworkId.toInt()]
             if (tradeRecipe == null) {
                 log.error("Can't find trade recipe from netId {}", action.recipeNetworkId)
                 return context.error()
@@ -108,7 +111,7 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
             if (inventory.holder is EntityVillagerV2) {
                 reputation = (inventory.holder as EntityVillagerV2).getReputation(player)
             }
-            output.setCount(output.getCount() * action.numberOfRequestedCrafts)
+            output.setCount(output.getCount() * action.numberOfCrafts)
             if (first.isNothing && second.isNothing) {
                 log.error("Can't find trade input!")
                 return context.error()
@@ -136,7 +139,7 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
                     return context.error()
                 } else {
                     if (checkTrade(tradeRecipe.getCompound("buyA"), first, reductionA)) return context.error()
-                    if (tradeRecipe.getInt("uses") + action.numberOfRequestedCrafts > tradeRecipe.getInt("maxUses")) return context.error()
+                    if (tradeRecipe.getInt("uses") + action.numberOfCrafts > tradeRecipe.getInt("maxUses")) return context.error()
                     inventory.sendContents(player)
                     player.creativeOutputInventory.setItem(output)
                 }
@@ -144,11 +147,11 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
             if (ca) {
                 val traderExp = if (tradeRecipe.contains("traderExp")) tradeRecipe.getInt("traderExp") else 0
                 val rewardExp = if (tradeRecipe.contains("rewardExp")) tradeRecipe.getInt("rewardExp") else 0
-                player.addExperience(rewardExp * action.numberOfRequestedCrafts)
-                tradeRecipe.putInt("uses", tradeRecipe.getInt("uses") + action.numberOfRequestedCrafts)
+                player.addExperience(rewardExp * action.numberOfCrafts)
+                tradeRecipe.putInt("uses", tradeRecipe.getInt("uses") + action.numberOfCrafts)
                 if (inventory.holder is EntityVillagerV2) {
                     val villager = inventory.holder as EntityVillagerV2
-                    villager.addExperience(traderExp * action.numberOfRequestedCrafts)
+                    villager.addExperience(traderExp * action.numberOfCrafts)
                     villager.addGossip(player.loginChainData.xuid!!, EntityVillagerV2.Gossip.TRADING, 2)
                 }
             }
@@ -159,8 +162,8 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
         } else {
             player.craftingGrid
         }
-        val numberOfRequestedCrafts = action.numberOfRequestedCrafts
-        val recipe = Registries.RECIPE.getRecipeByNetworkId(action.recipeNetworkId)
+        val numberOfRequestedCrafts = action.numberOfCrafts
+        val recipe = Registries.RECIPE.getRecipeByNetworkId(action.recipeNetworkId.toInt())
         val input = craft.input
         val data = input.data
         val items = ArrayList<Item>()
@@ -307,11 +310,14 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeAc
         const val RECIPE_DATA_KEY: String = "recipe"
         const val ENCH_RECIPE_KEY: String = "ench_recipe"
 
-        fun findAllConsumeActions(actions: Array<ItemStackRequestAction>, startIndex: Int): List<ConsumeAction> {
-            val found = ArrayList<ConsumeAction>()
+        fun findAllConsumeActions(
+            actions: List<org.chorus_oss.protocol.types.itemstack.request.action.ItemStackRequestAction>,
+            startIndex: Int
+        ): List<ConsumeRequestAction> {
+            val found = mutableListOf<ConsumeRequestAction>()
             for (i in startIndex..<actions.size) {
                 val action = actions[i]
-                if (action is ConsumeAction) {
+                if (action is ConsumeRequestAction) {
                     found.add(action)
                 }
             }

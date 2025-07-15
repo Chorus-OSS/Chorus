@@ -5,7 +5,7 @@ import org.chorus_oss.protocol.types.biome.BiomeElementData
 import org.chorus_oss.protocol.types.biome.BiomeSurfaceMaterialData
 import org.chorus_oss.protocol.types.biome.ExpressionOp
 
-fun BiomeElementData.Companion.fromNBT(nbt: CompoundTag): BiomeElementData {
+operator fun BiomeElementData.Companion.invoke(nbt: CompoundTag): BiomeElementData {
     return BiomeElementData(
         noiseFrequencyScale = nbt.getFloat("noiseFreqScale"),
         noiseLowerBound = nbt.getFloat("noiseLowerBound"),
@@ -14,6 +14,6 @@ fun BiomeElementData.Companion.fromNBT(nbt: CompoundTag): BiomeElementData {
         heightMin = nbt.getShort("heightMin"),
         heightMaxType = ExpressionOp.entries[nbt.getInt("heightMaxType")],
         heightMax = nbt.getShort("heightMax"),
-        adjustedMaterials = BiomeSurfaceMaterialData.fromNBT(nbt.getCompound("adjustedMaterials"))
+        adjustedMaterials = BiomeSurfaceMaterialData.invoke(nbt.getCompound("adjustedMaterials"))
     )
 }

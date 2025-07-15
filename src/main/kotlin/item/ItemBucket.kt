@@ -8,6 +8,7 @@ import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.EntityVariant
 import org.chorus_oss.chorus.event.player.PlayerBucketEmptyEvent
 import org.chorus_oss.chorus.event.player.PlayerBucketFillEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Sound
@@ -17,7 +18,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.UpdateBlockPacket
 import org.chorus_oss.chorus.utils.Identifier
 
 
@@ -199,7 +199,7 @@ open class ItemBucket : Item {
                     )
 
                     // When water is removed ensure any adjacent still water is replaced with water that can flow.
-                    for (side in BlockFace.Plane.HORIZONTAL) {
+                    for (side in BlockFace.Plane.HORIZONTAL_FACES) {
                         val b = target.getSideAtLayer(0, side)
                         if (b.id == BlockID.WATER) {
                             level.setBlock(b.position, Block.get(BlockID.FLOWING_WATER))
@@ -273,7 +273,7 @@ open class ItemBucket : Item {
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf(target.getLevelBlockAtLayer(1)),
-                    UpdateBlockPacket.FLAG_ALL_PRIORITY,
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
                     1
                 )
                 target.level.vibrationManager.callVibrationEvent(
@@ -299,7 +299,7 @@ open class ItemBucket : Item {
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf(block.getLevelBlockAtLayer(1)),
-                    UpdateBlockPacket.FLAG_ALL_PRIORITY,
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
                     1
                 )
                 player.inventory.sendContents(player)

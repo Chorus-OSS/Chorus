@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.entity.data
 
-import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockState
 import java.util.*
 import java.util.function.Function

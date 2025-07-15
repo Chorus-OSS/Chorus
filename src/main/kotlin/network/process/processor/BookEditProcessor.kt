@@ -3,58 +3,59 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerEditBookEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.ItemWritableBook
 import org.chorus_oss.chorus.item.ItemWrittenBook
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.BookEditPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.Loggable
 
 
-class BookEditProcessor : DataPacketProcessor<BookEditPacket>() {
-    override fun handle(player: Player, pk: BookEditPacket) {
+class BookEditProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protocol.packets.BookEditPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<org.chorus_oss.protocol.packets.BookEditPacket>) {
+        val packet = pk.packet
+
         val player = player.player
 
-        val oldBook = player.inventory.getItem(pk.bookSlot.toInt())
+        val oldBook = player.inventory.getItem(packet.bookSlot.toInt())
         if (oldBook.id != ItemID.WRITABLE_BOOK) {
             return
         }
 
         var newBook: Item = oldBook.clone()
         val success: Boolean
-        when (pk.action) {
-            BookEditPacket.Action.REPLACE_PAGE -> {
-                val actionData = pk.actionData as BookEditPacket.ReplacePageData
+        when (packet.action) {
+            org.chorus_oss.protocol.packets.BookEditPacket.Action.ReplacePage -> {
+                val actionData = packet.actionData as org.chorus_oss.protocol.packets.BookEditPacket.ReplacePageData
                 if (actionData.text.length > 512) return
 
                 success = (newBook as ItemWritableBook).setPageText(actionData.pageIndex.toInt(), actionData.text)
             }
 
-            BookEditPacket.Action.ADD_PAGE -> {
-                val actionData = pk.actionData as BookEditPacket.AddPageData
+            org.chorus_oss.protocol.packets.BookEditPacket.Action.AddPage -> {
+                val actionData = packet.actionData as org.chorus_oss.protocol.packets.BookEditPacket.AddPageData
                 if (actionData.text.length > 512) return
 
                 success = (newBook as ItemWritableBook).insertPage(actionData.pageIndex.toInt(), actionData.text)
             }
 
-            BookEditPacket.Action.DELETE_PAGE -> {
-                val actionData = pk.actionData as BookEditPacket.DeletePageData
+            org.chorus_oss.protocol.packets.BookEditPacket.Action.DeletePage -> {
+                val actionData = packet.actionData as org.chorus_oss.protocol.packets.BookEditPacket.DeletePageData
                 success = (newBook as ItemWritableBook).deletePage(actionData.pageIndex.toInt())
             }
 
-            BookEditPacket.Action.SWAP_PAGES -> {
-                val actionData = pk.actionData as BookEditPacket.SwapPagesData
+            org.chorus_oss.protocol.packets.BookEditPacket.Action.SwapPages -> {
+                val actionData = packet.actionData as org.chorus_oss.protocol.packets.BookEditPacket.SwapPagesData
                 success = (newBook as ItemWritableBook).swapPages(
                     actionData.pageIndexA.toInt(),
                     actionData.pageIndexB.toInt()
                 )
             }
 
-            BookEditPacket.Action.FINALIZE -> {
-                val actionData = pk.actionData as BookEditPacket.FinalizeData
+            org.chorus_oss.protocol.packets.BookEditPacket.Action.Finalize -> {
+                val actionData = packet.actionData as org.chorus_oss.protocol.packets.BookEditPacket.FinalizeData
                 if (actionData.title.length > 64 || actionData.author.length > 64 || actionData.xuid.length > 64) return
 
                 newBook = get(ItemID.WRITTEN_BOOK, 0, 1, oldBook.compoundTag)
@@ -65,21 +66,18 @@ class BookEditProcessor : DataPacketProcessor<BookEditPacket>() {
                     ItemWrittenBook.GENERATION_ORIGINAL
                 )
             }
-
-            else -> return
         }
 
         if (success) {
-            val editBookEvent = PlayerEditBookEvent(player, oldBook, newBook, pk.action)
+            val editBookEvent = PlayerEditBookEvent(player, oldBook, newBook, packet.action)
             Server.instance.pluginManager.callEvent(editBookEvent)
             if (!editBookEvent.cancelled) {
-                player.inventory.setItem(pk.bookSlot.toInt(), editBookEvent.newBook)
+                player.inventory.setItem(packet.bookSlot.toInt(), editBookEvent.newBook)
             }
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.BOOK_EDIT_PACKET
+    override val packetId: Int = org.chorus_oss.protocol.packets.BookEditPacket.id
 
     companion object : Loggable
 }

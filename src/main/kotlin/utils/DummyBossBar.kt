@@ -6,10 +6,14 @@ import org.chorus_oss.chorus.entity.Attribute.Companion.getAttribute
 import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataMap
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
-import org.chorus_oss.chorus.math.Vector2f
-import org.chorus_oss.chorus.math.Vector3f
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.network.protocol.MoveEntityAbsolutePacket
+import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
+import org.chorus_oss.protocol.packets.BossEventPacket
+import org.chorus_oss.protocol.packets.SetActorDataPacket
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.actor_data.ActorDataType
 import java.util.concurrent.ThreadLocalRandom
 
 class DummyBossBar private constructor(builder: Builder) {
@@ -29,8 +33,7 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     class Builder(val player: Player) {
-        val bossBarId: Long =
-            1095216660480L + ThreadLocalRandom.current().nextLong(0, 0x7fffffffL)
+        val bossBarId: Long = 1095216660480L + ThreadLocalRandom.current().nextLong(0, 0x7fffffffL)
 
         var text: String = ""
         var length: Float = 100f
@@ -93,17 +96,17 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun createBossEntity() {
-        player.dataPacket(
-            AddActorPacket(
-                targetActorID = this.bossBarId,
-                targetRuntimeID = this.bossBarId,
+        player.sendPacket(
+            org.chorus_oss.protocol.packets.AddActorPacket(
+                actorUniqueID = this.bossBarId,
+                actorRuntimeID = this.bossBarId.toULong(),
                 actorType = EntityID.CREEPER,
-                position = player.position.asVector3f().setY(-74f),
-                velocity = Vector3f(),
-                rotation = Vector2f(),
-                yHeadRotation = 0f,
-                yBodyRotation = 0f,
-                attributeList = emptyList(),
+                position = org.chorus_oss.protocol.types.Vector3f(player.position.asVector3f().setY(-74f)),
+                velocity = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                rotation = org.chorus_oss.protocol.types.Vector2f(0f, 0f),
+                headYaw = 0f,
+                bodyYaw = 0f,
+                attributes = emptyList(),
                 actorData = run {
                     val entityDataMap = EntityDataMap()
                     entityDataMap.getOrCreateFlags()
@@ -112,9 +115,9 @@ class DummyBossBar private constructor(builder: Builder) {
                     entityDataMap[EntityDataTypes.LEASH_HOLDER] = -1
                     entityDataMap[EntityDataTypes.NAME] = text
                     entityDataMap[EntityDataTypes.SCALE] = 0
-                    entityDataMap
+                    ActorDataMap(entityDataMap)
                 },
-                syncedProperties = PropertySyncData(intArrayOf(), floatArrayOf()),
+                actorProperties = ActorProperties(emptyList(), emptyList()),
                 actorLinks = emptyList()
             )
         )
@@ -131,51 +134,51 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun sendShowBossBar() {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = bossBarId,
-                eventType = BossEventPacket.EventType.ADD,
-                eventData = BossEventPacket.EventType.Companion.AddData(
+                eventType = BossEventPacket.Companion.EventType.Add,
+                eventData = BossEventPacket.Companion.EventType.Companion.AddData(
                     name = text,
                     filteredName = text,
                     healthPercent = this.length / 100,
-                    darkenScreen = 0,
-                    color = 0,
-                    overlay = 0
+                    darkenScreen = 0u,
+                    color = 0u,
+                    overlay = 0u
                 )
             )
         )
     }
 
     private fun sendHideBossBar() {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = bossBarId,
-                eventType = BossEventPacket.EventType.REMOVE,
+                eventType = BossEventPacket.Companion.EventType.Remove,
                 eventData = null,
             )
         )
     }
 
     private fun sendSetBossBarTexture() {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = this.bossBarId,
-                eventType = BossEventPacket.EventType.UPDATE_STYLE,
-                eventData = BossEventPacket.EventType.Companion.UpdateStyleData(
-                    color = if (color != null) color!!.ordinal else 0,
-                    overlay = 0,
+                eventType = BossEventPacket.Companion.EventType.UpdateStyle,
+                eventData = BossEventPacket.Companion.EventType.Companion.UpdateStyleData(
+                    color = if (color != null) color!!.ordinal.toUInt() else 0u,
+                    overlay = 0u,
                 )
             )
         )
     }
 
     private fun sendSetBossBarTitle() {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = bossBarId,
-                eventType = BossEventPacket.EventType.UPDATE_NAME,
-                eventData = BossEventPacket.EventType.Companion.UpdateNameData(
+                eventType = BossEventPacket.Companion.EventType.UpdateName,
+                eventData = BossEventPacket.Companion.EventType.Companion.UpdateNameData(
                     name = text,
                     filteredName = text,
                 )
@@ -184,11 +187,11 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun sendSetBossBarLength() {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = bossBarId,
-                eventType = BossEventPacket.EventType.UPDATE_PERCENT,
-                eventData = BossEventPacket.EventType.Companion.UpdatePercentData(
+                eventType = BossEventPacket.Companion.EventType.UpdatePercent,
+                eventData = BossEventPacket.Companion.EventType.Companion.UpdatePercentData(
                     healthPercent = this.length / 100
                 )
             )
@@ -212,18 +215,20 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun updateBossEntityNameTag() {
-        val pk = SetEntityDataPacket()
-        pk.eid = this.bossBarId
-        val entityDataMap = EntityDataMap()
-        entityDataMap[EntityDataTypes.NAME] = text
-        pk.entityData = entityDataMap
-        player.dataPacket(pk)
+        val pk = SetActorDataPacket(
+            actorRuntimeID = this.bossBarId.toULong(),
+            actorDataMap = ActorDataMap().apply { this.put(ActorDataType.Name, text) },
+            actorProperties = ActorProperties(emptyList(), emptyList()),
+            tick = 0uL
+        )
+        player.sendPacket(pk)
     }
 
     private fun removeBossEntity() {
-        val pkRemove = RemoveActorPacket()
-        pkRemove.actorUniqueID = bossBarId
-        player.dataPacket(pkRemove)
+        val pkRemove = org.chorus_oss.protocol.packets.RemoveActorPacket(
+            actorUniqueID = bossBarId
+        )
+        player.sendPacket(pkRemove)
     }
 
     fun create() {

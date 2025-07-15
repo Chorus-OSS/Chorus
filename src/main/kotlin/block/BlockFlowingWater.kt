@@ -38,7 +38,7 @@ open class BlockFlowingWater @JvmOverloads constructor(blockstate: BlockState = 
         }
 
         val up = up(1, 0)
-        for (diagonalFace in BlockFace.Plane.HORIZONTAL) {
+        for (diagonalFace in BlockFace.Plane.HORIZONTAL_FACES) {
             val diagonal = up.getSide(diagonalFace)
             if (diagonal.id == BlockID.REEDS) {
                 diagonal.onUpdate(Level.BLOCK_UPDATE_SCHEDULED)

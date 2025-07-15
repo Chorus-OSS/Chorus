@@ -11,6 +11,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.vehicle.VehicleMoveEvent
 import org.chorus_oss.chorus.event.vehicle.VehicleUpdateEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.GameRule
@@ -20,10 +21,12 @@ import org.chorus_oss.chorus.math.AxisAlignedBB.BBConsumer
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.AddActorPacket
 import org.chorus_oss.chorus.network.protocol.AnimatePacket
-import org.chorus_oss.chorus.network.protocol.DataPacket
-import org.chorus_oss.chorus.network.protocol.types.EntityLink
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.ActorLink
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.attribute.AttributeValue
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -123,26 +126,33 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
         }
     }
 
-    override fun createAddEntityPacket(): DataPacket {
-        return AddActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
+    override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
-            position = this.position.asVector3f().add(0f, this.getBaseOffset(), 0f),
-            velocity = this.motion.asVector3f(),
-            rotation = this.rotation.asVector2f(),
-            yHeadRotation = this.rotation.yaw.toFloat(),
-            yBodyRotation = this.rotation.yaw.toFloat(),
-            attributeList = this.attributes.values.toList(),
-            actorData = this.entityDataMap,
-            syncedProperties = this.propertySyncData(),
+            position = org.chorus_oss.protocol.types.Vector3f(
+                this.position.add(
+                    0.0,
+                    this.getBaseOffset().toDouble(),
+                    0.0
+                )
+            ),
+            velocity = org.chorus_oss.protocol.types.Vector3f(this.motion),
+            rotation = org.chorus_oss.protocol.types.Vector2f(this.rotation),
+            headYaw = this.rotation.yaw.toFloat(),
+            bodyYaw = this.rotation.yaw.toFloat(),
+            attributes = this.attributes.values.map(AttributeValue::invoke),
+            actorData = ActorDataMap(this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
             actorLinks = List(passengers.size) { i ->
-                EntityLink(
-                    this.getRuntimeID(),
-                    passengers[i].getRuntimeID(),
-                    if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                ActorLink(
+                    riddenActorUniqueID = this.uniqueId,
+                    riderActorUniqueID = passengers[i].uniqueId,
+                    type = if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                     immediate = false,
-                    riderInitiated = false
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f
                 )
             }
         )
@@ -346,7 +356,7 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
             super.updatePassengerPosition(ent)
 
             if (sendLinks) {
-                broadcastLinkPacket(ent, EntityLink.Type.RIDER)
+                broadcastLinkPacket(ent, ActorLink.Companion.Type.Rider)
             }
         } else if (passengers.size == 2) {
             if ((passengers.get(0).also { ent = it }) !is Player) { //swap
@@ -363,7 +373,7 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
             ent.setSeatPosition(getMountedOffset(ent).add(RIDER_PASSENGER_OFFSET))
             super.updatePassengerPosition(ent)
             if (sendLinks) {
-                broadcastLinkPacket(ent, EntityLink.Type.RIDER)
+                broadcastLinkPacket(ent, ActorLink.Companion.Type.Rider)
             }
 
             (passengers.get(1).also { ent = it }).setSeatPosition(getMountedOffset(ent).add(PASSENGER_OFFSET))
@@ -371,7 +381,7 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
             super.updatePassengerPosition(ent)
 
             if (sendLinks) {
-                broadcastLinkPacket(ent, EntityLink.Type.PASSENGER)
+                broadcastLinkPacket(ent, ActorLink.Companion.Type.Passenger)
             }
 
             //float yawDiff = ent.getId() % 2 == 0 ? 90 : 270;
@@ -414,16 +424,16 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
 
     override fun mountEntity(entity: Entity): Boolean {
         val player: Boolean = !passengers.isEmpty() && passengers.get(0) is Player
-        var mode: EntityLink.Type = EntityLink.Type.PASSENGER
+        var mode = ActorLink.Companion.Type.Passenger
 
         if (!player && (entity is Player || passengers.isEmpty())) {
-            mode = EntityLink.Type.RIDER
+            mode = ActorLink.Companion.Type.Rider
         }
 
         return super.mountEntity(entity, mode)
     }
 
-    override fun mountEntity(entity: Entity, mode: EntityLink.Type): Boolean {
+    override fun mountEntity(entity: Entity, mode: ActorLink.Companion.Type): Boolean {
         val r: Boolean = super.mountEntity(entity, mode)
         if (entity.riding === this) {
             updatePassengers(true)

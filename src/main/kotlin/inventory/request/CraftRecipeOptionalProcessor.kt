@@ -12,17 +12,17 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.CraftRecipeOptionalAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.CraftRecipeOptionalRequestAction
 import java.util.*
 import java.util.stream.Stream
 import kotlin.math.max
 import kotlin.math.min
 
-class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipeOptionalAction> {
+class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipeOptionalRequestAction> {
     override fun handle(
-        action: CraftRecipeOptionalAction,
+        action: CraftRecipeOptionalRequestAction,
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {
@@ -35,7 +35,7 @@ class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipe
         val inventory = topWindow.get()
 
         var filterString: String? = null
-        if (itemStackRequest.filterStrings.size != 0 && !itemStackRequest.filterStrings[0].isBlank()) {
+        if (itemStackRequest.filterStrings.isNotEmpty() && !itemStackRequest.filterStrings[0].isBlank()) {
             val filteredStringIndex = action.filteredStringIndex
             val filterStrings = itemStackRequest.filterStrings
             filterString = filterStrings[filteredStringIndex]
@@ -83,9 +83,9 @@ class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipe
         val repairMaterial = getRepairMaterial(target)
         var result = target.clone()
 
-        val enchantments: MutableSet<Enchantment> = LinkedHashSet(Arrays.asList(*target.enchantments))
+        val enchantments: MutableSet<Enchantment> = LinkedHashSet(listOf(*target.enchantments))
         if (!sacrifice.isNothing) {
-            val enchantedBook = sacrifice.id == ItemID.ENCHANTED_BOOK && sacrifice.enchantments.size > 0
+            val enchantedBook = sacrifice.id == ItemID.ENCHANTED_BOOK && sacrifice.enchantments.isNotEmpty()
             var repair: Int
             var repair2: Int
             var repair3: Int

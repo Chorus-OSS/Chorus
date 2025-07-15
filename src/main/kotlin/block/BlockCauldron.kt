@@ -26,7 +26,8 @@ import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
 import kotlin.math.sqrt
 
-class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSolid(blockState), BlockEntityHolder<BlockEntityCauldron> {
+class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSolid(blockState),
+    BlockEntityHolder<BlockEntityCauldron> {
     override fun getBlockEntityType(): String {
         return BlockEntityID.CAULDRON
     }

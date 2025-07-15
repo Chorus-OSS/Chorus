@@ -4,11 +4,9 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.CommandSender
 import org.chorus_oss.chorus.math.round
 import org.chorus_oss.chorus.utils.TextFormat
-import org.chorus_oss.chorus.utils.ThreadCache
-import kotlin.math.round
 
 class GarbageCollectorCommand(name: String) :
-    TestCommand(name, "%nukkit.command.gc.description", "%nukkit.command.gc.usage"),
+    TestCommand(name, "%chorus.command.gc.description", "%chorus.command.gc.usage"),
     CoreCommand {
     init {
         this.permission = "chorus.command.gc"
@@ -36,7 +34,6 @@ class GarbageCollectorCommand(name: String) :
             tilesCollected += tilesCount - level.blockEntities.size
         }
 
-        ThreadCache.clean()
         System.gc()
 
         val freedMemory = usedMemory - (runtime.totalMemory() - runtime.freeMemory())

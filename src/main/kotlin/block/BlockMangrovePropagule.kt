@@ -33,7 +33,7 @@ class BlockMangrovePropagule @JvmOverloads constructor(blockstate: BlockState = 
         player: Player?
     ): Boolean {
         // TODO: 实现红树树苗放置逻辑
-        if (isSupportValid(down())) {
+        if (isSupportValid(block.down())) {
             level.setBlock(block.position, this, true, true)
             return true
         }

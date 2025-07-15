@@ -3,10 +3,11 @@ package org.chorus_oss.chorus.inventory
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.BlockUndyedShulkerBox
 import org.chorus_oss.chorus.blockentity.BlockEntityShulkerBox
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.network.protocol.BlockEventPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.BlockPos
 
 class ShulkerBoxInventory(box: BlockEntityShulkerBox) : ContainerInventory(box, InventoryType.CONTAINER, 27) {
     override fun init() {
@@ -20,8 +21,8 @@ class ShulkerBoxInventory(box: BlockEntityShulkerBox) : ContainerInventory(box, 
         super.onOpen(who)
 
         if (viewers.size == 1) {
-            val pk = BlockEventPacket(
-                blockPosition = holder.vector3.asBlockVector3(),
+            val pk = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(holder.vector3),
                 eventType = 1,
                 eventValue = 2,
             )
@@ -39,8 +40,8 @@ class ShulkerBoxInventory(box: BlockEntityShulkerBox) : ContainerInventory(box, 
 
     override fun onClose(who: Player) {
         if (viewers.size == 1) {
-            val pk = BlockEventPacket(
-                blockPosition = holder.vector3.asBlockVector3(),
+            val pk = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(holder.vector3),
                 eventType = 1,
                 eventValue = 0,
             )

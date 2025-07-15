@@ -1,14 +1,15 @@
 package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.SetLocalPlayerAsInitializedPacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.SetLocalPlayerAsInitializedPacket
 
 
-class SetLocalPlayerAsInitializedPacketProcessor : DataPacketProcessor<SetLocalPlayerAsInitializedPacket>() {
-    override fun handle(player: Player, pk: SetLocalPlayerAsInitializedPacket) {
+class SetLocalPlayerAsInitializedPacketProcessor :
+    DataPacketProcessor<MigrationPacket<SetLocalPlayerAsInitializedPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<SetLocalPlayerAsInitializedPacket>) {
         val player = player.player
         log.debug(
             "receive SetLocalPlayerAsInitializedPacket for {}",
@@ -17,8 +18,7 @@ class SetLocalPlayerAsInitializedPacketProcessor : DataPacketProcessor<SetLocalP
         player.player.onPlayerLocallyInitialized()
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET
+    override val packetId: Int = SetLocalPlayerAsInitializedPacket.id
 
     companion object : Loggable
 }

@@ -80,16 +80,7 @@ class JavaPluginLoader(private val server: Server) : PluginLoader {
     override fun getPluginDescription(file: File): PluginTOML? {
         try {
             JarFile(file).use { jar ->
-                var entry = jar.getJarEntry("powernukkitx.yml")
-                if (entry == null) {
-                    entry = jar.getJarEntry("nukkit.yml")
-                    if (entry == null) {
-                        entry = jar.getJarEntry("plugin.yml")
-                        if (entry == null) {
-                            return null
-                        }
-                    }
-                }
+                val entry = jar.getJarEntry("plugin.toml") ?: return null
                 jar.getInputStream(entry).use { stream ->
                     return PluginTOML.fromString(Utils.readFile(stream))
                 }

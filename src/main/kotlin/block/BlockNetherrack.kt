@@ -35,7 +35,7 @@ class BlockNetherrack(blockState: BlockState = properties.defaultState) : BlockS
         }
 
         val options: MutableList<String> = ArrayList()
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             val id = getSide(face).id
             if ((id == BlockID.CRIMSON_NYLIUM || id == BlockID.WARPED_NYLIUM) && !options.contains(id)) {
                 options.add(id)

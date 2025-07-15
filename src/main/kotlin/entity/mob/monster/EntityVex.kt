@@ -59,27 +59,27 @@ class EntityVex(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), E
             setOf<IBehavior>(
                 Behavior(PlaySoundExecutor(Sound.MOB_VEX_AMBIENT), RandomSoundEvaluator(), 5, 1),
                 Behavior(
-                    VexMeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 40, true, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
+                    VexMeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 40, true, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
                     ), 4, 1
                 ),
                 Behavior(
                     VexMeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         40,
                         true,
                         30
                     ), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
                     ), 3, 1
                 ),
                 Behavior(
-                    VexMeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 40, false, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
+                    VexMeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 40, false, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 80, Int.MAX_VALUE)
                     ), 2, 1
                 ),
                 Behavior(
@@ -93,7 +93,7 @@ class EntityVex(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), E
                 NearestPlayerSensor(70.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 70.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
@@ -117,7 +117,7 @@ class EntityVex(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), E
     override fun initEntity() {
         this.maxHealth = 14
         super.initEntity()
-        memoryStorage.set<Int>(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, level!!.tick)
+        memoryStorage.set<Int>(CoreMemoryTypes.LAST_ATTACK_TIME, level!!.tick)
         this.setItemInHand(Item.get(ItemID.IRON_SWORD))
         this.diffHandDamage = floatArrayOf(5.5f, 9f, 13.5f)
     }

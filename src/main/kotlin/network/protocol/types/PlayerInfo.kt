@@ -8,7 +8,7 @@ import java.util.*
 
 open class PlayerInfo(
     val username: String,
-    val uniqueId: UUID,
+    val uuid: UUID,
     val skin: Skin,
     val data: ClientChainData,
 )

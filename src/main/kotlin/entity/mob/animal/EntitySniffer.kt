@@ -34,8 +34,8 @@ class EntitySniffer(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
                     ),
                     1, 1
                 )
@@ -43,24 +43,24 @@ class EntitySniffer(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
             setOf<IBehavior>(
                 Behavior(
                     FlatRandomRoamExecutor(0.4f, 12, 40, true, 100, true, 10),
-                    PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 100),
+                    PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100),
                     4,
                     1
                 ),
                 Behavior(
                     EntityBreedingExecutor<EntitySniffer>(EntitySniffer::class.java, 16, 100, 0.5f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     3,
                     1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER, 0.4f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_FEEDING_PLAYER, 0.4f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                     2,
                     1
                 ),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     1,
                     1,

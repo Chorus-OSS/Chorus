@@ -82,41 +82,41 @@ open class EntitySkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMon
                 Behavior(
                     BowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.ATTACK_TARGET,
+                        CoreMemoryTypes.ATTACK_TARGET,
                         0.3f,
                         15,
                         true,
                         30,
                         20
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), 4, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), 4, 1
                 ),
                 Behavior(
                     BowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.NEAREST_GOLEM,
+                        CoreMemoryTypes.NEAREST_GOLEM,
                         0.3f,
                         15,
                         true,
                         30,
                         20
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_GOLEM), 3, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_GOLEM), 3, 1
                 ),
                 Behavior(
                     BowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.NEAREST_PLAYER,
+                        CoreMemoryTypes.NEAREST_PLAYER,
                         0.3f,
                         15,
                         true,
                         30,
                         20
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
             setOf<ISensor>(
                 NearestPlayerSensor(16.0, 0.0, 20),
-                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.Companion.NEAREST_GOLEM, 42.0, 0.0)
+                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.NEAREST_GOLEM, 42.0, 0.0)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),

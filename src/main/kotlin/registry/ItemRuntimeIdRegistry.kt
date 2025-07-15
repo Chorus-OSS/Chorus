@@ -1,7 +1,9 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.JsonParser
+import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.utils.BinaryStream
+import org.chorus_oss.protocol.types.item.ItemInstance
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.atomic.AtomicBoolean
@@ -109,6 +111,9 @@ class ItemRuntimeIdRegistry : IRegistry<String, Int, Int> {
         if (REGISTRY.putIfAbsent(key, value) == null) {
             ID2NAME[value] = key
         }
+
+        // TODO: Move this out
+        if (key == ItemID.SHIELD) ItemInstance.ShieldID = value
     }
 
     private fun register1(entry: ItemData) {

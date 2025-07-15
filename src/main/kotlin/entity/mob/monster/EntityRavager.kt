@@ -32,14 +32,14 @@ class EntityRavager(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.2f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.2f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     3,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.2f, 40, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.2f, 40, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     2,
                     1
                 ),

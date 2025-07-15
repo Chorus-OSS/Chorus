@@ -41,7 +41,7 @@ abstract class BlockSapling(blockstate: BlockState) : BlockFlowable(blockstate),
         fz: Double,
         player: Player?
     ): Boolean {
-        if (isSupportValid(down())) {
+        if (isSupportValid(block.down())) {
             level.setBlock(block.position, this, true, true)
             return true
         }

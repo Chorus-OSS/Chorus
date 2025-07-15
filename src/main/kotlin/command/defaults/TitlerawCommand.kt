@@ -56,7 +56,7 @@ class TitlerawCommand(name: String) : VanillaCommand(name, "commands.titleraw.de
             "clear" -> {
                 for (player in players) {
                     player.clearTitle()
-                    log.addMessage(TextFormat.WHITE.toString() + "%nukkit.command.title.clear", player.getEntityName())
+                    log.addMessage(TextFormat.WHITE.toString() + "%chorus.command.title.clear", player.getEntityName())
                 }
                 log.output()
                 return 1
@@ -65,7 +65,7 @@ class TitlerawCommand(name: String) : VanillaCommand(name, "commands.titleraw.de
             "reset" -> {
                 for (player in players) {
                     player.resetTitleSettings()
-                    log.addMessage(TextFormat.WHITE.toString() + "%nukkit.command.title.reset", player.getEntityName())
+                    log.addMessage(TextFormat.WHITE.toString() + "%chorus.command.title.reset", player.getEntityName())
                 }
                 log.output()
                 return 1
@@ -118,7 +118,7 @@ class TitlerawCommand(name: String) : VanillaCommand(name, "commands.titleraw.de
                 val fadeOut = list.getResult<Int>(4)!!
                 for (player in players) {
                     log.addMessage(
-                        TextFormat.WHITE.toString() + "%nukkit.command.title.times.success",
+                        TextFormat.WHITE.toString() + "%chorus.command.title.times.success",
                         fadeIn.toString(),
                         stay.toString(),
                         fadeOut.toString(),

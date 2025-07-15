@@ -9,6 +9,7 @@ import org.chorus_oss.chorus.entity.EntityHanging
 import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.ItemPainting
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Level
@@ -17,8 +18,8 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.AddPaintingPacket
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.function.Function
 import java.util.function.Predicate
 
@@ -104,13 +105,13 @@ class EntityPainting(chunk: IChunk?, nbt: CompoundTag?) : EntityHanging(chunk, n
         super.initEntity()
     }
 
-    public override fun createAddEntityPacket(): DataPacket {
-        return AddPaintingPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
-            position = this.position.asVector3f(),
+    public override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddPaintingPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
+            position = Vector3f(this.position),
             direction = this.getDirection().horizontalIndex,
-            motif = namedTag!!.getString("Motive"),
+            motif = namedTag.getString("Motive"),
         )
     }
 

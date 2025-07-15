@@ -10,7 +10,6 @@ import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.particle.BoneMealParticle
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.utils.OptionalBoolean
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.min
@@ -256,20 +255,20 @@ abstract class BlockVinesNether
      *  * `FALSE` if the base was already in the max age or the block change was refused
      *
      */
-    fun increaseRootAge(): OptionalBoolean {
+    fun increaseRootAge(): Boolean? {
         val base = findVine(true).map(Locator::levelBlock)
             .orElse(null) as? BlockVinesNether
-            ?: return OptionalBoolean.EMPTY
+            ?: return null
 
         val vineAge = base.vineAge
         if (vineAge < base.maxVineAge) {
             base.vineAge = vineAge + 1
             if (level.setBlock(base.position, base)) {
-                return OptionalBoolean.TRUE
+                return true
             }
         }
 
-        return OptionalBoolean.FALSE
+        return false
     }
 
     override fun onActivate(

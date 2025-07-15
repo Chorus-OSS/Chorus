@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.InventorySlotPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
 import org.jetbrains.annotations.ApiStatus
 
@@ -222,14 +221,11 @@ interface Inventory {
     fun close(who: Player)
 
     /**
-     * 当执行[.setItem]时该方法会被调用，此时物品已经put进slots
-     *
-     *
      * This method is called when [.setItem] is executed, and the item has been put into slots
      *
-     * @param index  物品变动的格子索引<br></br>The grid index of the item's changes
-     * @param before 变动前的物品<br></br>Items before the change
-     * @param send   是否发送[InventorySlotPacket]到客户端<br></br>Whether to send [InventorySlotPacket] to the client
+     * @param index  The grid index of the item's changes
+     * @param before Items before the change
+     * @param send   Whether to send InventorySlotPacket to the client
      */
     fun onSlotChange(index: Int, before: Item, send: Boolean)
 

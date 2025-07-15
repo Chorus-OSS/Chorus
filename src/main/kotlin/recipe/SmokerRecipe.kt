@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.recipe
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
 import org.chorus_oss.chorus.registry.RecipeRegistry
-import java.util.List
 
 class SmokerRecipe(recipeId: String?, result: Item, ingredient: Item) :
     SmeltingRecipe(

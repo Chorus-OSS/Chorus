@@ -10,8 +10,8 @@ import org.chorus_oss.chorus.utils.TextFormat
 
 class PluginsCommand(name: String) : Command(
     name,
-    "%nukkit.command.plugins.description",
-    "%nukkit.command.plugins.usage",
+    "%chorus.command.plugins.description",
+    "%chorus.command.plugins.usage",
     arrayOf<String>("pl")
 ), CoreCommand {
     init {

@@ -2,81 +2,87 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.data.EntityFlag
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.HumanInventory
+import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.enchantment.Enchantment.Companion.getEnchantments
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.MobEquipmentPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.MobEquipmentPacket
 
 
-class MobEquipmentProcessor : DataPacketProcessor<MobEquipmentPacket>() {
-    override fun handle(player: Player, pk: MobEquipmentPacket) {
+class MobEquipmentProcessor : DataPacketProcessor<MigrationPacket<MobEquipmentPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<MobEquipmentPacket>) {
+        val packet = pk.packet
+
         val player = player.player
         if (!player.spawned || !player.isAlive()) {
             return
         }
 
-        if (pk.selectedSlot < 0 || pk.selectedSlot > 8) {
+        if (packet.hotbarSlot < 0 || packet.hotbarSlot > 8) {
             player.close("§cPacket handling error")
             return
         }
-        if (!pk.item.isNothing) {
-            if (pk.item.enchantments.size > getEnchantments().size) { // Last Enchant Id
+
+        val newItem = Item(packet.newItem.item)
+
+        if (!newItem.isNothing) {
+            if (newItem.enchantments.size > getEnchantments().size) { // Last Enchant Id
                 player.close("§cPacket handling error")
                 return
             }
-            if (pk.item.lore.size > 100) {
+            if (newItem.lore.size > 100) {
                 player.close("§cPacket handling error")
                 return
             }
-            if (pk.item.canPlaceOn.size() > 250) {
+            if (newItem.canPlaceOn.size() > 250) {
                 player.close("§cPacket handling error")
                 return
             }
-            if (pk.item.canDestroy.size() > 250) {
+            if (newItem.canDestroy.size() > 250) {
                 player.close("§cPacket handling error")
                 return
             }
         }
 
-        val inv = player.getWindowById(pk.containerId)
+        val inv = player.getWindowById(packet.windowID.toInt())
 
         if (inv == null) {
             log.debug(
                 "Player {} has no open container with window ID {}",
                 player.getEntityName(),
-                pk.containerId
+                packet.windowID
             )
             return
         }
 
-        if (inv is HumanInventory && inv.heldItemIndex == pk.selectedSlot) {
+        if (inv is HumanInventory && inv.heldItemIndex == packet.hotbarSlot.toInt()) {
             return
         }
 
-        val item = inv.getItem(pk.selectedSlot)
+        val item = inv.getItem(packet.hotbarSlot.toInt())
 
-        if (!item.equals(pk.item, false, true)) {
+        if (!item.equals(newItem, checkDamage = false, checkCompound = true)) {
             val fixItem = get(item.id, item.damage, item.getCount(), item.compoundTag)
-            if (fixItem.equals(pk.item, false, true)) {
-                inv.setItem(pk.selectedSlot, fixItem)
+            if (fixItem.equals(newItem, checkDamage = false, checkCompound = true)) {
+                inv.setItem(packet.hotbarSlot.toInt(), fixItem)
             } else {
-                log.debug("Tried to equip {} but have {} in target slot", pk.item, fixItem)
+                log.debug("Tried to equip {} but have {} in target slot", newItem, fixItem)
                 inv.sendContents(player)
             }
         }
 
         if (inv is HumanInventory) {
-            inv.equipItem(pk.selectedSlot)
+            inv.equipItem(packet.hotbarSlot.toInt())
         }
 
         player.setDataFlag(EntityFlag.USING_ITEM, false)
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.MOB_EQUIPMENT_PACKET
+    override val packetId: Int = MobEquipmentPacket.id
 
     companion object : Loggable
 }

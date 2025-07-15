@@ -18,7 +18,6 @@ import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.scoreboard.scorer.EntityScorer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
-import org.chorus_oss.chorus.utils.StringUtils
 import org.chorus_oss.chorus.utils.Utils
 import java.util.regex.Pattern
 import kotlin.math.floor
@@ -745,7 +744,7 @@ class ExecuteCommand(name: String) : VanillaCommand(name, "commands.execute.desc
                     //条件为一个区间
                     var min = Int.MIN_VALUE
                     var max = Int.MAX_VALUE
-                    val splittedScoreScope = StringUtils.fastSplit(SCORE_SCOPE_SEPARATOR, range)
+                    val splittedScoreScope = range.split(SCORE_SCOPE_SEPARATOR)
                     val min_str = splittedScoreScope[0]
                     if (!min_str.isEmpty()) {
                         min = min_str.toInt()

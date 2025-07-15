@@ -1,24 +1,29 @@
 package org.chorus_oss.chorus.network.process.handler
 
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.NetworkSettingsPacket
-import org.chorus_oss.chorus.network.protocol.PlayStatusPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.RequestNetworkSettingsPacket
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
+import org.chorus_oss.protocol.ProtocolInfo
+import org.chorus_oss.protocol.packets.PlayStatusPacket
+import org.chorus_oss.protocol.packets.RequestNetworkSettingsPacket
 
 class SessionStartHandler(session: BedrockSession) : BedrockSessionPacketHandler(session) {
-    override fun handle(pk: RequestNetworkSettingsPacket) {
-        val protocol = pk.protocolVersion
-        if (protocol != ProtocolInfo.PROTOCOL_VERSION) {
+    override fun handle(pk: MigrationPacket<*>) {
+        val packet = pk.packet
+        if (packet !is RequestNetworkSettingsPacket) return
+
+        val protocol = packet.clientProtocol
+        if (protocol != ProtocolInfo.VERSION) {
             session.sendPlayStatus(
-                if (protocol < ProtocolInfo.PROTOCOL_VERSION) PlayStatusPacket.LOGIN_FAILED_CLIENT else PlayStatusPacket.LOGIN_FAILED_SERVER,
+                if (protocol < ProtocolInfo.VERSION)
+                    PlayStatusPacket.Companion.Status.LoginFailedClient
+                else PlayStatusPacket.Companion.Status.LoginFailedServer,
                 true
             )
             val message =
-                if (protocol < ProtocolInfo.PROTOCOL_VERSION) "disconnectionScreen.outdatedClient" else "disconnectionScreen.outdatedServer"
+                if (protocol < ProtocolInfo.VERSION) "disconnectionScreen.outdatedClient" else "disconnectionScreen.outdatedServer"
             session.close(message)
             return
         }
@@ -30,19 +35,26 @@ class SessionStartHandler(session: BedrockSession) : BedrockSessionPacketHandler
             return
         }
 
-        val settingsPacket = NetworkSettingsPacket()
-        //FIXME there is no way out there to disable compression
-        val algorithm = if (Server.instance.settings.networkSettings.snappy) {
-            PacketCompressionAlgorithm.SNAPPY
-        } else {
-            PacketCompressionAlgorithm.ZLIB
-        }
-        settingsPacket.compressionAlgorithm = algorithm
-        settingsPacket.compressionThreshold = 1 // compress everything
+        val settingsPacket = org.chorus_oss.protocol.packets.NetworkSettingsPacket(
+            compressionThreshold = 1u, // compress everything
+            compressionAlgorithm = when (Server.instance.settings.networkSettings.snappy) {
+                true -> org.chorus_oss.protocol.types.PacketCompressionAlgorithm.Snappy
+                false -> org.chorus_oss.protocol.types.PacketCompressionAlgorithm.Zlib
+            },
+            clientThrottle = false,
+            clientThrottleThreshold = 0,
+            clientThrottleScalar = 0f,
+        )
         //In raknet version 11, the client does not enable packet compression by default,but the server will tell client what the
         //compression algorithm through NetworkSettingsPacket
         session.sendNetworkSettingsPacket(settingsPacket)
+
+        val algorithm = when (Server.instance.settings.networkSettings.snappy) {
+            true -> PacketCompressionAlgorithm.SNAPPY
+            false -> PacketCompressionAlgorithm.ZLIB
+        }
+
         session.setCompression(algorithm) //so send the NetworkSettingsPacket packet before set the session compression
-        session.machine.fire(SessionState.LOGIN)
+        session.machine.fire(SessionState.Login)
     }
 }

@@ -1,36 +1,40 @@
 name: Chorus
 
-# on: [ push, pull_request ]
-on: [ workflow_dispatch ]
+on: [ push, pull_request ]
+
+permissions:
+  contents: write
 
 jobs:
-  move-tag:
-    name: Move Tag
+  check-changes:
+    name: Check Changes
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository) && contains(github.ref_name, 'main')
+    outputs:
+      changed: ${{ steps.changed-files.outputs.any_modified }}
     steps:
-      - name: Move ci tag
-        run: |
-          mkdir repo
-          git clone -b "$BRANCH_NAME" "https://github.com/${GITHUB_REPOSITORY}" repo
-          cd repo
-          bash .github/workflows/move-tag.sh "snapshot" "Last commit build by the CI"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: tj-actions/changed-files@v46
+        id: changed-files
+        with:
+          files: |
+            src/**
+            gradle/**
+            build.gradle.kts
+            settings.gradle.kts
 
   build-chorus:
     name: Build Chorus
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    needs: [ move-tag ]
-    if: ((github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push' && (contains(github.event.commits[0].message, '+b') || contains(github.event.commits[0].message, '+u'))))
+    needs: check-changes
+    if: needs.check-changes.outputs.changed == 'true'
 
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
           submodules: true
 
       - uses: actions/setup-java@v4
@@ -41,105 +45,52 @@ jobs:
       - run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: wrapper
-          cache-overwrite-existing: true
-          build-scan-publish: true
-          build-scan-terms-of-service-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-service-agree: "yes"
-          arguments: buildForGithubAction --scan
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Read version
-        id: read_version
-        uses: christian-draeger/read-properties@1.1.1
-        with:
-          path: 'build/resources/main/git.properties'
-          properties: 'git.build.version'
+      - name: Build Chorus
+        run: ./gradlew build
 
-      - name: Rename artifacts
-        run: |
-          cd build
-          ls
-          cd ../
-          mv build/chorus-${{ steps.read_version.outputs.git-build-version }}-all.jar build/chorus-shaded.jar
-          tar -vczf build/libs.tar.gz build/libs
-
-      - name: Calculate hashes
-        run: |
-          cd build
-          mkdir -p hash/sha256 hash/md5
-          sha256sum chorus-shaded.jar > hash/sha256/chorus-shaded.jar.sha256
-          sha256sum chorus.jar > hash/sha256/chorus.jar.sha256
-          sha256sum libs.tar.gz > hash/sha256/libs.tar.gz.sha256
-          md5sum chorus-shaded.jar > hash/md5/chorus-shaded.jar.md5
-          md5sum chorus.jar > hash/md5/chorus.jar.md5
-          md5sum libs.tar.gz > hash/md5/libs.tar.gz.md5
-
-      - name: Archive PNX Core
+      - name: Upload Chorus artifact
         uses: actions/upload-artifact@v4
-        if: success()
         with:
-          name: Chorus-Core
-          path: build/chorus.jar
+          name: chorus
+          path: build/chorus-all.jar
 
-      - name: Archive Libraries
-        uses: actions/upload-artifact@v4
-        if: success()
+  release-chorus:
+    name: Release Chorus
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    needs: build-chorus
+    if: github.repository == 'Chorus-OSS/Chorus' && github.ref_name == 'main'
+    steps:
+      - name: Download Chorus artifact
+        uses: actions/download-artifact@v4
         with:
-          name: Chorus-Libs
-          path: build/libs/
+          name: chorus
 
-      - name: Archive PNX SHADED
-        uses: actions/upload-artifact@v4
-        if: success()
+      - name: Rename JAR for release
+        run: mv chorus-all.jar chorus.jar
+
+      - name: Release Snapshot
+        uses: softprops/action-gh-release@v1
         with:
-          name: Chorus-Shaded
-          path: build/chorus-shaded.jar
-
-      - name: Download PNX CLI
-        run: |
-          cd build
-          wget -O cli.jar https://github.com/PowerNukkitX/PNX-CLI/releases/download/0.2.4/PNX-CLI-0.2.4.jar
-          zip -q -r chorus-run.zip chorus.jar cli.jar libs
-          ls -l
-
-      - name: Release latest build
-        uses: Xotl/cool-github-releases@v1
-        if: success() && github.repository == 'Chorus-OSS/Chorus' && contains(github.ref_name, 'main')
-        with:
-          mode: update
-          isPrerelease: false
           tag_name: snapshot
-          release_name: "Latest Snapshot"
-          body_mrkdwn: |
-            This is the **latest version of Chorus**, built from the latest source. 
-            (_Please note that the date on GitHub might appear outdated due to certain limitations._)
-            **Corresponding commit:** <https://github.com/Chorus-OSS/Chorus/commit/${{ github.sha }}>_
+          name: "Latest Snapshot"
+          body: |
+            Latest version of Chorus.
             
-            > [!NOTE]
-            > If you encounter any issues, please report them in the [GitHub Issues](https://github.com/Chorus-OSS/Chorus/issues) tab.
-            
-            ### How to Update
+            **Commit:** https://github.com/Chorus-OSS/Chorus/commit/${{ github.sha }}
+          files: chorus.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            To update to the latest version, follow these steps:
-            1. Download the `chorus.jar` file from the assets below.
-            2. Replace the `chorus.jar` file in your server's directory with the new one.
-            3. Restart your server.
-            4. Enjoy the latest features and bug fixes !
-
-            Thank you for using Chorus ⭐
-          assets: build/chorus-shaded.jar;build/chorus-run.zip;build/chorus.jar;build/libs.tar.gz;build/hash/sha256/chorus.jar.sha256|text/plain;build/hash/sha256/libs.tar.gz.sha256|text/plain;build/hash/md5/chorus.jar.md5|text/plain;build/hash/md5/libs.tar.gz.md5|text/plain;
-          replace_assets: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release new version
-        uses: ncipollo/release-action@v1
-        if: success() && contains(github.event.commits[0].message, '+u') && github.repository == 'Chorus-OSS/Chorus' && contains(github.ref_name, 'main')
+      - uses: actions/checkout@v4
         with:
-          artifacts: "build/chorus-run.zip,build/chorus.jar,build/libs.tar.gz,build/hash/sha256/chorus.jar.sha256,build/hash/sha256/libs.tar.gz.sha256,build/hash/md5/chorus.jar.md5,build/hash/md5/libs.tar.gz.md5,build/chorus-shaded.jar"
-          tag: ${{ steps.read_version.outputs.git-build-version }}
-          body: ${{ steps.read_version.outputs.git-build-version }} - ${{ github.ref_name }} - ${{ github.sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit: ${{ github.ref_name }}
-          allowUpdates: true
+          fetch-tags: true
+
+      - name: Bump Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -fa snapshot "$GITHUB_SHA" -m "Latest snapshot build of Chorus"
+          git push -f origin snapshot

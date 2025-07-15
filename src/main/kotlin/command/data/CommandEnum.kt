@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.command.data
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.camera.data.CameraPreset.Companion.presets
 import org.chorus_oss.chorus.item.enchantment.Enchantment
-import org.chorus_oss.chorus.network.protocol.UpdateSoftEnumPacket
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Identifier
 import java.util.function.Supplier
@@ -61,21 +60,26 @@ class CommandEnum {
         return name.hashCode()
     }
 
-    fun updateSoftEnum(mode: UpdateSoftEnumPacket.Type, vararg value: String) {
+    fun updateSoftEnum(
+        mode: org.chorus_oss.protocol.packets.UpdateSoftEnumPacket.Companion.ActionType,
+        vararg value: String
+    ) {
         if (!this.isSoft) return
-        val packet = UpdateSoftEnumPacket()
-        packet.name = this.name
-        packet.values = value.toList()
-        packet.type = mode
+        val packet = org.chorus_oss.protocol.packets.UpdateSoftEnumPacket(
+            enumType = this.name,
+            options = value.toList(),
+            actionType = mode
+        )
         Server.broadcastPacket(Server.instance.onlinePlayers.values, packet)
     }
 
     fun updateSoftEnum() {
         if (!this.isSoft && this.supplier == null) return
-        val packet = UpdateSoftEnumPacket()
-        packet.name = this.name
-        packet.values = this.getValues()
-        packet.type = UpdateSoftEnumPacket.Type.SET
+        val packet = org.chorus_oss.protocol.packets.UpdateSoftEnumPacket(
+            enumType = this.name,
+            options = this.getValues(),
+            actionType = org.chorus_oss.protocol.packets.UpdateSoftEnumPacket.Companion.ActionType.Set,
+        )
         Server.broadcastPacket(Server.instance.onlinePlayers.values, packet)
     }
 

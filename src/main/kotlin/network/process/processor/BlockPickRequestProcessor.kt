@@ -3,25 +3,29 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerBlockPickEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.HumanInventory
+import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.BlockPickRequestPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.Loggable
 
 
-class BlockPickRequestProcessor : DataPacketProcessor<BlockPickRequestPacket>() {
-    override fun handle(player: Player, pk: BlockPickRequestPacket) {
+class BlockPickRequestProcessor :
+    DataPacketProcessor<MigrationPacket<org.chorus_oss.protocol.packets.BlockPickRequestPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<org.chorus_oss.protocol.packets.BlockPickRequestPacket>) {
+        val packet = pk.packet
+
         val player = player.player
-        val block = player.level!!.getBlock(pk.position.asVector3(), false)
+        val block = player.level!!.getBlock(Vector3(packet.position), false)
         if (block.position.distanceSquared(player.position) > 1000) {
             log.debug(player.player.getEntityName() + ": Block pick request for a block too far away")
             return
         }
         val item = block.toItem()
 
-        if (pk.withData) {
-            val blockEntity = player.level!!.getBlockEntity(pk.position.asVector3())
+        if (packet.withData) {
+            val blockEntity = player.level!!.getBlockEntity(Vector3(packet.position))
             if (blockEntity != null) {
                 val nbt = blockEntity.cleanedNBT
                 if (nbt != null) {
@@ -46,7 +50,7 @@ class BlockPickRequestProcessor : DataPacketProcessor<BlockPickRequestPacket>() 
             var itemExists = false
             var itemSlot = -1
             for (slot in 0..<player.inventory.size) {
-                if (player.inventory.getItem(slot).equals(pickEvent.item)) {
+                if (player.inventory.getItem(slot) == pickEvent.item) {
                     if (slot < player.inventory.hotbarSize) {
                         player.inventory.setHeldItemSlot(slot)
                     } else {
@@ -91,8 +95,7 @@ class BlockPickRequestProcessor : DataPacketProcessor<BlockPickRequestPacket>() 
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.BLOCK_PICK_REQUEST_PACKET
+    override val packetId: Int = org.chorus_oss.protocol.packets.BlockPickRequestPacket.id
 
     companion object : Loggable
 }

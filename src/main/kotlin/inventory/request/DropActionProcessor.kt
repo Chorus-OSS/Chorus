@@ -4,20 +4,20 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerDropItemEvent
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.DropAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseSlot
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.DropRequestAction
 
-class DropActionProcessor : ItemStackRequestActionProcessor<DropAction> {
+class DropActionProcessor : ItemStackRequestActionProcessor<DropRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.DROP
 
-    override fun handle(action: DropAction, player: Player, context: ItemStackRequestContext): ActionResponse {
-        val inventory: Inventory = NetworkMapping.getInventory(player, action.source.containerName.container)
+    override fun handle(action: DropRequestAction, player: Player, context: ItemStackRequestContext): ActionResponse {
+        val inventory: Inventory = NetworkMapping.getInventory(player, action.source.container.container)
         val count = action.count
-        val slot = inventory.fromNetworkSlot(action.source.slot)
+        val slot = inventory.fromNetworkSlot(action.source.slot.toInt())
         var item = inventory.getItem(slot)
 
         val ev: PlayerDropItemEvent
@@ -26,7 +26,7 @@ class DropActionProcessor : ItemStackRequestActionProcessor<DropAction> {
             return context.error()
         }
 
-        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkId)) {
+        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkID)) {
             log.warn("mismatch stack network id!")
             return context.error()
         }
@@ -39,7 +39,7 @@ class DropActionProcessor : ItemStackRequestActionProcessor<DropAction> {
             return context.error()
         }
         val drop = item.clone()
-        drop.setCount(count)
+        drop.setCount(count.toInt())
         player.dropItem(drop)
 
         val c = item.getCount() - count
@@ -53,7 +53,6 @@ class DropActionProcessor : ItemStackRequestActionProcessor<DropAction> {
         return context.success(
             listOf(
                 ItemStackResponseContainer(
-                    inventory.getSlotType(slot),
                     mutableListOf(
                         ItemStackResponseSlot(
                             inventory.toNetworkSlot(slot),
@@ -64,7 +63,7 @@ class DropActionProcessor : ItemStackRequestActionProcessor<DropAction> {
                             item.damage
                         )
                     ),
-                    action.source.containerName
+                    action.source.container
                 )
             )
         )

@@ -173,7 +173,7 @@ class BlockReeds @JvmOverloads constructor(blockstate: BlockState = properties.d
             if (!down.`is`(BlockTags.DIRT) && !down.`is`(BlockTags.SAND)) {
                 return false
             }
-            for (face in BlockFace.Plane.HORIZONTAL) {
+            for (face in BlockFace.Plane.HORIZONTAL_FACES) {
                 val possibleWater = down.getSide(face)
                 if (possibleWater is BlockFlowingWater
                     || possibleWater is BlockFrostedIce

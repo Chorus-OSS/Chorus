@@ -48,23 +48,23 @@ class EntityEvocationIllager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(
             setOf<IBehavior>(
                 Behavior(PlaySoundExecutor(Sound.MOB_EVOCATION_ILLAGER_AMBIENT), RandomSoundEvaluator(), 10, 1),
                 Behavior(
-                    FleeFromTargetExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 0.5f, true, 9f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 8.0),
+                    FleeFromTargetExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 0.5f, true, 9f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 8.0),
                         any(
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.NONE }
                         )
                     ), 9, 1),
                 Behavior(
                     FleeFromTargetExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.5f,
                         true,
                         11f
                     ),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 10.0),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 10.0),
                         any(
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.NONE }
                         )
@@ -73,9 +73,9 @@ class EntityEvocationIllager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(
                     1),
                 Behavior(
                     ColorConversionExecutor(), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_CONVERSION, 100),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 40),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_CONVERSION, 100),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 40),
                         IBehaviorEvaluator { entity: EntityMob ->
                             for (entity1 in entity.level!!.getNearbyEntities(
                                 entity.getBoundingBox().grow(16.0, 16.0, 16.0)
@@ -98,9 +98,9 @@ class EntityEvocationIllager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(
                     ), 7, 1),
                 Behavior(
                     VexSummonExecutor(), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_SUMMON, 340),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 40),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_SUMMON, 340),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 40),
                         IBehaviorEvaluator { entity: EntityMob ->
                             var count = 0
                             for (entity1 in entity.level!!.getNearbyEntities(
@@ -117,10 +117,10 @@ class EntityEvocationIllager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(
                     ), 6, 1),
                 Behavior(
                     FangCircleExecutor(), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_CAST, 100),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 40),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 3.0),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_CAST, 100),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 40),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 3.0),
                         any(
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.NONE },
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.CAST_CIRLCE }
@@ -128,17 +128,17 @@ class EntityEvocationIllager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(
                     ), 5, 1),
                 Behavior(
                     FangLineExecutor(), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_CAST, 100),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 40),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_CAST, 100),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 40),
                         any(
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.NONE },
                             IBehaviorEvaluator { it.memoryStorage[CoreMemoryTypes.LAST_MAGIC] == Spell.CAST_LINE }
                         )
                     ), 4, 1),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 1), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 1), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                         IBehaviorEvaluator { entity: EntityMob -> !entity.getDataFlag(EntityFlag.CASTING) }
                     ), 3, 1),
                 Behavior(

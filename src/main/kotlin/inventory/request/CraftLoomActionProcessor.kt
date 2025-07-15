@@ -7,16 +7,20 @@ import org.chorus_oss.chorus.item.ItemBannerPattern
 import org.chorus_oss.chorus.item.ItemDye
 import org.chorus_oss.chorus.network.protocol.types.BannerPattern
 import org.chorus_oss.chorus.network.protocol.types.BannerPatternType
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.CraftLoomAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.utils.DyeColor
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.CraftLoomRequestAction
 
-class CraftLoomActionProcessor : ItemStackRequestActionProcessor<CraftLoomAction> {
+class CraftLoomActionProcessor : ItemStackRequestActionProcessor<CraftLoomRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.CRAFT_LOOM
 
-    override fun handle(action: CraftLoomAction, player: Player, context: ItemStackRequestContext): ActionResponse? {
+    override fun handle(
+        action: CraftLoomRequestAction,
+        player: Player,
+        context: ItemStackRequestContext
+    ): ActionResponse? {
         val topWindow = player.topWindow
         if (topWindow.isEmpty) {
             log.error("the player's haven't open any inventory!")
@@ -35,9 +39,9 @@ class CraftLoomActionProcessor : ItemStackRequestActionProcessor<CraftLoomAction
 
         val pattern = loomInventory.pattern
         var patternType: BannerPatternType? = null
-        if (pattern is ItemBannerPattern && action.patternId.isNotBlank()) {
+        if (pattern is ItemBannerPattern && action.patternID.isNotBlank()) {
             patternType = pattern.patternType
-            if (action.patternId != patternType?.code) return context.error()
+            if (action.patternID != patternType?.code) return context.error()
         }
         var dyeColor: DyeColor = DyeColor.BLACK
         if (dye is ItemDye) {

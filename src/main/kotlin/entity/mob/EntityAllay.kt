@@ -61,8 +61,8 @@ class EntityAllay(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Ent
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_ITEM, 0.22f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_ITEM),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_ITEM, 0.22f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_ITEM),
                     5,
                     1
                 ),
@@ -74,7 +74,7 @@ class EntityAllay(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Ent
                     } else return@IBehaviorEvaluator false
                 }, 4, 1),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ConditionalProbabilityEvaluator(
                         3, 7,
                         Function<Entity, Boolean> { entity: Entity? -> hasOwner(false) }, 10
@@ -133,8 +133,8 @@ class EntityAllay(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Ent
     private fun updateMemory() {
         val item = itemInHand
         if (item.isNothing) {
-            memoryStorage.clear(CoreMemoryTypes.Companion.LOOKING_ITEM)
-        } else memoryStorage[CoreMemoryTypes.Companion.LOOKING_ITEM] = item.javaClass
+            memoryStorage.clear(CoreMemoryTypes.LOOKING_ITEM)
+        } else memoryStorage[CoreMemoryTypes.LOOKING_ITEM] = item.javaClass
     }
 
     override val inventory: Inventory
@@ -145,7 +145,7 @@ class EntityAllay(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Ent
 
     override fun onUpdate(currentTick: Int): Boolean {
         if (currentTick % 10 == 0) {
-            val nearestItem = memoryStorage[CoreMemoryTypes.Companion.NEAREST_ITEM]
+            val nearestItem = memoryStorage[CoreMemoryTypes.NEAREST_ITEM]
             if (nearestItem != null && !nearestItem.closed) {
                 if (nearestItem.position.distance(this.position) < 1 && currentTick - lastItemDropTick > dropCollectCooldown) {
                     val item: Item = nearestItem.item

@@ -1,17 +1,25 @@
 package org.chorus_oss.chorus.network.process.handler
 
+import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.data.property.EntityProperty.Companion.getPacketCache
 import org.chorus_oss.chorus.entity.data.property.EntityProperty.Companion.getPlayerPropertyCache
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.connection.BedrockSession
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.StartGamePacket
 import org.chorus_oss.chorus.network.protocol.types.TrimData
 import org.chorus_oss.chorus.registry.ItemRegistry
 import org.chorus_oss.chorus.registry.ItemRuntimeIdRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.RequestChunkRadiusPacket
+import org.chorus_oss.protocol.packets.SetLocalPlayerAsInitializedPacket
+import org.chorus_oss.protocol.types.TrimMaterial
+import org.chorus_oss.protocol.types.TrimPattern
+import org.chorus_oss.protocol.types.item.ItemEntry
 import kotlin.math.max
 import kotlin.math.min
 
@@ -22,8 +30,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         this.startGame()
 
         log.debug("Sending item components")
-        val itemRegistryPacket = ItemRegistryPacket()
-        val entries = mutableSetOf<ItemRegistryPacket.Entry>()
+        val entries = mutableSetOf<ItemEntry>()
 
         for (data in ItemRuntimeIdRegistry.ITEM_DATA) {
             var tag = CompoundTag()
@@ -36,23 +43,26 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             }
 
             entries.add(
-                ItemRegistryPacket.Entry(
+                ItemEntry(
                     data.identifier,
-                    data.runtimeId,
-                    data.version,
+                    data.runtimeId.toShort(),
                     data.componentBased,
-                    tag
+                    data.version,
+                    org.chorus_oss.nbt.tags.CompoundTag(tag)
                 )
             )
         }
 
-        itemRegistryPacket.entries = entries.toTypedArray()
-        player!!.dataPacket(itemRegistryPacket)
+        player!!.sendPacket(
+            org.chorus_oss.protocol.packets.ItemRegistryPacket(
+                items = entries.toList()
+            )
+        )
 
         log.debug("Sending actor identifiers")
-        player.dataPacket(
-            AvailableActorIdentifiersPacket(
-                Registries.ENTITY.tag
+        player.sendPacket(
+            org.chorus_oss.protocol.packets.AvailableActorIdentifiersPacket(
+                ByteString(Registries.ENTITY.tag)
             )
         )
 
@@ -61,7 +71,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
 
         log.debug("Sending actor properties")
         for (pk in getPacketCache()) {
-            player.dataPacket(pk)
+            player.sendPacket(pk)
         }
 
         log.debug("Sending biome definitions")
@@ -98,9 +108,10 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         this.session.syncCreativeContent()
 
         log.debug("Sending trim data")
-        val trimDataPacket = TrimDataPacket()
-        trimDataPacket.materials.addAll(TrimData.trimMaterials)
-        trimDataPacket.patterns.addAll(TrimData.trimPatterns)
+        val trimDataPacket = org.chorus_oss.protocol.packets.TrimDataPacket(
+            patterns = TrimData.trimPatterns.map(TrimPattern::invoke),
+            materials = TrimData.trimMaterials.map(TrimMaterial::invoke),
+        )
         this.session.sendPacket(trimDataPacket)
 
         player.setNameTagVisible(true)
@@ -159,12 +170,19 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         player.dataPacketImmediately(startPk)
     }
 
-    override fun handle(pk: RequestChunkRadiusPacket) {
-        player!!.viewDistance =
-            max(2.0, min(pk.radius.toDouble(), player.viewDistance.toDouble())).toInt()
+    override fun handle(pk: MigrationPacket<*>) {
+        val packet = pk.packet
+        when (packet) {
+            is RequestChunkRadiusPacket -> handleRadius(packet)
+            is SetLocalPlayerAsInitializedPacket -> handleInitialized(packet)
+        }
     }
 
-    override fun handle(pk: SetLocalPlayerAsInitializedPacket) {
+    fun handleRadius(packet: RequestChunkRadiusPacket) {
+        player!!.viewDistance = max(2.0, min(packet.chunkRadius.toDouble(), player.viewDistance.toDouble())).toInt()
+    }
+
+    fun handleInitialized(packet: SetLocalPlayerAsInitializedPacket) {
         log.debug(
             "receive SetLocalPlayerAsInitializedPacket for {}",
             player?.playerInfo?.username

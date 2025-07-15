@@ -1,5 +1,8 @@
 package org.chorus_oss.chorus.network.protocol
 
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketDecoder
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 
 
@@ -58,11 +61,7 @@ class SetTitlePacket : DataPacket() {
     }
 
     override fun pid(): Int {
-        return ProtocolInfo.Companion.SET_TITLE_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
+        return ProtocolInfo.SET_TITLE_PACKET
     }
 
     companion object : PacketDecoder<SetTitlePacket> {

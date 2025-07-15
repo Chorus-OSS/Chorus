@@ -3,6 +3,8 @@ package org.chorus_oss.chorus.network.protocol
 import io.netty.handler.codec.EncoderException
 import org.chorus_oss.chorus.nbt.NBTIO.writeValue
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import java.io.IOException
 import java.nio.ByteOrder
@@ -22,10 +24,6 @@ class LevelEventGenericPacket : DataPacket() {
     }
 
     override fun pid(): Int {
-        return ProtocolInfo.Companion.LEVEL_EVENT_GENERIC_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
+        return ProtocolInfo.LEVEL_EVENT_GENERIC_PACKET
     }
 }

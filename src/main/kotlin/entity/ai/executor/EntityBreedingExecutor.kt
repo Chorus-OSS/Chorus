@@ -73,7 +73,7 @@ open class EntityBreedingExecutor<T : EntityMob>(
     }
 
     protected open fun clearData(entity: T) {
-        entity.memoryStorage.clear(CoreMemoryTypes.Companion.ENTITY_SPOUSE)
+        entity.memoryStorage.clear(CoreMemoryTypes.ENTITY_SPOUSE)
         //clear move target
         entity.moveTarget = null
         //clear look target

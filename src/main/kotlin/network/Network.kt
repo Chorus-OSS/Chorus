@@ -19,7 +19,6 @@ import org.chorus_oss.chorus.network.connection.BedrockPeer
 import org.chorus_oss.chorus.network.connection.BedrockPong
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.connection.netty.initializer.BedrockServerInitializer
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils
@@ -62,7 +61,7 @@ class Network @JvmOverloads constructor(
         server.serverID.mostSignificantBits,
         Server.getGamemodeString(server.defaultGamemode, true),
         false,
-        ProtocolInfo.PROTOCOL_VERSION,
+        org.chorus_oss.protocol.ProtocolInfo.VERSION,
         null,
         server.port,
         server.port

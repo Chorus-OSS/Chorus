@@ -4,7 +4,8 @@ import org.apache.commons.lang3.reflect.FieldUtils
 import org.chorus_oss.chorus.GameMockExtension
 import org.chorus_oss.chorus.TestPlayer
 import org.chorus_oss.chorus.math.Vector3
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
 

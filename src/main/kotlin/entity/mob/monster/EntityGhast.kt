@@ -43,14 +43,14 @@ class EntityGhast(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt),
             ),
             setOf<IBehavior>(
                 Behavior(
-                    GhastShootExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 64, true, 60, 10),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    GhastShootExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 64, true, 60, 10),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     2,
                     1
                 ),
                 Behavior(
-                    GhastShootExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 28, true, 60, 10),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    GhastShootExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 28, true, 60, 10),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     1,
                     1
                 )

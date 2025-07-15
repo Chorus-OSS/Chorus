@@ -587,8 +587,7 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
         }
 
         for (method in methods) {
-            val eh =
-                method.getAnnotation(EventHandler::class.java) ?: continue
+            val eh = method.getAnnotation(EventHandler::class.java) ?: continue
             if (method.isBridge || method.isSynthetic) {
                 continue
             }
@@ -619,12 +618,14 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
                 }
                 clazz = clazz.superclass
             }
-            var eventExecutor = MethodEventExecutor.Companion.compile(listener.javaClass, method)
-            if (eventExecutor == null) {
-                eventExecutor = MethodEventExecutor(method)
-                log.debug("Compile fast EventExecutor {} for {} failed!", eventClass.name, plugin.name)
-            }
-            this.registerEvent(eventClass, listener, eh.priority, eventExecutor, plugin, eh.ignoreCancelled)
+            this.registerEvent(
+                eventClass,
+                listener,
+                eh.priority,
+                MethodEventExecutor(method),
+                plugin,
+                eh.ignoreCancelled
+            )
         }
     }
 

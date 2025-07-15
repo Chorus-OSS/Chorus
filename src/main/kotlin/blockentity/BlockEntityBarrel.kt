@@ -2,17 +2,12 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.BarrelInventory
+import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 class BlockEntityBarrel(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnableContainer(chunk, nbt) {
-    init {
-        isMovable = true
-    }
-
-    override fun requireContainerInventory(): BarrelInventory {
-        return BarrelInventory(this)
-    }
+    override var inventory: Inventory = BarrelInventory(this)
 
     override val spawnCompound: CompoundTag
         get() = super.spawnCompound
@@ -35,5 +30,10 @@ class BlockEntityBarrel(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnableC
 
     override fun hasName(): Boolean {
         return namedTag.contains("CustomName")
+    }
+
+    init {
+        isMovable = true
+        loadNBT()
     }
 }

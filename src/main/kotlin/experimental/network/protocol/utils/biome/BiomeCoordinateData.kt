@@ -5,7 +5,7 @@ import org.chorus_oss.protocol.types.biome.BiomeCoordinateData
 import org.chorus_oss.protocol.types.biome.ExpressionOp
 import org.chorus_oss.protocol.types.biome.RandomDistributionType
 
-fun BiomeCoordinateData.Companion.fromNBT(nbt: CompoundTag): BiomeCoordinateData {
+operator fun BiomeCoordinateData.Companion.invoke(nbt: CompoundTag): BiomeCoordinateData {
     return BiomeCoordinateData(
         minValueType = ExpressionOp.entries[nbt.getInt("maxValueType")],
         minValue = nbt.getShort("minValue"),

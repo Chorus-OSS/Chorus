@@ -33,7 +33,7 @@ open class BlockTorch @JvmOverloads constructor(blockstate: BlockState = propert
     }
 
     private fun findValidSupport(): BlockFace? {
-        for (horizontalFace in BlockFace.Plane.HORIZONTAL) {
+        for (horizontalFace in BlockFace.Plane.HORIZONTAL_FACES) {
             if (isSupportValid(getSide(horizontalFace.getOpposite()), horizontalFace)) {
                 return horizontalFace
             }

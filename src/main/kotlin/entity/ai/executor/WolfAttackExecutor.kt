@@ -37,7 +37,7 @@ class WolfAttackExecutor
 //        if ((target != null && !target.isAlive()) || (target != null && target.equals(entity))) return false;
         wolf.setAngry(true)
 
-        if (entity.memoryStorage.notEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.notEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             if (!entity.isEnablePitch) entity.isEnablePitch = (true)
             val vector3 = entity.memoryStorage.get(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)
             if (vector3 != null) {
@@ -62,7 +62,7 @@ class WolfAttackExecutor
         val wolf = entity as EntityWolf
         entity.level!!.scheduler.scheduleDelayedTask(null, { wolf.setAngry(false) }, 5)
 
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             entity.setDataFlag(EntityFlag.INTERESTED, false)
         }
     }

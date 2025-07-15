@@ -2,9 +2,11 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.BlockCartographyTable
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.ContainerOpenPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ContainerType
 
 class CartographyTableInventory(blockCartographyTable: BlockCartographyTable) :
     BaseInventory(blockCartographyTable, InventoryType.CARTOGRAPHY, 2) {
@@ -21,12 +23,12 @@ class CartographyTableInventory(blockCartographyTable: BlockCartographyTable) :
 
     override fun onOpen(who: Player) {
         super.onOpen(who)
-        who.dataPacket(
-            ContainerOpenPacket(
-                containerID = who.getWindowId(this),
-                containerType = type.networkType,
-                position = holder.vector3.asBlockVector3(),
-                targetActorID = who.getRuntimeID()
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerOpenPacket(
+                containerID = who.getWindowId(this).toByte(),
+                containerType = ContainerType(type),
+                position = BlockPos(holder.vector3),
+                targetActorID = who.getUniqueID()
             )
         )
         this.sendContents(who)

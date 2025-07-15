@@ -2,27 +2,30 @@ package org.chorus_oss.chorus.inventory.request
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ConsumeAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseSlot
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.ConsumeRequestAction
 
-class ConsumeActionProcessor : ItemStackRequestActionProcessor<ConsumeAction> {
-    override fun handle(action: ConsumeAction, player: Player, context: ItemStackRequestContext): ActionResponse? {
+class ConsumeActionProcessor : ItemStackRequestActionProcessor<ConsumeRequestAction> {
+    override fun handle(
+        action: ConsumeRequestAction,
+        player: Player,
+        context: ItemStackRequestContext
+    ): ActionResponse? {
         // We have validated the recipe in CraftRecipeActionProcessor, so here we can believe the client directly
         val count = action.count
-        if (count == 0) {
+        if (count == 0.toByte()) {
             log.warn("cannot consume 0 items!")
 
             return context.error()
         }
 
-        val sourceContainer: Inventory = NetworkMapping.getInventory(player, action.source.containerName.container)
-        val slot = sourceContainer.fromNetworkSlot(action.source.slot)
+        val sourceContainer: Inventory = NetworkMapping.getInventory(player, action.source.container.container)
+        val slot = sourceContainer.fromNetworkSlot(action.source.slot.toInt())
         var item = sourceContainer.getItem(slot)
-        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkId)) {
+        if (validateStackNetworkId(item.getNetId(), action.source.stackNetworkID)) {
             log.warn("mismatch stack network id!")
 
             return context.error()
@@ -49,16 +52,13 @@ class ConsumeActionProcessor : ItemStackRequestActionProcessor<ConsumeAction> {
         }
 
         val isEnchRecipe = context.get<Boolean>(CraftRecipeActionProcessor.ENCH_RECIPE_KEY)
-        if (isEnchRecipe != null && isEnchRecipe && action.source.containerName.container == ContainerSlotType.ENCHANTING_INPUT) {
+        if (isEnchRecipe != null && isEnchRecipe && action.source.container.container == org.chorus_oss.protocol.types.itemstack.ContainerSlotType.EnchantingInput) {
             return null
         }
-
-        val containerSlotType = sourceContainer.getSlotType(slot)
 
         return context.success(
             listOf(
                 ItemStackResponseContainer(
-                    containerSlotType,
                     mutableListOf(
                         ItemStackResponseSlot(
                             sourceContainer.toNetworkSlot(slot),
@@ -69,7 +69,7 @@ class ConsumeActionProcessor : ItemStackRequestActionProcessor<ConsumeAction> {
                             item.damage
                         )
                     ),
-                    action.source.containerName
+                    action.source.container
                 )
             )
         )

@@ -11,7 +11,6 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.level.Transform
 import org.chorus_oss.chorus.scoreboard.scorer.EntityScorer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
-import org.chorus_oss.chorus.utils.StringUtils
 import java.util.function.Predicate
 
 class Scores : CachedSimpleSelectorArgument() {
@@ -24,9 +23,9 @@ class Scores : CachedSimpleSelectorArgument() {
     ): Predicate<Entity> {
         ParseUtils.singleArgument(arguments.toList().toTypedArray(), keyName)
         val conditions = ArrayList<ScoreCondition>()
-        for (entry in StringUtils.fastSplit(SCORE_SEPARATOR, arguments[0].substring(1, arguments[0].length - 1))) {
+        for (entry in arguments[0].substring(1, arguments[0].length - 1).split(SCORE_SEPARATOR)) {
             if (entry.isEmpty()) throw SelectorSyntaxException("Empty score entry is not allowed in selector!")
-            val splittedEntry = StringUtils.fastSplit(SCORE_JOINER, entry, 2)
+            val splittedEntry = entry.split(SCORE_JOINER, limit = 2)
             val objectiveName = splittedEntry[0]
             var condition = splittedEntry[1]
             val reversed: Boolean = ParseUtils.checkReversed(condition)
@@ -35,7 +34,7 @@ class Scores : CachedSimpleSelectorArgument() {
                 //条件为一个区间
                 var min = Int.MIN_VALUE
                 var max = Int.MAX_VALUE
-                val splittedScoreScope = StringUtils.fastSplit(SCORE_SCOPE_SEPARATOR, condition)
+                val splittedScoreScope = condition.split(SCORE_SCOPE_SEPARATOR)
                 val minStr = splittedScoreScope[0]
                 if (minStr.isNotEmpty()) {
                     min = minStr.toInt()

@@ -37,8 +37,8 @@ class EntityShulkerBullet(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, n
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.2f, true),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MoveToTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.2f, true),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     1,
                     1
                 )

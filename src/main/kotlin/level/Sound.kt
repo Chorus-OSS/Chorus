@@ -1165,6 +1165,8 @@ enum class Sound(val sound: String) {
     RECORD_STRAD("record.strad"),
     RECORD_WAIT("record.wait"),
     RECORD_WARD("record.ward"),
+    RECORD_TEARS("record.tears"),
+    RECORD_LAVA_CHICKEN("record.lava_chicken"),
     RESONATE_AMETHYST_BLOCK("resonate.amethyst_block"),
     RESPAWN_ANCHOR_AMBIENT("respawn_anchor.ambient"),
     RESPAWN_ANCHOR_CHARGE("respawn_anchor.charge"),

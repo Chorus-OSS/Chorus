@@ -8,9 +8,10 @@ import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.tree.node.PlayersNode
 import org.chorus_oss.chorus.command.utils.CommandLogger
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.network.protocol.PlaySoundPacket
+import org.chorus_oss.protocol.types.Vector3f
 
 class PlaySoundCommand(name: String) : VanillaCommand(name, "commands.playsound.description") {
     init {
@@ -74,28 +75,28 @@ class PlaySoundCommand(name: String) : VanillaCommand(name, "commands.playsound.
         val successes: MutableList<String> = mutableListOf()
         for (player in targets) {
             val name = player.getEntityName()
-            val packet: PlaySoundPacket = PlaySoundPacket()
             if (locator.position.distance(player.position) > maxDistance) {
                 if (minimumVolume <= 0) {
                     log.addError("commands.playsound.playerTooFar", name)
                     continue
                 }
 
-                packet.volume = minimumVolume
-                packet.x = player.position.floorX
-                packet.y = player.position.floorY
-                packet.z = player.position.floorZ
+                val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
+                    soundName = sound,
+                    position = Vector3f(player.position),
+                    volume = minimumVolume,
+                    pitch = pitch,
+                )
+                player.sendPacket(packet)
             } else {
-                packet.volume = volume
-                packet.x = locator.position.floorX
-                packet.y = locator.position.floorY
-                packet.z = locator.position.floorZ
+                val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
+                    soundName = sound,
+                    position = Vector3f(locator.position),
+                    volume = volume,
+                    pitch = pitch,
+                )
+                player.sendPacket(packet)
             }
-
-            packet.name = sound
-            packet.pitch = pitch
-            player.dataPacket(packet)
-
             successes.add(name)
         }
         log.addSuccess("commands.playsound.success", sound, java.lang.String.join(", ", successes))

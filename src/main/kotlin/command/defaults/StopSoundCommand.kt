@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.tree.node.PlayersNode
 import org.chorus_oss.chorus.command.utils.CommandLogger
-import org.chorus_oss.chorus.network.protocol.StopSoundPacket
 import java.util.stream.Collectors
 
 class StopSoundCommand(name: String) : VanillaCommand(name, "commands.stopsound.description") {
@@ -36,22 +35,22 @@ class StopSoundCommand(name: String) : VanillaCommand(name, "commands.stopsound.
             log.addNoTargetMatch().output()
             return 0
         }
-        var sound: String? = ""
+        var sound = ""
 
         if (list.hasResult(1)) {
-            sound = list.getResult(1)
+            sound = list.getResult(1)!!
         }
-        val packet: StopSoundPacket = StopSoundPacket()
-        packet.name = sound
-        if (sound!!.isEmpty()) {
-            packet.stopAll = true
-        }
+        val packet = org.chorus_oss.protocol.packets.StopSoundPacket(
+            soundName = sound,
+            stopAll = sound.isEmpty(),
+            stopLegacyMusic = false,
+        )
         Server.broadcastPacket(targets, packet)
-        val players_str = targets.stream().map { obj: Player -> obj.getEntityName() }.collect(Collectors.joining(" "))
+        val players = targets.stream().map { obj: Player -> obj.getEntityName() }.collect(Collectors.joining(" "))
         if (packet.stopAll) {
-            log.addSuccess("commands.stopsound.success.all", players_str).output()
+            log.addSuccess("commands.stopsound.success.all", players).output()
         } else {
-            log.addSuccess("commands.stopsound.success", sound, players_str).output()
+            log.addSuccess("commands.stopsound.success", sound, players).output()
         }
         return 1
     }

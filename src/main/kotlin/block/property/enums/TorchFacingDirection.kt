@@ -19,13 +19,7 @@ enum class TorchFacingDirection(val torchDirection: BlockFace? = null) {
             WEST -> BlockFace.WEST
             SOUTH -> BlockFace.SOUTH
             NORTH -> BlockFace.NORTH
-            else -> {
-                BlockFace.DOWN
-                BlockFace.EAST
-                BlockFace.WEST
-                BlockFace.SOUTH
-                BlockFace.NORTH
-            }
+            else -> BlockFace.DOWN
         }
 
     companion object {

@@ -5,9 +5,9 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.event.vehicle.VehicleMoveEvent
 import org.chorus_oss.chorus.math.Vector3
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.chorus.network.protocol.MoveEntityAbsolutePacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 
 class MoveEntityAbsoluteProcessor : DataPacketProcessor<MoveEntityAbsolutePacket>() {
     override fun handle(player: Player, pk: MoveEntityAbsolutePacket) {

@@ -15,7 +15,15 @@ class HomeboundSpaceRandomRoamExecutor(
     maxRetryTime: Int = 10,
     val home: Vector3,
     val homeRadius: Int,
-) : FlatRandomRoamExecutor(speed, maxXZRoamRange, frequency, callNextTargetImmediately, runningTime, avoidWater, maxRetryTime) {
+) : FlatRandomRoamExecutor(
+    speed,
+    maxXZRoamRange,
+    frequency,
+    callNextTargetImmediately,
+    runningTime,
+    avoidWater,
+    maxRetryTime
+) {
     override fun next(entity: EntityMob): Vector3 {
         val x = Random.nextInt(homeRadius * 2) - homeRadius + home.floorX
         val z = Random.nextInt(homeRadius * 2) - homeRadius + home.floorZ

@@ -2,11 +2,12 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.IHuman
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.InventoryContentPacket
-import org.chorus_oss.chorus.network.protocol.MobEquipmentPacket
-import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.packets.InventoryContentPacket
+import org.chorus_oss.protocol.types.inventory.FullContainerName
+import org.chorus_oss.protocol.types.item.ItemStack
 
 class HumanOffHandInventory(holder: IHuman) : BaseInventory(holder, InventoryType.INVENTORY, 1) {
     override fun init() {
@@ -50,17 +51,20 @@ class HumanOffHandInventory(holder: IHuman) : BaseInventory(holder, InventoryTyp
 
         for (player in players) {
             if (player === this.holder) {
-                val pk2 = InventoryContentPacket()
-                pk2.inventoryId = SpecialWindowId.OFFHAND.id
-                pk2.slots = listOf(item)
-                pk2.fullContainerName = FullContainerName(
-                    ContainerSlotType.OFFHAND,
-                    0
+                val packet = InventoryContentPacket(
+                    windowID = SpecialWindowId.OFFHAND.id.toUInt(),
+                    content = listOf(item).map { ItemStack(it) },
+                    container = FullContainerName(
+                        org.chorus_oss.protocol.types.itemstack.ContainerSlotType.Offhand,
+                        null
+                    ),
+                    storageItem = ItemStack(Item.AIR)
                 )
-                player.dataPacket(pk2)
-                player.dataPacket(pk)
+
+                player.sendPacket(packet)
+                player.sendPacket(pk)
             } else {
-                player.dataPacket(pk)
+                player.sendPacket(pk)
             }
         }
     }
@@ -69,12 +73,14 @@ class HumanOffHandInventory(holder: IHuman) : BaseInventory(holder, InventoryTyp
         sendContents(*players)
     }
 
-    private fun createMobEquipmentPacket(item: Item): MobEquipmentPacket {
-        val pk = MobEquipmentPacket()
-        pk.eid = (holder as IHuman).getEntity().getUniqueID()
-        pk.item = item
-        pk.slot = 1
-        pk.containerId = SpecialWindowId.OFFHAND.id
+    private fun createMobEquipmentPacket(item: Item): org.chorus_oss.protocol.packets.MobEquipmentPacket {
+        val pk = org.chorus_oss.protocol.packets.MobEquipmentPacket(
+            entityRuntimeID = (holder as IHuman).getEntity().getRuntimeID().toULong(),
+            newItem = ItemStack(item),
+            inventorySlot = 1,
+            hotbarSlot = 0,
+            windowID = SpecialWindowId.OFFHAND.id.toByte()
+        )
         return pk
     }
 }

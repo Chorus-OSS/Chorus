@@ -4,6 +4,7 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.blockentity.BlockEntityID
 import org.chorus_oss.chorus.blockentity.BlockEntityMusic
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemTool
 import org.chorus_oss.chorus.level.Level
@@ -12,9 +13,9 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.BlockEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.RedstoneComponent
+import org.chorus_oss.protocol.types.BlockPos
 
 class BlockNoteblock @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
     BlockSolid(blockstate), RedstoneComponent, BlockEntityHolder<BlockEntityMusic> {
@@ -189,8 +190,8 @@ class BlockNoteblock @JvmOverloads constructor(blockstate: BlockState = properti
             instrument.ordinal shl 8 or this.strength
         )
 
-        val pk = BlockEventPacket(
-            blockPosition = position.asBlockVector3(),
+        val pk = org.chorus_oss.protocol.packets.BlockEventPacket(
+            blockPosition = BlockPos(position),
             eventType = instrument.ordinal,
             eventValue = this.strength,
         )

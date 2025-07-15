@@ -1,8 +1,8 @@
 package org.chorus_oss.chorus.network.process
 
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.process.processor.*
-import org.chorus_oss.chorus.network.protocol.DataPacket
 
 /**
  * DataPacketManager is a static class to manage DataPacketProcessors and process DataPackets.
@@ -58,7 +58,6 @@ class DataPacketManager {
             StructureBlockUpdateProcessor(),
             TextProcessor(),
             ContainerCloseProcessor(),
-            BlockEntityDataProcessor(),
             SetPlayerGameTypeProcessor(),
             LecternUpdateProcessor(),
             MapInfoRequestProcessor(),

@@ -52,21 +52,21 @@ class EntitySnowGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    SnowGolemShootExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.4f, 16, true, 20, 0),
+                    SnowGolemShootExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.4f, 16, true, 20, 0),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        IBehaviorEvaluator { entity: EntityMob? -> memoryStorage.get<Entity>(CoreMemoryTypes.Companion.ATTACK_TARGET) !is EntitySnowGolem }),
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        IBehaviorEvaluator { entity: EntityMob? -> memoryStorage.get<Entity>(CoreMemoryTypes.ATTACK_TARGET) !is EntitySnowGolem }),
                     3,
                     1
                 ),
                 Behavior(
-                    SnowGolemShootExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 0.4f, 10, true, 20, 0),
+                    SnowGolemShootExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 0.4f, 10, true, 20, 0),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
                         IBehaviorEvaluator {
                             attackTarget(
                                 memoryStorage.get(
-                                    CoreMemoryTypes.Companion.ATTACK_TARGET
+                                    CoreMemoryTypes.ATTACK_TARGET
                                 )!!
                             )
                         }
@@ -78,7 +78,7 @@ class EntitySnowGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
             setOf<ISensor>(
                 NearestEntitySensor(
                     EntityMonster::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     16.0,
                     0.0
                 )

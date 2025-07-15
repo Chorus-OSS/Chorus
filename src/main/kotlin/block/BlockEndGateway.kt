@@ -9,7 +9,8 @@ import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
 
-class BlockEndGateway(blockState: BlockState = properties.defaultState) : BlockSolid(blockState), BlockEntityHolder<BlockEntityEndGateway> {
+class BlockEndGateway(blockState: BlockState = properties.defaultState) : BlockSolid(blockState),
+    BlockEntityHolder<BlockEntityEndGateway> {
     override val name: String
         get() = "End Gateway"
 

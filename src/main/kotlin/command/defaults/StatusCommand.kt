@@ -15,11 +15,10 @@ import java.io.IOException
 import java.lang.management.ManagementFactory
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
-import kotlin.math.round
 
 
 class StatusCommand(name: String) :
-    TestCommand(name, "%nukkit.command.status.description", "%nukkit.command.status.usage"),
+    TestCommand(name, "%chorus.command.status.description", "%chorus.command.status.usage"),
     CoreCommand {
     private val systemInfo = SystemInfo()
 

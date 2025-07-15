@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.compression
 
-import org.chorus_oss.chorus.utils.ThreadCache
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.zip.DataFormatException
 import java.util.zip.Deflater
@@ -10,14 +10,13 @@ class ZlibThreadLocal : ZlibProvider {
     @Throws(IOException::class)
     override fun deflate(data: ByteArray, level: Int, raw: Boolean): ByteArray {
         val deflater = if (raw) DEFLATER_RAW.get() else DEFLATER.get()
-        val bos = ThreadCache.fbaos.get()!!
+        deflater.reset()
+        deflater.setLevel(level)
+        deflater.setInput(data)
+        deflater.finish()
+        val buffer = BUFFER.get()
+        val bos = ByteArrayOutputStream(1024)
         try {
-            deflater.reset()
-            deflater.setLevel(level)
-            deflater.setInput(data)
-            deflater.finish()
-            bos.reset()
-            val buffer = BUFFER.get()
             while (!deflater.finished()) {
                 val i = deflater.deflate(buffer)
                 bos.write(buffer, 0, i)
@@ -25,35 +24,31 @@ class ZlibThreadLocal : ZlibProvider {
         } finally {
             deflater.reset()
         }
-        // Deflater::end is called the time when the process exits.
         return bos.toByteArray()
     }
 
     @Throws(IOException::class)
     override fun inflate(data: ByteArray, maxSize: Int, raw: Boolean): ByteArray {
         val inflater = if (raw) INFLATER_RAW.get() else INFLATER.get()
-        try {
-            inflater.reset()
-            inflater.setInput(data)
-            inflater.finished()
-            val bos = ThreadCache.fbaos.get()!!
-            bos.reset()
+        inflater.reset()
+        inflater.setInput(data)
 
-            val buffer = BUFFER.get()
-            try {
-                var length = 0
-                while (!inflater.finished()) {
-                    val i = inflater.inflate(buffer)
-                    length += i
-                    if (maxSize in 1..<length) {
-                        throw IOException("Inflated data exceeds maximum size")
-                    }
-                    bos.write(buffer, 0, i)
+        val buffer = BUFFER.get()
+        val bos = ByteArrayOutputStream(1024)
+
+        try {
+            var length = 0
+            while (!inflater.finished()) {
+                val i = inflater.inflate(buffer)
+                length += i
+                if (maxSize in 1..<length) {
+                    throw IOException("Inflated data exceeds maximum size")
                 }
-                return bos.toByteArray()
-            } catch (e: DataFormatException) {
-                throw IOException("Unable to inflate zlib stream", e)
+                bos.write(buffer, 0, i)
             }
+            return bos.toByteArray()
+        } catch (e: DataFormatException) {
+            throw IOException("Unable to inflate zlib stream", e)
         } finally {
             inflater.reset()
         }

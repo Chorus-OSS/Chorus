@@ -11,7 +11,6 @@ import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Transform
 import org.chorus_oss.chorus.math.BVector3
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.types.PlayerAbility
 
 class TeleportCommand(name: String) :
     VanillaCommand(name, "commands.tp.description", "commands.tp.usage", arrayOf<String>("teleport")) {
@@ -70,7 +69,7 @@ class TeleportCommand(name: String) :
     }
 
     override fun testPermissionSilent(target: CommandSender): Boolean {
-        if (target.isPlayer && target.asPlayer()!!.adventureSettings.get(PlayerAbility.TELEPORT)) return true
+        if (target.isPlayer && target.asPlayer()!!.adventureSettings.get(org.chorus_oss.protocol.types.PlayerAbility.Teleport)) return true
         return super.testPermissionSilent(target)
     }
 

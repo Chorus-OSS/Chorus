@@ -4,24 +4,26 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.blockentity.BlockEntityItemFrame
 import org.chorus_oss.chorus.event.player.PlayerMapInfoRequestEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemFilledMap
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.MapInfoRequestPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.chorus.scheduler.AsyncTask
+import org.chorus_oss.protocol.packets.MapInfoRequestPacket
 
 
-class MapInfoRequestProcessor : DataPacketProcessor<MapInfoRequestPacket>() {
-    override fun handle(player: Player, pk: MapInfoRequestPacket) {
+class MapInfoRequestProcessor : DataPacketProcessor<MigrationPacket<MapInfoRequestPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<MapInfoRequestPacket>) {
+        val packet = pk.packet
+
         val player = player.player
         var mapItem: Item? = null
         var index = 0
         var offhand = false
 
         for ((key, item1) in player.offhandInventory.contents) {
-            if (checkMapItemValid(item1, pk)) {
+            if (checkMapItemValid(item1, packet)) {
                 mapItem = item1
                 index = key
                 offhand = true
@@ -30,7 +32,7 @@ class MapInfoRequestProcessor : DataPacketProcessor<MapInfoRequestPacket>() {
 
         if (mapItem == null) {
             for ((key, item1) in player.inventory.contents) {
-                if (checkMapItemValid(item1, pk)) {
+                if (checkMapItemValid(item1, packet)) {
                     mapItem = item1
                     index = key
                 }
@@ -39,7 +41,7 @@ class MapInfoRequestProcessor : DataPacketProcessor<MapInfoRequestPacket>() {
 
         if (mapItem == null) {
             for (be in player.level!!.getBlockEntities().values) {
-                if (be is BlockEntityItemFrame && checkMapItemValid(be.item, pk)) {
+                if (be is BlockEntityItemFrame && checkMapItemValid(be.item, packet)) {
                     (be.item as ItemFilledMap).sendImage(player)
                     break
                 }
@@ -70,14 +72,14 @@ class MapInfoRequestProcessor : DataPacketProcessor<MapInfoRequestPacket>() {
                         if (finalOffhand) {
                             if (checkMapItemValid(
                                     player.offhandInventory.getUnclonedItem(finalIndex),
-                                    pk
+                                    packet
                                 )
                             ) player.offhandInventory
                                 .setItem(finalIndex, map)
                         } else {
                             if (checkMapItemValid(
                                     player.inventory.getUnclonedItem(finalIndex),
-                                    pk
+                                    packet
                                 )
                             ) player.inventory.setItem(finalIndex, map)
                         }
@@ -88,10 +90,9 @@ class MapInfoRequestProcessor : DataPacketProcessor<MapInfoRequestPacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.MAP_INFO_REQUEST_PACKET
+    override val packetId: Int = MapInfoRequestPacket.id
 
-    protected fun checkMapItemValid(item: Item?, pk: MapInfoRequestPacket): Boolean {
-        return item is ItemFilledMap && item.mapId == pk.mapId
+    private fun checkMapItemValid(item: Item?, pk: MapInfoRequestPacket): Boolean {
+        return item is ItemFilledMap && item.mapId == pk.mapID
     }
 }

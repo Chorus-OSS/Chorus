@@ -51,36 +51,36 @@ class EntityPhantom(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt
                     1
                 ),
                 Behavior(
-                    CircleAboveTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.4f, true), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_ENTITY),
-                        not(PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, Utils.rand(200, 400)))
+                    CircleAboveTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.4f, true), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.LAST_ATTACK_ENTITY),
+                        not(PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, Utils.rand(200, 400)))
                     ), 5, 1
                 ),
                 Behavior(
-                    CircleAboveTargetExecutor(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 0.4f, true),
+                    CircleAboveTargetExecutor(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 0.4f, true),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_ENTITY),
-                        not(PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, Utils.rand(200, 400)))
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.LAST_ATTACK_ENTITY),
+                        not(PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, Utils.rand(200, 400)))
                     ),
                     4,
                     1
                 ),
                 Behavior(
-                    PhantomMeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.5f, 64, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    PhantomMeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.5f, 64, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     3,
                     1
                 ),
                 Behavior(
                     PhantomMeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.5f,
                         64,
                         false,
                         30
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(
                     SpaceRandomRoamExecutor(0.15f, 12, 100, 20, false, -1, true, 10),
@@ -93,7 +93,7 @@ class EntityPhantom(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt
                 NearestPlayerSensor(64.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 64.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!

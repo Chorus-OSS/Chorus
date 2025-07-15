@@ -4,11 +4,9 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.registry.Registries
-
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.util.List
 
 class RecipeTest {
     @Test
@@ -140,7 +138,7 @@ class RecipeTest {
     companion object {
         @JvmStatic
         @BeforeAll
-        fun before(): Unit {
+        fun before() {
             Registries.POTION.init()
             Registries.BLOCKSTATE_ITEMMETA.init()
             Registries.BLOCK.init()

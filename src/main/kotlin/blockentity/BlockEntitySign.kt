@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.DyeColor
-import org.chorus_oss.chorus.utils.StringUtils
 import org.chorus_oss.chorus.utils.TextFormat
 import kotlin.math.min
 
@@ -70,10 +69,10 @@ open class BlockEntitySign(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
     override fun saveNBT() {
         super.saveNBT()
         namedTag.getCompound(TAG_FRONT_TEXT)
-            .putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *frontText))
+            .putString(TAG_TEXT_BLOB, frontText.filterNotNull().joinToString("\n"))
             .putByte(TAG_PERSIST_FORMATTING, 1)
         namedTag.getCompound(TAG_BACK_TEXT)
-            .putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *backText))
+            .putString(TAG_TEXT_BLOB, backText.filterNotNull().joinToString("\n"))
             .putByte(TAG_PERSIST_FORMATTING, 1)
         namedTag.putBoolean(TAG_LEGACY_BUG_RESOLVE, true)
             .putByte(TAG_WAXED, 0)
@@ -118,13 +117,13 @@ open class BlockEntitySign(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
                 if (i < lines.size) frontText[i] = lines[i]
                 else frontText[i] = ""
             }
-            namedTag.getCompound(TAG_FRONT_TEXT).putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *lines))
+            namedTag.getCompound(TAG_FRONT_TEXT).putString(TAG_TEXT_BLOB, lines.filterNotNull().joinToString("\n"))
         } else {
             for (i in 0..3) {
                 if (i < lines.size) backText[i] = lines[i]
                 else backText[i] = ""
             }
-            namedTag.getCompound(TAG_BACK_TEXT).putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *lines))
+            namedTag.getCompound(TAG_BACK_TEXT).putString(TAG_TEXT_BLOB, lines.filterNotNull().joinToString("\n"))
         }
         this.spawnToAll()
         if (this.chunk != null) {
@@ -322,7 +321,7 @@ open class BlockEntitySign(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
                 if (i < lines.size) frontText[i] = lines[i]
                 else frontText[i] = ""
             }
-            namedTag.getCompound(TAG_FRONT_TEXT).putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *frontText))
+            namedTag.getCompound(TAG_FRONT_TEXT).putString(TAG_TEXT_BLOB, frontText.filterNotNull().joinToString("\n"))
             namedTag.remove(TAG_TEXT_BLOB)
         } else {
             var count = 0
@@ -336,7 +335,8 @@ open class BlockEntitySign(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
                 }
             }
             if (count == 4) {
-                namedTag.getCompound(TAG_FRONT_TEXT).putString(TAG_TEXT_BLOB, StringUtils.joinNotNull("\n", *frontText))
+                namedTag.getCompound(TAG_FRONT_TEXT)
+                    .putString(TAG_TEXT_BLOB, frontText.filterNotNull().joinToString("\n"))
             }
         }
         if (namedTag.contains(TAG_GLOWING_TEXT)) {

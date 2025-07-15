@@ -34,17 +34,19 @@ class BedrockBatchEncoder : ChannelOutboundHandlerAdapter() {
         val batch: BedrockBatchWrapper = BedrockBatchWrapper.newInstance()
 
         try {
-            var packet: BedrockPacketWrapper
-            while ((messages.poll().also { packet = it }) != null) try {
-                val message = requireNotNull(packet.packetBuffer) { "BedrockPacket is not encoded" }
+            while (true) {
+                val packet = messages.poll() ?: break
+                try {
+                    val message = requireNotNull(packet.packetBuffer) { "BedrockPacket is not encoded" }
 
-                val header = ctx.alloc().ioBuffer(5)
-                ByteBufVarInt.writeUnsignedInt(header, message.readableBytes())
-                buf.addComponent(true, header)
-                buf.addComponent(true, message.retain())
-                batch.addPacket(packet.retain())
-            } finally {
-                packet.release()
+                    val header = ctx.alloc().ioBuffer(5)
+                    ByteBufVarInt.writeUnsignedInt(header, message.readableBytes())
+                    buf.addComponent(true, header)
+                    buf.addComponent(true, message.retain())
+                    batch.addPacket(packet.retain())
+                } finally {
+                    packet.release()
+                }
             }
 
             batch.setUncompressed(buf.retain())
@@ -59,8 +61,8 @@ class BedrockBatchEncoder : ChannelOutboundHandlerAdapter() {
 
     @Throws(Exception::class)
     override fun handlerRemoved(ctx: ChannelHandlerContext) {
-        var message: BedrockPacketWrapper
-        while ((messages.poll().also { message = it }) != null) {
+        while (true) {
+            val message = messages.poll() ?: break
             message.release()
         }
         super.handlerRemoved(ctx)

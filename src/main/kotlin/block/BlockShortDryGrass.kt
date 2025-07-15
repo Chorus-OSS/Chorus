@@ -23,7 +23,7 @@ class BlockShortDryGrass(blockState: BlockState = properties.defaultState) : Blo
         fz: Double,
         player: Player?
     ): Boolean {
-        if (BlockSweetBerryBush.isSupportValid(down())) {
+        if (BlockSweetBerryBush.isSupportValid(block.down())) {
             this.level.setBlock(block.position, this, true)
             return true
         }

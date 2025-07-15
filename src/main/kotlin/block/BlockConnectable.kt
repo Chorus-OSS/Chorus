@@ -24,7 +24,7 @@ interface BlockConnectable {
     val connections: Set<BlockFace>
         get() {
             val connections: EnumSet<BlockFace> = EnumSet.noneOf(BlockFace::class.java)
-            for (blockFace in BlockFace.Plane.HORIZONTAL) {
+            for (blockFace in BlockFace.Plane.HORIZONTAL_FACES) {
                 if (isConnected(blockFace)) {
                     connections.add(blockFace)
                 }

@@ -3,14 +3,14 @@ package org.chorus_oss.chorus.inventory.request
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.blockentity.BlockEntityBeacon
 import org.chorus_oss.chorus.inventory.BeaconInventory
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.BeaconPaymentAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.itemstack.request.action.BeaconPaymentRequestAction
 
 
-class BeaconPaymentActionProcessor : ItemStackRequestActionProcessor<BeaconPaymentAction>, Loggable {
+class BeaconPaymentActionProcessor : ItemStackRequestActionProcessor<BeaconPaymentRequestAction>, Loggable {
     override fun handle(
-        action: BeaconPaymentAction,
+        action: BeaconPaymentRequestAction,
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {

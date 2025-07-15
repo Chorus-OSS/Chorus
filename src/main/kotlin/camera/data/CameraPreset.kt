@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.data.CommandEnum
 import org.chorus_oss.chorus.math.Vector2f
 import org.chorus_oss.chorus.math.Vector3f
-import org.chorus_oss.chorus.network.protocol.UpdateSoftEnumPacket
 import org.chorus_oss.chorus.network.protocol.types.ControlScheme
 import org.chorus_oss.chorus.network.protocol.types.camera.CameraAudioListener
 import org.chorus_oss.chorus.network.protocol.types.camera.aimassist.CameraPresetAimAssist
@@ -105,7 +104,10 @@ class CameraPreset @JvmOverloads constructor(
             for (preset in presets) {
                 require(!PRESETS.containsKey(preset.identifier)) { "Camera preset " + preset.identifier + " already exists!" }
                 PRESETS[preset.identifier] = preset
-                CommandEnum.CAMERA_PRESETS.updateSoftEnum(UpdateSoftEnumPacket.Type.ADD, preset.identifier)
+                CommandEnum.CAMERA_PRESETS.updateSoftEnum(
+                    org.chorus_oss.protocol.packets.UpdateSoftEnumPacket.Companion.ActionType.Add,
+                    preset.identifier
+                )
             }
             var id = 0
             //重新分配id

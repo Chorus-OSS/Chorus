@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.CompoundTagView
 import org.chorus_oss.chorus.nbt.tag.LinkedCompoundTag
 import org.chorus_oss.chorus.nbt.tag.TreeMapCompoundTag
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.utils.HashUtils
 
 class BlockStateImpl(

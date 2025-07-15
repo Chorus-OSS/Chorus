@@ -88,14 +88,9 @@ class BlockSweetBerryBush @JvmOverloads constructor(blockstate: BlockState = pro
         Server.instance.pluginManager.callEvent(event)
         if (!event.cancelled) {
             level.setBlock(this.position, event.newState, true, true)
-            val drops: Array<Item> = event.drops
-            if (drops != null) {
-                val dropPos = add(0.5, 0.5, 0.5)
-                for (drop in drops) {
-                    if (drop != null) {
-                        level.dropItem(dropPos.position, drop)
-                    }
-                }
+            val dropPos = add(0.5, 0.5, 0.5)
+            for (drop in event.drops) {
+                level.dropItem(dropPos.position, drop)
             }
         }
 
@@ -140,7 +135,7 @@ class BlockSweetBerryBush @JvmOverloads constructor(blockstate: BlockState = pro
         if (target!!.id == BlockID.SWEET_BERRY_BUSH || !block.isAir) {
             return false
         }
-        if (isSupportValid(down())) {
+        if (isSupportValid(block.down())) {
             level.setBlock(block.position, this, true)
             return true
         }

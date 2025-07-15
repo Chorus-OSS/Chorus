@@ -4,7 +4,6 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.NPCCommandSender
 import org.chorus_oss.chorus.dialog.element.ElementDialogButton
-import org.chorus_oss.chorus.dialog.handler.FormDialogHandler
 import org.chorus_oss.chorus.dialog.window.FormWindowDialog
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityID
@@ -28,7 +27,7 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.network.protocol.NPCRequestPacket
+import org.chorus_oss.protocol.packets.NPCRequestPacket
 
 class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), EntityInteractable {
     override fun getEntityIdentifier(): String {
@@ -72,7 +71,7 @@ class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Entit
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(2, 100)
                 )
             ),
@@ -96,74 +95,82 @@ class EntityNPC(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), Entit
         this.setMovementSpeedF(0.5f)
 
         this.dialog = FormWindowDialog(
-            if (namedTag!!.contains(TAG_RAWTEXT_NAME)) namedTag!!.getString(TAG_RAWTEXT_NAME) else this.getNameTag(),
-            if (namedTag!!.contains(TAG_INTERACTIVE_TEXT)) namedTag!!.getString(TAG_INTERACTIVE_TEXT) else "",
+            if (namedTag.contains(TAG_RAWTEXT_NAME)) namedTag.getString(TAG_RAWTEXT_NAME) else this.getNameTag(),
+            if (namedTag.contains(TAG_INTERACTIVE_TEXT)) namedTag.getString(TAG_INTERACTIVE_TEXT) else "",
             this
         )
 
-        if (!namedTag!!.getString(TAG_ACTIONS).isEmpty()) dialog.buttonJSONData =
-            namedTag!!.getString(TAG_ACTIONS)
+        if (!namedTag.getString(TAG_ACTIONS).isEmpty()) dialog.buttonJSONData =
+            namedTag.getString(TAG_ACTIONS)
 
-        dialog.addHandler(FormDialogHandler { player, response ->
-            if (response.requestType === NPCRequestPacket.RequestType.SET_ACTIONS) {
-                if (!response.data.isEmpty()) {
-                    this.dialog.buttonJSONData = response.data
-                    this.setDataProperty(EntityDataTypes.ACTIONS, response.data)
-                }
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.SET_INTERACTION_TEXT) {
-                this.dialog.content = response.data
-                this.setDataProperty(EntityDataTypes.INTERACT_TEXT, response.data)
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.SET_NAME) {
-                this.dialog.title = response.data
-                this.setNameTag(response.data)
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.SET_SKIN) {
-                this.variant = response.skinType
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.EXECUTE_ACTION) {
-                val clickedButton = response.clickedButton
-                if (clickedButton != null) {
-                    for (line in clickedButton.getData()) {
-                        Server.instance.executeCommand(NPCCommandSender(this, player), line.cmdLine)
+        dialog.addHandler { player, response ->
+            when (response.requestType) {
+                NPCRequestPacket.Companion.RequestType.SetActions -> {
+                    if (!response.data.isEmpty()) {
+                        this.dialog.buttonJSONData = response.data
+                        this.setDataProperty(EntityDataTypes.ACTIONS, response.data)
                     }
                 }
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.EXECUTE_OPENING_COMMANDS) {
-                for (button in this.dialog.getButtons()) {
-                    if (button.getMode() == ElementDialogButton.Mode.ON_ENTER) {
-                        for (line in button.getData()) {
+
+                NPCRequestPacket.Companion.RequestType.SetInteractText -> {
+                    this.dialog.content = response.data
+                    this.setDataProperty(EntityDataTypes.INTERACT_TEXT, response.data)
+                }
+
+                NPCRequestPacket.Companion.RequestType.SetName -> {
+                    this.dialog.title = response.data
+                    this.setNameTag(response.data)
+                }
+
+                NPCRequestPacket.Companion.RequestType.SetSkin -> {
+                    this.variant = response.skinType
+                }
+
+                NPCRequestPacket.Companion.RequestType.ExecuteAction -> {
+                    val clickedButton = response.clickedButton
+                    if (clickedButton != null) {
+                        for (line in clickedButton.getData()) {
                             Server.instance.executeCommand(NPCCommandSender(this, player), line.cmdLine)
                         }
                     }
                 }
-            }
-            if (response.requestType === NPCRequestPacket.RequestType.EXECUTE_CLOSING_COMMANDS) {
-                for (button in this.dialog.getButtons()) {
-                    if (button.getMode() == ElementDialogButton.Mode.ON_EXIT) {
-                        for (line in button.getData()) {
-                            Server.instance.executeCommand(NPCCommandSender(this, player), line.cmdLine)
+
+                NPCRequestPacket.Companion.RequestType.ExecuteOpeningCommands -> {
+                    for (button in this.dialog.getButtons()) {
+                        if (button.getMode() == ElementDialogButton.Mode.ON_ENTER) {
+                            for (line in button.getData()) {
+                                Server.instance.executeCommand(NPCCommandSender(this, player), line.cmdLine)
+                            }
+                        }
+                    }
+                }
+
+                NPCRequestPacket.Companion.RequestType.ExecuteClosingCommands -> {
+                    for (button in this.dialog.getButtons()) {
+                        if (button.getMode() == ElementDialogButton.Mode.ON_EXIT) {
+                            for (line in button.getData()) {
+                                Server.instance.executeCommand(NPCCommandSender(this, player), line.cmdLine)
+                            }
                         }
                     }
                 }
             }
-        })
+        }
         dialog.bindEntity = this
     }
 
     override fun saveNBT() {
         super.saveNBT()
 
-        namedTag!!.putString(
+        namedTag.putString(
             TAG_RAWTEXT_NAME,
             dialog.title!!
         )
-        namedTag!!.putString(
+        namedTag.putString(
             TAG_INTERACTIVE_TEXT,
             dialog.content!!
         )
-        namedTag!!.putString(
+        namedTag.putString(
             TAG_ACTIONS,
             dialog.buttonJSONData!!
         )

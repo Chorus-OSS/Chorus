@@ -43,7 +43,7 @@ class BlockChorusFlower @JvmOverloads constructor(blockstate: BlockState = prope
                 return false
             }
             var foundPlant = false
-            for (face in BlockFace.Plane.HORIZONTAL) {
+            for (face in BlockFace.Plane.HORIZONTAL_FACES) {
                 val side = getSide(face)
                 if (side.id == BlockID.CHORUS_PLANT) {
                     if (foundPlant) {
@@ -205,7 +205,7 @@ class BlockChorusFlower @JvmOverloads constructor(blockstate: BlockState = prope
         get() = age >= maxAge
 
     private fun isHorizontalAir(block: Block): Boolean {
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             if (!block.getSide(face).isAir) {
                 return false
             }
@@ -214,7 +214,7 @@ class BlockChorusFlower @JvmOverloads constructor(blockstate: BlockState = prope
     }
 
     private fun isHorizontalAirExcept(block: Block, except: BlockFace?): Boolean {
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             if (face != except) {
                 if (!block.getSide(face).isAir) {
                     return false

@@ -45,7 +45,7 @@ class EntityEnderman(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
             setOf<IBehavior>(
                 Behavior(
                     PlaySoundExecutor(Sound.MOB_ENDERMEN_IDLE, 0.8f, 1.2f, 1f, 1f),
-                    all(not(EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET)), RandomSoundEvaluator()),
+                    all(not(EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET)), RandomSoundEvaluator()),
                     6,
                     1,
                     1,
@@ -53,7 +53,7 @@ class EntityEnderman(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
                 ),
                 Behavior(
                     PlaySoundExecutor(Sound.MOB_ENDERMEN_SCREAM, 0.8f, 1.2f, 1f, 1f),
-                    all(EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), RandomSoundEvaluator(10, 7)),
+                    all(EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), RandomSoundEvaluator(10, 7)),
                     5,
                     1,
                     1,
@@ -67,26 +67,26 @@ class EntityEnderman(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
                             IBehaviorEvaluator { level!!.tick % 10 == 0 }),
                         IBehaviorEvaluator { isInsideOfWater() },
                         all(
-                            IBehaviorEvaluator { memoryStorage.isEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET) },
+                            IBehaviorEvaluator { memoryStorage.isEmpty(CoreMemoryTypes.ATTACK_TARGET) },
                             IBehaviorEvaluator { level!!.tick % 20 == 0 },
                             ProbabilityEvaluator(2, 25)
                         ),
                         all(
-                            IBehaviorEvaluator { !memoryStorage.isEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET) },
+                            IBehaviorEvaluator { !memoryStorage.isEmpty(CoreMemoryTypes.ATTACK_TARGET) },
                             ProbabilityEvaluator(1, 20),
-                            PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 10)
+                            PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 10)
                         )
                     ), 4, 1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.45f, 64, true, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.45f, 64, true, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                         any(
                             IBehaviorEvaluator {
                                 val holder = memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
                                 holder is Player && (holder.inventory.helmet.id != BlockID.CARVED_PUMPKIN)
                             },
-                            IBehaviorEvaluator { memoryStorage[CoreMemoryTypes.Companion.ATTACK_TARGET] is EntityMob }
+                            IBehaviorEvaluator { memoryStorage[CoreMemoryTypes.ATTACK_TARGET] is EntityMob }
                         )
                     ), 3, 1),
                 Behavior(

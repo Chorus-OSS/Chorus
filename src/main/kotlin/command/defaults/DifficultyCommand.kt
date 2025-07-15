@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.command.data.CommandParamType
 import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.utils.CommandLogger
-import org.chorus_oss.chorus.network.protocol.SetDifficultyPacket
 
 class DifficultyCommand(name: String) :
     VanillaCommand(name, "commands.difficulty.description", "%commands.difficulty.usage") {
@@ -53,9 +52,10 @@ class DifficultyCommand(name: String) :
         }
         if (difficulty != -1) {
             Server.instance.setDifficulty(difficulty)
-            val pk: SetDifficultyPacket = SetDifficultyPacket()
-            pk.difficulty = Server.instance.getDifficulty()
-            Server.broadcastPacket(ArrayList(Server.instance.onlinePlayers.values), pk)
+            val pk = org.chorus_oss.protocol.packets.SetDifficultyPacket(
+                difficulty = Server.instance.getDifficulty().toUInt()
+            )
+            Server.broadcastPacket(Server.instance.onlinePlayers.values, pk)
             log.addSuccess("commands.difficulty.success", difficulty.toString()).output(true)
             return 1
         } else {

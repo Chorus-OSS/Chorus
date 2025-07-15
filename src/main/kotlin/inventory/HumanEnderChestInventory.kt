@@ -4,11 +4,11 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.blockentity.BlockEntityEnderChest
 import org.chorus_oss.chorus.blockentity.BlockEntityNameable
 import org.chorus_oss.chorus.entity.IHuman
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.network.protocol.BlockEventPacket
-import org.chorus_oss.chorus.network.protocol.ContainerClosePacket
-import org.chorus_oss.chorus.network.protocol.ContainerOpenPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ContainerType
 
 
 class HumanEnderChestInventory(human: IHuman) : BaseInventory(human, InventoryType.CONTAINER, 27),
@@ -46,18 +46,18 @@ class HumanEnderChestInventory(human: IHuman) : BaseInventory(human, InventoryTy
             return
         }
         super.onOpen(who)
-        who.dataPacket(
-            ContainerOpenPacket(
-                containerID = who.getWindowId(this),
-                containerType = type.networkType,
-                position = holder.vector3.asBlockVector3(),
-                targetActorID = who.getRuntimeID()
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerOpenPacket(
+                containerID = who.getWindowId(this).toByte(),
+                containerType = ContainerType(type),
+                position = BlockPos(holder.vector3),
+                targetActorID = who.getUniqueID()
             )
         )
         this.sendContents(who)
 
-        val blockEventPacket = BlockEventPacket(
-            blockPosition = enderChest!!.position.asBlockVector3(),
+        val blockEventPacket = org.chorus_oss.protocol.packets.BlockEventPacket(
+            blockPosition = BlockPos(enderChest!!.position),
             eventType = 1,
             eventValue = 2,
         )
@@ -88,16 +88,16 @@ class HumanEnderChestInventory(human: IHuman) : BaseInventory(human, InventoryTy
         }
 
         val containerId = who.getWindowId(this)
-        who.dataPacket(
-            ContainerClosePacket(
-                containerID = containerId,
-                containerType = type,
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerClosePacket(
+                containerID = containerId.toByte(),
+                containerType = ContainerType(type),
                 serverInitiatedClose = who.closingWindowId != containerId
             )
         )
 
-        val blockEventPacket = BlockEventPacket(
-            blockPosition = enderChest!!.position.asBlockVector3(),
+        val blockEventPacket = org.chorus_oss.protocol.packets.BlockEventPacket(
+            blockPosition = BlockPos(enderChest!!.position),
             eventType = 1,
             eventValue = 0,
         )

@@ -23,12 +23,13 @@ import kotlin.math.atan
 
 
 class BlockEntityBeehive(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
-    private var occupants: MutableList<Occupant> = ArrayList(4)
+    private var occupants: MutableList<Occupant> = mutableListOf()
 
     var interactingEntity: Entity? = null
 
     override fun initBlockEntity() {
         super.initBlockEntity()
+        this.occupants = mutableListOf()
         if (!isEmpty) {
             scheduleUpdate()
         }

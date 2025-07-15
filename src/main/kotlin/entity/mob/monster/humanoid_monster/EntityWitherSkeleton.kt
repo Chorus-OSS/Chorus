@@ -50,15 +50,15 @@ class EntityWitherSkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(c
                 Behavior(
                     IBehaviorExecutor { entity: EntityMob? ->
                         val storage = memoryStorage
-                        if (storage.notEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET)) return@IBehaviorExecutor false
+                        if (storage.notEmpty(CoreMemoryTypes.ATTACK_TARGET)) return@IBehaviorExecutor false
                         var attackTarget: Entity? = null
-                        if (storage.notEmpty(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET) && storage.get<Entity>(
-                                CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET
+                        if (storage.notEmpty(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET) && storage.get<Entity>(
+                                CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET
                             )!!.isAlive()
                         ) {
-                            attackTarget = storage.get<Entity>(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET)
+                            attackTarget = storage.get<Entity>(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET)
                         }
-                        storage[CoreMemoryTypes.Companion.ATTACK_TARGET] = attackTarget
+                        storage[CoreMemoryTypes.ATTACK_TARGET] = attackTarget
                         false
                     },
                     { entity: EntityMob? -> true }, 20
@@ -68,17 +68,17 @@ class EntityWitherSkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(c
                 Behavior(PlaySoundExecutor(Sound.MOB_WITHER_AMBIENT), RandomSoundEvaluator(), 5, 1),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 40, true, 10, Effect.get(
+                        CoreMemoryTypes.ATTACK_TARGET, 0.3f, 40, true, 10, Effect.get(
                             EffectType.WITHER
                         ).setDuration(200)
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), 4, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), 4, 1
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 40, false, 10, Effect.get(
+                        CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 40, false, 10, Effect.get(
                             EffectType.WITHER
                         ).setDuration(200)
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
@@ -86,7 +86,7 @@ class EntityWitherSkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(c
                 NearestPlayerSensor(40.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!

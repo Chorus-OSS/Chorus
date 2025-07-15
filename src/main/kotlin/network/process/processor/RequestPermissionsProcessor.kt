@@ -3,12 +3,15 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerHackDetectedEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.Controllable
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.RequestPermissionsPacket
+import org.chorus_oss.protocol.packets.RequestPermissionsPacket
 
-class RequestPermissionsProcessor : DataPacketProcessor<RequestPermissionsPacket>() {
-    override fun handle(player: Player, pk: RequestPermissionsPacket) {
+class RequestPermissionsProcessor : DataPacketProcessor<MigrationPacket<RequestPermissionsPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<RequestPermissionsPacket>) {
+        val packet = pk.packet
+
         if (!player.player.isOp) {
             val event =
                 PlayerHackDetectedEvent(player.player, PlayerHackDetectedEvent.HackType.PERMISSION_REQUEST)
@@ -18,17 +21,16 @@ class RequestPermissionsProcessor : DataPacketProcessor<RequestPermissionsPacket
 
             return
         }
-        val player = pk.targetPlayer
+        val player = Server.instance.onlinePlayers.values.find { it.getUniqueID() == packet.entityUniqueID }
         if (player != null && player.isOnline) {
-            val customPermissions = pk.parseCustomPermissions()
-            for (controllableAbility in RequestPermissionsPacket.CONTROLLABLE_ABILITIES) {
-                player.adventureSettings[controllableAbility] = customPermissions.contains(controllableAbility)
+            for (controllableAbility in org.chorus_oss.protocol.types.PlayerAbility.Controllable) {
+                player.adventureSettings[controllableAbility] =
+                    (packet.requestedPermissions and controllableAbility.bit) != 0.toUShort()
             }
-            player.adventureSettings.playerPermission = pk.permissions
+            player.adventureSettings.playerPermission = packet.permissionLevel
             player.adventureSettings.update()
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.REQUEST_PERMISSIONS_PACKET
+    override val packetId: Int = RequestPermissionsPacket.id
 }

@@ -10,7 +10,6 @@ import org.chorus_oss.chorus.command.exceptions.SelectorSyntaxException
 import org.chorus_oss.chorus.command.selector.args.ISelectorArgument
 import org.chorus_oss.chorus.command.selector.args.impl.*
 import org.chorus_oss.chorus.entity.Entity
-import org.chorus_oss.chorus.utils.StringUtils
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
@@ -166,7 +165,7 @@ class EntitySelectorAPI private constructor() {
 
         if (inputArguments != null) {
             for (arg in separateArguments(inputArguments)) {
-                val split = StringUtils.fastSplit(ARGUMENT_JOINER, arg, 2)
+                val split = arg.split(ARGUMENT_JOINER, limit = 2)
                 val argName = split[0]
 
                 if (!registry.containsKey(argName)) {

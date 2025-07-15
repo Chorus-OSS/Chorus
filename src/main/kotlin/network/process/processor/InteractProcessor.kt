@@ -12,19 +12,19 @@ import org.chorus_oss.chorus.entity.projectile.abstract_arrow.EntityArrow
 import org.chorus_oss.chorus.event.player.PlayerHackDetectedEvent
 import org.chorus_oss.chorus.event.player.PlayerKickEvent
 import org.chorus_oss.chorus.event.player.PlayerMouseOverEntityEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.InteractPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.InteractPacket
 
-class InteractProcessor : DataPacketProcessor<InteractPacket>() {
-    override fun handle(player: Player, pk: InteractPacket) {
+class InteractProcessor : DataPacketProcessor<MigrationPacket<InteractPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<InteractPacket>) {
         val player = player.player
         if (!player.spawned || !player.isAlive()) {
             return
         }
 
-        val targetEntity = player.level!!.getEntity(pk.targetRuntimeID)
+        val targetEntity = player.level!!.getEntity(pk.packet.targetRuntimeID.toLong())
 
         if (targetEntity == null || !player.isAlive() || !targetEntity.isAlive()) {
             return
@@ -50,22 +50,22 @@ class InteractProcessor : DataPacketProcessor<InteractPacket>() {
             return
         }
 
-        when (pk.action) {
-            InteractPacket.Action.INTERACT_UPDATE -> {
-                if (pk.targetRuntimeID == 0L) {
+        when (pk.packet.action) {
+            InteractPacket.Companion.Action.InteractUpdate -> {
+                if (pk.packet.targetRuntimeID.toLong() == 0L) {
                     return
                 }
                 Server.instance.pluginManager.callEvent(PlayerMouseOverEntityEvent(player, targetEntity))
             }
 
-            InteractPacket.Action.STOP_RIDING -> {
+            InteractPacket.Companion.Action.StopRiding -> {
                 if (targetEntity !is EntityRideable || player.riding == null) {
                     return
                 }
                 (player.riding as EntityRideable).dismountEntity(player)
             }
 
-            InteractPacket.Action.OPEN_INVENTORY -> {
+            InteractPacket.Companion.Action.OpenInventory -> {
                 if (targetEntity is EntityRideable) {
                     if (targetEntity is EntityChestBoat) {
                         player.addWindow(targetEntity.inventory)
@@ -88,8 +88,7 @@ class InteractProcessor : DataPacketProcessor<InteractPacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.INTERACT_PACKET
+    override val packetId: Int = InteractPacket.id
 
     companion object : Loggable
 }

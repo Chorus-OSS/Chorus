@@ -12,7 +12,8 @@ import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockFlowerPot(blockState: BlockState = properties.defaultState) : BlockFlowable(blockState), BlockEntityHolder<BlockEntityFlowerPot> {
+class BlockFlowerPot(blockState: BlockState = properties.defaultState) : BlockFlowable(blockState),
+    BlockEntityHolder<BlockEntityFlowerPot> {
     override val waterloggingLevel: Int
         get() = 1
 
@@ -45,7 +46,7 @@ class BlockFlowerPot(blockState: BlockState = properties.defaultState) : BlockFl
         fz: Double,
         player: Player?
     ): Boolean {
-        if (!BlockLever.isSupportValid(down(), BlockFace.UP)) {
+        if (!BlockLever.isSupportValid(block.down(), BlockFace.UP)) {
             return false
         }
 

@@ -42,15 +42,15 @@ class EntityPig(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
                     ),
                     1, 1
                 ),  //生长
                 Behavior(
                     AnimalGrowExecutor(),  //todo：Growth rate
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.ENTITY_SPAWN_TIME, 20 * 60 * 20, Int.MAX_VALUE),
+                        PassByTimeEvaluator(CoreMemoryTypes.ENTITY_SPAWN_TIME, 20 * 60 * 20, Int.MAX_VALUE),
                         IBehaviorEvaluator { entity: EntityMob -> entity is EntityAnimal && entity.isBaby() }
                     ),
                     1, 1, 1200
@@ -59,24 +59,24 @@ class EntityPig(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
             setOf<IBehavior>(
                 Behavior(
                     FlatRandomRoamExecutor(0.4f, 12, 40, true, 100, true, 10),
-                    PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 100),
+                    PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100),
                     4,
                     1
                 ),
                 Behavior(
                     EntityBreedingExecutor<EntityPig>(EntityPig::class.java, 16, 100, 0.5f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     3,
                     1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER, 0.4f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_FEEDING_PLAYER, 0.4f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                     2,
                     1
                 ),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     1,
                     1,
@@ -116,7 +116,13 @@ class EntityPig(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
         if (namedTag!!.contains("variant")) {
             this.climateVariant = ClimateVariant.Companion.Variant.get(namedTag!!.getString("variant"))
         } else {
-            this.climateVariant = this.getBiomeVariant(this.level!!.getBiomeId(this.position.x.toInt(), this.position.y.toInt(), this.position.z.toInt()))
+            this.climateVariant = this.getBiomeVariant(
+                this.level!!.getBiomeId(
+                    this.position.x.toInt(),
+                    this.position.y.toInt(),
+                    this.position.z.toInt()
+                )
+            )
         }
     }
 

@@ -55,7 +55,7 @@ class EntityShulker(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), E
             this.tickSpread,
             setOf<IBehavior>(
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     2,
                     1
@@ -70,10 +70,10 @@ class EntityShulker(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), E
             setOf<IBehavior>(
                 Behavior(ShulkerIdleExecutor(), RandomSoundEvaluator(20, 10), 2, 1),
                 Behavior(
-                    ShulkerAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 16.0),
-                        not(PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 60))
+                    ShulkerAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 16.0),
+                        not(PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 60))
                     ), 1, 1
                 )
             ),
@@ -135,7 +135,7 @@ class EntityShulker(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), E
     override fun initEntity() {
         this.setMaxHealth(30)
         super.initEntity()
-        if (memoryStorage[CoreMemoryTypes.Companion.VARIANT] == null) variant = (16)
+        if (memoryStorage[CoreMemoryTypes.VARIANT] == null) variant = (16)
         setDataProperty(
             EntityDataTypes.SHULKER_ATTACH_POS,
             locator.levelBlock.getSide(BlockFace.UP).position.asBlockVector3()

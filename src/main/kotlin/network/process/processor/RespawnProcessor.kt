@@ -1,26 +1,29 @@
 package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.RespawnPacket
+import org.chorus_oss.protocol.packets.RespawnPacket
+import org.chorus_oss.protocol.types.Vector3f
 
-class RespawnProcessor : DataPacketProcessor<RespawnPacket>() {
-    override fun handle(player: Player, pk: RespawnPacket) {
+class RespawnProcessor : DataPacketProcessor<MigrationPacket<RespawnPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<RespawnPacket>) {
+        val packet = pk.packet
+
         val player = player.player
         if (player.isAlive()) {
             return
         }
-        if (pk.respawnState == RespawnPacket.STATE_CLIENT_READY_TO_SPAWN) {
-            val respawn1 = RespawnPacket()
-            respawn1.x = player.getX().toFloat()
-            respawn1.y = player.getY().toFloat()
-            respawn1.z = player.getZ().toFloat()
-            respawn1.respawnState = RespawnPacket.STATE_READY_TO_SPAWN
-            player.dataPacket(respawn1)
+        if (packet.state == RespawnPacket.Companion.State.ReadyToSpawn) {
+            val respawn1 = RespawnPacket(
+                position = Vector3f(player.position),
+                state = RespawnPacket.Companion.State.ReadyToSpawn,
+                entityRuntimeID = player.getRuntimeID().toULong(),
+            )
+            player.sendPacket(respawn1)
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.RESPAWN_PACKET
+    override val packetId: Int = RespawnPacket.id
 }

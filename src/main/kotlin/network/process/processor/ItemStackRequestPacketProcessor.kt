@@ -4,36 +4,34 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.inventory.ItemStackRequestActionEvent
 import org.chorus_oss.chorus.event.player.PlayerTransferItemEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.inventory.request.*
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ItemStackRequestPacket
-import org.chorus_oss.chorus.network.protocol.ItemStackResponsePacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.ItemStackRequestSlotData
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.*
-import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponse
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
-import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseSlot
-import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseStatus
 import org.chorus_oss.chorus.utils.Loggable
-import java.util.*
+import org.chorus_oss.protocol.packets.ItemStackRequestPacket
+import org.chorus_oss.protocol.types.itemstack.request.action.*
 
 
-class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPacket>() {
-    override fun handle(player: Player, pk: ItemStackRequestPacket) {
+class ItemStackRequestPacketProcessor : DataPacketProcessor<MigrationPacket<ItemStackRequestPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<ItemStackRequestPacket>) {
+        val packet = pk.packet
+
         val player = player.player
-        val responses: MutableList<ItemStackResponse> = ArrayList()
-        for (request in pk.requests) {
+        val responses: MutableList<org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse> = mutableListOf()
+        for (request in packet.requests) {
             val actions = request.actions
             val context = ItemStackRequestContext(request)
-            val itemStackResponse = ItemStackResponse(ItemStackResponseStatus.OK, request.requestId, ArrayList())
-            val responseContainerMap: MutableMap<ContainerSlotType, ItemStackResponseContainer> = LinkedHashMap()
+            val responseContainerMap: MutableMap<org.chorus_oss.protocol.types.itemstack.ContainerSlotType, ItemStackResponseContainer> =
+                LinkedHashMap()
             for (index in actions.indices) {
                 val action = actions[index]
                 context.currentActionIndex = (index)
-                val processor = PROCESSORS[action.type] as ItemStackRequestActionProcessor<ItemStackRequestAction>?
+                @Suppress("UNCHECKED_CAST")
+                val processor =
+                    PROCESSORS[action.type] as ItemStackRequestActionProcessor<ItemStackRequestAction>?
                 if (processor == null) {
                     log.warn("Unhandled inventory action type {}", action.type)
                     continue
@@ -52,8 +50,11 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
                 }
                 if (response != null) {
                     if (!response.ok) {
-                        itemStackResponse.result = ItemStackResponseStatus.ERROR
-                        itemStackResponse.containers.clear()
+                        val itemStackResponse = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse(
+                            org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseStatus.Error,
+                            request.requestId,
+                            listOf()
+                        )
                         responses.add(itemStackResponse)
                         break
                     }
@@ -61,7 +62,7 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
                     for (container in response.containers) {
                         responseContainerMap.compute(
                             container.containerName.container
-                        ) { key: ContainerSlotType?, oldValue: ItemStackResponseContainer? ->
+                        ) { key, oldValue ->
                             if (oldValue == null) {
                                 return@compute container
                             } else {
@@ -72,29 +73,21 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
                     }
                 }
             }
-            itemStackResponse.containers.addAll(responseContainerMap.values)
+            val itemStackResponse = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse(
+                result = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseStatus.OK,
+                requestID = request.requestId,
+                containers = responseContainerMap.values.map(org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseContainer::invoke)
+            )
             responses.add(itemStackResponse)
         }
 
-        for (r in responses) {
-            for (c in r.containers) {
-                val newItems = LinkedHashMap<Int, ItemStackResponseSlot>()
-                for (i in c.items) {
-                    newItems[Objects.hash(i.slot, i.hotbarSlot)] = i
-                }
-                c.items.clear()
-                c.items.addAll(newItems.values)
-            }
-        }
-
-        val itemStackResponsePacket = ItemStackResponsePacket()
-        itemStackResponsePacket.entries.addAll(responses)
-        player.dataPacket(itemStackResponsePacket)
+        val itemStackResponsePacket = org.chorus_oss.protocol.packets.ItemStackResponsePacket(
+            responses = responses
+        )
+        player.sendPacket(itemStackResponsePacket)
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.ITEM_STACK_REQUEST_PACKET
-
+    override val packetId: Int = ItemStackRequestPacket.id
 
     private object TransferItemEventCaller {
         fun call(event: ItemStackRequestActionEvent) {
@@ -103,39 +96,34 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
             val transferResult = handleAction(action) ?: return
 
             val player = event.player
-            val sourceInventory = NetworkMapping.getInventory(player, transferResult.source.containerName.container)
-            val sourceSlot = sourceInventory.fromNetworkSlot(transferResult.source.slot)
+            val sourceInventory = NetworkMapping.getInventory(player, transferResult.source.container.container)
+            val sourceSlot = sourceInventory.fromNetworkSlot(transferResult.source.slot.toInt())
 
-            val destinationInventory = transferResult.destination
-                .map { destination ->
-                    NetworkMapping.getInventory(
-                        player,
-                        destination.containerName.container
-                    )
+            val destinationInventory = transferResult.destination?.let { destination ->
+                NetworkMapping.getInventory(
+                    player,
+                    destination.container.container
+                )
+            }
+            val destinationSlot = destinationInventory?.let { inventory ->
+                transferResult.destination.let { destination -> inventory.fromNetworkSlot(destination.slot.toInt()) }
+            }
+
+            val destinationItem = destinationSlot?.let { slot: Int? ->
+                destinationInventory.let { inventory: Inventory? ->
+                    inventory!!.getItem(slot!!)
                 }
-            val destinationSlot = destinationInventory
-                .flatMap { inventory: Inventory? ->
-                    transferResult.destination
-                        .map { destination: ItemStackRequestSlotData -> inventory!!.fromNetworkSlot(destination.slot) }
-                }
-            val destinationItem = destinationSlot
-                .flatMap { slot: Int? ->
-                    destinationInventory.flatMap { inventory: Inventory? ->
-                        Optional.of(
-                            inventory!!.getItem(slot!!)
-                        )
-                    }
-                }
+            }
 
             val transferEvent = PlayerTransferItemEvent(
                 player,
                 transferResult.type,
                 sourceInventory.getItem(sourceSlot),
-                destinationItem.orElse(null),
+                destinationItem,
                 sourceSlot,
-                destinationSlot.orElse(-1),
+                destinationSlot ?: -1,
                 sourceInventory,
-                destinationInventory.orElse(null)
+                destinationInventory
             )
 
             Server.instance.pluginManager.callEvent(transferEvent)
@@ -147,21 +135,27 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
 
         fun handleAction(action: ItemStackRequestAction): TransferResult? {
             return when (action) {
-                is TransferItemStackRequestAction -> TransferResult(
+                is PlaceRequestAction -> TransferResult(
                     action.source,
-                    Optional.of<ItemStackRequestSlotData>(action.destination),
+                    action.destination,
                     PlayerTransferItemEvent.Type.TRANSFER
                 )
 
-                is SwapAction -> TransferResult(
+                is TakeRequestAction -> TransferResult(
                     action.source,
-                    Optional.of<ItemStackRequestSlotData>(action.destination),
+                    action.destination,
+                    PlayerTransferItemEvent.Type.TRANSFER
+                )
+
+                is SwapRequestAction -> TransferResult(
+                    action.source,
+                    action.destination,
                     PlayerTransferItemEvent.Type.SWAP
                 )
 
-                is DropAction -> TransferResult(
+                is DropRequestAction -> TransferResult(
                     action.source,
-                    Optional.empty<ItemStackRequestSlotData>(),
+                    null,
                     PlayerTransferItemEvent.Type.DROP
                 )
 
@@ -172,50 +166,30 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<ItemStackRequestPack
 
         @JvmRecord
         private data class TransferResult(
-            val source: ItemStackRequestSlotData,
-            val destination: Optional<ItemStackRequestSlotData>,
+            val source: org.chorus_oss.protocol.types.itemstack.request.ItemStackRequestSlotData,
+            val destination: org.chorus_oss.protocol.types.itemstack.request.ItemStackRequestSlotData?,
             val type: PlayerTransferItemEvent.Type
         )
     }
 
     companion object : Loggable {
-        val PROCESSORS: EnumMap<ItemStackRequestActionType, ItemStackRequestActionProcessor<*>> = EnumMap(
-            ItemStackRequestActionType::class.java
+        val PROCESSORS: Map<ItemStackRequestAction.Companion.Type, ItemStackRequestActionProcessor<*>> = mapOf(
+            ItemStackRequestAction.Companion.Type.Consume to ConsumeActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftCreative to CraftCreativeActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftRecipe to CraftRecipeActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftResultsDeprecated to CraftResultDeprecatedActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftRecipeAuto to CraftRecipeAutoProcessor(),
+            ItemStackRequestAction.Companion.Type.Create to CreateActionProcessor(),
+            ItemStackRequestAction.Companion.Type.Destroy to DestroyActionProcessor(),
+            ItemStackRequestAction.Companion.Type.Drop to DropActionProcessor(),
+            ItemStackRequestAction.Companion.Type.Place to PlaceActionProcessor(),
+            ItemStackRequestAction.Companion.Type.Swap to SwapActionProcessor(),
+            ItemStackRequestAction.Companion.Type.Take to TakeActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftRecipeOptional to CraftRecipeOptionalProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftRepairAndDisenchant to CraftGrindstoneActionProcessor(),
+            ItemStackRequestAction.Companion.Type.MineBlock to MineBlockActionProcessor(),
+            ItemStackRequestAction.Companion.Type.CraftLoom to CraftLoomActionProcessor(),
+            ItemStackRequestAction.Companion.Type.BeaconPayment to BeaconPaymentActionProcessor(),
         )
-
-        init {
-            PROCESSORS[ItemStackRequestActionType.CONSUME] =
-                ConsumeActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_CREATIVE] =
-                CraftCreativeActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_RECIPE] =
-                CraftRecipeActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_RESULTS_DEPRECATED] =
-                CraftResultDeprecatedActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_RECIPE_AUTO] =
-                CraftRecipeAutoProcessor()
-            PROCESSORS[ItemStackRequestActionType.CREATE] =
-                CreateActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.DESTROY] =
-                DestroyActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.DROP] =
-                DropActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.PLACE] =
-                PlaceActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.SWAP] =
-                SwapActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.TAKE] =
-                TakeActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_RECIPE_OPTIONAL] =
-                CraftRecipeOptionalProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_REPAIR_AND_DISENCHANT] =
-                CraftGrindstoneActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.MINE_BLOCK] =
-                MineBlockActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.CRAFT_LOOM] =
-                CraftLoomActionProcessor()
-            PROCESSORS[ItemStackRequestActionType.BEACON_PAYMENT] =
-                BeaconPaymentActionProcessor()
-        }
     }
 }

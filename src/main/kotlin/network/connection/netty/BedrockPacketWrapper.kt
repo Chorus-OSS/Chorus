@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.network.connection.netty
 import io.netty.buffer.ByteBuf
 import io.netty.util.AbstractReferenceCounted
 import io.netty.util.ReferenceCountUtil
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.chorus.network.DataPacket
 
 class BedrockPacketWrapper(
     var packetId: Int,

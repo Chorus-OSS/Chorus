@@ -1,10 +1,11 @@
 package org.chorus_oss.chorus.entity.data.property
 
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.network.protocol.SyncEntityPropertyPacket
+import org.chorus_oss.protocol.packets.SyncActorPropertyPacket
 import java.io.IOException
 
 abstract class EntityProperty(private val identifier: String) {
@@ -103,8 +104,8 @@ abstract class EntityProperty(private val identifier: String) {
         }
 
         @JvmStatic
-        fun getPacketCache(): List<SyncEntityPropertyPacket> {
-            return nbtCache.stream().map { data -> SyncEntityPropertyPacket(data) }.toList()
+        fun getPacketCache(): List<SyncActorPropertyPacket> {
+            return nbtCache.map { SyncActorPropertyPacket(org.chorus_oss.nbt.tags.CompoundTag(it)) }
         }
 
         @JvmStatic

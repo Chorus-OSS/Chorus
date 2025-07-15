@@ -46,7 +46,7 @@ class BlockEntityPistonArm(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
     var finished: Boolean = true
 
     protected fun moveCollidedEntities() {
-        if (this.closed || this.level == null) {
+        if (this.closed) {
             return
         }
 
@@ -112,7 +112,7 @@ class BlockEntityPistonArm(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
 
     //需要先调用preMove
     fun move() {
-        if (this.closed || this.level == null) {
+        if (this.closed) {
             return
         }
 
@@ -218,7 +218,7 @@ class BlockEntityPistonArm(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
         attachedBlocks = mutableListOf<BlockVector3>()
         if (namedTag.contains("AttachedBlocks")) {
             val blocks = namedTag.getList("AttachedBlocks", IntTag::class.java)
-            if (blocks != null && blocks.size() > 0) {
+            if (blocks.size() > 0) {
                 var i = 0
                 while (i < blocks.size()) {
                     attachedBlocks.add(
@@ -275,13 +275,13 @@ class BlockEntityPistonArm(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnab
     }
 
     fun updateMovingData(immediately: Boolean) {
-        if (this.closed || this.level == null) {
+        if (this.closed) {
             return
         }
 
         val packet = this.spawnPacket
         if (!immediately) {
-            if (packet != null) level.addChunkPacket(
+            level.addChunkPacket(
                 position.chunkX,
                 position.chunkZ, packet
             )

@@ -10,7 +10,9 @@ class BlockDriedGhast(blockState: BlockState = properties.defaultState) : BlockT
         get() = 1
 
     companion object {
-        val properties: BlockProperties = BlockProperties(BlockID.DRIED_GHAST, CommonBlockProperties.MINECRAFT_CARDINAL_DIRECTION,
-            CommonBlockProperties.REHYDRATION_LEVEL)
+        val properties: BlockProperties = BlockProperties(
+            BlockID.DRIED_GHAST, CommonBlockProperties.MINECRAFT_CARDINAL_DIRECTION,
+            CommonBlockProperties.REHYDRATION_LEVEL
+        )
     }
 }

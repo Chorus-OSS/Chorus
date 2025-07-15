@@ -42,8 +42,8 @@ enum class LangCode(private val string: String) {
         fun from(name: String): LangCode? {
             try {
                 return enumValueOf<LangCode>(name)
-            } catch (ignore: IllegalArgumentException) {
-                log.error("Can't find LangCode for {},return null", name)
+            } catch (_: IllegalArgumentException) {
+                log.error("LangCode not found for $name")
                 return null
             }
         }

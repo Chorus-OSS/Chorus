@@ -153,7 +153,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
             val up = this.up()
             val upFaces: Set<BlockFace>? = if (up is BlockVine) up.faces else null
             val faces = this.faces
-            for (face in BlockFace.Plane.HORIZONTAL) {
+            for (face in BlockFace.Plane.HORIZONTAL_FACES) {
                 if (!getSide(face).isSolid && (upFaces == null || !upFaces.contains(face))) {
                     faces.remove(face)
                 }
@@ -184,7 +184,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
 
                 if (position.y < 255 && face == BlockFace.UP && block.isAir) {
                     if (this.canSpread()) {
-                        for (horizontalFace in BlockFace.Plane.HORIZONTAL) {
+                        for (horizontalFace in BlockFace.Plane.HORIZONTAL_FACES) {
                             if (random.nextBoolean() || !getSide(horizontalFace).getSide(face).isSolid) {
                                 meta = meta and getMetaFromFace(horizontalFace).inv()
                             }
@@ -223,7 +223,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
                     val below = this.down()
                     val id = below.id
                     if (id == BlockID.AIR || id == BlockID.VINE) {
-                        for (horizontalFace in BlockFace.Plane.HORIZONTAL) {
+                        for (horizontalFace in BlockFace.Plane.HORIZONTAL_FACES) {
                             if (random.nextBoolean()) {
                                 meta = meta and getMetaFromFace(horizontalFace).inv()
                             }
@@ -277,7 +277,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
     private fun putVineOnHorizontalFace(block: Block, meta: Int, source: Block?) {
         if (block.id == BlockID.VINE && block.blockState.specialValue().toInt() == meta) return
         var isOnHorizontalFace = false
-        for (face in BlockFace.Plane.HORIZONTAL) {
+        for (face in BlockFace.Plane.HORIZONTAL_FACES) {
             val faceMeta = getMetaFromFace(face)
             if ((meta and faceMeta) == faceMeta) {
                 isOnHorizontalFace = true

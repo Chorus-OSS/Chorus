@@ -22,7 +22,7 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
 
     override fun execute(entity: EntityMob): Boolean {
         currentTick++
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET)) return false
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.ATTACK_TARGET)) return false
         if (currentTick == this.chargingTime) {
             val target = entity.memoryStorage.get(CoreMemoryTypes.ATTACK_TARGET)!!
 

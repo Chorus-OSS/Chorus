@@ -2,12 +2,10 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.Entity
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.InventoryContentPacket
-import org.chorus_oss.chorus.network.protocol.InventorySlotPacket
-import org.chorus_oss.chorus.network.protocol.MobArmorEquipmentPacket
 import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
-import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.item.ItemStack
 
 class EntityArmorInventory(holder: InventoryHolder) : BaseInventory(holder, InventoryType.ARMOR, 5) {
     val entity: Entity = holder as Entity
@@ -67,28 +65,30 @@ class EntityArmorInventory(holder: InventoryHolder) : BaseInventory(holder, Inve
 
     override fun sendSlot(index: Int, player: Player) {
         if (player === this.holder) {
-            val inventorySlotPacket = InventorySlotPacket()
             val id = player.getWindowId(this)
-            inventorySlotPacket.inventoryId = id
-            inventorySlotPacket.slot = index
-            inventorySlotPacket.item = this.getItem(index)
-            inventorySlotPacket.fullContainerName = FullContainerName(
-                this.getSlotType(index),
-                id
+            val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                windowID = id.toUInt(),
+                slot = index.toUInt(),
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                    FullContainerName(
+                        this.getSlotType(index),
+                        id
+                    )
+                ),
+                storageItem = ItemStack(Item.AIR),
+                newItem = ItemStack(this.getItem(index))
             )
-            player.dataPacket(inventorySlotPacket)
+            player.sendPacket(packet)
         } else {
-            val mobArmorEquipmentPacket = MobArmorEquipmentPacket()
-            mobArmorEquipmentPacket.eid = entity.getRuntimeID()
-            mobArmorEquipmentPacket.slots = arrayOf(
-                this.helmet,
-                chestplate,
-                leggings,
-                boots
+            val mobArmorEquipmentPacket = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+                entityRuntimeID = entity.getRuntimeID().toULong(),
+                head = ItemStack(helmet),
+                torso = ItemStack(chestplate),
+                legs = ItemStack(leggings),
+                feet = ItemStack(boots),
+                body = ItemStack(body)
             )
-            mobArmorEquipmentPacket.body = this.body
-
-            player.dataPacket(mobArmorEquipmentPacket)
+            player.sendPacket(mobArmorEquipmentPacket)
         }
     }
 
@@ -100,32 +100,32 @@ class EntityArmorInventory(holder: InventoryHolder) : BaseInventory(holder, Inve
 
     override fun sendContents(player: Player) {
         if (player === this.holder) {
-            val inventoryContentPacket = InventoryContentPacket()
             val id = player.getWindowId(this)
-            inventoryContentPacket.inventoryId = id
-            inventoryContentPacket.slots = listOf(
-                this.helmet,
-                chestplate,
-                leggings,
-                boots
+            val packet = org.chorus_oss.protocol.packets.InventoryContentPacket(
+                windowID = id.toUInt(),
+                content = listOf(
+                    this.helmet,
+                    chestplate,
+                    leggings,
+                    boots
+                ).map { ItemStack(it) },
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                    org.chorus_oss.protocol.types.itemstack.ContainerSlotType.Armor,
+                    id
+                ),
+                storageItem = ItemStack(Item.AIR)
             )
-            inventoryContentPacket.fullContainerName = FullContainerName(
-                ContainerSlotType.ARMOR,
-                id
-            )
-            player.dataPacket(inventoryContentPacket)
+            player.sendPacket(packet)
         } else {
-            val mobArmorEquipmentPacket = MobArmorEquipmentPacket()
-            mobArmorEquipmentPacket.eid = entity.getRuntimeID()
-            mobArmorEquipmentPacket.slots = arrayOf(
-                this.helmet,
-                chestplate,
-                leggings,
-                boots
+            val mobArmorEquipmentPacket = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+                entityRuntimeID = entity.getRuntimeID().toULong(),
+                head = ItemStack(helmet),
+                torso = ItemStack(chestplate),
+                legs = ItemStack(leggings),
+                feet = ItemStack(boots),
+                body = ItemStack(body)
             )
-            mobArmorEquipmentPacket.body = this.body
-
-            player.dataPacket(mobArmorEquipmentPacket)
+            player.sendPacket(mobArmorEquipmentPacket)
         }
     }
 

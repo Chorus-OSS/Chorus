@@ -5,7 +5,7 @@ import org.chorus_oss.protocol.types.biome.BiomeDefinitionChunkGenData
 import org.chorus_oss.protocol.types.biome.BiomeDefinitionData
 import org.chorus_oss.protocol.types.biome.BiomeTagsData
 
-fun BiomeDefinitionData.Companion.fromNBT(nbt: CompoundTag): BiomeDefinitionData {
+operator fun BiomeDefinitionData.Companion.invoke(nbt: CompoundTag): BiomeDefinitionData {
     return BiomeDefinitionData(
         temperature = nbt.getFloat("temperature"),
         downfall = nbt.getFloat("downfall"),
@@ -17,7 +17,7 @@ fun BiomeDefinitionData.Companion.fromNBT(nbt: CompoundTag): BiomeDefinitionData
         scale = nbt.getFloat("scale"),
         mapWaterColorARGB = nbt.getInt("mapWaterColorARGB"),
         rain = nbt.getBoolean("rain"),
-        tags = if (nbt.containsCompound("tags")) BiomeTagsData.fromNBT(nbt.getCompound("tags")) else null,
-        chunkGenData = if (nbt.containsCompound("chunkGenData")) BiomeDefinitionChunkGenData.fromNBT(nbt.getCompound("chunkGenData")) else null,
+        tags = if (nbt.containsCompound("tags")) BiomeTagsData.invoke(nbt.getCompound("tags")) else null,
+        chunkGenData = if (nbt.containsCompound("chunkGenData")) BiomeDefinitionChunkGenData.invoke(nbt.getCompound("chunkGenData")) else null,
     )
 }

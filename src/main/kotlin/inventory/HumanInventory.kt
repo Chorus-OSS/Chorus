@@ -8,16 +8,23 @@ import org.chorus_oss.chorus.entity.IHuman
 import org.chorus_oss.chorus.event.entity.EntityArmorChangeEvent
 import org.chorus_oss.chorus.event.entity.EntityInventoryChangeEvent
 import org.chorus_oss.chorus.event.player.PlayerItemHeldEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemArmor
 import org.chorus_oss.chorus.item.ItemFilledMap
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.PlayerArmorDamagePacket.PlayerArmorDamageFlag
 import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_BOOTS
+import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_CHESTPLATE
+import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_HELMET
+import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_LEGGINGS
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ContainerType
+import org.chorus_oss.protocol.types.item.ItemStack
 import org.jetbrains.annotations.Range
+import kotlin.experimental.or
 import kotlin.math.min
 
 /**
@@ -149,19 +156,18 @@ class HumanInventory(human: IHuman) //9+27+4
     fun sendHeldItem(vararg players: Player) {
         val item = this.itemInHand
 
-        val pk = MobEquipmentPacket()
-        pk.item = item
-        pk.selectedSlot = this.heldItemIndex
-        pk.slot = pk.selectedSlot
-
+        val pk = org.chorus_oss.protocol.packets.MobEquipmentPacket(
+            entityRuntimeID = (holder as IHuman).getEntity().getRuntimeID().toULong(),
+            newItem = ItemStack(item),
+            inventorySlot = heldItemIndex.toByte(),
+            hotbarSlot = heldItemIndex.toByte(),
+            windowID = 0
+        )
         for (player in players) {
-            pk.eid = (holder as IHuman).getEntity().getUniqueID()
             if (player == this.holder) {
-                pk.eid = player.getRuntimeID()
                 this.sendSlot(this.heldItemIndex, player)
             }
-
-            player.dataPacket(pk)
+            player.sendPacket(pk)
         }
     }
 
@@ -486,35 +492,69 @@ class HumanInventory(human: IHuman) //9+27+4
     fun sendArmorContents(players: Array<Player>) {
         val armor = this.armorContents
 
-        val pk = MobArmorEquipmentPacket()
-        pk.eid = (holder as IHuman).getEntity().getUniqueID()
-        pk.slots = armor
+        val pk = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+            entityRuntimeID = (holder as IHuman).getEntity().getRuntimeID().toULong(),
+            head = ItemStack(armor[0]),
+            torso = ItemStack(armor[1]),
+            legs = ItemStack(armor[2]),
+            feet = ItemStack(armor[3]),
+            body = ItemStack(Item.AIR),
+        )
 
         for (player in players) {
             if (player == this.holder) {
-                val pk1 = InventoryContentPacket()
                 val id = SpecialWindowId.ARMOR.id
-                pk1.inventoryId = id
-                pk1.slots = armor.toList()
-                pk1.fullContainerName = FullContainerName(
-                    ContainerSlotType.ARMOR,
-                    id
+                val packet = org.chorus_oss.protocol.packets.InventoryContentPacket(
+                    windowID = id.toUInt(),
+                    content = armor.toList().map { ItemStack(it) },
+                    container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                        org.chorus_oss.protocol.types.itemstack.ContainerSlotType.Armor,
+                        id
+                    ),
+                    storageItem = ItemStack(Item.AIR)
                 )
-                player.dataPacket(pk1)
+                player.sendPacket(packet)
 
-                val pk2 = PlayerArmorDamagePacket()
-                for (i in 0..3) {
-                    val item = armor[i]
-                    if (item.isNothing) {
-                        pk2.damage[i] = 0
-                    } else {
-                        pk2.flags.add(PlayerArmorDamageFlag.entries.toTypedArray()[i])
-                        pk2.damage[i] = item.damage
-                    }
+                var pk2 = org.chorus_oss.protocol.packets.PlayerArmorDamagePacket(
+                    bitset = 0,
+                    helmetDamage = 0,
+                    chestplateDamage = 0,
+                    leggingsDamage = 0,
+                    bootsDamage = 0,
+                    bodyDamage = 0,
+                )
+
+                if (!armor[0].isNothing) {
+                    pk2 = pk2.copy(
+                        bitset = pk2.bitset or FLAG_HELMET,
+                        helmetDamage = armor[0].damage
+                    )
                 }
-                player.dataPacket(pk2)
+
+                if (!armor[1].isNothing) {
+                    pk2 = pk2.copy(
+                        bitset = pk2.bitset or FLAG_CHESTPLATE,
+                        chestplateDamage = armor[1].damage
+                    )
+                }
+
+                if (!armor[2].isNothing) {
+                    pk2 = pk2.copy(
+                        bitset = pk2.bitset or FLAG_LEGGINGS,
+                        leggingsDamage = armor[2].damage
+                    )
+                }
+
+                if (!armor[3].isNothing) {
+                    pk2 = pk2.copy(
+                        bitset = pk2.bitset or FLAG_BOOTS,
+                        bootsDamage = armor[3].damage
+                    )
+                }
+
+                player.sendPacket(pk2)
             } else {
-                player.dataPacket(pk)
+                player.sendPacket(pk)
             }
         }
     }
@@ -522,7 +562,7 @@ class HumanInventory(human: IHuman) //9+27+4
     /**
      * Send armor slot.
      *
-     * @param index  the index 0~3 [PlayerArmorDamagePacket.PlayerArmorDamageFlag]
+     * @param index  the index 0~3
      * @param player the player
      */
     fun sendArmorSlot(index: Int, player: Player) {
@@ -532,7 +572,7 @@ class HumanInventory(human: IHuman) //9+27+4
     /**
      * Send armor slot.
      *
-     * @param index   the index 0~3 [PlayerArmorDamagePacket.PlayerArmorDamageFlag]
+     * @param index   the index 0~3
      * @param players the players
      */
     fun sendArmorSlot(index: Int, players: Collection<Player>) {
@@ -542,40 +582,53 @@ class HumanInventory(human: IHuman) //9+27+4
     /**
      * Send armor slot.
      *
-     * @param index   the index 0~3 [PlayerArmorDamagePacket.PlayerArmorDamageFlag]
+     * @param index   the index 0~3
      * @param players the players
      */
     fun sendArmorSlot(index: Int, players: Array<Player>) {
         val armor = this.armorContents
 
-        val pk = MobArmorEquipmentPacket()
-        pk.eid = (holder as IHuman).getEntity().getUniqueID()
-        pk.slots = armor
+        val pk = org.chorus_oss.protocol.packets.MobArmorEquipmentPacket(
+            entityRuntimeID = (holder as IHuman).getEntity().getRuntimeID().toULong(),
+            head = ItemStack(armor[0]),
+            torso = ItemStack(armor[1]),
+            legs = ItemStack(armor[2]),
+            feet = ItemStack(armor[3]),
+            body = ItemStack(Item.AIR),
+        )
 
         for (player in players) {
             if (player == this.holder) {
-                val pk1 = InventorySlotPacket()
                 val id = SpecialWindowId.ARMOR.id
-                pk1.inventoryId = id
-                pk1.slot = index
-                pk1.item = this.getItem(ARMORS_INDEX + index)
-                pk1.fullContainerName = FullContainerName(
-                    ContainerSlotType.ARMOR,
-                    id
+                val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                    windowID = id.toUInt(),
+                    slot = index.toUInt(),
+                    container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                        org.chorus_oss.protocol.types.itemstack.ContainerSlotType.Armor,
+                        id
+                    ),
+                    storageItem = ItemStack(Item.AIR),
+                    newItem = ItemStack(this.getItem(ARMORS_INDEX + index))
                 )
-                player.dataPacket(pk1)
+                player.sendPacket(packet)
 
-                val pk2 = PlayerArmorDamagePacket()
-                val item = armor[index]
-                if (item.isNothing) {
-                    pk2.damage[index] = 0
-                } else {
-                    pk2.flags.add(PlayerArmorDamageFlag.entries.toTypedArray()[index])
-                    pk2.damage[index] = item.damage
-                }
-                player.dataPacket(pk2)
+                val pk2 = org.chorus_oss.protocol.packets.PlayerArmorDamagePacket(
+                    bitset = when (index) {
+                        0 -> FLAG_HELMET
+                        1 -> FLAG_CHESTPLATE
+                        2 -> FLAG_LEGGINGS
+                        3 -> FLAG_BOOTS
+                        else -> 0
+                    },
+                    helmetDamage = if (!armor[0].isNothing) armor[0].damage else 0,
+                    chestplateDamage = if (!armor[1].isNothing) armor[1].damage else 0,
+                    leggingsDamage = if (!armor[2].isNothing) armor[2].damage else 0,
+                    bootsDamage = if (!armor[3].isNothing) armor[3].damage else 0,
+                    bodyDamage = 0,
+                )
+                player.sendPacket(pk2)
             } else {
-                player.dataPacket(pk)
+                player.sendPacket(pk)
             }
         }
     }
@@ -589,11 +642,7 @@ class HumanInventory(human: IHuman) //9+27+4
     }
 
     override fun sendContents(vararg players: Player) {
-        val pk = InventoryContentPacket()
         val inventoryAndHotBarSize = this.size - 4
-        pk.slots = List(inventoryAndHotBarSize) { i ->
-            this.getItem(i)
-        }
 
         for (player in players) {
             val id = player.getWindowId(this)
@@ -601,12 +650,20 @@ class HumanInventory(human: IHuman) //9+27+4
                 if (this.holder !== player) this.close(player)
                 continue
             }
-            pk.inventoryId = id
-            pk.fullContainerName = FullContainerName(
-                this.getSlotType(id),
-                id
+
+            val packet = org.chorus_oss.protocol.packets.InventoryContentPacket(
+                windowID = id.toUInt(),
+                content = List(inventoryAndHotBarSize) { ItemStack(this.getItem(it)) },
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName.invoke(
+                    FullContainerName(
+                        this.getSlotType(id),
+                        id
+                    )
+                ),
+                storageItem = ItemStack(Item.AIR)
             )
-            player.dataPacket(pk)
+
+            player.sendPacket(packet)
         }
     }
 
@@ -619,31 +676,42 @@ class HumanInventory(human: IHuman) //9+27+4
     }
 
     override fun sendSlot(index: Int, vararg players: Player) {
-        val pk = InventorySlotPacket()
-        pk.slot = index
-        pk.item = getItem(index).clone()
-
         for (player in players) {
             if (player == this.holder) {
                 val id = SpecialWindowId.PLAYER.id
-                pk.inventoryId = id
-                pk.fullContainerName = FullContainerName(
-                    this.getSlotType(index),
-                    id
+                val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                    windowID = id.toUInt(),
+                    slot = index.toUInt(),
+                    container = org.chorus_oss.protocol.types.inventory.FullContainerName.invoke(
+                        FullContainerName(
+                            this.getSlotType(index),
+                            id
+                        )
+                    ),
+                    storageItem = ItemStack(Item.AIR),
+                    newItem = ItemStack(this.getItem(index))
                 )
-                player.dataPacket(pk)
+                player.sendPacket(packet)
             } else {
                 val id = player.getWindowId(this)
                 if (id == -1) {
                     this.close(player)
                     continue
                 }
-                pk.inventoryId = id
-                pk.fullContainerName = FullContainerName(
-                    this.getSlotType(index),
-                    id
+
+                val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                    windowID = id.toUInt(),
+                    slot = index.toUInt(),
+                    container = org.chorus_oss.protocol.types.inventory.FullContainerName.invoke(
+                        FullContainerName(
+                            this.getSlotType(index),
+                            id
+                        )
+                    ),
+                    storageItem = ItemStack(Item.AIR),
+                    newItem = ItemStack(this.getItem(index))
                 )
-                player.dataPacket(pk)
+                player.sendPacket(packet)
             }
         }
     }
@@ -651,12 +719,12 @@ class HumanInventory(human: IHuman) //9+27+4
     override fun onOpen(who: Player) {
         super.onOpen(who)
         if (who.spawned) {
-            who.dataPacket(
-                ContainerOpenPacket(
-                    containerID = who.getWindowId(this),
-                    containerType = type.networkType,
-                    position = who.vector3.asBlockVector3(),
-                    targetActorID = who.getRuntimeID()
+            who.sendPacket(
+                org.chorus_oss.protocol.packets.ContainerOpenPacket(
+                    containerID = who.getWindowId(this).toByte(),
+                    containerType = ContainerType(type),
+                    position = BlockPos(who.vector3),
+                    targetActorID = who.getUniqueID()
                 )
             )
         }
@@ -664,10 +732,10 @@ class HumanInventory(human: IHuman) //9+27+4
 
     override fun onClose(who: Player) {
         val containerId = who.getWindowId(this)
-        who.dataPacket(
-            ContainerClosePacket(
-                containerID = containerId,
-                containerType = type,
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerClosePacket(
+                containerID = containerId.toByte(),
+                containerType = ContainerType(type),
                 serverInitiatedClose = who.closingWindowId != containerId
             )
         )

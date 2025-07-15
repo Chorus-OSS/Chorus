@@ -29,7 +29,7 @@ class PluginTOML(
     /**
      * Returns the message title of this plugin.
      *
-     * When a PluginLogger logs, the message title is used as the prefix of message. If prefix is undefined,
+     * When a PluginLogger logs, the message title is used as the prefix of message. If prefix is null,
      * the plugin name will be used instead.
      */
     var prefix: String? = null,

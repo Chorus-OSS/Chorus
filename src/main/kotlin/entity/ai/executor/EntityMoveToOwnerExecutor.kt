@@ -88,7 +88,7 @@ class EntityMoveToOwnerExecutor @JvmOverloads constructor(
         //重置速度
         entity.movementSpeed = 1.2f
         entity.isEnablePitch = false
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             entity.setDataFlag(EntityFlag.INTERESTED, false)
         }
         oldTarget = null
@@ -101,7 +101,7 @@ class EntityMoveToOwnerExecutor @JvmOverloads constructor(
         //重置速度
         entity.movementSpeed = 1.2f
         entity.isEnablePitch = false
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             entity.setDataFlag(EntityFlag.INTERESTED, false)
         }
         oldTarget = null

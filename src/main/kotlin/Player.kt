@@ -9,6 +9,7 @@ import com.google.common.collect.HashBiMap
 import com.google.common.collect.Sets
 import io.netty.util.internal.EmptyArrays
 import io.netty.util.internal.PlatformDependent
+import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.block.*
 import org.chorus_oss.chorus.block.customblock.CustomBlock
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
@@ -45,6 +46,8 @@ import org.chorus_oss.chorus.event.player.*
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent.TeleportCause
 import org.chorus_oss.chorus.event.server.DataPacketSendEvent
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.form.window.Form
 import org.chorus_oss.chorus.inventory.*
 import org.chorus_oss.chorus.item.*
@@ -55,6 +58,7 @@ import org.chorus_oss.chorus.lang.LangCode.Companion.from
 import org.chorus_oss.chorus.lang.TextContainer
 import org.chorus_oss.chorus.lang.TranslationContainer
 import org.chorus_oss.chorus.level.*
+import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Level.Companion.chunkHash
 import org.chorus_oss.chorus.level.Level.Companion.generateChunkLoaderId
 import org.chorus_oss.chorus.level.Level.Companion.getHashX
@@ -66,14 +70,22 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.tag.*
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.CameraShakePacket.CameraShakeAction
-import org.chorus_oss.chorus.network.protocol.CameraShakePacket.CameraShakeType
-import org.chorus_oss.chorus.network.protocol.types.*
-import org.chorus_oss.chorus.network.protocol.types.GameType.Companion.from
+import org.chorus_oss.chorus.network.protocol.AnimatePacket
+import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
+import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
+import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
+import org.chorus_oss.chorus.network.protocol.SetScorePacket
+import org.chorus_oss.chorus.network.protocol.SetTitlePacket
+import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
+import org.chorus_oss.chorus.network.protocol.types.GameType
+import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
+import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.permission.PermissibleBase
 import org.chorus_oss.chorus.permission.Permission
 import org.chorus_oss.chorus.permission.PermissionAttachment
@@ -85,15 +97,19 @@ import org.chorus_oss.chorus.scheduler.TaskHandler
 import org.chorus_oss.chorus.scoreboard.IScoreboard
 import org.chorus_oss.chorus.scoreboard.IScoreboardLine
 import org.chorus_oss.chorus.scoreboard.data.DisplaySlot
-import org.chorus_oss.chorus.scoreboard.data.SortOrder
 import org.chorus_oss.chorus.scoreboard.displayer.IScoreboardViewer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
 import org.chorus_oss.chorus.utils.*
-import org.chorus_oss.chorus.utils.Binary.Companion.writeUUID
-import org.chorus_oss.chorus.utils.Identifier.Companion.tryParse
+import org.chorus_oss.chorus.utils.Binary.writeUUID
 import org.chorus_oss.chorus.utils.PortalHelper.moveToTheEnd
 import org.chorus_oss.chorus.utils.TextFormat.Companion.clean
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.*
+import org.chorus_oss.protocol.types.*
+import org.chorus_oss.protocol.types.Vector3f
+import org.chorus_oss.protocol.types.camera.preset.CameraPreset
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlot
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlotOrder
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.UnmodifiableView
 import java.net.InetSocketAddress
@@ -105,6 +121,8 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Consumer
 import kotlin.concurrent.Volatile
 import kotlin.math.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Game player object, representing the controlled character
@@ -408,10 +426,11 @@ open class Player(
         set(value) {
             field = value
             if (value) {
-                val pk = ShowCreditsPacket()
-                pk.eid = this.getRuntimeID()
-                pk.status = ShowCreditsPacket.STATUS_START_CREDITS
-                this.dataPacket(pk)
+                val pk = ShowCreditsPacket(
+                    playerRuntimeID = this.getRuntimeID().toULong(),
+                    statusType = ShowCreditsPacket.Companion.StatusType.Start
+                )
+                this.sendPacket(pk)
             }
         }
     var lastBlockAction: PlayerBlockActionData? = null
@@ -459,7 +478,7 @@ open class Player(
      *
      * Player Fog Settings
      */
-    var fogStack: MutableList<PlayerFogPacket.Fog> = ArrayList()
+    var fogStack: MutableList<Pair<String, String>> = mutableListOf()
     /**
      * @return [.lastBeAttackEntity]
      */
@@ -570,8 +589,8 @@ open class Player(
         this.creationTime = System.currentTimeMillis()
         this.displayName = playerInfo.username
         this.loginChainData = playerInfo.data
-        this.uuid = playerInfo.uniqueId
-        this.rawUUID = writeUUID(playerInfo.uniqueId)
+        this.uuid = playerInfo.uuid
+        this.rawUUID = writeUUID(playerInfo.uuid)
         this.skin = (playerInfo.skin)
     }
 
@@ -630,12 +649,17 @@ open class Player(
         Server.instance.pluginManager.callEvent(playerInteractEvent)
         if (playerInteractEvent.cancelled) {
             inventory.sendHeldItem(this)
-            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), UpdateBlockPacket.FLAG_ALL_PRIORITY, false)
+            level!!.sendBlocks(
+                arrayOf(this),
+                arrayOf<Block?>(target),
+                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                false
+            )
             if (target.getLevelBlockAtLayer(1) is BlockLiquid) {
                 level!!.sendBlocks(
                     arrayOf(this), arrayOf(
                         target.getLevelBlockAtLayer(1)
-                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 1
+                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 1
                 )
             }
             return
@@ -741,7 +765,7 @@ open class Player(
             } else if (handItem == null) level!!.sendBlocks(
                 arrayOf(this), arrayOf(
                     level!!.getBlock(blockPos.asVector3())
-                ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 0
+                ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
             )
             return
         }
@@ -751,7 +775,11 @@ open class Player(
 
         if (blockPos.distanceSquared(this.position) < 100) {
             val target = level!!.getBlock(blockPos.asVector3())
-            level!!.sendBlocks(arrayOf(this), arrayOf<Block?>(target), UpdateBlockPacket.FLAG_ALL_PRIORITY)
+            level!!.sendBlocks(
+                arrayOf(this),
+                arrayOf<Block?>(target),
+                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
+            )
 
             val blockEntity = level!!.getBlockEntity(blockPos.asVector3())
             if (blockEntity is BlockEntitySpawnable) {
@@ -769,21 +797,25 @@ open class Player(
 
     //todo a lot on dimension
     private fun setDimension(dimension: Int) {
-        this.dataPacket(
+        this.sendPacket(
             ChangeDimensionPacket(
                 dimension = dimension,
-                position = position.asVector3f(),
+                position = Vector3f(position),
                 respawn = false,
-                loadingScreenID = loadingScreenId++
+                loadingScreenID = null
             )
         )
 
         level!!.sendChunks(this)
 
-        val playerActionPacket = PlayerActionPacket()
-        playerActionPacket.action = PlayerActionPacket.ACTION_DIMENSION_CHANGE_ACK
-        playerActionPacket.entityId = this.getRuntimeID()
-        this.dataPacket(playerActionPacket)
+        val playerActionPacket = PlayerActionPacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            actionType = PlayerActionType.ChangeDimensionACK,
+            blockPosition = BlockPos(0, 0, 0),
+            resultPosition = BlockPos(0, 0, 0),
+            blockFace = 0,
+        )
+        this.sendPacket(playerActionPacket)
     }
 
     private fun updateBlockingFlag() {
@@ -798,14 +830,16 @@ open class Player(
 
     public override fun initEntity() {
         super.initEntity()
-        val level = if (namedTag!!.containsString("SpawnLevel")) {
-            Server.instance.getLevelByName(namedTag!!.getString("SpawnLevel"))
+        this.uniqueId = this.uuid.leastSignificantBits
+
+        val level = if (namedTag.containsString("SpawnLevel")) {
+            Server.instance.getLevelByName(namedTag.getString("SpawnLevel")) ?: Server.instance.defaultLevel
         } else Server.instance.defaultLevel
-        if (namedTag!!.containsInt("SpawnX") && namedTag!!.containsInt("SpawnY") && namedTag!!.containsInt("SpawnZ")) {
+        if (namedTag.containsInt("SpawnX") && namedTag.containsInt("SpawnY") && namedTag.containsInt("SpawnZ")) {
             this.spawnPoint = Locator(
-                namedTag!!.getInt("SpawnX").toDouble(),
-                namedTag!!.getInt("SpawnY").toDouble(),
-                namedTag!!.getInt("SpawnZ").toDouble(), level!!
+                namedTag.getInt("SpawnX").toDouble(),
+                namedTag.getInt("SpawnY").toDouble(),
+                namedTag.getInt("SpawnZ").toDouble(), level!!
             )
         } else {
             this.spawnPoint = level!!.safeSpawn
@@ -849,9 +883,10 @@ open class Player(
 
         this.enableClientCommand = true
 
-        val setTimePacket = SetTimePacket()
-        setTimePacket.time = level!!.getTime()
-        this.dataPacket(setTimePacket)
+        val setTimePacket = SetTimePacket(
+            time = level!!.getTime()
+        )
+        this.sendPacket(setTimePacket)
 
         this.noDamageTicks = 60
 
@@ -891,20 +926,20 @@ open class Player(
             this.setSpawn(this.level!!.safeSpawn, SpawnPointType.WORLD)
         } else {
             //update compass
-            val pk = SetSpawnPositionPacket()
-            pk.spawnType = SetSpawnPositionPacket.TYPE_WORLD_SPAWN
-            pk.x = spawn.first!!.position.floorX
-            pk.y = spawn.first!!.position.floorY
-            pk.z = spawn.first!!.position.floorZ
-            pk.dimension = spawn.first!!.level.dimension
-            this.dataPacket(pk)
+            val pk = SetSpawnPositionPacket(
+                spawnType = SetSpawnPositionPacket.Companion.SpawnType.World,
+                position = BlockPos(spawn.first!!.position),
+                dimension = spawn.first!!.level.dimension,
+                spawnPosition = BlockPos(spawn.first!!.position)
+            )
+            this.sendPacket(pk)
         }
 
         this.sendFogStack()
         this.sendCameraPresets()
 
         log.debug("Send Player Spawn Status Packet to {},wait init packet", getEntityName())
-        this.sendPlayStatus(PlayStatusPacket.PLAYER_SPAWN)
+        this.sendPlayStatus(PlayStatusPacket.Companion.Status.PlayerSpawn)
 
         //客户端初始化完毕再传送玩家，避免下落 (x)
         //已经设置immobile了所以不用管下落了
@@ -932,7 +967,7 @@ open class Player(
 
 
         this.level!!.scheduler.scheduleDelayedTask(InternalPlugin.INSTANCE, {
-            session.machine.fire(SessionState.IN_GAME)
+            session.machine.fire(SessionState.InGame)
         }, 5)
     }
 
@@ -1404,10 +1439,9 @@ open class Player(
         }
 
         var oldPlayer: Player? = null
-        for (p in ArrayList<Player>(Server.instance.onlinePlayers.values)) {
-            if (p !== this && p.getEntityName()
-                    .equals(this.getEntityName(), ignoreCase = true) || this.getUniqueID() == p.getUniqueID()
-            ) {
+        for (p in Server.instance.onlinePlayers.values) {
+            if (p === this) continue
+            if (p.getEntityName() == this.getEntityName() || this.getUniqueID() == p.getUniqueID()) {
                 oldPlayer = p
                 break
             }
@@ -1531,22 +1565,16 @@ open class Player(
         if (!namedTag!!.contains("userProvidedFogIds")) {
             namedTag!!.putList("userProvidedFogIds", ListTag<StringTag>())
         }
-        val fogIdentifiers = namedTag!!.getList(
+        val fogIdentifiers = namedTag.getList(
             "fogIdentifiers",
             StringTag::class.java
         )
-        val userProvidedFogIds = namedTag!!.getList(
+        val userProvidedFogIds = namedTag.getList(
             "userProvidedFogIds",
             StringTag::class.java
         )
         for (i in 0..<fogIdentifiers.size()) {
-            fogStack.add(
-                i, PlayerFogPacket.Fog(
-                    tryParse(
-                        fogIdentifiers[i].data
-                    )!!, userProvidedFogIds[i].data
-                )
-            )
+            fogStack.add(i, Pair(userProvidedFogIds[i].data, fogIdentifiers[i].data))
         }
 
         if (!Server.instance.settings.playerSettings.checkMovement) {
@@ -1767,14 +1795,14 @@ open class Player(
         }
     }
 
-    protected fun sendPlayStatus(status: Int, immediate: Boolean = false) {
-        val pk = PlayStatusPacket()
-        pk.status = status
-
+    protected fun sendPlayStatus(status: PlayStatusPacket.Companion.Status, immediate: Boolean = false) {
+        val pk = PlayStatusPacket(
+            status = status
+        )
         if (immediate) {
-            this.dataPacketImmediately(pk)
+            this.sendPacketImmediately(pk)
         } else {
-            this.dataPacket(pk)
+            this.sendPacket(pk)
         }
     }
 
@@ -1783,11 +1811,19 @@ open class Player(
         val chunkPositionZ = position.floorZ shr 4
         for (x in -chunkRadius..<chunkRadius) {
             for (z in -chunkRadius..<chunkRadius) {
-                val chunk = LevelChunkPacket()
-                chunk.chunkX = chunkPositionX + x
-                chunk.chunkZ = chunkPositionZ + z
-                chunk.data = EmptyArrays.EMPTY_BYTES
-                this.dataPacket(chunk)
+                val chunk = LevelChunkPacket(
+                    position = ChunkPos(
+                        chunkPositionX + x,
+                        chunkPositionZ + z
+                    ),
+                    dimension = this.level!!.dimension,
+                    subChunkCount = 0u,
+                    subChunkLimit = 0u,
+                    cacheEnabled = false,
+                    blobHashes = emptyList(),
+                    data = ByteString(),
+                )
+                this.sendPacket(chunk)
             }
         }
     }
@@ -1943,10 +1979,12 @@ open class Player(
 
             if (this.isSpectator) {
                 //发送旁观者的游戏模式给对方，使得对方客户端正确渲染玩家实体
-                val pk = UpdatePlayerGameTypePacket()
-                pk.gameType = GameType.SPECTATOR
-                pk.entityId = this.getRuntimeID()
-                player.dataPacket(pk)
+                val pk = UpdatePlayerGameTypePacket(
+                    gameType = org.chorus_oss.protocol.types.GameType.Spectator,
+                    playerUniqueID = this.getUniqueID(),
+                    tick = 0uL
+                )
+                player.sendPacket(pk)
             }
         }
     }
@@ -2020,14 +2058,10 @@ open class Player(
     override var isOp: Boolean
         get() = Server.instance.isOp(this.getEntityName())
         set(value) {
-            if (value == isOp) {
-                return
-            }
-
-            if (value) {
-                Server.instance.addOp(this.getEntityName())
-            } else {
-                Server.instance.removeOp(this.getEntityName())
+            when (value) {
+                isOp -> return
+                true -> Server.instance.addOp(this.getEntityName())
+                false -> Server.instance.removeOp(this.getEntityName())
             }
         }
 
@@ -2141,7 +2175,7 @@ open class Player(
      */
     fun closeFormWindows() {
         formWindows.clear()
-        this.dataPacket(ClientboundCloseFormPacket())
+        this.sendPacket(ClientboundCloseFormPacket())
     }
 
     val address: String
@@ -2207,11 +2241,12 @@ open class Player(
      * @param itemId       the item id
      */
     fun setItemCoolDown(coolDownTick: Int, itemId: Identifier) {
-        val pk = PlayerStartItemCoolDownPacket()
-        pk.coolDownDuration = coolDownTick
-        pk.itemCategory = itemId.toString()
+        val pk = PlayerStartItemCoolDownPacket(
+            category = itemId.toString(),
+            duration = coolDownTick,
+        )
         cooldownTickMap[itemId.toString()] = level!!.tick + coolDownTick
-        this.dataPacket(pk)
+        this.sendPacket(pk)
     }
 
     /**
@@ -2230,11 +2265,12 @@ open class Player(
     }
 
     fun setItemCoolDown(coolDown: Int, category: String) {
-        val pk = PlayerStartItemCoolDownPacket()
-        pk.coolDownDuration = coolDown
-        pk.itemCategory = category
+        val pk = PlayerStartItemCoolDownPacket(
+            category = category,
+            duration = coolDown,
+        )
         cooldownTickMap[category] = level!!.tick + coolDown
-        this.dataPacket(pk)
+        this.sendPacket(pk)
     }
 
     fun isItemCoolDownEnd(category: String): Boolean {
@@ -2315,13 +2351,13 @@ open class Player(
             level!!
         )
         this.spawnPointType = spawnPointType
-        val pk = SetSpawnPositionPacket()
-        pk.spawnType = SetSpawnPositionPacket.TYPE_PLAYER_SPAWN
-        pk.x = spawnPoint!!.position.x.toInt()
-        pk.y = spawnPoint!!.position.y.toInt()
-        pk.z = spawnPoint!!.position.z.toInt()
-        pk.dimension = spawnPoint!!.level.dimension
-        this.dataPacket(pk)
+        val pk = SetSpawnPositionPacket(
+            spawnType = SetSpawnPositionPacket.Companion.SpawnType.Player,
+            position = BlockPos(spawnPoint!!.position),
+            dimension = spawnPoint!!.level.dimension,
+            spawnPosition = BlockPos(spawnPoint!!.position),
+        )
+        this.sendPacket(pk)
     }
 
     fun sendChunk(x: Int, z: Int, packet: DataPacket) {
@@ -2340,6 +2376,10 @@ open class Player(
                 }
             }
         }
+    }
+
+    fun sendChunk(x: Int, z: Int, packet: Packet) {
+        sendChunk(x, z, MigrationPacket(packet))
     }
 
 
@@ -2554,15 +2594,17 @@ open class Player(
             this.setDataFlag(EntityFlag.HAS_COLLISION, true)
         }
 
-        namedTag!!.putInt("playerGameType", this.gamemode)
+        namedTag.putInt("playerGameType", this.gamemode)
 
         this.adventureSettings = (ev.newAdventureSettings)
 
         if (!serverSide) {
-            val pk = UpdatePlayerGameTypePacket()
             val networkGamemode = toNetworkGamemode(gamemode)
-            pk.gameType = from(networkGamemode)
-            pk.entityId = this.getRuntimeID()
+            val pk = UpdatePlayerGameTypePacket(
+                gameType = org.chorus_oss.protocol.types.GameType.entries[networkGamemode],
+                playerUniqueID = this.getUniqueID(),
+                tick = 0uL,
+            )
             val players: HashSet<Player> =
                 Sets.newHashSet<Player>(Server.instance.onlinePlayers.values)
             //不向自身发送UpdatePlayerGameTypePacket，我们将使用SetPlayerGameTypePacket
@@ -2571,9 +2613,10 @@ open class Player(
             //eg: 观察者模式玩家对于gm 0 1 2的玩家不可见
             Server.broadcastPacket(players, pk)
             //对于自身，我们使用SetPlayerGameTypePacket来确保与WaterDog的兼容
-            val pk2 = SetPlayerGameTypePacket()
-            pk2.gamemode = networkGamemode
-            this.dataPacket(pk2)
+            val pk2 = SetPlayerGameTypePacket(
+                gameType = org.chorus_oss.protocol.types.GameType.entries[networkGamemode],
+            )
+            this.sendPacket(pk2)
         }
 
         this.resetFallDistance()
@@ -2685,12 +2728,12 @@ open class Player(
         if (super.setMotion(motion)) {
             if (this.chunk != null) {
                 this.addMotion(this.motion.x, this.motion.y, this.motion.z) //Send to others
-                val pk = SetEntityMotionPacket()
-                pk.eid = this.getRuntimeID()
-                pk.motionX = motion.x.toFloat()
-                pk.motionY = motion.y.toFloat()
-                pk.motionZ = motion.z.toFloat()
-                this.dataPacket(pk) //Send to self
+                val pk = SetActorMotionPacket(
+                    actorRuntimeID = this.getRuntimeID().toULong(),
+                    motion = Vector3f(motion),
+                    tick = 0uL,
+                )
+                this.sendPacket(pk) //Send to self
             }
             if (this.motion.y > 0) {
                 // TODO: check this
@@ -2733,18 +2776,19 @@ open class Player(
      * Send the fog settings to the client
      */
     fun sendFogStack() {
-        val pk = PlayerFogPacket()
-        pk.fogStack = this.fogStack
-        this.dataPacket(pk)
+        val pk = PlayerFogPacket(
+            stack = this.fogStack.map { it.second }
+        )
+        this.sendPacket(pk)
     }
 
     /**
      * Send camera presets to cilent
      */
     fun sendCameraPresets() {
-        dataPacket(
+        sendPacket(
             CameraPresetsPacket(
-                presets = presets.values.toMutableList()
+                presets = presets.values.map(CameraPreset::invoke)
             )
         )
     }
@@ -3191,7 +3235,7 @@ open class Player(
     fun setViewDistance(distance: Int) {
         this.chunkRadius = distance
 
-        this.dataPacket(
+        this.sendPacket(
             ChunkRadiusUpdatedPacket(
                 radius = distance
             )
@@ -3211,10 +3255,17 @@ open class Player(
     }
 
     override fun sendMessage(message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_RAW
-        pk.message = Server.instance.lang.tr(message)
-        this.dataPacket(pk)
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Raw,
+            needsTranslation = false,
+            sourceName = null,
+            message = Server.instance.lang.tr(message),
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     override fun sendMessage(message: TextContainer) {
@@ -3226,18 +3277,19 @@ open class Player(
     }
 
 
+    @OptIn(ExperimentalUuidApi::class)
     override fun sendCommandOutput(container: CommandOutputContainer) {
         if (level!!.gameRules.getBoolean(GameRule.SEND_COMMAND_FEEDBACK)) {
             val pk = CommandOutputPacket(
                 originData = CommandOriginData(
-                    CommandOriginData.Origin.PLAYER,
-                    getUUID(), "", null
+                    CommandOriginData.Companion.Origin.Player,
+                    Uuid(getUUID()), "", null
                 ),
-                outputType = CommandOutputType.ALL_OUTPUT,
-                successCount = container.successCount,
-                outputMessages = container.messages,
+                outputType = CommandOutputType.AllOutput,
+                successCount = container.successCount.toUInt(),
+                outputMessages = container.messages.map(CommandOutputMessage::invoke),
             )
-            this.dataPacket(pk)
+            this.sendPacket(pk)
         }
     }
 
@@ -3250,10 +3302,17 @@ open class Player(
      * @param text JSON文本<br></br>Json text
      */
     fun sendRawTextMessage(text: RawText) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_OBJECT
-        pk.message = text.toRawText()
-        this.dataPacket(pk)
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Object,
+            needsTranslation = false,
+            sourceName = null,
+            message = text.toRawText(),
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3272,26 +3331,38 @@ open class Player(
      */
     @JvmOverloads
     fun sendTranslation(message: String, parameters: Array<String> = EmptyArrays.EMPTY_STRINGS) {
-        val pk = TextPacket()
-        if (Server.instance.settings.baseSettings.forceServerTranslate) {
-            pk.type = TextPacket.TYPE_RAW
-            pk.message = Server.instance.lang.tr(message, *parameters)
-        } else {
-            pk.type = TextPacket.TYPE_TRANSLATION
-            pk.message = Server.instance.lang.tr(message, parameters, "nukkit.", true)
-            for (i in parameters.indices) {
-                parameters[i] = Server.instance.lang.tr(parameters[i], parameters, "nukkit.", true)
-            }
-            pk.parameters = parameters
-        }
-        this.dataPacket(pk)
+        val packet = TextPacket(
+
+            textType = when (Server.instance.settings.baseSettings.forceServerTranslate) {
+                true -> TextPacket.Companion.TextType.Raw
+                false -> TextPacket.Companion.TextType.Translation
+            },
+
+            needsTranslation = !Server.instance.settings.baseSettings.forceServerTranslate,
+            sourceName = null,
+            message = when (Server.instance.settings.baseSettings.forceServerTranslate) {
+                true -> Server.instance.lang.tr(message, *parameters)
+                false -> Server.instance.lang.tr(message, parameters, "nukkit.", true)
+            },
+
+            parameters = when (Server.instance.settings.baseSettings.forceServerTranslate) {
+                true -> null
+                false -> parameters.map { Server.instance.lang.tr(it, parameters, "nukkit.", true) }
+            },
+
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+
+        this.sendPacket(packet)
     }
 
     /**
      * @see .sendChat
      */
     fun sendChat(message: String) {
-        this.sendChat("", message)
+        this.sendChat(source = "", message)
     }
 
     /**
@@ -3303,11 +3374,18 @@ open class Player(
      * @param message 消息
      */
     fun sendChat(source: String, message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_CHAT
-        pk.source = source
-        pk.message = Server.instance.lang.tr(message)
-        this.dataPacket(pk)
+
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Chat,
+            needsTranslation = false,
+            sourceName = source,
+            message = Server.instance.lang.tr(message),
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(packet = pk)
     }
 
     /**
@@ -3324,10 +3402,19 @@ open class Player(
      */
     @JvmOverloads
     fun sendPopup(message: String, subtitle: String? = "") {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_POPUP
-        pk.message = message
-        this.dataPacket(pk)
+
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Popup,
+            needsTranslation = false,
+            sourceName = null,
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+
+        this.sendPacket(pk)
     }
 
     /**
@@ -3339,11 +3426,21 @@ open class Player(
      * @param message 消息
      */
     fun sendTip(message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_TIP
-        pk.message = message
-        this.dataPacket(pk)
+
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Tip,
+            needsTranslation = false,
+            sourceName = null,
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+
+        this.sendPacket(pk)
     }
+
 
     /**
      * 清除掉玩家身上正在显示的标题信息。
@@ -3594,12 +3691,17 @@ open class Player(
         unloadAllUsedChunk()
 
         //send disconnection packet
-        val packet = DisconnectPacket()
-        if (reason1.isBlank()) {
-            packet.hideDisconnectionScreen = true
+        val hideDisconnectionScreen = reason1.isBlank()
+        if (hideDisconnectionScreen) {
             reason1 = BedrockDisconnectReasons.DISCONNECTED
         }
-        packet.message = reason1
+
+        val packet = DisconnectPacket(
+            reason = DisconnectFailReason.Unknown,
+            hideDisconnectionScreen,
+            message = reason1,
+            filteredMessage = reason1
+        )
         session.sendPacketSync(packet)
 
         //call quit event
@@ -3611,7 +3713,7 @@ open class Player(
             }
         }
         // Close the temporary windows first, so they have chance to change all inventories before being disposed
-        if (ev != null && ev!!.autoSave && namedTag != null) {
+        if (ev != null && ev.autoSave) {
             this.save()
         }
         super.close()
@@ -3626,8 +3728,8 @@ open class Player(
         Server.instance.pluginManager.unsubscribeFromPermission(Server.BROADCAST_CHANNEL_USERS, this)
         Server.instance.pluginManager.unsubscribeFromPermission(Server.BROADCAST_CHANNEL_ADMINISTRATIVE, this)
         // broadcast disconnection message
-        if (ev != null && (this.getEntityName() != "") && this.spawned && (ev!!.quitMessage.toString() != "")) {
-            Server.instance.broadcastMessage(ev!!.quitMessage!!)
+        if (ev != null && (this.getEntityName() != "") && this.spawned && (ev.quitMessage.toString() != "")) {
+            Server.instance.broadcastMessage(ev.quitMessage!!)
         }
 
         hasSpawned.clear()
@@ -3659,12 +3761,18 @@ open class Player(
                 val chunkX = getHashX(l)
                 val chunkZ = getHashZ(l)
                 if (level!!.unregisterChunkLoader(this, chunkX, chunkZ, false)) {
-                    val pk = LevelChunkPacket()
-                    pk.chunkX = chunkX
-                    pk.chunkZ = chunkZ
-                    pk.dimension = level!!.dimension
-                    pk.subChunkCount = 0
-                    pk.data = ByteArray(0)
+                    val pk = LevelChunkPacket(
+                        position = ChunkPos(
+                            chunkX,
+                            chunkZ,
+                        ),
+                        dimension = level!!.dimension,
+                        subChunkCount = 0u,
+                        subChunkLimit = 0u,
+                        cacheEnabled = false,
+                        blobHashes = emptyList(),
+                        data = ByteString(),
+                    )
                     this.sendChunk(chunkX, chunkZ, pk)
                     for (entity in level!!.getChunkEntities(chunkX, chunkZ).values) {
                         if (entity !== this) {
@@ -3675,7 +3783,7 @@ open class Player(
                 }
             }
         } catch (e: Exception) {
-            Server.instance.logger.error("Failed to unload all used chunks.", e)
+            log.error("Failed to unload all used chunks.", e)
         } finally {
             playerChunkManager.usedChunks.clear()
         }
@@ -3727,8 +3835,8 @@ open class Player(
             val fogIdentifiers = ListTag<StringTag>()
             val userProvidedFogIds = ListTag<StringTag>()
             fogStack.forEach { fog ->
-                fogIdentifiers.add(StringTag(fog.identifier.toString()))
-                userProvidedFogIds.add(StringTag(fog.userProvidedId))
+                userProvidedFogIds.add(StringTag(fog.first))
+                fogIdentifiers.add(StringTag(fog.second))
             }
             namedTag!!.putList("fogIdentifiers", fogIdentifiers)
             namedTag!!.putList("userProvidedFogIds", userProvidedFogIds)
@@ -3931,9 +4039,11 @@ open class Player(
 
             this.timeSinceRest = 0
 
-            val deathInfo = DeathInfoPacket()
-            deathInfo.translation = ev.translationDeathMessage
-            this.dataPacket(deathInfo)
+            val deathInfo = DeathInfoPacket(
+                cause = ev.translationDeathMessage.text,
+                messages = ev.translationDeathMessage.parameters.toList()
+            )
+            this.sendPacket(deathInfo)
 
             if (showMessages && ev.deathMessage.toString().isNotEmpty()) {
                 Server.instance.broadcast(ev.deathMessage, Server.BROADCAST_CHANNEL_USERS)
@@ -3944,14 +4054,12 @@ open class Player(
                 )
             )
 
-            val pk = RespawnPacket()
-            val pos = spawn.first
-            pk.x = pos!!.position.x.toFloat()
-            pk.y = pos.position.y.toFloat()
-            pk.z = pos.position.z.toFloat()
-            pk.respawnState = RespawnPacket.STATE_SEARCHING_FOR_SPAWN
-            pk.runtimeEntityId = this.getRuntimeID()
-            this.dataPacket(pk)
+            val pk = RespawnPacket(
+                position = Vector3f(spawn.first!!.position),
+                state = RespawnPacket.Companion.State.SearchingForSpawn,
+                entityRuntimeID = this.getRuntimeID().toULong(),
+            )
+            this.sendPacket(pk)
         }
     }
 
@@ -4398,7 +4506,7 @@ open class Player(
 
         clientMovements.clear()
         //switch level, update pos and rotation, update aabb
-        if (setPositionAndRotation(to, to.yaw, to.pitch, to.headYaw)) {
+        if (setPositionAndRotation(to.locator, to.yaw, to.pitch, to.headYaw)) {
             //if switch level or the distance teleported is too far
             if (switchLevel) {
                 playerChunkManager.handleTeleport()
@@ -4451,21 +4559,21 @@ open class Player(
         level!!.scheduler.scheduleDelayedTask(InternalPlugin.INSTANCE, {
             for (b in level!!.getBlockEntities().values) {
                 if (b is BlockEntitySpawnable) {
-                    val setAir = UpdateBlockPacket()
-                    setAir.blockRuntimeId = BlockAir.STATE.blockStateHash()
-                    setAir.flags = UpdateBlockPacket.FLAG_NETWORK
-                    setAir.x = b.position.floorX
-                    setAir.y = b.position.floorY
-                    setAir.z = b.position.floorZ
-                    this.dataPacket(setAir)
+                    val setAir = UpdateBlockPacket(
+                        position = BlockPos(b.position),
+                        newBlockRuntimeID = BlockAir.STATE.blockStateHash().toUInt(),
+                        flags = UpdateBlockPacket.FLAG_NETWORK,
+                        layer = 0u
+                    )
+                    this.sendPacket(setAir)
 
-                    val revertAir = UpdateBlockPacket()
-                    revertAir.blockRuntimeId = b.block.runtimeId
-                    revertAir.flags = UpdateBlockPacket.FLAG_NETWORK
-                    revertAir.x = b.position.floorX
-                    revertAir.y = b.position.floorY
-                    revertAir.z = b.position.floorZ
-                    this.dataPacket(revertAir)
+                    val revertAir = UpdateBlockPacket(
+                        position = BlockPos(b.position),
+                        newBlockRuntimeID = b.block.runtimeId.toUInt(),
+                        flags = UpdateBlockPacket.FLAG_NETWORK,
+                        layer = 0u
+                    )
+                    this.sendPacket(revertAir)
                     b.spawnTo(this)
                 }
             }
@@ -4500,13 +4608,13 @@ open class Player(
             form.viewers.add(this)
         }
 
-        val packet = ModalFormRequestPacket()
-        packet.formId = id
-        packet.data = form.toJson()
+        val packet = ModalFormRequestPacket(
+            formID = id.toUInt(),
+            formData = form.toJson()
+        )
+        formWindows[id] = form
+        this.sendPacket(packet)
 
-        formWindows[packet.formId] = form
-
-        this.dataPacket(packet)
         return id
     }
 
@@ -4520,12 +4628,12 @@ open class Player(
             .filter { f: Map.Entry<Int, Form<*>> -> f.value == form }
             .map { it.key }
             .findFirst()
-            .ifPresent { id: Int? ->
-                val packet =
-                    ServerSettingsResponsePacket() // Exploiting some (probably unintended) protocol features here
-                packet.formId = id!!
-                packet.data = form.toJson()
-                this.dataPacket(packet)
+            .ifPresent { id ->
+                val packet = ServerSettingsResponsePacket(
+                    formID = id,
+                    formData = form.toJson(),
+                ) // Exploiting some (probably unintended) protocol features here
+                this.sendPacket(packet)
             }
     }
 
@@ -4561,15 +4669,19 @@ open class Player(
         dialog.bindEntity!!.setDataProperty(EntityDataTypes.ACTIONS, actionJson!!)
         dialog.bindEntity!!.setDataProperty(EntityDataTypes.INTERACT_TEXT, dialog.content!!)
 
-        val packet = NPCDialoguePacket()
-        packet.runtimeEntityId = dialog.entityId
-        packet.action = NPCDialoguePacket.NPCDialogAction.OPEN
-        packet.dialogue = dialog.content!!
-        packet.npcName = dialog.title!!
-        if (book) packet.sceneName = dialog.sceneName
-        packet.actionJson = dialog.buttonJSONData!!
+        val packet = NPCDialoguePacket(
+            entityUniqueID = dialog.entityUniqueID.toULong(),
+            actionType = NPCDialoguePacket.Companion.ActionType.Open,
+            dialogue = dialog.content ?: "",
+            sceneName = when (book) {
+                true -> dialog.sceneName
+                false -> ""
+            },
+            npcName = dialog.title ?: "",
+            actionJSON = dialog.buttonJSONData ?: ""
+        )
         if (book) dialogWindows.put(dialog.sceneName, dialog)
-        this.dataPacket(packet)
+        this.sendPacket(packet)
     }
 
     /**
@@ -4865,44 +4977,46 @@ open class Player(
     override val isLoaderActive: Boolean
         get() = this.isConnected()
 
-    public override fun switchLevel(level: Level): Boolean {
-        if (super.switchLevel(level)) {
+    public override fun switchLevel(targetLevel: Level): Boolean {
+        if (super.switchLevel(targetLevel)) {
             clientMovements.clear()
-            val spawnPosition = SetSpawnPositionPacket()
-            spawnPosition.spawnType = SetSpawnPositionPacket.TYPE_WORLD_SPAWN
-            val spawn = level.spawnLocation
-            spawnPosition.x = spawn.position.floorX
-            spawnPosition.y = spawn.position.floorY
-            spawnPosition.z = spawn.position.floorZ
-            spawnPosition.dimension = spawn.level.dimension
-            this.dataPacket(spawnPosition)
+            val spawnPosition = SetSpawnPositionPacket(
+                spawnType = SetSpawnPositionPacket.Companion.SpawnType.World,
+                position = BlockPos(targetLevel.spawnLocation.position),
+                dimension = targetLevel.dimension,
+                spawnPosition = BlockPos(targetLevel.spawnLocation.position),
+            )
+            this.sendPacket(spawnPosition)
 
             // Remove old chunks
             this.forceSendEmptyChunks()
 
-            val setTime = SetTimePacket()
-            setTime.time = level.getTime()
-            this.dataPacket(setTime)
+            val setTime = SetTimePacket(
+                time = targetLevel.getTime()
+            )
+            this.sendPacket(setTime)
 
-            val gameRulesChanged = GameRulesChangedPacket()
-            gameRulesChanged.gameRules = level.gameRules
-            this.dataPacket(gameRulesChanged)
+            val gameRulesChanged = GameRulesChangedPacket(
+                gameRules = targetLevel.gameRules.getGameRules()
+                    .map { org.chorus_oss.protocol.types.GameRule(it.toPair()) }
+            )
+            this.sendPacket(gameRulesChanged)
 
-            if (level.dimension == this.level!!.dimension) {
-                this.dataPacket(
+            if (targetLevel.dimension == this.level!!.dimension) {
+                this.sendPacket(
                     ChangeDimensionPacket(
                         dimension = when (this.level!!.dimension) {
                             Level.DIMENSION_NETHER -> Level.DIMENSION_OVERWORLD
                             else -> Level.DIMENSION_NETHER
                         },
-                        position = Vector3f(),
+                        position = Vector3f(0f, 0f, 0f),
                         respawn = false,
-                        loadingScreenID = loadingScreenId++
+                        loadingScreenID = null
                     )
                 )
             }
 
-            this.setDimension(level.dimension)
+            this.setDimension(targetLevel.dimension)
 
             updateTrackingPositions(true)
             return true
@@ -4950,10 +5064,12 @@ open class Player(
     fun transfer(address: InetSocketAddress) {
         val hostName = address.address.hostAddress
         val port = address.port
-        val pk = TransferPacket()
-        pk.address = hostName
-        pk.port = port
-        this.dataPacket(pk)
+        val packet = TransferPacket(
+            address = hostName,
+            port = port.toUShort(),
+            reloadWorld = false,
+        )
+        this.sendPacket(packet)
     }
 
     @ApiStatus.Internal
@@ -4990,11 +5106,12 @@ open class Player(
                     return false
                 }
 
-                val pk = TakeItemEntityPacket()
-                pk.entityId = this.getRuntimeID()
-                pk.target = entity.getRuntimeID()
+                val pk = TakeItemEntityPacket(
+                    itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                    takerEntityRuntimeID = this.getRuntimeID().toULong(),
+                )
                 Server.broadcastPacket(entity.viewers.values, pk)
-                this.dataPacket(pk)
+                this.sendPacket(pk)
 
                 if (!this.isCreative) {
                     inventory.addItem(item.clone())
@@ -5034,11 +5151,12 @@ open class Player(
                     return false
                 }
 
-                val pk = TakeItemEntityPacket()
-                pk.entityId = this.getRuntimeID()
-                pk.target = entity.getRuntimeID()
+                val pk = TakeItemEntityPacket(
+                    itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                    takerEntityRuntimeID = this.getRuntimeID().toULong(),
+                )
                 Server.broadcastPacket(entity.viewers.values, pk)
-                this.dataPacket(pk)
+                this.sendPacket(pk)
 
                 if (!entity.isCreative) {
                     if (inventory!!.getItem(entity.getFavoredSlot()).isNothing) {
@@ -5058,7 +5176,9 @@ open class Player(
                     }
 
                     val ev: InventoryPickupItemEvent
-                    Server.instance.pluginManager.callEvent(InventoryPickupItemEvent(inventory!!, entity).also { ev = it })
+                    Server.instance.pluginManager.callEvent(InventoryPickupItemEvent(inventory!!, entity).also {
+                        ev = it
+                    })
                     if (ev.cancelled) {
                         return false
                     }
@@ -5069,11 +5189,12 @@ open class Player(
                         this.awardAchievement("diamond")
                     }
 
-                    val pk = TakeItemEntityPacket()
-                    pk.entityId = this.getRuntimeID()
-                    pk.target = entity.getRuntimeID()
+                    val pk = TakeItemEntityPacket(
+                        itemEntityRuntimeID = entity.getRuntimeID().toULong(),
+                        takerEntityRuntimeID = this.getRuntimeID().toULong(),
+                    )
                     Server.broadcastPacket(entity.viewers.values, pk)
-                    this.dataPacket(pk)
+                    this.sendPacket(pk)
 
                     this.inventory.addItem(item.clone())
                     entity.close()
@@ -5133,11 +5254,11 @@ open class Player(
         return this.hash
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj !is Player) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is Player) {
             return false
         }
-        return this.getUniqueID() == obj.getUniqueID() && this.getRuntimeID() == obj.getRuntimeID()
+        return this.getUniqueID() == other.getUniqueID() && this.getRuntimeID() == other.getRuntimeID()
     }
 
     /**
@@ -5160,10 +5281,11 @@ open class Player(
      *
      * @param xuid XUID
      */
-    fun showXboxProfile(xuid: String?) {
-        val pk = ShowProfilePacket()
-        pk.xuid = xuid
-        this.dataPacket(pk)
+    fun showXboxProfile(xuid: String) {
+        val pk = ShowProfilePacket(
+            xuid = xuid
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -5273,17 +5395,32 @@ open class Player(
 
     // TODO: Support Translation Parameters
     fun sendPopupJukebox(message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_JUKEBOX_POPUP
-        pk.message = message
-        this.dataPacket(pk)
+
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.JukeboxPopup,
+            needsTranslation = false,
+            sourceName = null,
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     fun sendSystem(message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_SYSTEM
-        pk.message = message
-        this.dataPacket(pk)
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.System,
+            needsTranslation = false,
+            sourceName = "",
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
@@ -5293,11 +5430,17 @@ open class Player(
 
 
     fun sendWhisper(source: String, message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_WHISPER
-        pk.source = source
-        pk.message = message
-        this.dataPacket(pk)
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Whisper,
+            needsTranslation = false,
+            sourceName = source,
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
@@ -5307,17 +5450,26 @@ open class Player(
 
 
     fun sendAnnouncement(source: String, message: String) {
-        val pk = TextPacket()
-        pk.type = TextPacket.TYPE_ANNOUNCEMENT
-        pk.source = source
-        pk.message = message
-        this.dataPacket(pk)
+        val pk = TextPacket(
+            textType = TextPacket.Companion.TextType.Announcement,
+            needsTranslation = false,
+            sourceName = source,
+            message = message,
+            parameters = emptyList(),
+            xuid = "",
+            platformChatID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
-    fun completeUsingItem(itemId: Short, action: CompletedUsingItemPacket.ItemUseMethod) {
-        this.dataPacket(
-            CompletedUsingItemPacket(
+    fun completeUsingItem(
+        itemId: Short,
+        action: CompletedUsingItemPacket.Companion.ItemUseMethod
+    ) {
+        this.sendPacket(
+            packet = CompletedUsingItemPacket(
                 itemID = itemId,
                 itemUseMethod = action
             )
@@ -5331,7 +5483,7 @@ open class Player(
 
 
     fun showCredits() {
-        this.showingCredits = (true)
+        this.showingCredits = true
     }
 
 
@@ -5357,6 +5509,10 @@ open class Player(
         return true
     }
 
+    fun sendPacketImmediately(packet: Packet): Boolean {
+        return dataPacketImmediately(MigrationPacket(packet))
+    }
+
     /**
      * 玩家屏幕振动效果
      *
@@ -5368,13 +5524,18 @@ open class Player(
      * @param shakeType   the shake type
      * @param shakeAction the shake action
      */
-    fun shakeCamera(intensity: Float, duration: Float, shakeType: CameraShakeType, shakeAction: CameraShakeAction) {
-        this.dataPacket(
+    fun shakeCamera(
+        intensity: Float,
+        duration: Float,
+        shakeType: CameraShakePacket.Companion.Type,
+        shakeAction: CameraShakePacket.Companion.Action
+    ) {
+        this.sendPacket(
             CameraShakePacket(
                 intensity = intensity,
-                seconds = duration,
-                shakeType = shakeType,
-                shakeAction = shakeAction
+                duration = duration,
+                type = shakeType,
+                action = shakeAction
             )
         )
     }
@@ -5389,10 +5550,11 @@ open class Player(
      * @param content the content
      */
     fun sendToast(title: String, content: String) {
-        val pk = ToastRequestPacket()
-        pk.title = title
-        pk.content = content
-        this.dataPacket(pk)
+        val pk = ToastRequestPacket(
+            title = title,
+            message = content,
+        )
+        this.sendPacket(pk)
     }
 
     override fun removeLine(line: IScoreboardLine) {
@@ -5422,13 +5584,14 @@ open class Player(
     }
 
     override fun display(scoreboard: IScoreboard, slot: DisplaySlot?) {
-        val pk = SetDisplayObjectivePacket()
-        pk.displaySlot = slot
-        pk.objectiveName = scoreboard.objectiveName
-        pk.displayName = scoreboard.displayName
-        pk.criteriaName = scoreboard.criteriaName
-        pk.sortOrder = scoreboard.sortOrder
-        this.dataPacket(pk)
+        val pk = SetDisplayObjectivePacket(
+            displaySlot = ScoreboardSlot.entries[slot!!.ordinal],
+            objectiveName = scoreboard.objectiveName,
+            displayName = scoreboard.displayName ?: "",
+            criteriaName = scoreboard.criteriaName ?: "",
+            sortOrder = ScoreboardSlotOrder.entries[scoreboard.sortOrder!!.ordinal],
+        )
+        this.sendPacket(pk)
 
         //client won't storage the score of a scoreboard,so we should send the score to client
         val pk2 = SetScorePacket()
@@ -5445,13 +5608,14 @@ open class Player(
     }
 
     override fun hide(slot: DisplaySlot?) {
-        val pk = SetDisplayObjectivePacket()
-        pk.displaySlot = slot
-        pk.objectiveName = ""
-        pk.displayName = ""
-        pk.criteriaName = ""
-        pk.sortOrder = SortOrder.ASCENDING
-        this.dataPacket(pk)
+        val pk = SetDisplayObjectivePacket(
+            displaySlot = ScoreboardSlot.entries[slot!!.ordinal],
+            objectiveName = "",
+            displayName = "",
+            criteriaName = "",
+            sortOrder = ScoreboardSlotOrder.Ascending,
+        )
+        this.sendPacket(pk)
 
         if (slot == DisplaySlot.BELOW_NAME) {
             this.setScoreTag("")
@@ -5459,10 +5623,10 @@ open class Player(
     }
 
     override fun removeScoreboard(scoreboard: IScoreboard) {
-        val pk = RemoveObjectivePacket()
-        pk.objectiveName = scoreboard.objectiveName
-
-        this.dataPacket(pk)
+        val pk = RemoveObjectivePacket(
+            objectiveName = scoreboard.objectiveName,
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -5474,10 +5638,11 @@ open class Player(
             if (blockEntity is BlockEntitySign) {
                 if (blockEntity.editorEntityRuntimeId == -1L) {
                     blockEntity.editorEntityRuntimeId = this.getRuntimeID()
-                    val openSignPacket = OpenSignPacket()
-                    openSignPacket.position = position.asBlockVector3()
-                    openSignPacket.frontSide = frontSide
-                    this.dataPacket(openSignPacket)
+                    val openSignPacket = OpenSignPacket(
+                        position = BlockPos(position),
+                        frontSide = frontSide,
+                    )
+                    this.sendPacket(openSignPacket)
                     isOpenSignFront = frontSide
                 }
             } else {

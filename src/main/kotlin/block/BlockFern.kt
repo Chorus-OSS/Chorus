@@ -36,7 +36,7 @@ class BlockFern(blockState: BlockState = properties.defaultState) : BlockFlowabl
         fz: Double,
         player: Player?
     ): Boolean {
-        if (BlockSweetBerryBush.isSupportValid(down())) {
+        if (BlockSweetBerryBush.isSupportValid(block.down())) {
             level.setBlock(block.position, this, true)
             return true
         }

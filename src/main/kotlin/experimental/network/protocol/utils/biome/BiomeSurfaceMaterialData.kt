@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.experimental.network.protocol.utils.biome
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.types.biome.BiomeSurfaceMaterialData
 
-fun BiomeSurfaceMaterialData.Companion.fromNBT(nbt: CompoundTag): BiomeSurfaceMaterialData {
+operator fun BiomeSurfaceMaterialData.Companion.invoke(nbt: CompoundTag): BiomeSurfaceMaterialData {
     return BiomeSurfaceMaterialData(
         topBlock = nbt.getInt("topBlock"),
         midBlock = nbt.getInt("midBlock"),

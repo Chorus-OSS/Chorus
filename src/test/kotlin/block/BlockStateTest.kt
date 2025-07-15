@@ -14,7 +14,7 @@ class BlockStateTest internal constructor() {
     init {
         Registries.BLOCK.init()
         var blocks = 0
-        FileInputStream("src/main/resources/block_states.json").use { stream ->
+        FileInputStream("src/main/resources/gamedata/endstone/block_states.json").use { stream ->
             val reader = BufferedReader(InputStreamReader(stream))
             val blockStateData = JsonParser.parseReader(reader).asJsonArray
             for (i in 0..<blockStateData.size()) {

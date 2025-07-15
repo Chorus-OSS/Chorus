@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.level.particle
 
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 
 class BlockForceFieldParticle @JvmOverloads constructor(pos: Vector3, scale: Int = 0) :

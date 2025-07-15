@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.CompletedUsingItemPacket
 
 
 abstract class ItemFood : Item {
@@ -54,7 +53,10 @@ abstract class ItemFood : Item {
 
         if (this.onEaten(player)) {
             player.foodData?.addFood(this)
-            player.completeUsingItem(this.runtimeId.toShort(), CompletedUsingItemPacket.ItemUseMethod.EAT)
+            player.completeUsingItem(
+                this.runtimeId.toShort(),
+                org.chorus_oss.protocol.packets.CompletedUsingItemPacket.Companion.ItemUseMethod.Eat
+            )
 
             if (player.isAdventure || player.isSurvival) {
                 --this.count

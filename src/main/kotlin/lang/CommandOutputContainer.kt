@@ -2,9 +2,6 @@ package org.chorus_oss.chorus.lang
 
 import org.chorus_oss.chorus.network.protocol.types.CommandOutputMessage
 
-/**
- * [CommandOutputPacket][org.chorus_oss.chorus.network.protocol.CommandOutputPacket] 负载消息的容器，支持同时发送多条消息
- */
 class CommandOutputContainer : Cloneable {
     @JvmField
     val messages: MutableList<CommandOutputMessage>

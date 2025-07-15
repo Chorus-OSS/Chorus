@@ -1,5 +1,7 @@
 package org.chorus_oss.chorus.network.protocol
 
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.utils.Utils
 
@@ -28,10 +30,6 @@ class LevelEventPacket : DataPacket() {
 
     override fun pid(): Int {
         return ProtocolInfo.LEVEL_EVENT_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object {

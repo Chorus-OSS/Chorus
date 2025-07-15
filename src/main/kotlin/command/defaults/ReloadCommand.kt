@@ -33,25 +33,25 @@ class ReloadCommand(name: String) : VanillaCommand(name, "Reload the server/plug
         val list = result.value
         when (result.key) {
             "default" -> {
-                log.addMessage(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloading" + TextFormat.WHITE)
+                log.addMessage(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloading" + TextFormat.WHITE)
                     .output(true)
                 Server.instance.reload()
-                log.addMessage(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloaded" + TextFormat.WHITE)
+                log.addMessage(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloaded" + TextFormat.WHITE)
                     .output(true)
                 return 1
             }
 
             "function" -> {
-                log.addMessage(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloading" + TextFormat.WHITE)
+                log.addMessage(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloading" + TextFormat.WHITE)
                     .output(true)
                 Server.instance.functionManager.reload()
-                log.addMessage(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloaded" + TextFormat.WHITE)
+                log.addMessage(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloaded" + TextFormat.WHITE)
                     .output(true)
                 return 1
             }
 
             "plugin" -> {
-                log.addMessage(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloading" + TextFormat.WHITE)
+                log.addMessage(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloading" + TextFormat.WHITE)
                     .output(true)
                 val pluginManager = Server.instance.pluginManager
                 val str = list.getResult<String>(1)!!
@@ -63,7 +63,7 @@ class ReloadCommand(name: String) : VanillaCommand(name, "Reload the server/plug
                 plugin = pluginManager.loadPlugin(plugin.file) ?: return 0
                 pluginManager.enablePlugin(plugin)
                 log.addSuccess("Plugin §a" + plugin.description.name + " §freloaded!").output(true)
-                log.addSuccess(TextFormat.YELLOW.toString() + "%nukkit.command.reload.reloaded" + TextFormat.WHITE)
+                log.addSuccess(TextFormat.YELLOW.toString() + "%chorus.command.reload.reloaded" + TextFormat.WHITE)
                     .output(true)
                 return 1
             }

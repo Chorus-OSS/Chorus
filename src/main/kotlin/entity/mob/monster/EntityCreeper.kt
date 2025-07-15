@@ -50,82 +50,82 @@ class EntityCreeper(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt
     public override fun requireBehaviorGroup(): IBehaviorGroup {
         return BehaviorGroup(
             this.tickSpread,
-            setOf<IBehavior>(),
+            setOf(),
             setOf<IBehavior>(
                 Behavior(
-                    FleeFromTargetExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 0.3f, true, 4f),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
+                    FleeFromTargetExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 0.3f, true, 4f),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
                     5,
                     1
                 ),
                 Behavior(
-                    EntityExplosionExecutor(30, 3, CoreMemoryTypes.Companion.SHOULD_EXPLODE),
+                    EntityExplosionExecutor(30, 3, CoreMemoryTypes.SHOULD_EXPLODE),
                     all(
-                        IBehaviorEvaluator { entity: EntityMob ->
+                        { entity: EntityMob ->
                             entity.memoryStorage[CoreMemoryTypes.SHOULD_EXPLODE]
                         },
                         any(
-                            IBehaviorEvaluator { entity: EntityMob? ->
-                                memoryStorage.get(CoreMemoryTypes.Companion.NEAREST_PLAYER) != null && level!!.raycastBlocks(
+                            { entity: EntityMob? ->
+                                memoryStorage[CoreMemoryTypes.NEAREST_PLAYER] != null && level!!.raycastBlocks(
                                     this.position,
-                                    memoryStorage.get(CoreMemoryTypes.Companion.NEAREST_PLAYER)!!.position
+                                    memoryStorage[CoreMemoryTypes.NEAREST_PLAYER]!!.position
                                 ).isEmpty()
                             },
-                            IBehaviorEvaluator { entity: EntityMob? ->
-                                memoryStorage.get(CoreMemoryTypes.Companion.ATTACK_TARGET) != null && level!!.raycastBlocks(
+                            { entity: EntityMob? ->
+                                memoryStorage[CoreMemoryTypes.ATTACK_TARGET] != null && level!!.raycastBlocks(
                                     this.position,
-                                    memoryStorage.get(CoreMemoryTypes.Companion.ATTACK_TARGET)!!.position
+                                    memoryStorage[CoreMemoryTypes.ATTACK_TARGET]!!.position
                                 ).isEmpty()
                             }
                         )
                     ), 4, 1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, true, 16f, 3f, true), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        IBehaviorEvaluator { entity: EntityMob ->
+                    MoveToTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, true, 16f, 3f, true), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        { entity: EntityMob ->
                             val attackTarget = entity.memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
                             attackTarget == null || attackTarget !is Player || attackTarget.isSurvival
                         }
                     ), 3, 1),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, true, 16f, 3f), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, true, 16f, 3f), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                         IBehaviorEvaluator { entity: EntityMob ->
-                            if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_PLAYER)) return@IBehaviorEvaluator true
-                            val player = entity.memoryStorage.get<Player>(CoreMemoryTypes.Companion.NEAREST_PLAYER)
+                            if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_PLAYER)) return@IBehaviorEvaluator true
+                            val player = entity.memoryStorage.get<Player>(CoreMemoryTypes.NEAREST_PLAYER)
                             player!!.isSurvival
                         }
                     ), 2, 1),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
-            setOf<ISensor>(
+            setOf(
                 NearestPlayerSensor(16.0, 0.0, 20),
-                NearestEntitySensor(EntityCat::class.java, CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 42.0, 0.0),
+                NearestEntitySensor(EntityCat::class.java, CoreMemoryTypes.NEAREST_SHARED_ENTITY, 42.0, 0.0),
                 NearestEntitySensor(
                     EntityOcelot::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     42.0,
                     0.0
                 ),
                 ISensor { entity: EntityMob ->
                     val memoryStorage = entity.memoryStorage
-                    var attacker = memoryStorage.get<Entity>(CoreMemoryTypes.Companion.ATTACK_TARGET)
-                    if (attacker == null) attacker = memoryStorage.get<Player>(CoreMemoryTypes.Companion.NEAREST_PLAYER)
+                    var attacker = memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
+                    if (attacker == null) attacker = memoryStorage[CoreMemoryTypes.NEAREST_PLAYER]
                     if (attacker != null && (attacker !is Player || attacker.isSurvival) && attacker.position.distanceSquared(
                             entity.position
                         ) <= 3 * 3 && (!memoryStorage[CoreMemoryTypes.SHOULD_EXPLODE])
                     ) {
-                        memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.SHOULD_EXPLODE, true)
+                        memoryStorage.set<Boolean>(CoreMemoryTypes.SHOULD_EXPLODE, true)
                         return@ISensor
                     }
                     if ((attacker == null || (attacker is Player && !attacker.isSurvival) || attacker.position.distanceSquared(
                             entity.position
                         ) >= 7 * 7) && memoryStorage[CoreMemoryTypes.SHOULD_EXPLODE] && memoryStorage.get<Boolean>(
-                            CoreMemoryTypes.Companion.EXPLODE_CANCELLABLE
+                            CoreMemoryTypes.EXPLODE_CANCELLABLE
                         )
                     ) {
-                        memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.SHOULD_EXPLODE, false)
+                        memoryStorage.set<Boolean>(CoreMemoryTypes.SHOULD_EXPLODE, false)
                     }
                 }),
             setOf<IController>(WalkController(), LookController(true, true), FluctuateController()),
@@ -206,8 +206,8 @@ class EntityCreeper(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt
         val memoryStorage = this.memoryStorage
         if (item.id === ItemID.FLINT_AND_STEEL && (!memoryStorage[CoreMemoryTypes.SHOULD_EXPLODE])
         ) {
-            memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.SHOULD_EXPLODE, true)
-            memoryStorage.set<Boolean>(CoreMemoryTypes.Companion.EXPLODE_CANCELLABLE, false)
+            memoryStorage.set<Boolean>(CoreMemoryTypes.SHOULD_EXPLODE, true)
+            memoryStorage.set<Boolean>(CoreMemoryTypes.EXPLODE_CANCELLABLE, false)
             level!!.addSound(this.position, Sound.FIRE_IGNITE)
             return true
         }

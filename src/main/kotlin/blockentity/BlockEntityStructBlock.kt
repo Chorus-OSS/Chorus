@@ -1,17 +1,15 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.block.property.enums.StructureBlockType
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.inventory.StructBlockInventory
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockVector3
+import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.StructureBlockUpdatePacket
-import org.chorus_oss.chorus.network.protocol.types.StructureAnimationMode
-import org.chorus_oss.chorus.network.protocol.types.StructureMirror
-import org.chorus_oss.chorus.network.protocol.types.StructureRedstoneSaveMode
-import org.chorus_oss.chorus.network.protocol.types.StructureRotation
+import org.chorus_oss.protocol.packets.StructureBlockUpdatePacket
+import org.chorus_oss.protocol.types.structure.*
 
 class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), IStructBlock,
     BlockEntityInventoryHolder {
@@ -38,9 +36,9 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
         super.loadNBT()
         if (namedTag.contains(IStructBlock.Companion.TAG_ANIMATION_MODE)) {
             this.animationMode =
-                StructureAnimationMode.from(namedTag.getByte(IStructBlock.Companion.TAG_ANIMATION_MODE).toInt())
+                StructureAnimationMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_ANIMATION_MODE).toInt()]
         } else {
-            this.animationMode = StructureAnimationMode.from(0)
+            this.animationMode = StructureAnimationMode.entries[0]
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_ANIMATION_SECONDS)) {
             this.animationSeconds = namedTag.getFloat(IStructBlock.Companion.TAG_ANIMATION_SECONDS)
@@ -48,9 +46,9 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
             this.animationSeconds = 0f
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_DATA)) {
-            this.data = StructureBlockType.from(namedTag.getByte(IStructBlock.Companion.TAG_DATA).toInt())
+            this.data = StructureBlockType.entries[namedTag.getByte(IStructBlock.Companion.TAG_DATA).toInt()]
         } else {
-            this.data = StructureBlockType.from(1)
+            this.data = StructureBlockType.entries[1]
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_DATA_FIELD)) {
             this.dataField = namedTag.getString(IStructBlock.Companion.TAG_DATA_FIELD)
@@ -78,15 +76,16 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
             this.isPowered = false
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_MIRROR)) {
-            this.mirror = StructureMirror.from(namedTag.getByte(IStructBlock.Companion.TAG_MIRROR).toInt())
+            this.mirror = StructureMirror.entries[namedTag.getByte(IStructBlock.Companion.TAG_MIRROR).toInt()]
         } else {
-            this.mirror = StructureMirror.from(0)
+            this.mirror = StructureMirror.entries[0]
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)) {
             this.redstoneSaveMode =
-                StructureRedstoneSaveMode.from(namedTag.getByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE).toInt())
+                StructureRedstoneSaveMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)
+                    .toInt()]
         } else {
-            this.redstoneSaveMode = StructureRedstoneSaveMode.from(0)
+            this.redstoneSaveMode = StructureRedstoneSaveMode.entries[0]
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_REMOVE_BLOCKS)) {
             this.removeBlocks = namedTag.getBoolean(IStructBlock.Companion.TAG_REMOVE_BLOCKS)
@@ -94,9 +93,9 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
             this.removeBlocks = false
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_ROTATION)) {
-            this.rotation = StructureRotation.from(namedTag.getByte(IStructBlock.Companion.TAG_ROTATION).toInt())
+            this.rotation = StructureRotation.entries[namedTag.getByte(IStructBlock.Companion.TAG_ROTATION).toInt()]
         } else {
-            this.rotation = StructureRotation.from(0)
+            this.rotation = StructureRotation.entries[0]
         }
         if (namedTag.contains(IStructBlock.Companion.TAG_SEED)) {
             this.seed = namedTag.getLong(IStructBlock.Companion.TAG_SEED)
@@ -200,7 +199,7 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
     override var name: String
         get() = if (this.hasName()) namedTag.getString(IStructBlock.Companion.TAG_CUSTOM_NAME) else BlockEntityID.STRUCTURE_BLOCK
         set(name) {
-            if (name.isNullOrEmpty()) {
+            if (name.isEmpty()) {
                 namedTag.remove(IStructBlock.Companion.TAG_CUSTOM_NAME)
             } else {
                 namedTag.putString(IStructBlock.Companion.TAG_CUSTOM_NAME, name)
@@ -226,23 +225,22 @@ class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawn
     }
 
     fun updateSetting(packet: StructureBlockUpdatePacket) {
-        val editorData = packet.editorData
-        this.animationMode = editorData.settings.animationMode
-        this.animationSeconds = editorData.settings.animationSeconds
-        this.data = editorData.type
-        this.dataField = editorData.dataField
-        this.ignoreEntities = editorData.settings.ignoringEntities
-        this.includePlayers = editorData.includingPlayers
-        this.integrity = editorData.settings.integrityValue
-        this.isPowered = packet.powered
-        this.mirror = editorData.settings.mirror
-        this.redstoneSaveMode = editorData.redstoneSaveMode
-        this.removeBlocks = editorData.settings.ignoringBlocks
-        this.rotation = editorData.settings.rotation
-        this.seed = editorData.settings.integritySeed.toLong()
-        this.showBoundingBox = editorData.boundingBoxVisible
-        this.structureName = editorData.name
-        this.offset = editorData.settings.offset
-        this.size = editorData.settings.size
+        this.animationMode = packet.settings.animationMode
+        this.animationSeconds = packet.settings.animationDuration
+        this.data = packet.structureBlockType
+        this.dataField = packet.dataField
+        this.ignoreEntities = packet.settings.ignoringEntities
+        this.includePlayers = packet.includePlayers
+        this.integrity = packet.settings.integrity
+        this.isPowered = packet.shouldTrigger
+        this.mirror = packet.settings.mirror
+        this.redstoneSaveMode = packet.redstoneSaveMode
+        this.removeBlocks = packet.settings.ignoringBlocks
+        this.rotation = packet.settings.rotation
+        this.seed = packet.settings.seed.toLong()
+        this.showBoundingBox = packet.showBoundingBox
+        this.structureName = packet.structureName
+        this.offset = Vector3(packet.settings.offset).asBlockVector3()
+        this.size = Vector3(packet.settings.size).asBlockVector3()
     }
 }

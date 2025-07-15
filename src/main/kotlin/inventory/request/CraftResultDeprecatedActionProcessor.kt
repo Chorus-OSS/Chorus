@@ -1,17 +1,19 @@
 package org.chorus_oss.chorus.inventory.request
 
 import org.chorus_oss.chorus.Player
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.CraftResultsDeprecatedAction
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 import org.chorus_oss.chorus.recipe.Recipe
 import org.chorus_oss.chorus.recipe.RecipeType
+import org.chorus_oss.protocol.types.itemstack.request.action.CraftResultsDeprecatedRequestAction
 
-class CraftResultDeprecatedActionProcessor : ItemStackRequestActionProcessor<CraftResultsDeprecatedAction> {
+class CraftResultDeprecatedActionProcessor : ItemStackRequestActionProcessor<CraftResultsDeprecatedRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.CRAFT_RESULTS_DEPRECATED
 
     override fun handle(
-        action: CraftResultsDeprecatedAction,
+        action: CraftResultsDeprecatedRequestAction,
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {
@@ -20,7 +22,7 @@ class CraftResultDeprecatedActionProcessor : ItemStackRequestActionProcessor<Cra
             ) as Recipe).type == RecipeType.MULTI
         ) {
             val createdOutput = player.creativeOutputInventory
-            val resultItem = action.resultItems[0]
+            val resultItem = Item(action.resultItems[0])
             resultItem.autoAssignStackNetworkId()
             createdOutput.setItem(0, resultItem, false)
             return null

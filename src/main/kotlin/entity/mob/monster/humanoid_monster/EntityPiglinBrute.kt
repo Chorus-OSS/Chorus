@@ -57,20 +57,20 @@ class EntityPiglinBrute(chunk: IChunk?, nbt: CompoundTag?) : EntityPiglin(chunk,
                         IBehaviorEvaluator { entity: EntityMob? -> !isAngry() }), 9, 1
                 ),
                 Behavior(
-                    PiglinMeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.5f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    PiglinMeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.5f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     6,
                     1
                 ),
                 Behavior(
-                    PiglinMeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.5f, 40, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    PiglinMeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.5f, 40, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     5,
                     1
                 ),
                 Behavior(
-                    PiglinFleeFromTargetExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
+                    PiglinFleeFromTargetExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
                         IBehaviorEvaluator { entity: EntityMob? -> !isBaby() }
                     ), 3, 1),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
@@ -79,7 +79,7 @@ class EntityPiglinBrute(chunk: IChunk?, nbt: CompoundTag?) : EntityPiglin(chunk,
                 NearestPlayerSensor(40.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
@@ -88,11 +88,11 @@ class EntityPiglinBrute(chunk: IChunk?, nbt: CompoundTag?) : EntityPiglin(chunk,
                 NearestPlayerAngryPiglinSensor(),
                 NearestEntitySensor(
                     EntityZombiePigman::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     8.0,
                     0.0
                 ),
-                BlockSensor(BlockDoor::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 2, 2, 20)
+                BlockSensor(BlockDoor::class.java, CoreMemoryTypes.NEAREST_BLOCK, 2, 2, 20)
             ),
             setOf(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),

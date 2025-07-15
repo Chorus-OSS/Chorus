@@ -57,7 +57,7 @@ class GamemodeCommand(name: String) : VanillaCommand(
                 if (sender.hasPermission("chorus.command.gamemode.other")) {
                     list.getResult<List<Player>>(1)!!
                 } else {
-                    log.addMessage(TextFormat.RED.toString() + "%nukkit.command.generic.permission").output()
+                    log.addMessage(TextFormat.RED.toString() + "%chorus.command.generic.permission").output()
                     return 0
                 }
             } else {
@@ -74,7 +74,7 @@ class GamemodeCommand(name: String) : VanillaCommand(
             (gameMode == 2 && !sender.hasPermission("chorus.command.gamemode.adventure")) ||
             (gameMode == 3 && !sender.hasPermission("chorus.command.gamemode.spectator"))
         ) {
-            log.addMessage(TextFormat.RED.toString() + "%nukkit.command.generic.permission").output()
+            log.addMessage(TextFormat.RED.toString() + "%chorus.command.generic.permission").output()
             return 0
         }
 

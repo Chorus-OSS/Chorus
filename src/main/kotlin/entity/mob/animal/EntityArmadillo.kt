@@ -47,8 +47,8 @@ class EntityArmadillo(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nb
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
                     ),
                     1, 1
                 )
@@ -72,22 +72,22 @@ class EntityArmadillo(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nb
                 Behavior(
                     ShedExecutor(), all(
                         IBehaviorEvaluator { entity: EntityMob? -> rollState == RollState.UNROLLED },
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.NEXT_SHED, 0)
+                        PassByTimeEvaluator(CoreMemoryTypes.NEXT_SHED, 0)
                     ), 5, 1
                 ),
                 Behavior(
                     EntityBreedingExecutor<EntityArmadillo>(EntityArmadillo::class.java, 16, 100, 0.5f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     7,
                     1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER, 0.4f, true), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_FEEDING_PLAYER, 0.4f, true), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                         IBehaviorEvaluator { entity: EntityMob? -> rollState == RollState.UNROLLED }
                     ), 2, 1),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100), all(
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100), all(
                         ProbabilityEvaluator(4, 10),
                         IBehaviorEvaluator { entity: EntityMob? -> rollState == RollState.UNROLLED }
                     ), 1, 1, 100),
@@ -123,7 +123,7 @@ class EntityArmadillo(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nb
         setMovementSpeedF(0.5f)
         setRollState(RollState.UNROLLED)
         memoryStorage.set<Int>(
-            CoreMemoryTypes.Companion.NEXT_SHED,
+            CoreMemoryTypes.NEXT_SHED,
             level!!.tick + Utils.rand(6000, 10800)
         )
     }
@@ -172,7 +172,7 @@ class EntityArmadillo(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nb
     class RollupEvaluator : IBehaviorEvaluator {
         override fun evaluate(entity: EntityMob): Boolean {
             return AnyMatchEvaluator(
-                PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 1),
+                PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 1),
                 IBehaviorEvaluator { entity1: EntityMob? ->
                     for (other in entity.level!!.getCollidingEntities(
                         entity.getBoundingBox().grow(7.0, 2.0, 7.0)

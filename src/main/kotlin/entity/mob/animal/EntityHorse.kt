@@ -37,6 +37,7 @@ import org.chorus_oss.chorus.event.block.FarmLandDecayEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityFallEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.HorseInventory
 import org.chorus_oss.chorus.inventory.InventoryHolder
 import org.chorus_oss.chorus.item.Item
@@ -49,12 +50,14 @@ import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.AddActorPacket
-import org.chorus_oss.chorus.network.protocol.DataPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
-import org.chorus_oss.chorus.network.protocol.types.EntityLink
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.ActorLink
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
@@ -207,7 +210,7 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
                 Behavior(
                     AnimalGrowExecutor(),  //todo：Growth rate
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.ENTITY_SPAWN_TIME, 20 * 60 * 20, Int.MAX_VALUE),
+                        PassByTimeEvaluator(CoreMemoryTypes.ENTITY_SPAWN_TIME, 20 * 60 * 20, Int.MAX_VALUE),
                         IBehaviorEvaluator { entity: EntityMob -> entity is EntityAnimal && entity.isBaby() }
                     ),
                     1, 1, 1200
@@ -216,11 +219,11 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
             setOf<IBehavior>(
                 Behavior(
                     TameHorseExecutor(0.4f, 12, 40, true, 100, true, 10, 35), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.RIDER_NAME),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.RIDER_NAME),
                         IBehaviorEvaluator { e: EntityMob? -> !this.hasOwner(false) }
                     ), 4, 1),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     1,
                     1,
@@ -375,13 +378,13 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
     }
 
     override fun mountEntity(entity: Entity): Boolean {
-        this.memoryStorage.set(CoreMemoryTypes.RIDER_NAME, entity.getEntityName())
-        super.mountEntity(entity, EntityLink.Type.RIDER)
+        this.memoryStorage[CoreMemoryTypes.RIDER_NAME] = entity.getEntityName()
+        super.mountEntity(entity, ActorLink.Companion.Type.Rider)
         return true
     }
 
     override fun dismountEntity(entity: Entity): Boolean {
-        this.memoryStorage.clear(CoreMemoryTypes.Companion.RIDER_NAME)
+        this.memoryStorage.clear(CoreMemoryTypes.RIDER_NAME)
         return super.dismountEntity(entity)
     }
 
@@ -390,7 +393,7 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
     }
 
     fun getRider(): Entity? {
-        val name = memoryStorage.get<String>(CoreMemoryTypes.Companion.RIDER_NAME)
+        val name = memoryStorage.get<String>(CoreMemoryTypes.RIDER_NAME)
         return if (name != null) {
             Server.instance.getPlayerExact(name)
         } else null //todo other entity
@@ -496,26 +499,33 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
         return attributes
     }
 
-    override fun createAddEntityPacket(): DataPacket {
-        return AddActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
+    override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
-            position = this.position.asVector3f().add(0f, this.getBaseOffset(), 0f),
-            velocity = this.motion.asVector3f(),
-            rotation = this.rotation.asVector2f(),
-            yHeadRotation = this.rotation.yaw.toFloat(),
-            yBodyRotation = this.rotation.yaw.toFloat(),
-            attributeList = this.attributes.values.toList(),
-            actorData = this.entityDataMap,
-            syncedProperties = this.propertySyncData(),
+            position = org.chorus_oss.protocol.types.Vector3f(
+                this.position.add(
+                    0.0,
+                    this.getBaseOffset().toDouble(),
+                    0.0
+                )
+            ),
+            velocity = org.chorus_oss.protocol.types.Vector3f(this.motion),
+            rotation = org.chorus_oss.protocol.types.Vector2f(this.rotation),
+            headYaw = this.rotation.yaw.toFloat(),
+            bodyYaw = this.rotation.yaw.toFloat(),
+            attributes = this.attributes.values.map(AttributeValue::invoke),
+            actorData = ActorDataMap(this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
             actorLinks = List(passengers.size) { i ->
-                EntityLink(
-                    this.getRuntimeID(),
-                    passengers[i].getRuntimeID(),
-                    if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                ActorLink(
+                    riddenActorUniqueID = this.uniqueId,
+                    riderActorUniqueID = passengers[i].uniqueId,
+                    type = if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                     immediate = false,
-                    riderInitiated = false
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f
                 )
             }
         )

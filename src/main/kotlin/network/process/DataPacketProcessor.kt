@@ -1,8 +1,7 @@
 package org.chorus_oss.chorus.network.process
 
 import org.chorus_oss.chorus.Player
-import org.chorus_oss.chorus.network.protocol.DataPacket
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
+import org.chorus_oss.chorus.network.DataPacket
 
 /**
  * A DataPacketProcessor is used to handle a specific type of DataPacket. <br></br>
@@ -15,7 +14,4 @@ abstract class DataPacketProcessor<T : DataPacket> {
     abstract fun handle(player: Player, pk: T)
 
     abstract val packetId: Int
-
-    val protocol: Int
-        get() = ProtocolInfo.PROTOCOL_VERSION
 }

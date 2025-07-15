@@ -3,28 +3,29 @@ package org.chorus_oss.chorus.inventory.request
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.inventory.CraftItemEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.toItem
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.AutoCraftRecipeAction
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ConsumeAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
-import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
-import org.chorus_oss.chorus.recipe.descriptor.ItemTagDescriptor
 import org.chorus_oss.chorus.registry.Registries
+import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.types.item.desciptor.DefaultItemDescriptor
+import org.chorus_oss.protocol.types.item.desciptor.ItemTagItemDescriptor
+import org.chorus_oss.protocol.types.itemstack.request.action.AutoCraftRecipeRequestAction
 
 
-class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipeAction> {
+class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipeRequestAction> {
     override val type: ItemStackRequestActionType
         get() = ItemStackRequestActionType.CRAFT_RECIPE_AUTO
 
     override fun handle(
-        action: AutoCraftRecipeAction,
+        action: AutoCraftRecipeRequestAction,
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {
-        val recipe = Registries.RECIPE.getRecipeByNetworkId(action.recipeNetworkId)
+        val recipe = Registries.RECIPE.getRecipeByNetworkId(action.recipeNetworkId.toInt())
 
-        val eventItems = action.ingredients.map { it.toItem() }.toTypedArray()
+        val eventItems = action.ingredients.map { it.descriptor.toItem() }.toTypedArray()
 
         val craftItemEvent = CraftItemEvent(player, eventItems, recipe, 1)
         Server.instance.pluginManager.callEvent(craftItemEvent)
@@ -36,10 +37,12 @@ class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipe
         for (clientInputItem in eventItems) {
             for (serverExpect in action.ingredients) {
                 var match = false
-                if (serverExpect is ItemTagDescriptor) {
-                    match = serverExpect.match(clientInputItem)
-                } else if (serverExpect is DefaultDescriptor) {
-                    match = serverExpect.match(clientInputItem)
+
+                val descriptor = serverExpect.descriptor
+                when (descriptor) {
+                    is ItemTagItemDescriptor -> match = ItemTags.getTagSet(clientInputItem.id).contains(descriptor.tag)
+                    is DefaultItemDescriptor -> match =
+                        clientInputItem.getNetId() == descriptor.networkID.toInt() && clientInputItem.meta == descriptor.metadataValue?.toInt()
                 }
                 if (match) {
                     success++
@@ -59,7 +62,7 @@ class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipe
             return context.error()
         } else {
             context.put(CraftRecipeActionProcessor.Companion.RECIPE_DATA_KEY, recipe)
-            val consumeActions: List<ConsumeAction> = CraftRecipeActionProcessor.Companion.findAllConsumeActions(
+            val consumeActions = CraftRecipeActionProcessor.Companion.findAllConsumeActions(
                 context.itemStackRequest.actions,
                 context.currentActionIndex + 1
             )

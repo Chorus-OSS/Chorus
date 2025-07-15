@@ -35,7 +35,8 @@ import java.util.function.Predicate
 import kotlin.math.pow
 
 
-abstract class Block(blockState: BlockState) : Locator(0.0, 0.0, 0.0, Server.instance.defaultLevel!!), AxisAlignedBB, IVector3, Loggable {
+abstract class Block(blockState: BlockState) : Locator(0.0, 0.0, 0.0, Server.instance.defaultLevel!!), AxisAlignedBB,
+    IVector3, Loggable {
 
     var color: BlockColor = VANILLA_BLOCK_COLOR_MAP[blockState.blockStateHash().toLong()] ?: BlockColor.VOID_BLOCK_COLOR
 
@@ -1263,5 +1264,18 @@ abstract class Block(blockState: BlockState) : Locator(0.0, 0.0, 0.0, Server.ins
                 return true
             }
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Block
+
+        if (this.blockState != other.blockState) return false
+        if (this.position != other.position) return false
+        if (this.level != other.level) return false
+
+        return true
     }
 }

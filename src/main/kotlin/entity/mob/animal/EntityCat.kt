@@ -72,8 +72,8 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE),
                         IBehaviorEvaluator { entity: EntityMob? -> this.hasOwner() }
                     ),
                     1, 1
@@ -82,15 +82,15 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                     IBehaviorExecutor { entity: EntityMob? ->
                         if (this.hasOwner(false)) return@IBehaviorExecutor false
                         val storage = memoryStorage
-                        if (storage.notEmpty(CoreMemoryTypes.Companion.ATTACK_TARGET)) return@IBehaviorExecutor false
+                        if (storage.notEmpty(CoreMemoryTypes.ATTACK_TARGET)) return@IBehaviorExecutor false
                         var attackTarget: Entity? = null
                         //已驯服为家猫就不攻击下述动物反之未驯服为流浪猫攻击下述动物
                         //攻击最近的小海龟，兔子
                         if (storage.notEmpty(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET) && storage[CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET]!!.isAlive()
                         ) {
-                            attackTarget = storage.get<Entity>(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET)
+                            attackTarget = storage.get<Entity>(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET)
                         }
-                        storage.set(CoreMemoryTypes.Companion.ATTACK_TARGET, attackTarget)
+                        storage.set(CoreMemoryTypes.ATTACK_TARGET, attackTarget)
                         false
                     },
                     { entity: EntityMob? -> true }, 20
@@ -107,13 +107,13 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                     player.isSleeping()
                 }, 7),  //攻击仇恨目标 优先级6
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.35f, 15, true, 10),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.35f, 15, true, 10),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     6
                 ),  //猫咪繁殖 优先级5
                 Behavior(
                     EntityBreedingExecutor(EntityCat::class.java, 8, 100, 0.35f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     5
                 ),  //猫咪向主人移动 优先级4
                 Behavior(EntityMoveToOwnerExecutor(0.35f, true, 15), IBehaviorEvaluator { entity: EntityMob ->
@@ -131,7 +131,7 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                 ),  //猫咪看向食物 优先级3
                 Behavior(
                     LookAtFeedingPlayerExecutor(),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                     3
                 ),  //猫咪随机目标点移动 优先级1
                 Behavior(
@@ -142,7 +142,7 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                     25
                 ),  //猫咪看向目标玩家 优先级1
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ConditionalProbabilityEvaluator(
                         3, 7,
                         { entity: Entity? -> hasOwner(false) }, 10
@@ -157,7 +157,7 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                 NearestPlayerSensor(8.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 15.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
@@ -272,10 +272,10 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
                     this.setHealthSafe(max(maxHealth.toDouble(), (this.health + healable).toDouble()).toFloat())
                 }
                 memoryStorage.set<Int>(
-                    CoreMemoryTypes.Companion.LAST_BE_FEED_TIME,
+                    CoreMemoryTypes.LAST_BE_FEED_TIME,
                     level!!.tick
                 )
-                memoryStorage.set(CoreMemoryTypes.Companion.LAST_FEED_PLAYER, player)
+                memoryStorage.set(CoreMemoryTypes.LAST_FEED_PLAYER, player)
                 return true
             }
         } else if (item.id === ItemID.DYE) {

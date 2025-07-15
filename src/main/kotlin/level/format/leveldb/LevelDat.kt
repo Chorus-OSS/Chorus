@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.level.format.leveldb
 
 import org.chorus_oss.chorus.level.GameRules
 import org.chorus_oss.chorus.math.BlockVector3
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.utils.SemVersion
 
@@ -31,7 +31,7 @@ class LevelDat {
     var multiplayerGame: Boolean = true
     var multiplayerGameIntent: Boolean = false
     var netherScale: Int = 8
-    var networkVersion: Int = ProtocolInfo.PROTOCOL_VERSION
+    var networkVersion: Int = org.chorus_oss.protocol.ProtocolInfo.VERSION
     var platform: Int = 2
     var platformBroadcastIntent: Int = 0
     var randomSeed: Long = 1811906518383890446L

@@ -9,12 +9,12 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.event.entity.EntityInventoryChangeEvent
 import org.chorus_oss.chorus.event.inventory.InventoryCloseEvent
 import org.chorus_oss.chorus.event.inventory.InventoryOpenEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.network.protocol.InventoryContentPacket
-import org.chorus_oss.chorus.network.protocol.InventorySlotPacket
 import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.item.ItemStack
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
 import java.util.function.Consumer
@@ -434,19 +434,24 @@ abstract class BaseInventory(
     }
 
     override fun sendContents(vararg players: Player) {
-        val pk = InventoryContentPacket()
-        pk.slots = List(this.size) { i ->
-            this.getUnclonedItem(i)
-        }
-
         for (player in players) {
             val id = player.getWindowId(this)
             if (id == -1 || !player.spawned) {
                 this.close(player)
                 continue
             }
-            pk.inventoryId = id
-            player.dataPacket(pk)
+
+            val packet = org.chorus_oss.protocol.packets.InventoryContentPacket(
+                windowID = id.toUInt(),
+                content = List(this.size) { ItemStack(this.getUnclonedItem(it)) },
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                    org.chorus_oss.protocol.types.itemstack.ContainerSlotType.AnvilInput,
+                    null
+                ),
+                storageItem = ItemStack(Item.AIR)
+            )
+
+            player.sendPacket(packet)
         }
     }
 
@@ -514,10 +519,7 @@ abstract class BaseInventory(
     }
 
     override fun sendSlot(index: Int, vararg players: Player) {
-        val pk = InventorySlotPacket()
         val slot = toNetworkSlot(index)
-        pk.slot = slot
-        pk.item = this.getUnclonedItem(index)
 
         for (player in players) {
             val id = player.getWindowId(this)
@@ -525,12 +527,21 @@ abstract class BaseInventory(
                 this.close(player)
                 continue
             }
-            pk.inventoryId = id
-            pk.fullContainerName = FullContainerName(
-                this.getSlotType(slot),
-                id
+
+            val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                windowID = id.toUInt(),
+                slot = slot.toUInt(),
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName.invoke(
+                    FullContainerName(
+                        this.getSlotType(slot),
+                        id
+                    )
+                ),
+                storageItem = ItemStack(Item.AIR),
+                newItem = ItemStack(this.getUnclonedItem(index))
             )
-            player.dataPacket(pk)
+
+            player.sendPacket(packet)
         }
     }
 

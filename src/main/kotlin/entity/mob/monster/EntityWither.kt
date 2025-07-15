@@ -29,6 +29,7 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityExplosionPrimeEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Explosion
@@ -39,8 +40,14 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.types.EntityLink
+import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.BossEventPacket
+import org.chorus_oss.protocol.types.ActorLink
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.function.Function
 
 class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), EntityFlyable, EntitySmite {
@@ -59,87 +66,87 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 11, 1),
                 Behavior(
-                    WitherDashExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 1f, true, 64f, 0f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    WitherDashExecutor(CoreMemoryTypes.ATTACK_TARGET, 1f, true, 64f, 0f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                         any(
-                            PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_DASH, 400),
+                            PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_DASH, 400),
                             IBehaviorEvaluator { entity: EntityMob? -> getDataFlag(EntityFlag.CAN_DASH) }
                         ),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET, 65.0, 3.0),
+                        DistanceEvaluator(CoreMemoryTypes.ATTACK_TARGET, 65.0, 3.0),
                         IBehaviorEvaluator { entity: EntityMob? -> health <= maxHealth / 2f },
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 10, 1),
                 Behavior(
-                    WitherDashExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 1f, true, 64f, 0f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    WitherDashExecutor(CoreMemoryTypes.NEAREST_PLAYER, 1f, true, 64f, 0f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                         any(
-                            PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_DASH, 400),
+                            PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_DASH, 400),
                             IBehaviorEvaluator { entity: EntityMob? -> getDataFlag(EntityFlag.CAN_DASH) }
                         ),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 65.0, 3.0),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 65.0, 3.0),
                         IBehaviorEvaluator { entity: EntityMob? -> health <= maxHealth / 2f },
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 9, 1),
                 Behavior(
                     WitherDashExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         1f,
                         true,
                         64f,
                         0f
                     ),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                         any(
-                            PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_DASH, 400),
+                            PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_DASH, 400),
                             IBehaviorEvaluator { entity: EntityMob? -> getDataFlag(EntityFlag.CAN_DASH) }
                         ),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 65.0, 3.0),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 65.0, 3.0),
                         IBehaviorEvaluator { entity: EntityMob? -> health <= maxHealth / 2f },
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ),
                     8,
                     1),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.7f, true, 64f, 16f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET, 65.0, 17.0),
+                    MoveToTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.7f, true, 64f, 16f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.ATTACK_TARGET, 65.0, 17.0),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }), 7, 1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.7f, true, 64f, 16f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 65.0, 17.0),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.7f, true, 64f, 16f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 65.0, 17.0),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 6, 1),
                 Behavior(
                     MoveToTargetExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.7f,
                         true,
                         64f,
                         16f
                     ), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET, 65.0, 17.0),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET, 65.0, 17.0),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 5, 1),
                 Behavior(
-                    WitherShootExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 100),
+                    WitherShootExecutor(CoreMemoryTypes.ATTACK_TARGET), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 100),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 4, 1),
                 Behavior(
-                    WitherShootExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 100),
+                    WitherShootExecutor(CoreMemoryTypes.NEAREST_PLAYER), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 100),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 3, 1),
                 Behavior(
-                    WitherShootExecutor(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_ATTACK_TIME, 100),
+                    WitherShootExecutor(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_ATTACK_TIME, 100),
                         IBehaviorEvaluator { entity: EntityMob? -> age >= 200 }
                     ), 2, 1),
                 Behavior(
@@ -151,7 +158,7 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
                 NearestPlayerSensor(64.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 64.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity -> this.attackTarget(entity) })
             ),
             setOf<IController>(SpaceMoveController(), LookController(true, true), LiftController()),
@@ -224,32 +231,33 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
         return 3.0f
     }
 
-    override fun createAddEntityPacket(): DataPacket {
-        return AddActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
+    override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
-            position = this.position.asVector3f(),
-            velocity = this.motion.asVector3f(),
-            rotation = this.rotation.asVector2f(),
-            yHeadRotation = this.rotation.yaw.toFloat(),
-            yBodyRotation = this.rotation.yaw.toFloat(),
-            attributeList = run {
+            position = org.chorus_oss.protocol.types.Vector3f(this.position),
+            velocity = org.chorus_oss.protocol.types.Vector3f(this.motion),
+            rotation = org.chorus_oss.protocol.types.Vector2f(this.rotation),
+            headYaw = this.rotation.yaw.toFloat(),
+            bodyYaw = this.rotation.yaw.toFloat(),
+            attributes = run {
                 this.attributes.values.add(
                     Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(getMaxDiffHealth().toFloat())
                         .setValue(getMaxDiffHealth().toFloat())
                 )
-                this.attributes.values.toList()
+                this.attributes.values.map(AttributeValue::invoke)
             },
-            actorData = this.entityDataMap,
-            syncedProperties = this.propertySyncData(),
+            actorData = ActorDataMap(this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
             actorLinks = List(passengers.size) { i ->
-                EntityLink(
-                    this.getRuntimeID(),
-                    passengers[i].getRuntimeID(),
-                    if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                ActorLink(
+                    riddenActorUniqueID = this.uniqueId,
+                    riderActorUniqueID = passengers[i].uniqueId,
+                    type = if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                     immediate = false,
-                    riderInitiated = false
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f
                 )
             }
         )
@@ -302,17 +310,17 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
     }
 
     override fun addBossbar(player: Player) {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = this.runtimeId,
-                eventType = BossEventPacket.EventType.ADD,
-                eventData = BossEventPacket.EventType.Companion.AddData(
+                eventType = BossEventPacket.Companion.EventType.Add,
+                eventData = BossEventPacket.Companion.EventType.Companion.AddData(
                     name = this.getEntityName(),
                     filteredName = this.getEntityName(),
-                    color = 6,
-                    darkenScreen = 1,
+                    color = 6u,
+                    darkenScreen = 1u,
                     healthPercent = 0f,
-                    overlay = 0
+                    overlay = 0u
                 )
             )
         )

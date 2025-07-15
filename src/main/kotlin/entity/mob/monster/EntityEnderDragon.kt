@@ -35,6 +35,7 @@ import org.chorus_oss.chorus.entity.item.EntityEnderCrystal
 import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
@@ -43,9 +44,15 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.types.EntityLink
+import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.BossEventPacket
+import org.chorus_oss.protocol.types.ActorLink
+import org.chorus_oss.protocol.types.ActorProperties
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -64,27 +71,27 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
             setOf<IBehavior>(
                 Behavior(
                     PerchingExecutor(),
-                    { entity: EntityMob? -> memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.FORCE_PERCHING) },
+                    { entity: EntityMob? -> memoryStorage.get<Boolean>(CoreMemoryTypes.FORCE_PERCHING) },
                     5,
                     1
                 ),
                 Behavior(
                     StrafeExecutor(), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.LAST_ENDER_CRYSTAL_DESTROY)
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.LAST_ENDER_CRYSTAL_DESTROY)
                     ), 4, 1
                 ),
                 Behavior(
-                    CircleMovementExecutor(CoreMemoryTypes.Companion.STAY_NEARBY, 1f, true, 82, 12, 5), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.STAY_NEARBY),
-                        MemoryCheckEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY)
+                    CircleMovementExecutor(CoreMemoryTypes.STAY_NEARBY, 1f, true, 82, 12, 5), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.STAY_NEARBY),
+                        MemoryCheckEmptyEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY)
                     ), 3, 1
                 ),
                 Behavior(
-                    CircleMovementExecutor(CoreMemoryTypes.Companion.STAY_NEARBY, 1f, true, 48, 8, 4), all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.STAY_NEARBY),
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY)
+                    CircleMovementExecutor(CoreMemoryTypes.STAY_NEARBY, 1f, true, 48, 8, 4), all(
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.STAY_NEARBY),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY)
                     ), 2, 1
                 )
             ),
@@ -92,7 +99,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
                 NearestPlayerSensor(512.0, 0.0, 20),
                 NearestEntitySensor(
                     EntityEnderCrystal::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     192.0,
                     0.0,
                     10
@@ -104,31 +111,32 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         )
     }
 
-    override fun createAddEntityPacket(): DataPacket {
-        return AddActorPacket(
-            targetActorID = this.uniqueId,
-            targetRuntimeID = this.runtimeId,
+    override fun createAddEntityPacket(): Packet {
+        return org.chorus_oss.protocol.packets.AddActorPacket(
+            actorUniqueID = this.uniqueId,
+            actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
-            position = this.position.asVector3f(),
-            velocity = this.motion.asVector3f(),
-            rotation = this.rotation.asVector2f(),
-            yHeadRotation = this.rotation.yaw.toFloat(),
-            yBodyRotation = this.rotation.yaw.toFloat(),
-            attributeList = run {
+            position = org.chorus_oss.protocol.types.Vector3f(this.position),
+            velocity = org.chorus_oss.protocol.types.Vector3f(this.motion),
+            rotation = org.chorus_oss.protocol.types.Vector2f(this.rotation),
+            headYaw = this.rotation.yaw.toFloat(),
+            bodyYaw = this.rotation.yaw.toFloat(),
+            attributes = run {
                 this.attributes.values.add(
                     Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(200f).setValue(200f)
                 )
-                this.attributes.values.toList()
+                this.attributes.values.map(AttributeValue::invoke)
             },
-            actorData = this.entityDataMap,
-            syncedProperties = this.propertySyncData(),
+            actorData = ActorDataMap(this.entityDataMap),
+            actorProperties = ActorProperties(this.propertySyncData()),
             actorLinks = List(passengers.size) { i ->
-                EntityLink(
-                    this.getRuntimeID(),
-                    passengers[i].getRuntimeID(),
-                    if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                ActorLink(
+                    riddenActorUniqueID = this.uniqueId,
+                    riderActorUniqueID = passengers[i].uniqueId,
+                    type = if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                     immediate = false,
-                    riderInitiated = false
+                    riderInitiated = false,
+                    vehicleAngularVelocity = 0f
                 )
             }
         )
@@ -256,7 +264,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         this.diffHandDamage = floatArrayOf(6f, 10f, 15f)
         this.maxHealth = 200
         super.initEntity()
-        memoryStorage[CoreMemoryTypes.Companion.STAY_NEARBY] = Vector3(0.0, 84.0, 0.0)
+        memoryStorage[CoreMemoryTypes.STAY_NEARBY] = Vector3(0.0, 84.0, 0.0)
         isActive = false
         noClip = true
     }
@@ -274,17 +282,17 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
     }
 
     override fun addBossbar(player: Player) {
-        player.dataPacket(
+        player.sendPacket(
             BossEventPacket(
                 targetActorID = this.runtimeId,
-                eventType = BossEventPacket.EventType.ADD,
-                eventData = BossEventPacket.EventType.Companion.AddData(
+                eventType = BossEventPacket.Companion.EventType.Add,
+                eventData = BossEventPacket.Companion.EventType.Companion.AddData(
                     name = this.getEntityName(),
                     filteredName = this.getEntityName(),
-                    color = 5,
+                    color = 5u,
                     healthPercent = health / maxHealth,
-                    darkenScreen = 0,
-                    overlay = 0
+                    darkenScreen = 0u,
+                    overlay = 0u
                 )
             )
         )
@@ -298,9 +306,9 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         SimpleSpaceAStarRouteFinder(blockEvaluator, entity) {
         override fun search(): Boolean {
             val superRes = super.search()
-            if (superRes && memoryStorage.notEmpty(CoreMemoryTypes.Companion.MOVE_TARGET)) {
+            if (superRes && memoryStorage.notEmpty(CoreMemoryTypes.MOVE_TARGET)) {
                 this.nodes = mutableListOf(nodes.first())
-                nodes.add(Node(memoryStorage[CoreMemoryTypes.Companion.MOVE_TARGET]!!, null, 0, 0))
+                nodes.add(Node(memoryStorage[CoreMemoryTypes.MOVE_TARGET]!!, null, 0, 0))
             }
             return superRes
         }

@@ -25,7 +25,7 @@ class LookAtFeedingPlayerExecutor : EntityControl, IBehaviorExecutor {
 
     override fun onInterrupt(entity: EntityMob) {
         entity.isEnablePitch = false
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             entity.setDataFlag(EntityFlag.INTERESTED, false)
         }
         removeLookTarget(entity)
@@ -33,7 +33,7 @@ class LookAtFeedingPlayerExecutor : EntityControl, IBehaviorExecutor {
 
     override fun onStop(entity: EntityMob) {
         entity.isEnablePitch = false
-        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER)) {
+        if (entity.memoryStorage.isEmpty(CoreMemoryTypes.NEAREST_FEEDING_PLAYER)) {
             entity.setDataFlag(EntityFlag.INTERESTED, false)
         }
         removeLookTarget(entity)

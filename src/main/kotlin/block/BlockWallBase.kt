@@ -93,7 +93,7 @@ abstract class BlockWallBase(blockstate: BlockState) : BlockTransparent(blocksta
 
         val above = up(1, 0)
 
-        for (blockFace in BlockFace.Plane.HORIZONTAL) {
+        for (blockFace in BlockFace.Plane.HORIZONTAL_FACES) {
             val side = getSideAtLayer(0, blockFace)
             if (canConnect(side)) {
                 try {
@@ -160,7 +160,7 @@ abstract class BlockWallBase(blockstate: BlockState) : BlockTransparent(blocksta
                 EnumMap<BlockFace, WallConnectionType>(
                     BlockFace::class.java
                 )
-            for (blockFace in BlockFace.Plane.HORIZONTAL) {
+            for (blockFace in BlockFace.Plane.HORIZONTAL_FACES) {
                 val connectionType = getConnectionType(blockFace)
                 if (connectionType != WallConnectionType.NONE) {
                     connections[blockFace] = connectionType

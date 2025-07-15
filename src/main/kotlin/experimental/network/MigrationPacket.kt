@@ -2,10 +2,10 @@ package org.chorus_oss.chorus.experimental.network
 
 import kotlinx.io.Buffer
 import kotlinx.io.readByteArray
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketEncoder
+import org.chorus_oss.chorus.network.PacketHandler
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
-import org.chorus_oss.chorus.network.protocol.DataPacket
-import org.chorus_oss.chorus.network.protocol.PacketEncoder
-import org.chorus_oss.chorus.network.protocol.PacketHandler
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.core.PacketCodec
 import org.chorus_oss.protocol.core.PacketRegistry
@@ -17,7 +17,9 @@ data class MigrationPacket<T : Packet>(val packet: T) : DataPacket(), PacketEnco
 
     override fun pid(): Int = this.packet.id
 
-    override fun handle(handler: PacketHandler) {}
+    override fun handle(handler: PacketHandler) {
+        handler.handle(this)
+    }
 
     override fun encode(byteBuf: HandleByteBuf) {
         val buffer = Buffer()

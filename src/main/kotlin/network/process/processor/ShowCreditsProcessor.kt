@@ -2,13 +2,14 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.ShowCreditsPacket
 
-class ShowCreditsProcessor : DataPacketProcessor<ShowCreditsPacket>() {
-    override fun handle(player: Player, pk: ShowCreditsPacket) {
-        if (pk.status == ShowCreditsPacket.STATUS_END_CREDITS) {
+class ShowCreditsProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protocol.packets.ShowCreditsPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<org.chorus_oss.protocol.packets.ShowCreditsPacket>) {
+        val packet = pk.packet
+
+        if (packet.statusType == org.chorus_oss.protocol.packets.ShowCreditsPacket.Companion.StatusType.End) {
             if (player.player.showingCredits) {
                 player.player.showingCredits = false
                 player.player.teleport(
@@ -19,6 +20,5 @@ class ShowCreditsProcessor : DataPacketProcessor<ShowCreditsPacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.SHOW_CREDITS_PACKET
+    override val packetId: Int = org.chorus_oss.protocol.packets.ShowCreditsPacket.id
 }

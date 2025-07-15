@@ -137,7 +137,7 @@ class EntityTnt @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTag?, pro
     }
 
     override fun explode() {
-        val event: EntityExplosionPrimeEvent = EntityExplosionPrimeEvent(this, 4.0)
+        val event = EntityExplosionPrimeEvent(this, 4.0)
         Server.instance.pluginManager.callEvent(event)
         if (event.cancelled) {
             return

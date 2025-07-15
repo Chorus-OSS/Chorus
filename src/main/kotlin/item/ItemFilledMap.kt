@@ -3,13 +3,12 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.level.Level
-import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.ClientboundMapItemDataPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.chorus.utils.Loggable
-import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -105,14 +104,14 @@ class ItemFilledMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         // don't load the image from NBT if it has been done before.
         val image = if (this.image != null) this.image else loadImageFromNBT()
 
-        val pk = ClientboundMapItemDataPacket(
+        val pk = org.chorus_oss.protocol.packets.ClientboundMapItemDataPacket(
             mapID = mapId,
-            typeFlags = setOf(ClientboundMapItemDataPacket.Type.TEXTURE_UPDATE),
-            mapOrigin = BlockVector3(),
+            typeFlags = org.chorus_oss.protocol.packets.ClientboundMapItemDataPacket.Companion.Type.TextureUpdate.bit,
+            mapOrigin = BlockPos(0, 0, 0),
             isLockedMap = false,
             dimension = 0,
             scale = (scale - 1).toByte(),
-            textureUpdateData = ClientboundMapItemDataPacket.TextureUpdateData(
+            textureUpdateData = org.chorus_oss.protocol.packets.ClientboundMapItemDataPacket.Companion.TextureUpdateData(
                 textureWidth = 128,
                 textureHeight = 128,
                 xTexCoordinate = 0,
@@ -122,7 +121,13 @@ class ItemFilledMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
                         List(128 * 128) { i ->
                             val x = i and 127
                             val y = i shr 7
-                            Utils.toABGR(image.getRGB(x, y)).toInt()
+                            val argb = image.getRGB(x, y)
+                            Color(
+                                a = (argb ushr 24).toByte(),
+                                r = (argb ushr 16).toByte(),
+                                g = (argb ushr 8).toByte(),
+                                b = (argb ushr 0).toByte(),
+                            )
                         }
                     }
 
@@ -131,10 +136,10 @@ class ItemFilledMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
             )
         )
 
-        player.dataPacket(pk)
+        player.sendPacket(pk)
         player.level!!.scheduler.scheduleDelayedTask(
             InternalPlugin.INSTANCE,
-            { player.dataPacket(pk) }, 20
+            { player.sendPacket(pk) }, 20
         )
     }
 

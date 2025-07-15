@@ -1,10 +1,9 @@
 package org.chorus_oss.chorus.inventory.request
 
 import org.chorus_oss.chorus.Player
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestAction
 import org.chorus_oss.chorus.network.protocol.types.itemstack.request.action.ItemStackRequestActionType
 
-interface ItemStackRequestActionProcessor<T : ItemStackRequestAction?> {
+interface ItemStackRequestActionProcessor<T : org.chorus_oss.protocol.types.itemstack.request.action.ItemStackRequestAction> {
     val type: ItemStackRequestActionType
 
     fun handle(action: T, player: Player, context: ItemStackRequestContext): ActionResponse?

@@ -4,7 +4,6 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.item.*
 import org.chorus_oss.chorus.item.customitem.CustomItem
 import org.chorus_oss.chorus.item.customitem.CustomItemDefinition
-import org.chorus_oss.chorus.item.ItemHarnessBlue
 import org.chorus_oss.chorus.nbt.NBTIO.readCompressed
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.plugin.Plugin
@@ -555,6 +554,7 @@ class ItemRegistry : ItemID, IRegistry<String, Item?, KClass<out Item>> {
             register(ItemID.HARNESS_RED, ItemHarnessRed::class)
             register(ItemID.HARNESS_WHITE, ItemHarnessWhite::class)
             register(ItemID.HARNESS_YELLOW, ItemHarnessYellow::class)
+            register(ItemID.MUSIC_DISC_LAVA_CHICKEN, ItemMusicDiscLavaChicken::class)
             registerBlockItem()
         } catch (e: RegisterException) {
             throw RuntimeException(e)

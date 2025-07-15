@@ -4,12 +4,12 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.inventory.CraftingTableInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.inventory.InventoryHolder
-import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.itemstack.ContainerSlotType
 
 object NetworkMapping {
     fun getInventory(player: Player, containerSlotType: ContainerSlotType): Inventory {
         return when (containerSlotType) {
-            ContainerSlotType.HORSE_EQUIP -> {
+            ContainerSlotType.HorseEquip -> {
                 val riding = player.getRiding()
                 if (riding is InventoryHolder) {
                     riding.inventory
@@ -18,12 +18,47 @@ object NetworkMapping {
                 }
             }
 
-            ContainerSlotType.CREATED_OUTPUT -> player.creativeOutputInventory
-            ContainerSlotType.CURSOR -> player.cursorInventory
-            ContainerSlotType.INVENTORY, ContainerSlotType.HOTBAR, ContainerSlotType.HOTBAR_AND_INVENTORY -> player.inventory
-            ContainerSlotType.ARMOR -> player.inventory.armorInventory!!
-            ContainerSlotType.OFFHAND -> player.offhandInventory
-            ContainerSlotType.BEACON_PAYMENT, ContainerSlotType.TRADE2_INGREDIENT_1, ContainerSlotType.TRADE2_INGREDIENT_2, ContainerSlotType.TRADE2_RESULT, ContainerSlotType.LOOM_DYE, ContainerSlotType.LOOM_MATERIAL, ContainerSlotType.LOOM_INPUT, ContainerSlotType.LOOM_RESULT, ContainerSlotType.BARREL, ContainerSlotType.BREWING_RESULT, ContainerSlotType.BREWING_FUEL, ContainerSlotType.BREWING_INPUT, ContainerSlotType.FURNACE_FUEL, ContainerSlotType.FURNACE_INGREDIENT, ContainerSlotType.FURNACE_RESULT, ContainerSlotType.SMOKER_INGREDIENT, ContainerSlotType.BLAST_FURNACE_INGREDIENT, ContainerSlotType.ENCHANTING_INPUT, ContainerSlotType.ENCHANTING_MATERIAL, ContainerSlotType.SMITHING_TABLE_TEMPLATE, ContainerSlotType.SMITHING_TABLE_INPUT, ContainerSlotType.SMITHING_TABLE_MATERIAL, ContainerSlotType.SMITHING_TABLE_RESULT, ContainerSlotType.ANVIL_INPUT, ContainerSlotType.ANVIL_MATERIAL, ContainerSlotType.ANVIL_RESULT, ContainerSlotType.STONECUTTER_INPUT, ContainerSlotType.STONECUTTER_RESULT, ContainerSlotType.GRINDSTONE_ADDITIONAL, ContainerSlotType.GRINDSTONE_INPUT, ContainerSlotType.GRINDSTONE_RESULT, ContainerSlotType.CARTOGRAPHY_INPUT, ContainerSlotType.CARTOGRAPHY_ADDITIONAL, ContainerSlotType.CARTOGRAPHY_RESULT, ContainerSlotType.LEVEL_ENTITY, ContainerSlotType.SHULKER_BOX -> {
+            ContainerSlotType.CreatedOutput -> player.creativeOutputInventory
+            ContainerSlotType.Cursor -> player.cursorInventory
+            ContainerSlotType.Inventory, ContainerSlotType.Hotbar, ContainerSlotType.HotbarAndInventory -> player.inventory
+            ContainerSlotType.Armor -> player.inventory.armorInventory!!
+            ContainerSlotType.Offhand -> player.offhandInventory
+            ContainerSlotType.BeaconPayment,
+            ContainerSlotType.Trade2Ingredient1,
+            ContainerSlotType.Trade2Ingredient2,
+            ContainerSlotType.Trade2Result,
+            ContainerSlotType.LoomDye,
+            ContainerSlotType.LoomMaterial,
+            ContainerSlotType.LoomInput,
+            ContainerSlotType.LoomResult,
+            ContainerSlotType.Barrel,
+            ContainerSlotType.BrewingResult,
+            ContainerSlotType.BrewingFuel,
+            ContainerSlotType.BrewingInput,
+            ContainerSlotType.FurnaceFuel,
+            ContainerSlotType.FurnaceIngredient,
+            ContainerSlotType.FurnaceResult,
+            ContainerSlotType.SmokerIngredient,
+            ContainerSlotType.BlastFurnaceIngredient,
+            ContainerSlotType.EnchantingInput,
+            ContainerSlotType.EnchantingMaterial,
+            ContainerSlotType.SmithingTableTemplate,
+            ContainerSlotType.SmithingTableInput,
+            ContainerSlotType.SmithingTableMaterial,
+            ContainerSlotType.SmithingTableResult,
+            ContainerSlotType.AnvilInput,
+            ContainerSlotType.AnvilMaterial,
+            ContainerSlotType.AnvilResult,
+            ContainerSlotType.StonecutterInput,
+            ContainerSlotType.StonecutterResult,
+            ContainerSlotType.GrindstoneAdditional,
+            ContainerSlotType.GrindstoneInput,
+            ContainerSlotType.GrindstoneResult,
+            ContainerSlotType.CartographyInput,
+            ContainerSlotType.CartographyAdditional,
+            ContainerSlotType.CartographyResult,
+            ContainerSlotType.LevelEntity,
+            ContainerSlotType.ShulkerBox -> {
                 if (player.enderChestOpen) {
                     player.enderChestInventory
                 } else if (player.topWindow.isPresent) {
@@ -33,7 +68,7 @@ object NetworkMapping {
                 }
             }
 
-            ContainerSlotType.CRAFTING_INPUT -> {
+            ContainerSlotType.CraftingInput -> {
                 if (player.topWindow.isPresent && player.topWindow.get() is CraftingTableInventory) {
                     player.topWindow.get()
                 } else {

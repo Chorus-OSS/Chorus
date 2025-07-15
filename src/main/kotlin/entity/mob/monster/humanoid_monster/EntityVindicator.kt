@@ -56,32 +56,32 @@ class EntityVindicator(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(chunk,
                     ), RandomSoundEvaluator(), 7, 1
                 ),
                 Behavior(
-                    VindicatorMeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.5f, 40, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    VindicatorMeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.5f, 40, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     4,
                     1
                 ),
                 Behavior(
-                    VindicatorMeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.5f, 40, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    VindicatorMeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.5f, 40, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     3,
                     1
                 ),
                 Behavior(
                     VindicatorMeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.5f,
                         40,
                         true,
                         30
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.5f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
             setOf<ISensor>(
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
@@ -163,14 +163,14 @@ class EntityVindicator(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(chunk,
             )
             entity.level!!.entities.values.filter { entity1: Entity ->
                 entity1 is EntityPiglin && entity1.position.distance(entity.position) < 16 && entity1.memoryStorage.isEmpty(
-                    CoreMemoryTypes.Companion.ATTACK_TARGET
+                    CoreMemoryTypes.ATTACK_TARGET
                 )
             }.forEach { entity1: Entity ->
-                (entity1 as EntityPiglin).memoryStorage[CoreMemoryTypes.Companion.ATTACK_TARGET] =
-                    entity.memoryStorage[CoreMemoryTypes.Companion.ATTACK_TARGET]
+                (entity1 as EntityPiglin).memoryStorage[CoreMemoryTypes.ATTACK_TARGET] =
+                    entity.memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
             }
-            if (entity.memoryStorage.get<Entity>(CoreMemoryTypes.Companion.ATTACK_TARGET) is EntityHoglin) {
-                entity.memoryStorage.set<Int>(CoreMemoryTypes.Companion.LAST_HOGLIN_ATTACK_TIME, entity.level!!.tick)
+            if (entity.memoryStorage.get<Entity>(CoreMemoryTypes.ATTACK_TARGET) is EntityHoglin) {
+                entity.memoryStorage.set<Int>(CoreMemoryTypes.LAST_HOGLIN_ATTACK_TIME, entity.level!!.tick)
             }
         }
 

@@ -1,5 +1,7 @@
 package org.chorus_oss.chorus.network.protocol
 
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.network.protocol.types.MaterialReducerDataEntry
 import org.chorus_oss.chorus.network.protocol.types.RecipeUnlockingRequirement
@@ -204,10 +206,6 @@ data class CraftingDataPacket(
 
     override fun pid(): Int {
         return ProtocolInfo.CRAFTING_DATA_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
     }
 
     companion object {

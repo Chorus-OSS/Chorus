@@ -57,8 +57,8 @@ class EntityIronGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.2f, 40, true, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.2f, 40, true, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                         not(
                             any(
                                 IBehaviorEvaluator { Server.instance.getDifficulty() == 0 },
@@ -71,8 +71,8 @@ class EntityIronGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
                                 )))
                     ), 3, 1),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 0.2f, 40, true, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 0.2f, 40, true, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
                         IBehaviorEvaluator {
                             attackTarget(
                                 memoryStorage[CoreMemoryTypes.NEAREST_SHARED_ENTITY]!!
@@ -86,7 +86,7 @@ class EntityIronGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
             setOf<ISensor>(
                 NearestEntitySensor(
                     EntityMonster::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     16.0,
                     0.0
                 )

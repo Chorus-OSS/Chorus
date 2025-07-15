@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.BossEventPacket
 
 abstract class EntityBoss(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt) {
     protected var blockBreakSound: Sound? = null
@@ -15,10 +14,10 @@ abstract class EntityBoss(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chun
     override fun setHealthSafe(health: Float) {
         super.setHealthSafe(health)
         Server.broadcastPacket(
-            viewers.values, BossEventPacket(
+            viewers.values, org.chorus_oss.protocol.packets.BossEventPacket(
                 targetActorID = this.runtimeId,
-                eventType = BossEventPacket.EventType.UPDATE_PERCENT,
-                eventData = BossEventPacket.EventType.Companion.UpdatePercentData(
+                eventType = org.chorus_oss.protocol.packets.BossEventPacket.Companion.EventType.UpdatePercent,
+                eventData = org.chorus_oss.protocol.packets.BossEventPacket.Companion.EventType.Companion.UpdatePercentData(
                     healthPercent = health / maxHealth
                 )
             )

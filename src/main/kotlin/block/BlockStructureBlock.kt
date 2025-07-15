@@ -2,12 +2,12 @@ package org.chorus_oss.chorus.block
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
-import org.chorus_oss.chorus.block.property.enums.StructureBlockType
 import org.chorus_oss.chorus.blockentity.BlockEntityID
 import org.chorus_oss.chorus.blockentity.BlockEntityStructBlock
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
+import org.chorus_oss.protocol.types.structure.StructureBlockType
 
 class BlockStructureBlock @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
     BlockSolid(blockstate), BlockEntityHolder<BlockEntityStructBlock> {

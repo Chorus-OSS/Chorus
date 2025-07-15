@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.level.particle
 
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 
 class DestroyBlockParticle(pos: Vector3, block: Block) : Particle(pos.x, pos.y, pos.z) {

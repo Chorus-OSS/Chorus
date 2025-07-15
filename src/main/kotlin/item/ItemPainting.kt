@@ -39,7 +39,7 @@ class ItemPainting @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
 
         val chunk = level.getChunk(block.x.toInt() shr 4, block.z.toInt() shr 4)
 
-        if (chunk == null || target.isTransparent || face.horizontalIndex == -1 || block.isSolid) {
+        if (target.isTransparent || face.horizontalIndex == -1 || block.isSolid) {
             return false
         }
 

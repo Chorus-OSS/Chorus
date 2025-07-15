@@ -44,20 +44,20 @@ class EntityBlaze(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt),
             setOf<IBehavior>(
                 Behavior(PlaySoundExecutor(Sound.MOB_BLAZE_BREATHE), RandomSoundEvaluator(), 5, 1),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 1, false, 30), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
-                        DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER, 1.0)
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 1, false, 30), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
+                        DistanceEvaluator(CoreMemoryTypes.NEAREST_PLAYER, 1.0)
                     ), 4, 1
                 ),
                 Behavior(
-                    BlazeShootExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 15, true, 100, 40),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    BlazeShootExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 15, true, 100, 40),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     3,
                     1
                 ),
                 Behavior(
-                    BlazeShootExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 15, true, 100, 40),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    BlazeShootExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 15, true, 100, 40),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     2,
                     1
                 ),

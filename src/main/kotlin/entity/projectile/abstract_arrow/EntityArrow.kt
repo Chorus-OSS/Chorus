@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.entity.data.EntityFlag
-import org.chorus_oss.chorus.entity.projectile.EntityProjectile
 import org.chorus_oss.chorus.item.ItemArrow
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk

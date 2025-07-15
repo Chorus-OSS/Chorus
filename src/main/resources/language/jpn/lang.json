@@ -1034,7 +1034,6 @@
   "chorus.server.defaultGameMode": "デフォルトゲームタイプ: {%0}",
   "chorus.server.info": "このサーバーは{%0}のバージョン{%1} (API {%2})で動作しています",
   "chorus.server.info.extended": "このサーバーが実行している{%0}のバージョンは{%1} Minecraft BE {%3}用実装APIバージョン{%2}(プロトコルバージョン{%4})です",
-  "chorus.server.license": "PowerNukkitXはLGPLライセンスに基づき配布されています",
   "chorus.server.networkError": "[Network] {%1}によって{%0}のインターフェイスが停止しました",
   "chorus.server.networkStart": "{%0}:{%1}上でサーバーを開始しています",
   "chorus.server.query.info": "クエリポートを設定: {%0}",

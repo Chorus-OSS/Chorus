@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.recipe
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemPotion
 import org.chorus_oss.chorus.registry.RecipeRegistry
-import java.util.List
 
 class ContainerRecipe(recipeId: String?, input: Item, ingredient: Item, output: Item) :
     MixRecipe(

@@ -1,6 +1,9 @@
 package org.chorus_oss.chorus.form
 
-import org.chorus_oss.chorus.*
+import org.chorus_oss.chorus.GameMockExtension
+import org.chorus_oss.chorus.TestEventHandler
+import org.chorus_oss.chorus.TestPlayer
+import org.chorus_oss.chorus.TestPluginManager
 import org.chorus_oss.chorus.event.player.PlayerFormRespondedEvent
 import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.element.simple.ButtonImage

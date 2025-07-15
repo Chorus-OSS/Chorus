@@ -34,7 +34,7 @@ class BlockTrappedChest @JvmOverloads constructor(blockstate: BlockState = prope
 
         var chest: BlockEntityChest? = null
 
-        for (side in BlockFace.Plane.HORIZONTAL) {
+        for (side in BlockFace.Plane.HORIZONTAL_FACES) {
             if ((blockFace == BlockFace.WEST || blockFace == BlockFace.EAST) && (side == BlockFace.WEST || side == BlockFace.EAST)) {
                 continue
             } else if ((blockFace == BlockFace.NORTH || blockFace == BlockFace.SOUTH) && (side == BlockFace.NORTH || side == BlockFace.SOUTH)) {

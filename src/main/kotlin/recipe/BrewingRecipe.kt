@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.recipe
 
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.registry.RecipeRegistry
-import java.util.List
 
 
 class BrewingRecipe(recipeId: String?, input: Item, ingredient: Item, output: Item) :

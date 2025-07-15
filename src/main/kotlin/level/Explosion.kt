@@ -28,6 +28,7 @@ import org.chorus_oss.chorus.utils.Hash
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.roundToInt
 
 class Explosion protected constructor(private val source: Locator, size: Double, private val what: Any) {
     private val RAYS = 16
@@ -39,8 +40,8 @@ class Explosion protected constructor(private val source: Locator, size: Double,
     @JvmField
     var fireChance: Double = 0.0
 
-    private var affectedBlocks: MutableSet<Block> = LinkedHashSet()
-    private var fireIgnitions: MutableSet<Block> = LinkedHashSet()
+    private var affectedBlocks: MutableSet<Block> = mutableSetOf()
+    private var fireIgnitions: MutableSet<Block> = mutableSetOf()
     private var doesDamage = true
 
     constructor(center: Locator, size: Double, what: Entity) : this(center, size, what as Any)
@@ -356,9 +357,7 @@ class Explosion protected constructor(private val source: Locator, size: Double,
         }
         level.addSound(this.source.position, Sound.RANDOM_EXPLODE)
         level.addLevelEvent(
-            this.source.position, LevelEventPacket.EVENT_PARTICLE_EXPLOSION, Math.round(
-                size.toFloat()
-            )
+            this.source.position, LevelEventPacket.EVENT_PARTICLE_EXPLOSION, size.toFloat().roundToInt()
         )
         level.addLevelEvent(this.source.position, LevelEventPacket.EVENT_PARTICLE_BLOCK_EXPLOSION, data)
 

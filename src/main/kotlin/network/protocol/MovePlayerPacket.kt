@@ -1,5 +1,8 @@
 package org.chorus_oss.chorus.network.protocol
 
+import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.PacketDecoder
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 
 class MovePlayerPacket : DataPacket() {
@@ -54,11 +57,7 @@ class MovePlayerPacket : DataPacket() {
     }
 
     override fun pid(): Int {
-        return ProtocolInfo.Companion.MOVE_PLAYER_PACKET
-    }
-
-    override fun handle(handler: PacketHandler) {
-        handler.handle(this)
+        return ProtocolInfo.MOVE_PLAYER_PACKET
     }
 
     companion object : PacketDecoder<MovePlayerPacket> {

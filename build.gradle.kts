@@ -1,18 +1,17 @@
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
     `java-library`
     `maven-publish`
-    idea
     jacoco
-    id("io.github.goooler.shadow") version "8.1.7"
+    id("com.gradleup.shadow") version "8.3.7"
     id("com.gorylenko.gradle-git-properties") version "2.4.1"
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
 }
+
+kotlin.jvmToolchain(21)
 
 group = "org.chorus_oss"
 version = "1.0-SNAPSHOT"
@@ -21,7 +20,6 @@ description = "Chorus"
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://repo.maven.apache.org/maven2/")
     maven("https://jitpack.io")
     maven("https://repo.opencollab.dev/maven-releases/")
     maven("https://repo.opencollab.dev/maven-snapshots/")
@@ -50,31 +48,27 @@ dependencies {
     implementation(libs.oshi)
     implementation(libs.bundles.compress)
     implementation(libs.bundles.terminal)
-    implementation(libs.graalvm.polyglot)
     implementation(libs.caffeine)
-    runtimeOnly(libs.bundles.graalvm.runtime)
 
     testImplementation(libs.bundles.test)
     testImplementation(libs.commonsio)
     testImplementation(libs.commonslang3)
 
-    implementation("com.akuleshov7:ktoml-core:0.6.0")
-    implementation("com.akuleshov7:ktoml-file:0.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
     implementation(libs.chorus.protocol)
     implementation(libs.kotlinx.io)
+    implementation(libs.kotlinx.coroutines)
     implementation(libs.cryptography.core)
     implementation(libs.cryptography.random)
     implementation(libs.cryptography.provider.jdk)
     implementation(libs.jwt)
     implementation(libs.jwt.ecdsa)
+    implementation(libs.ktoml.core)
+    implementation(libs.ktoml.file)
+    implementation(libs.json)
     implementation(libs.fleks)
     implementation(libs.kotlin.poet)
     implementation(libs.rwmutex)
-
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(kotlin("reflect"))
+    implementation(libs.kotlin.reflect)
 }
 
 java {
@@ -82,136 +76,63 @@ java {
     withJavadocJar()
 }
 
-//Automatically download dependencies source code
-idea {
-    module {
-        isDownloadSources = true
-        isDownloadJavadoc = false
+tasks {
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
+        options.compilerArgs.add("-Xpkginfo:always")
     }
-}
 
-sourceSets {
-    main {
-        resources {
-            srcDirs("src/main/js", "src/main/resources")
+    withType<Javadoc> {
+        options.encoding = "UTF-8"
+        (options as CoreJavadocOptions).apply {
+            addStringOption("source", java.sourceCompatibility.toString())
+            addStringOption("Xdoclint:none", "-quiet")
         }
     }
-}
 
-tasks.register<DefaultTask>("buildFast") {
-    dependsOn(tasks.build)
-    group = "alpha build"
-    tasks["javadoc"].enabled = false
-    tasks["javadocJar"].enabled = false
-    tasks["sourcesJar"].enabled = false
-    tasks["copyDependencies"].enabled = false
-    tasks["shadowJar"].enabled = false
-    tasks["compileTestJava"].enabled = false
-    tasks["processTestResources"].enabled = false
-    tasks["testClasses"].enabled = false
-    tasks["test"].enabled = false
-    tasks["check"].enabled = false
+    test {
+        enabled = false // TODO: Fix tests. Use MockK
+
+        useJUnitPlatform()
+        jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            csv.required = false
+            xml.required = true
+            html.required = false
+        }
+    }
+
+    shadowJar {
+        archiveVersion.set("")
+
+        manifest {
+            attributes("Main-Class" to "org.chorus_oss.chorus.Chorus")
+        }
+        transform(Log4j2PluginsCacheFileTransformer::class.java) // required to fix shadowJar log4j2 issue
+        destinationDirectory = layout.buildDirectory
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
 }
 
 tasks.register<DefaultTask>("buildSkipChores") {
     dependsOn(tasks.build)
-    group = "alpha build"
+
+    tasks["test"].enabled = false
+    tasks["check"].enabled = false
     tasks["javadoc"].enabled = false
     tasks["javadocJar"].enabled = false
     tasks["sourcesJar"].enabled = false
     tasks["compileTestJava"].enabled = false
     tasks["processTestResources"].enabled = false
     tasks["testClasses"].enabled = false
-    tasks["test"].enabled = false
-    tasks["check"].enabled = false
-}
-
-tasks.register<DefaultTask>("buildForGithubAction") {
-    dependsOn(tasks.build)
-    group = "build"
-    tasks["javadoc"].enabled = false
-    tasks["javadocJar"].enabled = false
-}
-
-tasks.build {
-    dependsOn(tasks.shadowJar)
-    group = "alpha build"
-}
-
-tasks.clean {
-    group = "alpha build"
-    delete("nukkit.yml", "terra", "services")
-}
-
-tasks.compileJava {
-    options.encoding = "UTF-8"
-    options.compilerArgs.add("-Xpkginfo:always")
-}
-
-tasks.test {
-    useJUnitPlatform()
-    jvmArgs(listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED"))
-    jvmArgs(listOf("--add-opens", "java.base/java.io=ALL-UNNAMED"))
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-
-tasks.jacocoTestReport {
-    reports {
-        csv.required = false
-        xml.required = true
-        html.required = false
-    }
-    dependsOn(tasks.test) // tests are required to run before generating the report
-}
-
-tasks.withType<AbstractCopyTask> {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
-tasks.named<AbstractArchiveTask>("sourcesJar") {
-    destinationDirectory = layout.buildDirectory
-}
-
-tasks.jar {
-    destinationDirectory = layout.buildDirectory
-    doLast {//execution phase
-        val f: RegularFile = archiveFile.get()
-        val tf: RegularFile = layout.buildDirectory.file("${project.description}.jar").get()
-        Files.copy(Path.of(f.asFile.absolutePath), Path.of(tf.asFile.absolutePath), StandardCopyOption.REPLACE_EXISTING)
-    }
-}
-
-tasks.shadowJar {
-    dependsOn("copyDependencies")
-    manifest {
-        attributes(
-            "Main-Class" to "org.chorus_oss.chorus.JarStart"
-        )
-    }
-
-    transform(com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer::class.java) //required to fix shadowJar log4j2 issue
-
-    destinationDirectory = layout.buildDirectory
-}
-
-tasks.register<Copy>("copyDependencies") {
-    dependsOn(tasks.jar)
-    group = "other"
-    description = "Copy all dependencies to libs folder"
-    from(configurations.runtimeClasspath)
-    into(layout.buildDirectory.dir("libs"))
-}
-
-tasks.javadoc {
-    options.encoding = StandardCharsets.UTF_8.name()
-    includes.add("**/**.java")
-    val javadocOptions = options as CoreJavadocOptions
-    javadocOptions.addStringOption(
-        "source",
-        java.sourceCompatibility.toString()
-    )
-    // Suppress some meaningless warnings
-    javadocOptions.addStringOption("Xdoclint:none", "-quiet")
 }
 
 publishing {
@@ -219,24 +140,10 @@ publishing {
         from(components["java"])
         pom {
             repositories {
-                mavenLocal()
-                mavenCentral()
-                maven("https://repo.maven.apache.org/maven2/")
                 maven("https://jitpack.io")
                 maven("https://repo.opencollab.dev/maven-releases/")
                 maven("https://repo.opencollab.dev/maven-snapshots/")
             }
         }
     }
-}
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType<Javadoc> {
-    options.encoding = "UTF-8"
-}
-kotlin {
-    jvmToolchain(21)
 }

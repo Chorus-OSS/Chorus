@@ -4,8 +4,8 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.types.biome.BiomeConsolidatedFeatureData
 import org.chorus_oss.protocol.types.biome.BiomeConsolidatedFeaturesData
 
-fun BiomeConsolidatedFeaturesData.Companion.fromNBT(nbt: CompoundTag): BiomeConsolidatedFeaturesData {
+operator fun BiomeConsolidatedFeaturesData.Companion.invoke(nbt: CompoundTag): BiomeConsolidatedFeaturesData {
     return BiomeConsolidatedFeaturesData(
-        features = nbt.getList("features", CompoundTag::class.java).all.map { BiomeConsolidatedFeatureData.fromNBT(it) }
+        features = nbt.getList("features", CompoundTag::class.java).all.map { BiomeConsolidatedFeatureData.invoke(it) }
     )
 }

@@ -13,7 +13,8 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.Faceable
 import java.util.*
 
-class BlockDecoratedPot(blockState: BlockState = properties.defaultState) : BlockFlowable(blockState), Faceable, BlockEntityHolder<BlockEntityDecoratedPot> {
+class BlockDecoratedPot(blockState: BlockState = properties.defaultState) : BlockFlowable(blockState), Faceable,
+    BlockEntityHolder<BlockEntityDecoratedPot> {
     override val name: String
         get() = "Decorated Pot"
 

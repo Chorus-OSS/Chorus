@@ -5,9 +5,10 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.blockentity.BlockEntityStructBlock
 import org.chorus_oss.chorus.event.inventory.InventoryCloseEvent
 import org.chorus_oss.chorus.event.inventory.InventoryOpenEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.network.protocol.ContainerClosePacket
-import org.chorus_oss.chorus.network.protocol.ContainerOpenPacket
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.ContainerType
 
 class StructBlockInventory(override val holder: BlockEntityStructBlock) : Inventory {
     override val viewers: MutableSet<Player> = HashSet()
@@ -109,12 +110,12 @@ class StructBlockInventory(override val holder: BlockEntityStructBlock) : Invent
     override fun onOpen(who: Player) {
         if (who.isOp && who.isCreative) {
             viewers.add(who)
-            who.dataPacket(
-                ContainerOpenPacket(
-                    containerID = who.getWindowId(this),
-                    containerType = type.networkType,
-                    position = holder.vector3.asBlockVector3(),
-                    targetActorID = who.getRuntimeID()
+            who.sendPacket(
+                org.chorus_oss.protocol.packets.ContainerOpenPacket(
+                    containerID = who.getWindowId(this).toByte(),
+                    containerType = ContainerType(type),
+                    position = BlockPos(holder.vector3),
+                    targetActorID = who.getUniqueID()
                 )
             )
         }
@@ -143,10 +144,10 @@ class StructBlockInventory(override val holder: BlockEntityStructBlock) : Invent
 
     override fun onClose(who: Player) {
         val containerId = who.getWindowId(this)
-        who.dataPacket(
-            ContainerClosePacket(
-                containerID = containerId,
-                containerType = type,
+        who.sendPacket(
+            org.chorus_oss.protocol.packets.ContainerClosePacket(
+                containerID = containerId.toByte(),
+                containerType = ContainerType(type),
                 serverInitiatedClose = who.closingWindowId != containerId
             )
         )

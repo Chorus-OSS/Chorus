@@ -1,10 +1,9 @@
 package org.chorus_oss.chorus.inventory.request
 
-import org.chorus_oss.chorus.network.protocol.types.itemstack.request.ItemStackRequest
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 
 
-class ItemStackRequestContext(val itemStackRequest: ItemStackRequest) {
+class ItemStackRequestContext(val itemStackRequest: org.chorus_oss.protocol.types.itemstack.request.ItemStackRequest) {
     var currentActionIndex = 0
     val extraData: MutableMap<String, Any> =
         HashMap()

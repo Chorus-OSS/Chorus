@@ -54,14 +54,14 @@ class EntityBee(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
             setOf<IBehavior>(),
             setOf<IBehavior>(
                 Behavior(
-                    BeeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.7f, 33, true, 20),
+                    BeeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.7f, 33, true, 20),
                     all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                         IBehaviorEvaluator { entity: EntityMob? -> hasSting() }
                     ), 6, 1),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_BLOCK, 0.22f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_BLOCK, 0.22f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK),
                     4,
                     1
                 ),
@@ -108,17 +108,17 @@ class EntityBee(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
     }
 
     fun isAngry(): Boolean {
-        return memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_ANGRY)
+        return memoryStorage.get<Boolean>(CoreMemoryTypes.IS_ANGRY)
     }
 
     fun setAngry(angry: Boolean) {
-        memoryStorage[CoreMemoryTypes.Companion.IS_ANGRY] = angry
+        memoryStorage[CoreMemoryTypes.IS_ANGRY] = angry
         setDataFlag(EntityFlag.ANGRY, angry)
     }
 
     fun setAngry(entity: Entity?) {
         setAngry(true)
-        memoryStorage[CoreMemoryTypes.Companion.ATTACK_TARGET] = entity
+        memoryStorage[CoreMemoryTypes.ATTACK_TARGET] = entity
     }
 
     override fun attack(source: EntityDamageEvent): Boolean {

@@ -9,21 +9,24 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioDatagramChannel
+import kotlinx.io.Buffer
+import kotlinx.serialization.builtins.ByteArraySerializer
 import org.chorus_oss.chorus.GameMockExtension
 import org.chorus_oss.chorus.network.connection.netty.initializer.BedrockChannelInitializer
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
-import org.chorus_oss.chorus.network.protocol.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.RequestNetworkSettingsPacket
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.PacketRegistry
+import org.chorus_oss.protocol.packets.RequestNetworkSettingsPacket
 import org.cloudburstmc.netty.channel.raknet.RakChannelFactory
 import org.cloudburstmc.netty.channel.raknet.RakChildChannel
 import org.cloudburstmc.netty.channel.raknet.RakClientChannel
 import org.cloudburstmc.netty.channel.raknet.RakConstants
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption
 import org.cloudburstmc.netty.channel.raknet.packet.RakMessage
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.extension.ExtendWith
 import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
@@ -48,7 +51,7 @@ class RakNetInterfaceTest {
                         val content = msg.content()
                         val id = content.readUnsignedByte().toInt() //frame id
                         if (id != BedrockChannelInitializer.RAKNET_MINECRAFT_ID) {
-                            RakNetInterfaceTest.log.error("Client receive a Invalid packet for frame ID!")
+                            log.error("Client receive a Invalid packet for frame ID!")
                             System.exit(1)
                         }
 
@@ -58,11 +61,15 @@ class RakNetInterfaceTest {
 
                         //decode to game packet
                         val header = ByteBufVarInt.readUnsignedInt(byteBuf)
-                        assert(header == ProtocolInfo.REQUEST_NETWORK_SETTINGS_PACKET)
-                        val dataPacket = Registries.PACKET_DECODER[header]
-                        dataPacket!!.decode(HandleByteBuf.of(Unpooled.wrappedBuffer(byteBuf)))
-                        val target = dataPacket as RequestNetworkSettingsPacket
-                        assert(target.protocolVersion == ProtocolInfo.PROTOCOL_VERSION)
+                        assert(header == org.chorus_oss.protocol.packets.RequestNetworkSettingsPacket.id)
+                        val dataPacket = PacketRegistry[header]!!
+                        val packet = dataPacket.deserialize(Buffer().apply {
+                            val bytes = ByteArray(byteBuf.readableBytes())
+                            byteBuf.readBytes(bytes)
+                            this.write(bytes)
+                        })
+                        val target = packet as org.chorus_oss.protocol.packets.RequestNetworkSettingsPacket
+                        assert(target.clientProtocol == org.chorus_oss.protocol.ProtocolInfo.VERSION)
                         gameMockExtension.stopNetworkTickLoop()
                     }
                 })
@@ -86,9 +93,9 @@ class RakNetInterfaceTest {
                                 //RequestNetworkSettingsPacket
                                 ByteBufVarInt.writeUnsignedInt(
                                     buf,
-                                    ProtocolInfo.REQUEST_NETWORK_SETTINGS_PACKET
+                                    RequestNetworkSettingsPacket.id
                                 ) //packet header
-                                buf.writeInt(ProtocolInfo.PROTOCOL_VERSION)
+                                buf.writeInt(org.chorus_oss.protocol.ProtocolInfo.VERSION)
                                 //RequestNetworkSettingsPacket
                                 ctx.channel().writeAndFlush(RakMessage(buf))
                             }

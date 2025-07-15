@@ -68,34 +68,34 @@ class EntityGuardian(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
                     true
                 ),
                 Behavior(
-                    FleeFromTargetExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.5f, true, 9f), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 100)
+                    FleeFromTargetExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.5f, true, 9f), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100)
                     ), 4, 1
                 ),
                 Behavior(
-                    GuardianAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 15, true, 60, 40), all(
-                        EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    GuardianAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 15, true, 60, 40), all(
+                        EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                         IBehaviorEvaluator { entity: EntityMob ->
-                            entity.memoryStorage.get(CoreMemoryTypes.Companion.NEAREST_PLAYER) != null && !entity.memoryStorage
-                                .get<Player>(CoreMemoryTypes.Companion.NEAREST_PLAYER)!!.isBlocking()
+                            entity.memoryStorage.get(CoreMemoryTypes.NEAREST_PLAYER) != null && !entity.memoryStorage
+                                .get<Player>(CoreMemoryTypes.NEAREST_PLAYER)!!.isBlocking()
                         },
                         IBehaviorEvaluator { entity: EntityMob ->
-                            entity.memoryStorage.get(CoreMemoryTypes.Companion.NEAREST_PLAYER) != null && level!!.raycastBlocks(
+                            entity.memoryStorage.get(CoreMemoryTypes.NEAREST_PLAYER) != null && level!!.raycastBlocks(
                                 entity.position, entity.memoryStorage
-                                    .get<Player>(CoreMemoryTypes.Companion.NEAREST_PLAYER)!!.position
+                                    .get<Player>(CoreMemoryTypes.NEAREST_PLAYER)!!.position
                             ).stream().allMatch { obj: Block -> obj.isTransparent }
                         }
                     ), 3, 1),
                 Behavior(
                     GuardianAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         15,
                         true,
                         60,
                         40
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(SpaceRandomRoamExecutor(0.36f, 12, 1, 80, false, -1, false, 10), none(), 1, 1)
             ),
@@ -103,7 +103,7 @@ class EntityGuardian(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
                 NearestPlayerSensor(40.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!

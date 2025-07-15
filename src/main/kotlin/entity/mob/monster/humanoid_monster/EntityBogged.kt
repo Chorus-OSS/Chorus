@@ -56,24 +56,24 @@ class EntityBogged(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(chunk, nb
                 Behavior(
                     BowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.ATTACK_TARGET,
+                        CoreMemoryTypes.ATTACK_TARGET,
                         0.3f,
                         15,
                         true,
                         35,
                         20
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), 3, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), 3, 1
                 ),
                 Behavior(
                     BowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.NEAREST_PLAYER,
+                        CoreMemoryTypes.NEAREST_PLAYER,
                         0.3f,
                         15,
                         true,
                         35,
                         20
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),

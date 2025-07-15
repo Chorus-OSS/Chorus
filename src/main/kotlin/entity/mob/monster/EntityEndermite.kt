@@ -42,20 +42,20 @@ class EntityEndermite(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, n
             setOf<IBehavior>(
                 Behavior(PlaySoundExecutor(Sound.MOB_ENDERMITE_SAY), RandomSoundEvaluator(), 6, 1),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 16, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    MeleeAttackExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 16, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     4,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY, 0.3f, 16, true, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_SHARED_ENTITY, 0.3f, 16, true, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SHARED_ENTITY),
                     3,
                     1
                 ),
                 Behavior(
-                    MeleeAttackExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 16, false, 30),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    MeleeAttackExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 16, false, 30),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     2,
                     1
                 ),
@@ -65,13 +65,13 @@ class EntityEndermite(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, n
                 NearestPlayerSensor(16.0, 0.0, 0),
                 NearestEntitySensor(
                     EntityIronGolem::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     16.0,
                     0.0
                 ),
                 NearestEntitySensor(
                     EntityEnderman::class.java,
-                    CoreMemoryTypes.Companion.NEAREST_SHARED_ENTITY,
+                    CoreMemoryTypes.NEAREST_SHARED_ENTITY,
                     16.0,
                     0.0
                 )

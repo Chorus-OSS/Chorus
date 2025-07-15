@@ -181,7 +181,8 @@ class RawText private constructor(base: Component) {
                 return null
             }
             if (entities.isEmpty()) return null
-            val entities_str = entities.stream().map { obj: Entity -> obj.getEntityName() }.collect(Collectors.joining(", "))
+            val entities_str =
+                entities.stream().map { obj: Entity -> obj.getEntityName() }.collect(Collectors.joining(", "))
             val newComponent = Component()
             newComponent.component_text = (entities_str)
             return newComponent

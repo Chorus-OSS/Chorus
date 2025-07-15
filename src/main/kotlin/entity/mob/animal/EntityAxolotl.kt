@@ -53,21 +53,21 @@ class EntityAxolotl(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
                 Behavior(
                     InLoveExecutor(400),
                     all(
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_FEED_TIME, 0, 400),
-                        PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_FEED_TIME, 0, 400),
+                        PassByTimeEvaluator(CoreMemoryTypes.LAST_IN_LOVE_TIME, 6000, Int.MAX_VALUE)
                     ),
                     1, 1
                 ),
                 Behavior(
                     object : IBehaviorExecutor {
                         override fun execute(entity: EntityMob): Boolean {
-                            moveTarget = memoryStorage[CoreMemoryTypes.Companion.NEAREST_BLOCK]?.position
+                            moveTarget = memoryStorage[CoreMemoryTypes.NEAREST_BLOCK]?.position
                             return true
                         }
                     }, all(
-                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK),
+                        MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_BLOCK),
                         IBehaviorEvaluator { entity: EntityMob? -> !isInsideOfWater() },
-                        not(DistanceEvaluator(CoreMemoryTypes.Companion.NEAREST_BLOCK, 9.0))
+                        not(DistanceEvaluator(CoreMemoryTypes.NEAREST_BLOCK, 9.0))
                     ), 1, 1
                 )
             ),
@@ -88,33 +88,33 @@ class EntityAxolotl(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
                 ),
                 Behavior(
                     MeleeAttackExecutor(
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         17,
                         true,
                         30
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 5, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 5, 1
                 ),
                 Behavior(
                     FlatRandomRoamExecutor(0.4f, 12, 40, true, 100, true, 10),
-                    PassByTimeEvaluator(CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME, 0, 100),
+                    PassByTimeEvaluator(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, 0, 100),
                     4,
                     1
                 ),
                 Behavior(
                     EntityBreedingExecutor<EntityAxolotl>(EntityAxolotl::class.java, 16, 100, 0.5f),
-                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.Companion.IS_IN_LOVE) },
+                    { entity: EntityMob -> entity.memoryStorage.get<Boolean>(CoreMemoryTypes.IS_IN_LOVE) },
                     3,
                     1
                 ),
                 Behavior(
-                    MoveToTargetExecutor(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER, 0.4f, true),
-                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.Companion.NEAREST_FEEDING_PLAYER),
+                    MoveToTargetExecutor(CoreMemoryTypes.NEAREST_FEEDING_PLAYER, 0.4f, true),
+                    MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.NEAREST_FEEDING_PLAYER),
                     2,
                     1
                 ),
                 Behavior(
-                    LookAtTargetExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 100),
+                    LookAtTargetExecutor(CoreMemoryTypes.NEAREST_PLAYER, 100),
                     ProbabilityEvaluator(4, 10),
                     1,
                     1,
@@ -134,17 +134,17 @@ class EntityAxolotl(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
                 NearestPlayerSensor(8.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!
                         )
                     }),
-                BlockSensor(BlockFlowingWater::class.java, CoreMemoryTypes.Companion.NEAREST_BLOCK, 16, 5, 10),
+                BlockSensor(BlockFlowingWater::class.java, CoreMemoryTypes.NEAREST_BLOCK, 16, 5, 10),
                 object : ISensor {
                     override fun sense(entity: EntityMob) {
                         if (level!!.tick % 20 == 0) {
-                            val lastAttack = memoryStorage.get<Entity>(CoreMemoryTypes.Companion.LAST_ATTACK_ENTITY)
+                            val lastAttack = memoryStorage.get<Entity>(CoreMemoryTypes.LAST_ATTACK_ENTITY)
                             if (lastAttack != null) {
                                 if (!lastAttack.isAlive()) {
                                     if (lastAttack is EntityMob) {
@@ -163,7 +163,7 @@ class EntityAxolotl(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
                                             }
                                         }
                                     }
-                                    memoryStorage.clear(CoreMemoryTypes.Companion.LAST_ATTACK_ENTITY)
+                                    memoryStorage.clear(CoreMemoryTypes.LAST_ATTACK_ENTITY)
                                 }
                             }
                         }
@@ -248,8 +248,8 @@ class EntityAxolotl(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt)
     }
 
     override fun useBreedingItem(player: Player, item: Item): Boolean {
-        memoryStorage[CoreMemoryTypes.Companion.LAST_FEED_PLAYER] = player
-        memoryStorage[CoreMemoryTypes.Companion.LAST_BE_FEED_TIME] = level!!.tick
+        memoryStorage[CoreMemoryTypes.LAST_FEED_PLAYER] = player
+        memoryStorage[CoreMemoryTypes.LAST_BE_FEED_TIME] = level!!.tick
         sendBreedingAnimation(item)
         return player.inventory.setItemInHand(Item.get(ItemID.WATER_BUCKET))
     }

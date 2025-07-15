@@ -47,7 +47,7 @@ abstract class BlockRedstoneDiode(blockstate: BlockState) : BlockFlowable(blocks
         fz: Double,
         player: Player?
     ): Boolean {
-        if (!isSupportValid(down())) {
+        if (!isSupportValid(block.down())) {
             return false
         }
 

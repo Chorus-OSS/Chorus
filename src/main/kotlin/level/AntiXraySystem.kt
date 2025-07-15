@@ -2,9 +2,9 @@ package org.chorus_oss.chorus.level
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.*
+import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.UpdateBlockPacket
 import org.chorus_oss.chorus.registry.Registries
 
 class AntiXraySystem(private val level: Level) {
@@ -179,7 +179,11 @@ class AntiXraySystem(private val level: Level) {
                 }
             }
         }
-        level.sendBlocks(playerArray, vRidList.toTypedArray(), UpdateBlockPacket.FLAG_ALL)
+        level.sendBlocks(
+            playerArray,
+            vRidList.toTypedArray(),
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+        )
     }
 
     fun deObfuscateBlock(player: Player, face: BlockFace, target: Block) {
@@ -207,7 +211,7 @@ class AntiXraySystem(private val level: Level) {
         level.sendBlocks(
             arrayOf(player),
             vecList.toTypedArray(),
-            UpdateBlockPacket.FLAG_ALL
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
         )
     }
 

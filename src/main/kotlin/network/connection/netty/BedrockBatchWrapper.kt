@@ -5,7 +5,7 @@ import io.netty.util.AbstractReferenceCounted
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.ReferenceCounted
 import io.netty.util.internal.ObjectPool
-import org.chorus_oss.chorus.network.protocol.DataPacket
+import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.types.CompressionAlgorithm
 import java.util.function.Consumer
 

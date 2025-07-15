@@ -4,7 +4,6 @@ import org.chorus_oss.chorus.inventory.InventoryType
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
 import org.chorus_oss.chorus.registry.RecipeRegistry
-import java.util.List
 
 class RepairRecipe(val inventoryType: InventoryType, result: Item, ingredients: Collection<Item>) :
     BaseRecipe(RecipeRegistry.computeRecipeIdWithItem(listOf(result), ingredients, RecipeType.REPAIR)) {

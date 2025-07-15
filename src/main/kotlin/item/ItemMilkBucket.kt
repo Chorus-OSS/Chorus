@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.CompletedUsingItemPacket
 
 class ItemMilkBucket : ItemBucket(ItemID.Companion.MILK_BUCKET) {
     override var damage: Int
@@ -30,7 +29,10 @@ class ItemMilkBucket : ItemBucket(ItemID.Companion.MILK_BUCKET) {
 
         player.removeAllEffects()
 
-        player.completeUsingItem(this.runtimeId.toShort(), CompletedUsingItemPacket.ItemUseMethod.EAT)
+        player.completeUsingItem(
+            this.runtimeId.toShort(),
+            org.chorus_oss.protocol.packets.CompletedUsingItemPacket.Companion.ItemUseMethod.Eat
+        )
 
         if (player.isAdventure || player.isSurvival) {
             --this.count

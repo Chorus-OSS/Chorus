@@ -50,35 +50,35 @@ class EntityPillager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(chunk, n
                 Behavior(
                     CrossBowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.ATTACK_TARGET,
+                        CoreMemoryTypes.ATTACK_TARGET,
                         0.3f,
                         15,
                         true,
                         30,
                         80
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET), 4, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET), 4, 1
                 ),
                 Behavior(
                     CrossBowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.NEAREST_PLAYER,
+                        CoreMemoryTypes.NEAREST_PLAYER,
                         0.3f,
                         15,
                         true,
                         30,
                         80
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER), 3, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER), 3, 1
                 ),
                 Behavior(
                     CrossBowShootExecutor(
                         { this.itemInHand },
-                        CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET,
+                        CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET,
                         0.3f,
                         15,
                         true,
                         30,
                         80
-                    ), EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
+                    ), EntityCheckEvaluator(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET), 2, 1
                 ),
                 Behavior(FlatRandomRoamExecutor(0.3f, 12, 100, false, -1, true, 10), none(), 1, 1)
             ),
@@ -86,7 +86,7 @@ class EntityPillager(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(chunk, n
                 NearestPlayerSensor(40.0, 0.0, 20),
                 NearestTargetEntitySensor<Entity>(
                     0.0, 16.0, 20,
-                    listOf(CoreMemoryTypes.Companion.NEAREST_SUITABLE_ATTACK_TARGET),
+                    listOf(CoreMemoryTypes.NEAREST_SUITABLE_ATTACK_TARGET),
                     Function<Entity, Boolean> { entity: Entity? ->
                         this.attackTarget(
                             entity!!

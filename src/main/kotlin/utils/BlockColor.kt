@@ -29,11 +29,10 @@ class BlockColor {
         this.alpha = if (hasAlpha) (rgb shr 24) and 0xff else 0xff
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj !is BlockColor) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is BlockColor) {
             return false
         }
-        val other = obj
         return this.red == other.red && this.green == other.green && this.blue == other.blue && this.alpha == other.alpha
     }
 

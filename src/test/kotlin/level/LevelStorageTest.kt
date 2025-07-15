@@ -143,7 +143,7 @@ class LevelStorageTest {
 
         @JvmStatic
         @BeforeAll
-        fun before(): Unit {
+        fun before() {
             Registries.BLOCK.init()
             FileUtils.copyDirectory(File("src/test/resources/level"), File("src/test/resources/level2"))
             val level = Mockito.mock(Level::class.java)
@@ -153,7 +153,7 @@ class LevelStorageTest {
 
         @JvmStatic
         @AfterAll
-        fun after(): Unit {
+        fun after() {
             levelDBProvider!!.close()
             FileUtils.deleteDirectory(File("src/test/resources/level2"))
         }

@@ -2,12 +2,13 @@ package org.chorus_oss.chorus.inventory
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.blockentity.BlockEntityChest
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.network.protocol.BlockEventPacket
-import org.chorus_oss.chorus.network.protocol.InventorySlotPacket
 import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.item.ItemStack
 
 
 class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
@@ -108,8 +109,8 @@ class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
         rightSide.viewers.add(who)
 
         if (viewers.size == 1) {
-            val pk1 = BlockEventPacket(
-                blockPosition = leftSide.holder.vector3.asBlockVector3(),
+            val pk1 = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(leftSide.holder.vector3),
                 eventType = 1,
                 eventValue = 2,
             )
@@ -122,8 +123,8 @@ class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
                 )
             }
 
-            val pk2 = BlockEventPacket(
-                blockPosition = rightSide.holder.vector3.asBlockVector3(),
+            val pk2 = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(rightSide.holder.vector3),
                 eventType = 1,
                 eventValue = 2,
             )
@@ -141,8 +142,8 @@ class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
 
     override fun onClose(who: Player) {
         if (viewers.size == 1) {
-            val pk1 = BlockEventPacket(
-                blockPosition = rightSide.holder.vector3.asBlockVector3(),
+            val pk1 = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(rightSide.holder.vector3),
                 eventType = 1,
                 eventValue = 0,
             )
@@ -156,8 +157,8 @@ class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
                 )
             }
 
-            val pk2 = BlockEventPacket(
-                blockPosition = leftSide.holder.vector3.asBlockVector3(),
+            val pk2 = org.chorus_oss.protocol.packets.BlockEventPacket(
+                blockPosition = BlockPos(leftSide.holder.vector3),
                 eventType = 1,
                 eventValue = 0,
             )
@@ -178,23 +179,28 @@ class DoubleChestInventory(left: BlockEntityChest, right: BlockEntityChest) :
     }
 
     fun sendSlot(inv: Inventory, index: Int, vararg players: Player) {
-        val pk = InventorySlotPacket()
         val i = if (inv === this.rightSide) leftSide.size + index else index
-        pk.slot = toNetworkSlot(i)
-        pk.item = inv.getUnclonedItem(index)
-
+        val slot = toNetworkSlot(i)
         for (player in players) {
             val id = player.getWindowId(this)
             if (id == -1) {
                 this.close(player)
                 continue
             }
-            pk.inventoryId = id
-            pk.fullContainerName = FullContainerName(
-                this.getSlotType(pk.slot),
-                id
+
+            val packet = org.chorus_oss.protocol.packets.InventorySlotPacket(
+                windowID = id.toUInt(),
+                slot = slot.toUInt(),
+                container = org.chorus_oss.protocol.types.inventory.FullContainerName(
+                    FullContainerName(
+                        this.getSlotType(slot),
+                        id
+                    )
+                ),
+                storageItem = ItemStack(Item.AIR),
+                newItem = ItemStack(inv.getUnclonedItem(index))
             )
-            player.dataPacket(pk)
+            player.sendPacket(packet)
         }
     }
 }

@@ -8,16 +8,19 @@ import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.player.EntityFreezeEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemShield
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.AddPlayerPacket
 import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
-import org.chorus_oss.chorus.network.protocol.RemoveActorPacket
-import org.chorus_oss.chorus.network.protocol.SetEntityLinkPacket
-import org.chorus_oss.chorus.network.protocol.types.*
+import org.chorus_oss.protocol.packets.SetActorLinkPacket
+import org.chorus_oss.protocol.types.*
+import org.chorus_oss.protocol.types.actor_data.ActorDataMap
+import org.chorus_oss.protocol.types.item.ItemStack
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
 open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk, nbt) {
@@ -136,6 +139,7 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
         Server.broadcastPacket(viewers.values, pk)
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     override fun spawnTo(player: Player) {
         if (this !== player && !hasSpawned.containsKey(player.loaderId)) {
             hasSpawned[player.loaderId] = player
@@ -155,36 +159,57 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
                 arrayOf(player)
             )
 
-            player.dataPacket(
-                AddPlayerPacket(
-                    uuid = this.uuid,
+            player.sendPacket(
+                org.chorus_oss.protocol.packets.AddPlayerPacket(
+                    uuid = Uuid(this.uuid),
                     playerName = this.getEntityName(),
-                    targetRuntimeID = this.getRuntimeID(),
+                    actorRuntimeID = this.getRuntimeID().toULong(),
                     platformChatID = "", // TODO: platformChatID
-                    position = this.position.asVector3f(),
-                    velocity = this.motion.asVector3f(),
-                    rotation = this.rotation.asVector2f(),
-                    yHeadRotation = this.headYaw.toFloat(),
-                    carriedItem = this.itemInHand,
+                    position = Vector3f(this.position),
+                    velocity = Vector3f(this.motion),
+                    rotation = Vector2f(this.rotation),
+                    headYaw = this.headYaw.toFloat(),
+                    carriedItem = ItemStack(this.itemInHand),
                     playerGameType = Server.instance.gamemode,
-                    entityDataMap = this.entityDataMap,
-                    abilitiesData = SerializedAbilitiesData(
-                        this.getUniqueID(),
-                        PlayerPermission.VISITOR,
-                        CommandPermission.ANY,
-                        emptyArray() // TODO: AbilityLayers
+                    actorData = ActorDataMap(this.entityDataMap),
+                    abilitiesData = AbilitiesData(
+                        this.getRuntimeID(),
+                        PlayerPermission.Visitor,
+                        CommandPermission.Any,
+                        listOf(
+                            AbilityLayer(
+                                AbilityLayer.Companion.Type.Base,
+                                PlayerAbilitySet(
+                                    PlayerAbility.entries.toMutableSet()
+                                ),
+                                PlayerAbilitySet(
+                                    mutableSetOf(
+                                        PlayerAbility.Build,
+                                        PlayerAbility.Mine,
+                                        PlayerAbility.DoorsAndSwitches,
+                                        PlayerAbility.OpenContainers,
+                                        PlayerAbility.AttackPlayers,
+                                        PlayerAbility.AttackMobs
+                                    )
+                                ),
+                                0.1f,
+                                0.1f,
+                                0.05f,
+                            )
+                        ) // TODO: AbilityLayers
                     ),
                     actorLinks = List(this.passengers.size) { i ->
-                        EntityLink(
+                        ActorLink(
                             this.getUniqueID(),
                             this.passengers[i].uniqueId,
-                            if (i == 0) EntityLink.Type.RIDER else EntityLink.Type.PASSENGER,
+                            if (i == 0) ActorLink.Companion.Type.Rider else ActorLink.Companion.Type.Passenger,
                             immediate = false,
-                            riderInitiated = false
+                            riderInitiated = false,
+                            vehicleAngularVelocity = 0f,
                         )
                     },
-                    syncedProperties = this.propertySyncData(),
-                    buildPlatform = Platform.UNKNOWN, // TODO: buildPlatform
+                    actorProperties = ActorProperties(this.propertySyncData()),
+                    buildPlatform = Platform.Unknown, // TODO: buildPlatform
                     deviceID = "" // TODO: DeviceID
                 )
             )
@@ -193,13 +218,17 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
             offhandInventory.sendContents(player)
 
             if (this.riding != null) {
-                val pkk: SetEntityLinkPacket = SetEntityLinkPacket()
-                pkk.vehicleUniqueId = riding!!.getRuntimeID()
-                pkk.riderUniqueId = this.getRuntimeID()
-                pkk.type = EntityLink.Type.RIDER
-                pkk.immediate = 1
-
-                player.dataPacket(pkk)
+                val packet = SetActorLinkPacket(
+                    actorLink = ActorLink(
+                        riddenActorUniqueID = riding!!.getUniqueID(),
+                        riderActorUniqueID = this.getUniqueID(),
+                        type = ActorLink.Companion.Type.Rider,
+                        immediate = true,
+                        riderInitiated = false,
+                        vehicleAngularVelocity = 0f,
+                    )
+                )
+                player.sendPacket(packet)
             }
 
             if (this !is Player) {
@@ -210,16 +239,17 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
 
     override fun despawnFrom(player: Player) {
         if (hasSpawned.containsKey(player.loaderId)) {
-            val pk = RemoveActorPacket()
-            pk.actorUniqueID = this.getUniqueID()
-            player.dataPacket(pk)
+            val pk = org.chorus_oss.protocol.packets.RemoveActorPacket(
+                actorUniqueID = this.getUniqueID()
+            )
+            player.sendPacket(pk)
             hasSpawned.remove(player.loaderId)
         }
     }
 
     override fun close() {
         if (!this.closed) {
-            if (inventory != null && (this !is Player || this.loggedIn)) {
+            if (this !is Player || this.loggedIn) {
                 for (viewer in inventory.viewers) {
                     viewer.removeWindow(this.inventory)
                 }

@@ -1,9 +1,11 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.Player
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.BlockActorDataPacket
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.BlockPos
 
 
 abstract class BlockEntitySpawnable(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
@@ -27,19 +29,17 @@ abstract class BlockEntitySpawnable(chunk: IChunk, nbt: CompoundTag) : BlockEnti
             return
         }
 
-        player.dataPacket(spawnPacket)
+        player.sendPacket(spawnPacket)
     }
 
-    val spawnPacket: BlockActorDataPacket
-        get() = getSpawnPacket(null)
-
-    fun getSpawnPacket(nbt: CompoundTag?): BlockActorDataPacket {
-        val nbt1 = nbt ?: this.spawnCompound
-        return BlockActorDataPacket(
-            blockPosition = position.asBlockVector3(),
-            actorDataTags = nbt1
-        )
-    }
+    val spawnPacket: Packet
+        get() {
+            val nbt1 = this.spawnCompound
+            return org.chorus_oss.protocol.packets.BlockActorDataPacket(
+                blockPosition = BlockPos(position),
+                actorDataTags = org.chorus_oss.nbt.tags.CompoundTag(nbt1)
+            )
+        }
 
     open fun spawnToAll() {
         if (this.closed) {

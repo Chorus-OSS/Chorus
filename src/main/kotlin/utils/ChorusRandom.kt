@@ -28,10 +28,6 @@ class ChorusRandom {
         )
     }
 
-    fun fork(): ChorusRandom {
-        return ChorusRandom(nextLong())
-    }
-
     fun nextInt(min: Int, max: Int): Int {
         return provider.nextInt(min, max + 1)
     }

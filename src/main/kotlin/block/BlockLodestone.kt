@@ -13,7 +13,8 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.IOException
 
-class BlockLodestone(blockState: BlockState = properties.defaultState) : BlockSolid(blockState), BlockEntityHolder<BlockEntityLodestone> {
+class BlockLodestone(blockState: BlockState = properties.defaultState) : BlockSolid(blockState),
+    BlockEntityHolder<BlockEntityLodestone> {
     override fun getBlockEntityClass() = BlockEntityLodestone::class.java
 
     override fun getBlockEntityType(): String {

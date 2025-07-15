@@ -49,32 +49,32 @@ class EntityWitch(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonster(chu
                     UsePotionExecutor(0.3f, 30, 20), all(
                         IBehaviorEvaluator { entity: EntityMob ->
                             entity.level!!.tick - memoryStorage.get<Int>(
-                                CoreMemoryTypes.Companion.LAST_BE_ATTACKED_TIME
+                                CoreMemoryTypes.LAST_BE_ATTACKED_TIME
                             ) <= 1
                         }
                     ), 4, 1),
                 Behavior(
-                    PotionThrowExecutor(CoreMemoryTypes.Companion.ATTACK_TARGET, 0.3f, 15, true, 30, 20),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.ATTACK_TARGET),
+                    PotionThrowExecutor(CoreMemoryTypes.ATTACK_TARGET, 0.3f, 15, true, 30, 20),
+                    EntityCheckEvaluator(CoreMemoryTypes.ATTACK_TARGET),
                     3,
                     1
                 ),
                 Behavior(
-                    PotionThrowExecutor(CoreMemoryTypes.Companion.NEAREST_GOLEM, 0.3f, 15, true, 30, 20),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_GOLEM),
+                    PotionThrowExecutor(CoreMemoryTypes.NEAREST_GOLEM, 0.3f, 15, true, 30, 20),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_GOLEM),
                     2,
                     1
                 ),
                 Behavior(
-                    PotionThrowExecutor(CoreMemoryTypes.Companion.NEAREST_PLAYER, 0.3f, 15, true, 30, 20),
-                    EntityCheckEvaluator(CoreMemoryTypes.Companion.NEAREST_PLAYER),
+                    PotionThrowExecutor(CoreMemoryTypes.NEAREST_PLAYER, 0.3f, 15, true, 30, 20),
+                    EntityCheckEvaluator(CoreMemoryTypes.NEAREST_PLAYER),
                     1,
                     1
                 )
             ),
             setOf<ISensor>(
                 NearestPlayerSensor(16.0, 0.0, 20),
-                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.Companion.NEAREST_GOLEM, 42.0, 0.0)
+                NearestEntitySensor(EntityGolem::class.java, CoreMemoryTypes.NEAREST_GOLEM, 42.0, 0.0)
             ),
             setOf<IController>(WalkController(), LookController(true, true)),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
