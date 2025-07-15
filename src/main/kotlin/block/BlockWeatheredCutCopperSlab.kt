@@ -7,6 +7,8 @@ open class BlockWeatheredCutCopperSlab(
     blockState: BlockState = properties.defaultState,
     doubleSlabID: String = BlockID.WEATHERED_DOUBLE_CUT_COPPER_SLAB
 ) : BlockCutCopperSlab(blockState, doubleSlabID) {
+    constructor(blockState: BlockState) : this(blockState, BlockID.WEATHERED_DOUBLE_CUT_COPPER_SLAB)
+
     override val oxidizationLevel
         get(): OxidizationLevel {
             return OxidizationLevel.WEATHERED
