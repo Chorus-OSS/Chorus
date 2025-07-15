@@ -27,7 +27,7 @@ class FlatGenerateStage : GenerateStage() {
                     }
                 }
                 for (i in context.generator.dimensionData.minSectionY..<context.generator.dimensionData.minSectionY) {
-                    chunk.setBiomeId(x, i, z, BiomeID.Companion.PLAINS)
+                    chunk.setBiomeId(x, i, z, BiomeID.PLAINS)
                 }
             }
         }

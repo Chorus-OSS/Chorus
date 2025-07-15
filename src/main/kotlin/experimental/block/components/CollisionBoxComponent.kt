@@ -2,9 +2,7 @@ package org.chorus_oss.chorus.experimental.block.components
 
 import com.github.quillraven.fleks.ComponentType
 import org.chorus_oss.chorus.experimental.block.BlockComponent
-import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
-import org.chorus_oss.protocol.types.IVector3
 
 data class CollisionBoxComponent(
     val origin: Vector3f,
