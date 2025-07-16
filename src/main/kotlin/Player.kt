@@ -78,7 +78,6 @@ import org.chorus_oss.chorus.network.protocol.*
 import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
 import org.chorus_oss.chorus.network.protocol.SetScorePacket
 import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
@@ -554,17 +553,20 @@ open class Player(
      * Get the player info.
      */
 
+    @OptIn(ExperimentalUuidApi::class)
     override var skin: Skin
         get() = super.skin
         set(value) {
             super.skin = value
             if (this.spawned) {
 //            this.Server.instance.updatePlayerListData(this.getUniqueId(), this.getId(), this.getDisplayName(), skin, this.getLoginChainData().getXUID());
-                val skinPacket = PlayerSkinPacket()
-                skinPacket.uuid = this.getUUID()
-                skinPacket.skin = this.skin
-                skinPacket.newSkinName = skin.getSkinId()
-                skinPacket.oldSkinName = ""
+                val skinPacket = org.chorus_oss.protocol.packets.PlayerSkinPacket(
+                    uuid = Uuid(this.getUUID()),
+                    skin = org.chorus_oss.protocol.types.skin.Skin(this.skin),
+                    newSkinName = skin.getSkinId(),
+                    oldSkinName = "",
+                    isTrusted = skin.isTrusted() || Server.instance.settings.playerSettings.forceSkinTrusted,
+                )
                 Server.broadcastPacket(Server.instance.onlinePlayers.values, skinPacket)
             }
         }

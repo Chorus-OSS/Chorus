@@ -800,58 +800,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         this.writeBoolean(skin.isOverridingPlayerAppearance())
     }
 
-    fun readSkin(): Skin {
-        val skin = Skin()
-        skin.setSkinId(this.readString())
-        skin.setPlayFabId(this.readString())
-        skin.setSkinResourcePatch(this.readString())
-        skin.setSkinData(this.readImage())
-
-        val animationCount = this.readIntLE()
-        (0..<animationCount).forEach { _ ->
-            val image = this.readImage()
-            val type = this.readIntLE()
-            val frames = this.readFloatLE()
-            val expression = this.readIntLE()
-            skin.getAnimations().add(SkinAnimation(image, type, frames, expression))
-        }
-
-        skin.setCapeData(this.readImage())
-        skin.setGeometryData(this.readString())
-        skin.setGeometryDataEngineVersion(this.readString())
-        skin.setAnimationData(this.readString())
-        skin.setCapeId(this.readString())
-        skin.setFullSkinId(this.readString())
-        skin.setArmSize(this.readString())
-        skin.setSkinColor(this.readString())
-
-        val piecesLength = this.readIntLE()
-        (0..<piecesLength).forEach { _ ->
-            val pieceId = this.readString()
-            val pieceType = this.readString()
-            val packId = this.readString()
-            val isDefault = this.readBoolean()
-            val productId = this.readString()
-            skin.getPersonaPieces().add(PersonaPiece(pieceId, pieceType, packId, isDefault, productId))
-        }
-
-        val tintsLength = this.readIntLE()
-        (0..<tintsLength).forEach { _ ->
-            val pieceType = this.readString()
-            val colors: MutableList<String> = ArrayList()
-            val colorsLength = this.readIntLE()
-            (0..<colorsLength).forEach { _ -> colors.add(this.readString()) }
-            skin.getTintColors().add(PersonaPieceTint(pieceType, colors))
-        }
-
-        skin.setPremium(this.readBoolean())
-        skin.setPersona(this.readBoolean())
-        skin.setCapeOnClassic(this.readBoolean())
-        skin.setPrimaryUser(this.readBoolean())
-        skin.setOverridingPlayerAppearance(this.readBoolean())
-        return skin
-    }
-
     fun writeUnsignedVarInt(value: Int) {
         ByteBufVarInt.writeUnsignedInt(this, value)
     }

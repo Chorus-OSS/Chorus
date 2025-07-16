@@ -2,17 +2,21 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.event.player.PlayerChangeSkinEvent
-import org.chorus_oss.chorus.network.ProtocolInfo
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.PlayerSkinPacket
 import java.util.concurrent.TimeUnit
 
-class PlayerSkinProcessor : DataPacketProcessor<PlayerSkinPacket>() {
-    override fun handle(player: Player, pk: PlayerSkinPacket) {
+class PlayerSkinProcessor : DataPacketProcessor<MigrationPacket<PlayerSkinPacket>>() {
+    override fun handle(player: Player, pk: MigrationPacket<PlayerSkinPacket>) {
+        val packet = pk.packet
+
         val player = player.player
-        val skin = pk.skin
+        val skin = Skin(packet.skin)
 
         if (!skin.isValid()) {
             log.warn(player.player.getEntityName() + ": PlayerSkinPacket with invalid skin")
@@ -38,8 +42,7 @@ class PlayerSkinProcessor : DataPacketProcessor<PlayerSkinPacket>() {
         }
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.PLAYER_SKIN_PACKET
+    override val packetId: Int = PlayerSkinPacket.id
 
     companion object : Loggable
 }
