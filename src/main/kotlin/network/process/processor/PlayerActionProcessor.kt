@@ -14,7 +14,6 @@ import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.PlayerActionPacket
 import org.chorus_oss.protocol.types.PlayerActionType
@@ -160,7 +159,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                     player.position,
                     player.rotation.yaw,
                     player.rotation.pitch,
-                    MovePlayerPacket.MODE_NORMAL
+                    org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal
                 )
 
                 PlayerActionType.StartGliding -> {
@@ -227,7 +226,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -239,7 +238,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -249,7 +248,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -262,7 +261,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                     } else {
                         player.setSpinAttacking(true)

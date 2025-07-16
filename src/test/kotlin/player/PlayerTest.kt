@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.TestPlayer
 import org.chorus_oss.chorus.TestUtils
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
+import org.chorus_oss.protocol.packets.MovePlayerPacket
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers

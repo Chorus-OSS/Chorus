@@ -78,7 +78,6 @@ import org.chorus_oss.chorus.network.protocol.*
 import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
 import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
 import org.chorus_oss.chorus.network.protocol.SetScorePacket
 import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
@@ -1421,7 +1420,7 @@ open class Player(
         prevRotation.pitch = originalPos.pitch
 
         val syncPos = originalPos.position.add(0.0, 0.00001, 0.0)
-        this.sendPosition(syncPos, originalPos.yaw, originalPos.pitch, MovePlayerPacket.MODE_RESET)
+        this.sendPosition(syncPos, originalPos.yaw, originalPos.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset)
 
         if (this.speed == null) {
             this.speed = Vector3(0.0, 0.0, 0.0)
@@ -2718,7 +2717,7 @@ open class Player(
     override fun moveDelta() {
         this.sendPosition(
             this.position,
-            rotation.yaw, rotation.pitch, MovePlayerPacket.MODE_NORMAL, viewers.values.toTypedArray()
+            rotation.yaw, rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal, viewers.values.toTypedArray()
         )
     }
 
@@ -4470,54 +4469,43 @@ open class Player(
         return level!!.dropAndGetItem(position.add(0.0, 1.3, 0.0), item, motion, 40)
     }
 
-    /**
-     * [Player.moveDelta]的实现,仅发送[MovePlayerPacket]数据包到客户端
-     *
-     * @param pos     the pos of MovePlayerPacket
-     * @param yaw     the yaw of MovePlayerPacket
-     * @param pitch   the pitch of MovePlayerPacket
-     * @param mode    the mode of MovePlayerPacket
-     * @param targets 接受数据包的玩家们<br></br>players of receive the packet
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
     @JvmOverloads
     fun sendPosition(
         pos: Vector3,
         yaw: Double = rotation.yaw,
         pitch: Double = rotation.pitch,
-        mode: Int = MovePlayerPacket.MODE_NORMAL,
+        mode: org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode = org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal,
         targets: Array<Player>? = null
     ) {
-        val pk = MovePlayerPacket()
-        pk.eid = this.getRuntimeID()
-        pk.x = pos.x.toFloat()
-        pk.y = (pos.y + this.getEyeHeight()).toFloat()
-        pk.z = pos.z.toFloat()
-        pk.headYaw = yaw.toFloat()
-        pk.pitch = pitch.toFloat()
-        pk.yaw = yaw.toFloat()
-        pk.mode = mode
-        pk.onGround = this.onGround
-        if (this.riding != null) {
-            pk.ridingEid = riding!!.getRuntimeID()
-            pk.mode = MovePlayerPacket.MODE_PITCH
-        }
-
+        val pk = org.chorus_oss.protocol.packets.MovePlayerPacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = Vector3f(
+                pos.x.toFloat(),
+                (pos.y + this.getEyeHeight()).toFloat(),
+                pos.z.toFloat(),
+            ),
+            pitch = pitch.toFloat(),
+            yaw = yaw.toFloat(),
+            headYaw = yaw.toFloat(),
+            mode = when (this.riding) {
+                null -> mode
+                else -> org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Rotation
+            },
+            onGround = this.onGround,
+            riddenEntityRuntimeID = this.riding.let {
+                when (it) {
+                    null -> 0u
+                    else -> it.getRuntimeID().toULong()
+                }
+            },
+            teleportCause = org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.TeleportCause.Unknown,
+            teleportSourceEntityType = 0,
+            tick = 0u,
+        )
         if (targets != null) {
-            Server.broadcastPacket(targets, pk)
+            Server.broadcastPacket(targets.toList(), pk)
         } else {
-            this.dataPacket(pk)
+            this.sendPacket(pk)
         }
     }
 
@@ -4575,10 +4563,10 @@ open class Player(
                 this.nextChunkOrderRun = 0
             }
             //send to client
-            this.sendPosition(to.position, to.rotation.yaw, to.rotation.pitch, MovePlayerPacket.MODE_TELEPORT)
+            this.sendPosition(to.position, to.rotation.yaw, to.rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Teleport)
             this.newPosition = to.position
         } else {
-            this.sendPosition(this.position, to.rotation.yaw, to.rotation.pitch, MovePlayerPacket.MODE_TELEPORT)
+            this.sendPosition(this.position, to.rotation.yaw, to.rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Teleport)
             this.newPosition = this.position
         }
         //state update
