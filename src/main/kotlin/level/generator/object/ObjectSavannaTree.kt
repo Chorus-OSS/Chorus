@@ -75,7 +75,7 @@ class ObjectSavannaTree : TreeGenerator() {
 
                 if ((block == BlockID.GRASS_BLOCK || block == BlockID.DIRT) && position.y < 256 - i - 1) {
                     this.setDirtAt(level, position.down())
-                    val face: BlockFace = BlockFace.Plane.HORIZONTAL.random(rand)
+                    val face: BlockFace = BlockFace.Plane.HORIZONTAL_FACES.random()
                     val k2: Int = i - rand.nextInt(4) - 1
                     var l2: Int = 3 - rand.nextInt(3)
                     var i3 = position.floorX
@@ -124,7 +124,7 @@ class ObjectSavannaTree : TreeGenerator() {
                     this.placeLeafAt(level, blockpos2.north(2))
                     i3 = position.floorX
                     j1 = position.floorZ
-                    val face1: BlockFace = BlockFace.Plane.HORIZONTAL.random(rand)
+                    val face1: BlockFace = BlockFace.Plane.HORIZONTAL_FACES.random()
 
                     if (face1 != face) {
                         val l3: Int = k2 - rand.nextInt(2) - 1

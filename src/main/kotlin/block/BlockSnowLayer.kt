@@ -166,14 +166,14 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
             level.sendBlocks(
                 target,
                 blocks,
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 0,
                 false
             )
             level.sendBlocks(
                 target,
                 blocks,
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 1,
                 false
             )
@@ -184,14 +184,14 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
         level.sendBlocks(
             target,
             blocks,
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
             0,
             false
         )
         level.sendBlocks(
             target,
             blocks,
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
             1,
             false
         )

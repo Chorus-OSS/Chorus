@@ -66,8 +66,8 @@ class BlockCherrySapling @JvmOverloads constructor(blockState: BlockState = prop
                 level.setBlock(vector3, get(BlockID.DIRT))
             }
             blockManager.applySubChunkUpdate(
-                ev.blockList,
-                Predicate { block: Block -> !block.isAir })
+                ev.blockList
+            ) { block: Block -> !block.isAir }
         }
     }
 

@@ -1,8 +1,6 @@
 package org.chorus_oss.chorus.math
 
-import org.chorus_oss.chorus.utils.ChorusRandom
 import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Predicate
 import kotlin.math.abs
 import kotlin.math.floor
@@ -214,17 +212,9 @@ enum class BlockFace(
         }
     }
 
-    enum class Plane(val faces: Array<BlockFace>) : Predicate<BlockFace?> {
-        HORIZONTAL(arrayOf(NORTH, EAST, SOUTH, WEST)),
-        VERTICAL(arrayOf(UP, DOWN));
-
-        fun random(): BlockFace {
-            return faces[ThreadLocalRandom.current().nextInt(faces.size - 1)]
-        }
-
-        fun random(rand: ChorusRandom): BlockFace {
-            return faces[rand.nextInt(faces.size - 1)]
-        }
+    enum class Plane : Predicate<BlockFace?> {
+        HORIZONTAL,
+        VERTICAL;
 
         override fun test(face: BlockFace?): Boolean {
             return face != null && face.axis.plane == this

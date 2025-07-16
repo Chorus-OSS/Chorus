@@ -652,14 +652,14 @@ open class Player(
             level!!.sendBlocks(
                 arrayOf(this),
                 arrayOf<Block?>(target),
-                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 false
             )
             if (target.getLevelBlockAtLayer(1) is BlockLiquid) {
                 level!!.sendBlocks(
                     arrayOf(this), arrayOf(
                         target.getLevelBlockAtLayer(1)
-                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 1
+                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 1
                 )
             }
             return
@@ -765,7 +765,7 @@ open class Player(
             } else if (handItem == null) level!!.sendBlocks(
                 arrayOf(this), arrayOf(
                     level!!.getBlock(blockPos.asVector3())
-                ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
+                ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 0
             )
             return
         }
@@ -778,7 +778,7 @@ open class Player(
             level!!.sendBlocks(
                 arrayOf(this),
                 arrayOf<Block?>(target),
-                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
+                UpdateBlockPacket.FLAG_ALL_PRIORITY
             )
 
             val blockEntity = level!!.getBlockEntity(blockPos.asVector3())

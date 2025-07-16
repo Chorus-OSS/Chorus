@@ -109,7 +109,7 @@ class BlockChorusFlower @JvmOverloads constructor(blockstate: BlockState = prope
                         // Grow Horizontally
                     } else if (!isFullyAged) {
                         for (i in 0..<ThreadLocalRandom.current().nextInt(if (ground) 5 else 4)) {
-                            val face = BlockFace.Plane.HORIZONTAL.random()
+                            val face = BlockFace.Plane.HORIZONTAL_FACES.random()
                             val check = this.getSide(face)
                             if (check.isAir && check.down().isAir && isHorizontalAirExcept(
                                     check,

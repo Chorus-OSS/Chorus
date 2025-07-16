@@ -273,7 +273,7 @@ open class ItemBucket : Item {
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf(target.getLevelBlockAtLayer(1)),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                     1
                 )
                 target.level.vibrationManager.callVibrationEvent(
@@ -299,7 +299,7 @@ open class ItemBucket : Item {
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf(block.getLevelBlockAtLayer(1)),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                     1
                 )
                 player.inventory.sendContents(player)

@@ -334,12 +334,12 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf<Block?>(target, block),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS.toInt()
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS
                 )
                 player.level!!.sendBlocks(
                     arrayOf(player), arrayOf(
                         target.getLevelBlockAtLayer(1), block.getLevelBlockAtLayer(1)
-                    ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS.toInt(), 1
+                    ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS, 1
                 )
             }
 
@@ -380,7 +380,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                         arrayOf(player), arrayOf(
                             target.position
                         ),
-                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
+                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY, 0
                     )
 
                     val blockEntity = player.level!!.getBlockEntity(blockVector.asVector3())

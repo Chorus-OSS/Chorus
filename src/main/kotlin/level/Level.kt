@@ -820,7 +820,7 @@ class Level(
                                     this.sendBlocks(
                                         playerArray,
                                         blocksArray,
-                                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+                                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL
                                     )
                                 }
                             }
@@ -1074,16 +1074,16 @@ class Level(
     }
 
     fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3>) {
-        this.sendBlocks(target, blocks, 0, 0)
-        this.sendBlocks(target, blocks, 0, 1)
+        this.sendBlocks(target, blocks, 0u, 0)
+        this.sendBlocks(target, blocks, 0u, 1)
     }
 
-    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: Int) {
+    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: UInt) {
         this.sendBlocks(target, blocks, flags, 0)
         this.sendBlocks(target, blocks, flags, 1)
     }
 
-    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: Int, optimizeRebuilds: Boolean) {
+    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: UInt, optimizeRebuilds: Boolean) {
         this.sendBlocks(target, blocks, flags, 0, optimizeRebuilds)
         this.sendBlocks(target, blocks, flags, 1, optimizeRebuilds)
     }
@@ -1092,7 +1092,7 @@ class Level(
     fun sendBlocks(
         target: Array<Player>,
         blocks: Array<out IVector3?>,
-        flags: Int,
+        flags: UInt,
         dataLayer: Int,
         optimizeRebuilds: Boolean = false
     ) {
@@ -1120,25 +1120,27 @@ class Level(
                 }
             }
 
-            val bPos = pos.asBlockVector3()
+            val bPos = BlockPos(pos)
             val updateBlockPacket = org.chorus_oss.protocol.packets.UpdateBlockPacket(
-                position = BlockPos(pos),
-                newBlockRuntimeID = (if (b is Block) {
-                    b.runtimeId
-                } else if (b is Vector3WithRuntimeId) {
-                    if (dataLayer == 0) {
-                        b.runtimeIdLayer0
+                position = bPos,
+                newBlockRuntimeID = run {
+                    if (b is Block) {
+                        b.runtimeId.toUInt()
+                    } else if (b is Vector3WithRuntimeId) {
+                        if (dataLayer == 0) {
+                            b.runtimeIdLayer0.toUInt()
+                        } else {
+                            b.runtimeIdLayer1.toUInt()
+                        }
                     } else {
-                        b.runtimeIdLayer1
+                        val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
+                        if (hash == Int.MIN_VALUE) {
+                            continue
+                        }
+                        hash.toUInt()
                     }
-                } else {
-                    val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
-                    if (hash == Integer.MIN_VALUE) {
-                        continue
-                    }
-                    hash
-                }).toUInt(),
-                flags = if (first) flags.toUInt() else 0u,
+                },
+                flags = if (first) flags else 0u,
                 layer = dataLayer.toUInt(),
             )
             packets.add(updateBlockPacket)
@@ -1154,12 +1156,11 @@ class Level(
             return
         }
 
-        val chunksPerLoader = Math.min(
-            200,
-            Math.max(1, (((this.chunksPerTicks - loaders.size).toDouble() / loaders.size + 0.5)).toInt())
+        val chunksPerLoader = 200.coerceAtMost(
+            1.coerceAtLeast((((this.chunksPerTicks - loaders.size).toDouble() / loaders.size + 0.5)).toInt())
         )
         var randRange = 3 + chunksPerLoader / 30
-        randRange = Math.min(randRange, this.chunkTickRadius)
+        randRange = randRange.coerceAtMost(this.chunkTickRadius)
 
         val random = ThreadLocalRandom.current()
         if (!loaders.isEmpty()) {
@@ -1168,7 +1169,7 @@ class Level(
                 val chunkZ = loader.locator.position.chunkZ
 
                 val index = chunkHash(chunkX, chunkZ)
-                val existingLoaders = Math.max(0, chunkTickList.getOrDefault(index, 0))
+                val existingLoaders = 0.coerceAtLeast(chunkTickList.getOrDefault(index, 0))
                 chunkTickList.put(index, existingLoaders + 1)
                 for (chunk in 0..<chunksPerLoader) {
                     val dx = random.nextInt(2 * randRange) - randRange
@@ -2202,13 +2203,13 @@ class Level(
                         block.position.add(0.0, 0.0, 1.0),
                         block.position.add(0.0, 0.0, -1.0)
                     ),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY
                 )
             }
             this.sendBlocks(
                 getChunkPlayers(cx, cz).values.toTypedArray(),
                 arrayOf<Block?>(block),
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 block.layer
             )
         } else {
@@ -2696,7 +2697,7 @@ class Level(
                     player.level!!.sendBlocks(
                         arrayOf<Player>(player),
                         arrayOf<Block?>(Block.get(BlockID.AIR, target)),
-                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                         1
                     )
                 }
