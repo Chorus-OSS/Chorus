@@ -5,6 +5,7 @@ import org.chorus_oss.chorus.TestEventHandler
 import org.chorus_oss.chorus.TestPlayer
 import org.chorus_oss.chorus.TestPluginManager
 import org.chorus_oss.chorus.event.player.PlayerFormRespondedEvent
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.element.simple.ButtonImage
 import org.chorus_oss.chorus.form.element.simple.ElementButton
@@ -15,7 +16,6 @@ import org.chorus_oss.chorus.form.response.SimpleResponse
 import org.chorus_oss.chorus.form.window.CustomForm
 import org.chorus_oss.chorus.form.window.ModalForm
 import org.chorus_oss.chorus.form.window.SimpleForm
-import org.chorus_oss.chorus.network.protocol.ModalFormResponsePacket
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -44,9 +44,11 @@ class FormTest {
 
         test.send(player, 1)
         val dataPacketManager = player.session.dataPacketManager
-        val modalFormResponsePacket = ModalFormResponsePacket()
-        modalFormResponsePacket.formId = 1
-        modalFormResponsePacket.data = "[\"1\",\"input\",\"\",\"6\",\"0\",\"false\"]"
+        val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
+            formID = 1u,
+            responseData = "[\"1\",\"input\",\"\",\"6\",\"0\",\"false\"]",
+            cancelReason = null
+        )
         checkNotNull(dataPacketManager)
 
         testPluginManager.registerTestEventHandler(
@@ -81,7 +83,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, modalFormResponsePacket)
+        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
         testPluginManager.resetAll()
     }
 
@@ -105,9 +107,11 @@ class FormTest {
 
         val dataPacketManager = player.session.dataPacketManager
 
-        val modalFormResponsePacket = ModalFormResponsePacket()
-        modalFormResponsePacket.formId = 1
-        modalFormResponsePacket.data = "1"
+        val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
+            formID = 1u,
+            responseData = "1",
+            cancelReason = null,
+        )
         checkNotNull(dataPacketManager)
 
         testPluginManager.registerTestEventHandler(
@@ -130,7 +134,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, modalFormResponsePacket)
+        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
         testPluginManager.resetAll()
     }
 
@@ -143,9 +147,11 @@ class FormTest {
 
         val dataPacketManager = player.session.dataPacketManager
 
-        val modalFormResponsePacket = ModalFormResponsePacket()
-        modalFormResponsePacket.formId = 1
-        modalFormResponsePacket.data = "false"
+        val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
+            formID = 1u,
+            responseData = "false",
+            cancelReason = null
+        )
         checkNotNull(dataPacketManager)
 
         testPluginManager.registerTestEventHandler(
@@ -164,7 +170,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, modalFormResponsePacket)
+        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
         testPluginManager.resetAll()
     }
 }
