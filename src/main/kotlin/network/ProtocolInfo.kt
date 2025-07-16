@@ -19,7 +19,6 @@ object ProtocolInfo {
     const val UPDATE_ATTRIBUTES_PACKET = 29
     const val ANIMATE_PACKET = 44
     const val CRAFTING_DATA_PACKET = 52
-    const val PLAYER_LIST_PACKET = 63
     const val AVAILABLE_COMMANDS_PACKET = 76
     const val SET_SCORE_PACKET = 108
     const val MOVE_ENTITY_DELTA_PACKET = 111

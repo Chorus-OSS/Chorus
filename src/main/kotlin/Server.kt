@@ -30,6 +30,7 @@ import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
 import org.chorus_oss.chorus.lang.LangCode
@@ -57,7 +58,6 @@ import org.chorus_oss.chorus.nbt.tag.Tag
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.PlayerListPacket
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.permission.BanList
@@ -85,6 +85,7 @@ import org.chorus_oss.chorus.utils.Utils.allThreadDumps
 import org.chorus_oss.chorus.utils.Utils.getExceptionMessage
 import org.chorus_oss.chorus.utils.Utils.readFile
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.types.Color
 import org.iq80.leveldb.CompressionType
 import org.iq80.leveldb.DB
 import org.iq80.leveldb.Options
@@ -108,6 +109,8 @@ import kotlin.math.min
 import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Represents a server object, global singleton.
@@ -1262,20 +1265,22 @@ class Server internal constructor(
         network.pong.update()
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     @ApiStatus.Internal
     fun removeOnlinePlayer(player: Player) {
         if (playerList.containsKey(player.getUUID())) {
             playerList.remove(player.getUUID())
 
-            val pk = PlayerListPacket()
-            pk.type = PlayerListPacket.TYPE_REMOVE
-            pk.entries = arrayOf(
-                PlayerListPacket.Entry(
-                    player.getUUID()
+            val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+                actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+                addPlayerList = null,
+                trustedSkinList = null,
+                removePlayerList = listOf(
+                    Uuid(player.getUUID())
                 )
             )
-
             broadcastPacket(playerList.values, pk)
+
             network.pong.playerCount = playerList.size
             network.pong.update()
         }
@@ -1289,10 +1294,7 @@ class Server internal constructor(
     }
 
     /**
-     * 更新指定玩家们(players)的[PlayerListPacket]数据包(即玩家列表数据)
-     *
-     *
-     * Update [PlayerListPacket] data packets (i.e. player list data) for specified players
+     * Update PlayerListPacket data packets (i.e. player list data) for specified players
      *
      * @param uuid       uuid
      * @param entityId   实体id
@@ -1301,6 +1303,7 @@ class Server internal constructor(
      * @param xboxUserId xbox用户id
      * @param players    指定接受数据包的玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun updatePlayerListData(
         uuid: UUID,
         entityId: Long,
@@ -1313,10 +1316,32 @@ class Server internal constructor(
         // so under no circumstances should it be sent to all players on the server.
         skin.setSkinId("")
 
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_ADD
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid, entityId, name, skin, xboxUserId))
-        broadcastPacket(players, pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Add,
+            addPlayerList = listOf(
+                org.chorus_oss.protocol.packets.PlayerListPacket.Companion.AddPlayerEntry(
+                    uuid = Uuid(uuid),
+                    actorUniqueID = entityId,
+                    playerName = name,
+                    xuid = xboxUserId ?: "",
+                    platformChatID = "",
+                    buildPlatform = org.chorus_oss.protocol.types.Platform.Unknown,
+                    skin = org.chorus_oss.protocol.types.skin.Skin(skin),
+                    isTeacher = false,
+                    isHost = false,
+                    isSubClient = false,
+                    playerColor = Color(
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte()
+                    )
+                )
+            ),
+            trustedSkinList = listOf(skin.isTrusted() || Server.instance.settings.playerSettings.forceSkinTrusted),
+            removePlayerList = null,
+        )
+        broadcastPacket(players.toList(), pk)
     }
 
     /**
@@ -1358,11 +1383,17 @@ class Server internal constructor(
      *
      * @param players 玩家数组
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun removePlayerListData(uuid: UUID, players: Array<Player>) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_REMOVE
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid))
-        broadcastPacket(players, pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+            addPlayerList = null,
+            trustedSkinList = null,
+            removePlayerList = listOf(
+                Uuid(uuid)
+            )
+        )
+        broadcastPacket(players.toList(), pk)
     }
 
     /**
@@ -1373,11 +1404,17 @@ class Server internal constructor(
      *
      * @param player 玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun removePlayerListData(uuid: UUID, player: Player) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_REMOVE
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid))
-        player.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+            addPlayerList = null,
+            trustedSkinList = null,
+            removePlayerList = listOf(
+                Uuid(uuid)
+            )
+        )
+        player.sendPacket(pk)
     }
 
     @JvmOverloads
@@ -1393,22 +1430,39 @@ class Server internal constructor(
      *
      * @param player 玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun sendFullPlayerListData(player: Player) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_ADD
-        pk.entries = playerList.values
-            .map { p: Player ->
-                PlayerListPacket.Entry(
-                    p.getUUID(),
-                    p.getRuntimeID(),
-                    p.displayName,
-                    p.skin,
-                    p.loginChainData.xuid
-                )
-            }
-            .toTypedArray()
+        val players = playerList.values
 
-        player.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Add,
+            addPlayerList = players.map {
+                org.chorus_oss.protocol.packets.PlayerListPacket.Companion.AddPlayerEntry(
+                    uuid = Uuid(it.getUUID()),
+                    actorUniqueID = it.getUniqueID(),
+                    playerName = it.displayName,
+                    xuid = it.loginChainData.xuid ?: "",
+                    platformChatID = "",
+                    buildPlatform = org.chorus_oss.protocol.types.Platform.Unknown,
+                    skin = org.chorus_oss.protocol.types.skin.Skin(it.skin),
+                    isTeacher = false,
+                    isHost = false,
+                    isSubClient = false,
+                    playerColor = Color(
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte()
+                    )
+                )
+            },
+            trustedSkinList = players.map {
+                it.skin.isTrusted() || settings.playerSettings.forceSkinTrusted
+            },
+            removePlayerList = null,
+        )
+
+        player.sendPacket(pk)
     }
 
     /**
