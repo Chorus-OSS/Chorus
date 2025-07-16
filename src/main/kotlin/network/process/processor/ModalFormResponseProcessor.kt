@@ -10,10 +10,9 @@ import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.response.CustomResponse
 import org.chorus_oss.chorus.form.response.ElementResponse
 import org.chorus_oss.chorus.form.window.CustomForm
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.protocol.packets.ModalFormResponsePacket
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.ModalFormResponsePacket
 
 class ModalFormResponseProcessor : DataPacketProcessor<MigrationPacket<ModalFormResponsePacket>>() {
     override fun handle(player: Player, pk: MigrationPacket<ModalFormResponsePacket>) {

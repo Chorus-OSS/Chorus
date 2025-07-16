@@ -1593,8 +1593,12 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     protected fun broadcastMovement(tp: Boolean) {
         var flags: Byte = 0
-        if (tp) { flags = flags or MoveActorAbsolutePacket.FLAG_TELEPORT }
-        if (this.onGround) { flags = flags or MoveActorAbsolutePacket.FLAG_ON_GROUND }
+        if (tp) {
+            flags = flags or MoveActorAbsolutePacket.FLAG_TELEPORT
+        }
+        if (this.onGround) {
+            flags = flags or MoveActorAbsolutePacket.FLAG_ON_GROUND
+        }
 
         val pk = MoveActorAbsolutePacket(
             entityRuntimeID = this.getRuntimeID().toULong(),

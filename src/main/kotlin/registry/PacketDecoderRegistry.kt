@@ -3,7 +3,9 @@ package org.chorus_oss.chorus.registry
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.PacketDecoder
 import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.AnimatePacket
+import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.chorus.network.protocol.LoginPacket
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, PacketDecoder<out DataPacket>> {

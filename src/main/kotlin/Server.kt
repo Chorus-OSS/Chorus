@@ -1338,7 +1338,7 @@ class Server internal constructor(
                     )
                 )
             ),
-            trustedSkinList = listOf(skin.isTrusted() || Server.instance.settings.playerSettings.forceSkinTrusted),
+            trustedSkinList = listOf(skin.isTrusted() || settings.playerSettings.forceSkinTrusted),
             removePlayerList = null,
         )
         broadcastPacket(players.toList(), pk)

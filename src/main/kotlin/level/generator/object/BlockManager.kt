@@ -108,7 +108,8 @@ class BlockManager(val level: Level) {
             blockList1 = blockList1.stream().filter(predicate).toList()
         }
         val chunks: MutableMap<IChunk, ArrayList<Block>> = mutableMapOf()
-        val batches: MutableMap<SubChunkEntry, org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket> = mutableMapOf()
+        val batches: MutableMap<SubChunkEntry, org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket> =
+            mutableMapOf()
 
         for (b in blockList1) {
             val chunk = chunks.computeIfAbsent(

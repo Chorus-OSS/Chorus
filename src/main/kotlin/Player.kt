@@ -560,7 +560,7 @@ open class Player(
             super.skin = value
             if (this.spawned) {
 //            this.Server.instance.updatePlayerListData(this.getUniqueId(), this.getId(), this.getDisplayName(), skin, this.getLoginChainData().getXUID());
-                val skinPacket = org.chorus_oss.protocol.packets.PlayerSkinPacket(
+                val skinPacket = PlayerSkinPacket(
                     uuid = Uuid(this.getUUID()),
                     skin = org.chorus_oss.protocol.types.skin.Skin(this.skin),
                     newSkinName = skin.getSkinId(),
@@ -789,8 +789,8 @@ open class Player(
     }
 
     private fun setTitle(text: String) {
-        val packet = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetTitle,
+        val packet = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetTitle,
             text = text,
             fadeInDuration = 0,
             remainDuration = 0,
@@ -1422,7 +1422,12 @@ open class Player(
         prevRotation.pitch = originalPos.pitch
 
         val syncPos = originalPos.position.add(0.0, 0.00001, 0.0)
-        this.sendPosition(syncPos, originalPos.yaw, originalPos.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset)
+        this.sendPosition(
+            syncPos,
+            originalPos.yaw,
+            originalPos.pitch,
+            MovePlayerPacket.Companion.Mode.Reset
+        )
 
         if (this.speed == null) {
             this.speed = Vector3(0.0, 0.0, 0.0)
@@ -2719,7 +2724,10 @@ open class Player(
     override fun moveDelta() {
         this.sendPosition(
             this.position,
-            rotation.yaw, rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal, viewers.values.toTypedArray()
+            rotation.yaw,
+            rotation.pitch,
+            MovePlayerPacket.Companion.Mode.Normal,
+            viewers.values.toTypedArray()
         )
     }
 
@@ -3456,8 +3464,8 @@ open class Player(
      * Clears away the title info being displayed on the player.
      */
     fun clearTitle() {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.Clear,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.Clear,
             text = "",
             fadeInDuration = 0,
             remainDuration = 0,
@@ -3476,8 +3484,8 @@ open class Player(
      * Resets both title animation times and subtitle for the next shown title.
      */
     fun resetTitleSettings() {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.Reset,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.Reset,
             text = "",
             fadeInDuration = 0,
             remainDuration = 0,
@@ -3498,8 +3506,8 @@ open class Player(
      * @param subtitle 副标题
      */
     fun setSubtitle(subtitle: String) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetSubtitle,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetSubtitle,
             text = subtitle,
             fadeInDuration = 0,
             remainDuration = 0,
@@ -3520,8 +3528,8 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextSubTitle(text: RawText) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetSubtitleJSON,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetSubtitleJSON,
             text = text.toRawText(),
             fadeInDuration = 0,
             remainDuration = 0,
@@ -3544,8 +3552,8 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setTitleAnimationTimes(fadein: Int, duration: Int, fadeout: Int) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetDurations,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetDurations,
             text = "",
             fadeInDuration = fadein,
             remainDuration = duration,
@@ -3566,8 +3574,8 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextTitle(text: RawText) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetTitleJSON,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetTitleJSON,
             text = text.toRawText(),
             fadeInDuration = 0,
             remainDuration = 0,
@@ -3630,8 +3638,8 @@ open class Player(
      */
     @JvmOverloads
     fun sendActionBar(title: String, fadein: Int = 1, duration: Int = 0, fadeout: Int = 1) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetActionbar,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetActionbar,
             text = title,
             fadeInDuration = fadein,
             remainDuration = duration,
@@ -3664,8 +3672,8 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setRawTextActionBar(text: RawText, fadein: Int, duration: Int, fadeout: Int) {
-        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
-            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetActionbarJSON,
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetActionbarJSON,
             text = text.toRawText(),
             fadeInDuration = fadein,
             remainDuration = duration,
@@ -4476,10 +4484,10 @@ open class Player(
         pos: Vector3,
         yaw: Double = rotation.yaw,
         pitch: Double = rotation.pitch,
-        mode: org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode = org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal,
+        mode: MovePlayerPacket.Companion.Mode = MovePlayerPacket.Companion.Mode.Normal,
         targets: Array<Player>? = null
     ) {
-        val pk = org.chorus_oss.protocol.packets.MovePlayerPacket(
+        val pk = MovePlayerPacket(
             entityRuntimeID = this.getRuntimeID().toULong(),
             position = Vector3f(
                 pos.x.toFloat(),
@@ -4491,7 +4499,7 @@ open class Player(
             headYaw = yaw.toFloat(),
             mode = when (this.riding) {
                 null -> mode
-                else -> org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Rotation
+                else -> MovePlayerPacket.Companion.Mode.Rotation
             },
             onGround = this.onGround,
             riddenEntityRuntimeID = this.riding.let {
@@ -4500,7 +4508,7 @@ open class Player(
                     else -> it.getRuntimeID().toULong()
                 }
             },
-            teleportCause = org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.TeleportCause.Unknown,
+            teleportCause = MovePlayerPacket.Companion.TeleportCause.Unknown,
             teleportSourceEntityType = 0,
             tick = 0u,
         )
@@ -4565,10 +4573,20 @@ open class Player(
                 this.nextChunkOrderRun = 0
             }
             //send to client
-            this.sendPosition(to.position, to.rotation.yaw, to.rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Teleport)
+            this.sendPosition(
+                to.position,
+                to.rotation.yaw,
+                to.rotation.pitch,
+                MovePlayerPacket.Companion.Mode.Teleport
+            )
             this.newPosition = to.position
         } else {
-            this.sendPosition(this.position, to.rotation.yaw, to.rotation.pitch, org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Teleport)
+            this.sendPosition(
+                this.position,
+                to.rotation.yaw,
+                to.rotation.pitch,
+                MovePlayerPacket.Companion.Mode.Teleport
+            )
             this.newPosition = this.position
         }
         //state update
