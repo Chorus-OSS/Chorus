@@ -43,6 +43,7 @@ import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
 import org.chorus_oss.protocol.packets.SetActorMotionPacket
 import org.chorus_oss.protocol.types.ActorLink
@@ -56,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.Volatile
+import kotlin.experimental.or
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -1590,16 +1592,24 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
 
     protected fun broadcastMovement(tp: Boolean) {
-        val pk = MoveEntityAbsolutePacket()
-        pk.eid = this.getRuntimeID()
-        pk.x = position.x
-        pk.y = position.y + this.getBaseOffset()
-        pk.z = position.z
-        pk.headYaw = rotation.yaw
-        pk.pitch = rotation.pitch
-        pk.yaw = rotation.yaw
-        pk.teleport = tp
-        pk.onGround = this.onGround
+        var flags: Byte = 0
+        if (tp) { flags = flags or MoveActorAbsolutePacket.FLAG_TELEPORT }
+        if (this.onGround) { flags = flags or MoveActorAbsolutePacket.FLAG_ON_GROUND }
+
+        val pk = MoveActorAbsolutePacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            flags = flags,
+            position = org.chorus_oss.protocol.types.Vector3f(
+                position.x.toFloat(),
+                (position.y + this.getBaseOffset()).toFloat(),
+                position.z.toFloat()
+            ),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                rotation.pitch.toFloat(),
+                rotation.yaw.toFloat(),
+                rotation.yaw.toFloat(),
+            )
+        )
         Server.broadcastPacket(hasSpawned.values, pk)
     }
 

@@ -61,8 +61,6 @@ class DataPacketManager {
             SetPlayerGameTypeProcessor(),
             LecternUpdateProcessor(),
             MapInfoRequestProcessor(),
-            // LevelSoundEventProcessor(),
-            // PlayerHotbarProcessor(),
             ServerSettingsRequestProcessor(),
             RespawnProcessor(),
             BookEditProcessor(),

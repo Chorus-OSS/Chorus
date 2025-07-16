@@ -17,11 +17,8 @@ class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, Pac
         register(ProtocolInfo.ANIMATE_PACKET, AnimatePacket)
         register(ProtocolInfo.ENTITY_EVENT_PACKET, EntityEventPacket)
         register(ProtocolInfo.LOGIN_PACKET, LoginPacket)
-        register(ProtocolInfo.MOVE_ENTITY_ABSOLUTE_PACKET, MoveEntityAbsolutePacket)
         register(ProtocolInfo.MOVE_PLAYER_PACKET, MovePlayerPacket)
         register(ProtocolInfo.PLAYER_SKIN_PACKET, PlayerSkinPacket)
-        register(ProtocolInfo.MOVE_ENTITY_DELTA_PACKET, MoveEntityDeltaPacket)
-        register(ProtocolInfo.LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket)
     }
 
     override operator fun get(key: Int): PacketDecoder<out DataPacket>? {

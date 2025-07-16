@@ -13,7 +13,6 @@ object ProtocolInfo {
 
     const val LOGIN_PACKET = 1
     const val START_GAME_PACKET = 11
-    const val MOVE_ENTITY_ABSOLUTE_PACKET = 18
     const val MOVE_PLAYER_PACKET = 19
     const val LEVEL_EVENT_PACKET = 25
     const val ENTITY_EVENT_PACKET = 27
