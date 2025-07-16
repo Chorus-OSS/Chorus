@@ -81,7 +81,6 @@ import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
 import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
 import org.chorus_oss.chorus.network.protocol.SetScorePacket
-import org.chorus_oss.chorus.network.protocol.SetTitlePacket
 import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -789,10 +788,17 @@ open class Player(
     }
 
     private fun setTitle(text: String) {
-        val packet = SetTitlePacket()
-        packet.text = text
-        packet.type = SetTitlePacket.TYPE_TITLE
-        this.dataPacket(packet)
+        val packet = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetTitle,
+            text = text,
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(packet)
     }
 
     //todo a lot on dimension
@@ -3449,9 +3455,17 @@ open class Player(
      * Clears away the title info being displayed on the player.
      */
     fun clearTitle() {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_CLEAR
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.Clear,
+            text = "",
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3461,9 +3475,17 @@ open class Player(
      * Resets both title animation times and subtitle for the next shown title.
      */
     fun resetTitleSettings() {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_RESET
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.Reset,
+            text = "",
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3475,10 +3497,17 @@ open class Player(
      * @param subtitle 副标题
      */
     fun setSubtitle(subtitle: String) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_SUBTITLE
-        pk.text = subtitle
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetSubtitle,
+            text = subtitle,
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3490,10 +3519,17 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextSubTitle(text: RawText) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_SUBTITLE_JSON
-        pk.text = text.toRawText()
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetSubtitleJSON,
+            text = text.toRawText(),
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3507,12 +3543,17 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setTitleAnimationTimes(fadein: Int, duration: Int, fadeout: Int) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ANIMATION_TIMES
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetDurations,
+            text = "",
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3524,10 +3565,17 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextTitle(text: RawText) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_TITLE_JSON
-        pk.text = text.toRawText()
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetTitleJSON,
+            text = text.toRawText(),
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
@@ -3581,13 +3629,17 @@ open class Player(
      */
     @JvmOverloads
     fun sendActionBar(title: String, fadein: Int = 1, duration: Int = 0, fadeout: Int = 1) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ACTION_BAR
-        pk.text = title
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetActionbar,
+            text = title,
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3611,13 +3663,17 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setRawTextActionBar(text: RawText, fadein: Int, duration: Int, fadeout: Int) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ACTIONBAR_JSON
-        pk.text = text.toRawText()
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.SetTitlePacket(
+            actionType = org.chorus_oss.protocol.packets.SetTitlePacket.Companion.ActionType.SetActionbarJSON,
+            text = text.toRawText(),
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 

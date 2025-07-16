@@ -23,7 +23,6 @@ object ProtocolInfo {
     const val CRAFTING_DATA_PACKET = 52
     const val PLAYER_LIST_PACKET = 63
     const val AVAILABLE_COMMANDS_PACKET = 76
-    const val SET_TITLE_PACKET = 88
     const val PLAYER_SKIN_PACKET = 93
     const val SET_SCORE_PACKET = 108
     const val MOVE_ENTITY_DELTA_PACKET = 111

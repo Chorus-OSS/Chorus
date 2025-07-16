@@ -20,7 +20,6 @@ class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, Pac
         register(ProtocolInfo.MOVE_ENTITY_ABSOLUTE_PACKET, MoveEntityAbsolutePacket)
         register(ProtocolInfo.MOVE_PLAYER_PACKET, MovePlayerPacket)
         register(ProtocolInfo.PLAYER_SKIN_PACKET, PlayerSkinPacket)
-        register(ProtocolInfo.SET_TITLE_PACKET, SetTitlePacket)
         register(ProtocolInfo.MOVE_ENTITY_DELTA_PACKET, MoveEntityDeltaPacket)
         register(ProtocolInfo.LEVEL_SOUND_EVENT_PACKET, LevelSoundEventPacket)
     }
