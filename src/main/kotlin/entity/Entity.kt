@@ -709,11 +709,16 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             }
 
             if (this is Player) {
-                val packet = MobEffectPacket()
-                packet.eid = player.getRuntimeID()
-                packet.effectId = effect.getId()
-                packet.eventId = MobEffectPacket.EVENT_REMOVE.toInt()
-                player.dataPacket(packet)
+                val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+                    entityRuntimeID = player.getRuntimeID().toULong(),
+                    operation = org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Remove,
+                    effectType = effect.getId(),
+                    amplifier = 0,
+                    particles = true,
+                    duration = 0,
+                    tick = 0u,
+                )
+                player.sendPacket(packet)
             }
 
             effect.remove(this)
@@ -752,19 +757,19 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
 
         if (this is Player) {
-            val packet = MobEffectPacket()
-            packet.eid = player.getRuntimeID()
-            packet.effectId = effect.getId()
-            packet.amplifier = effect.getAmplifier()
-            packet.particles = effect.isVisible()
-            packet.duration = effect.getDuration()
-            if (oldEffect != null) {
-                packet.eventId = MobEffectPacket.EVENT_MODIFY.toInt()
-            } else {
-                packet.eventId = MobEffectPacket.EVENT_ADD.toInt()
-            }
-
-            player.dataPacket(packet)
+            val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+                entityRuntimeID = player.getRuntimeID().toULong(),
+                operation = when (oldEffect) {
+                    null -> org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Add
+                    else -> org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Modify
+                },
+                effectType = effect.getId(),
+                amplifier = effect.getAmplifier(),
+                particles = effect.isVisible(),
+                duration = effect.getDuration(),
+                tick = 0u,
+            )
+            player.sendPacket(packet)
         }
 
         effect.add(this)
@@ -984,14 +989,16 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     fun sendPotionEffects(player: Player) {
         for (effect: Effect in effects.values) {
-            val packet = MobEffectPacket()
-            packet.eid = this.getRuntimeID()
-            packet.effectId = effect.getId()
-            packet.amplifier = effect.getAmplifier()
-            packet.particles = effect.isVisible()
-            packet.duration = effect.getDuration()
-            packet.eventId = MobEffectPacket.EVENT_ADD.toInt()
-            player.dataPacket(packet)
+            val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+                entityRuntimeID = player.getRuntimeID().toULong(),
+                operation = org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Add,
+                effectType = effect.getId(),
+                amplifier = effect.getAmplifier(),
+                particles = effect.isVisible(),
+                duration = effect.getDuration(),
+                tick = 0u,
+            )
+            player.sendPacket(packet)
         }
     }
 
