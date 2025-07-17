@@ -15,11 +15,11 @@ class RespawnProcessor : DataPacketProcessor<MigrationPacket<RespawnPacket>>() {
         if (player.isAlive()) {
             return
         }
-        if (packet.state == RespawnPacket.Companion.State.ReadyToSpawn) {
+        if (packet.state == RespawnPacket.Companion.State.ClientReadyToSpawn) {
             val respawn1 = RespawnPacket(
                 position = Vector3f(player.position),
                 state = RespawnPacket.Companion.State.ReadyToSpawn,
-                entityRuntimeID = player.getRuntimeID().toULong(),
+                entityRuntimeID = 0u,
             )
             player.sendPacket(respawn1)
         }
