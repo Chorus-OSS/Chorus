@@ -7,7 +7,7 @@ import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataMap
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
@@ -124,13 +124,17 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun sendAttributes() {
-        val pkAttributes = UpdateAttributesPacket()
-        pkAttributes.entityId = bossBarId
-        val attr = getAttribute(Attribute.MAX_HEALTH)
-        attr.setMaxValue(100f) // Max value - We need to change the max value first, or else the "setValue" will return a IllegalArgumentException
-        attr.setValue(length) // Entity health
-        pkAttributes.entries = arrayOf(attr)
-        player.dataPacket(pkAttributes)
+        val pkAttributes = UpdateAttributesPacket(
+            actorRuntimeID = this.bossBarId.toULong(),
+            attributes = listOf(
+                getAttribute(Attribute.MAX_HEALTH).apply {
+                    setMaxValue(100f) // Max value - We need to change the max value first, or else the "setValue" will return a IllegalArgumentException
+                    setValue(length) // Entity health
+                }
+            ).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        player.sendPacket(pkAttributes)
     }
 
     private fun sendShowBossBar() {

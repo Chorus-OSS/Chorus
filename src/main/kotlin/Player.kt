@@ -77,7 +77,7 @@ import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -2765,25 +2765,27 @@ open class Player(
      * Send attributes to client
      */
     fun sendAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entityId = this.getRuntimeID()
-        pk.entries = arrayOf(
-            getAttribute(Attribute.MAX_HEALTH)
-                .setMaxValue(getMaxHealth().toFloat())
-                .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f),
-            getAttribute(Attribute.MAX_HUNGER)
-                .setValue(foodData!!.getFood().toFloat()),
-            getAttribute(Attribute.MOVEMENT_SPEED).setValue(this.movementSpeed),
-            getAttribute(Attribute.EXPERIENCE_LEVEL).setValue(
-                experienceLevel.toFloat()
-            ),
-            getAttribute(Attribute.EXPERIENCE).setValue(
-                (experience.toFloat()) / calculateRequireExperience(
-                    experienceLevel
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(
+                getAttribute(Attribute.MAX_HEALTH)
+                    .setMaxValue(getMaxHealth().toFloat())
+                    .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f),
+                getAttribute(Attribute.MAX_HUNGER)
+                    .setValue(foodData!!.getFood().toFloat()),
+                getAttribute(Attribute.MOVEMENT_SPEED).setValue(this.movementSpeed),
+                getAttribute(Attribute.EXPERIENCE_LEVEL).setValue(
+                    experienceLevel.toFloat()
+                ),
+                getAttribute(Attribute.EXPERIENCE).setValue(
+                    (experience.toFloat()) / calculateRequireExperience(
+                        experienceLevel
+                    )
                 )
-            )
+            ).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
         )
-        this.dataPacket(pk)
+        this.sendPacket(pk)
     }
 
     /**
@@ -4137,10 +4139,12 @@ open class Player(
         attribute.setMaxValue((if (this.getAbsorption() % 2 != 0f) this.getMaxHealth() + 1 else this.getMaxHealth()).toFloat())
             .setValue(if (health1 > 0) (if (health1 < getMaxHealth()) health1 else getMaxHealth().toFloat()) else 0f)
         if (this.spawned) {
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attribute)
-            pk.entityId = this.getRuntimeID()
-            this.dataPacket(pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u
+            )
+            this.sendPacket(pk)
         }
     }
 
@@ -4152,10 +4156,12 @@ open class Player(
         attribute.setMaxValue((if (this.getAbsorption() % 2 != 0f) this.getMaxHealth() + 1 else this.getMaxHealth()).toFloat())
             .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f)
         if (this.spawned) {
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attribute)
-            pk.entityId = this.getRuntimeID()
-            this.dataPacket(pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u,
+            )
+            this.sendPacket(pk)
         }
     }
 
@@ -4317,17 +4323,21 @@ open class Player(
      * @param attribute the attribute
      */
     override fun syncAttribute(attribute: Attribute) {
-        val pk = UpdateAttributesPacket()
-        pk.entries = arrayOf(attribute)
-        pk.entityId = this.getRuntimeID()
-        this.dataPacket(pk)
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        this.sendPacket(pk)
     }
 
     override fun syncAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entries = attributes.values.filter { it.isSyncable() }.toTypedArray()
-        pk.entityId = this.getRuntimeID()
-        this.dataPacket(pk)
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = attributes.values.filter(Attribute::isSyncable).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        this.sendPacket(pk)
     }
 
     override fun setAbsorption(absorption: Float) {

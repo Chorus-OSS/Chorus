@@ -51,7 +51,7 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.utils.Utils
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.types.ActorLink
@@ -162,10 +162,12 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
                 .setDefaultValue(maxHealth.toFloat())
                 .setMaxValue(maxHealth.toFloat())
                 .setValue(if (health > 0) (if (health < maxHealth) health else maxHealth.toFloat()) else 0f)
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attr)
-            pk.entityId = this.getRuntimeID()
-            Server.broadcastPacket(this.viewers.values.toTypedArray(), pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attr).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u,
+            )
+            Server.broadcastPacket(this.viewers.values, pk)
         }
     }
 
@@ -176,10 +178,12 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
             .setDefaultValue(maxHealth.toFloat())
             .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f)
         if (this.isAlive()) {
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attr)
-            pk.entityId = this.getRuntimeID()
-            Server.broadcastPacket(this.viewers.values.toTypedArray(), pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attr).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u,
+            )
+            Server.broadcastPacket(this.viewers.values, pk)
         }
     }
 
@@ -461,10 +465,12 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
             .setDefaultValue(maxHealth.toFloat())
             .setMaxValue(maxHealth.toFloat())
             .setValue(if (health > 0) (if (health < maxHealth) health else maxHealth.toFloat()) else 0f)
-        val pk = UpdateAttributesPacket()
-        pk.entries = arrayOf(attr)
-        pk.entityId = this.getRuntimeID()
-        player.dataPacket(pk)
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(attr).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        player.sendPacket(pk)
     }
 
     protected fun generateRandomMaxHealth(): Float {

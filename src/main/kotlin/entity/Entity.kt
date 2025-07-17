@@ -47,6 +47,7 @@ import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.MoveActorDeltaPacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
 import org.chorus_oss.protocol.packets.SetActorMotionPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
@@ -1817,17 +1818,20 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     open fun syncAttribute(attribute: Attribute) {
-        val pk = UpdateAttributesPacket()
-        pk.entries = arrayOf(attribute)
-        pk.entityId = this.getRuntimeID()
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 
     open fun syncAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entries =
-            attributes.values.stream().filter { obj: Attribute -> obj.isSyncable() }.toList().toTypedArray()
-        pk.entityId = this.getRuntimeID()
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = attributes.values.filter(Attribute::isSyncable).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 
