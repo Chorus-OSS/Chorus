@@ -1542,7 +1542,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      *
      */
     open fun moveDelta() {
-        var flags: UShort = 0u
+        var flags: UShort = 0xFE00u // Unused fields must be true
         if (prevPosition.x != position.x) {
             flags = flags or MoveActorDeltaPacket.FLAG_HAS_X
         }
