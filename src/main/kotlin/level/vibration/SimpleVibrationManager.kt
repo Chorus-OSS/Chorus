@@ -1,18 +1,20 @@
 package org.chorus_oss.chorus.level.vibration
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.event.level.VibrationArriveEvent
 import org.chorus_oss.chorus.event.level.VibrationOccurEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.math.VectorMath
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.chorus.tags.BlockTags
+import org.chorus_oss.nbt.TagSerialization
 import kotlin.math.pow
 
 class SimpleVibrationManager(protected var level: Level) : VibrationManager {
@@ -65,9 +67,12 @@ class SimpleVibrationManager(protected var level: Level) : VibrationManager {
                 if (listener.isEntity) createEntityTargetTag(listener.asEntity()) else createVec3fTag(listenerPos)
             )
             .putFloat("timeToLive", (listenerPos.distance(sourcePos) / 20.0).toFloat())
-        val packet: LevelEventGenericPacket = LevelEventGenericPacket()
-        packet.eventId = LevelEventPacket.EVENT_PARTICLE_VIBRATION_SIGNAL
-        packet.tag = tag
+        val packet = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
+            eventID = org.chorus_oss.protocol.packets.LevelEventPacket.PARTICLE_VIBRATION_SIGNAL,
+            serializedEventData = Buffer().apply {
+                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(tag), this, TagSerialization.NetLE, false)
+            }.readByteString()
+        )
         // TODO: 只对在视野范围内的玩家发包
         Server.broadcastPacket(level.players.values, packet)
     }

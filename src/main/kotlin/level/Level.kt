@@ -5,7 +5,9 @@ import com.google.common.base.Preconditions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.Buffer
 import kotlinx.io.bytestring.ByteString
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.*
@@ -54,7 +56,6 @@ import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -62,6 +63,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
 import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.nbt.TagSerialization
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.types.BlockPos
 import org.chorus_oss.protocol.types.ChunkPos
@@ -372,10 +374,12 @@ class Level(
     }
 
     fun addLevelEvent(pos: Vector3, event: Int, data: CompoundTag) {
-        val pk: LevelEventGenericPacket = LevelEventGenericPacket()
-        pk.eventId = event
-        pk.tag = data
-
+        val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
+            eventID = event,
+            serializedEventData = Buffer().apply {
+                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(data), this, TagSerialization.NetLE, false)
+            }.readByteString()
+        )
         this.addChunkPacket(pos.chunkX, pos.chunkZ, pk)
     }
 

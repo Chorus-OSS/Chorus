@@ -1,5 +1,7 @@
 package org.chorus_oss.chorus.entity.mob.monster
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.*
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
@@ -27,13 +29,13 @@ import org.chorus_oss.chorus.entity.ai.sensor.PlayerStaringSensor
 import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.nbt.TagSerialization
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -137,18 +139,22 @@ class EntityCreaking(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
     }
 
     fun sendParticleTrail() {
-        val packet = LevelEventGenericPacket()
-        packet.eventId = LevelEventPacket.EVENT_PARTICLE_CREAKING_HEART_TRIAL
-        val tag = CompoundTag()
-        tag.putInt("CreakingAmount", 1)
-        tag.putFloat("CreakingX", position.x.toFloat())
-        tag.putFloat("CreakingY", position.y.toFloat())
-        tag.putFloat("CreakingZ", position.z.toFloat())
-        tag.putInt("HeartAmount", 1)
-        tag.putFloat("HeartX", creakingHeart!!.position.x.toFloat())
-        tag.putFloat("HeartY", creakingHeart!!.position.y.toFloat())
-        tag.putFloat("HeartZ", creakingHeart!!.position.z.toFloat())
-        packet.tag = tag
+        val packet = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
+            eventID = org.chorus_oss.protocol.packets.LevelEventPacket.PARTICLE_CREAKING_HEART_TRAIL,
+            serializedEventData = Buffer().apply {
+                val tag = CompoundTag().apply {
+                    putInt("CreakingAmount", 1)
+                    putFloat("CreakingX", position.x.toFloat())
+                    putFloat("CreakingY", position.y.toFloat())
+                    putFloat("CreakingZ", position.z.toFloat())
+                    putInt("HeartAmount", 1)
+                    putFloat("HeartX", creakingHeart!!.position.x.toFloat())
+                    putFloat("HeartY", creakingHeart!!.position.y.toFloat())
+                    putFloat("HeartZ", creakingHeart!!.position.z.toFloat())
+                }
+                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(tag), this, TagSerialization.NetLE, false)
+            }.readByteString()
+        )
         Server.broadcastPacket(this.viewers.values, packet)
     }
 

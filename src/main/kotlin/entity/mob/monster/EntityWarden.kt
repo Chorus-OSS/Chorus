@@ -58,7 +58,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                     if (this.memoryStorage.notEmpty(CoreMemoryTypes.ATTACK_TARGET)) setAmbientSoundEvent(
                         Sound.MOB_WARDEN_ANGRY
                     )
-                    else if (this.memoryStorage.notEmpty(CoreMemoryTypes.WARDEN_ANGER_VALUE)) setAmbientSoundEvent(
+                    else if (this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE].isNotEmpty()) setAmbientSoundEvent(
                         Sound.MOB_WARDEN_AGITATED
                     )
                     else setAmbientSoundEvent(Sound.MOB_WARDEN_IDLE)
@@ -66,7 +66,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                 }, { true }, 1, 1, 20),
                 Behavior({ entity: EntityMob ->
                     //刷新anger数值
-                    val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]!!
+                    val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]
                     val iterator = angerValueMap.entries.iterator()
                     while (iterator.hasNext()) {
                         val next =
@@ -117,7 +117,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
             setOf<IBehavior>(
                 Behavior(
                     WardenViolentAnimationExecutor((4.2 * 20).toInt()), all(
-                        IBehaviorEvaluator { entity: EntityMob ->
+                        { entity: EntityMob ->
                             entity.memoryStorage[CoreMemoryTypes.IS_ATTACK_TARGET_CHANGED]
                         },
                         MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.ATTACK_TARGET)
@@ -164,7 +164,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                 )
             ),
             setOf<ISensor>(RouteUnreachableTimeSensor(CoreMemoryTypes.ROUTE_UNREACHABLE_TIME)),
-            setOf<IController>(WalkController(), LookController(true, true), FluctuateController()),
+            setOf(WalkController(), LookController(true, true), FluctuateController()),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
             this
         )
@@ -270,7 +270,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
     }
 
     fun addEntityAngerValue(entity: Entity, addition: Int) {
-        val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]!!
+        val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]
         val attackTarget = this.memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
         val origin = angerValueMap.getOrDefault(entity, 0)
         var added = (origin + addition).coerceIn(0, 150)
