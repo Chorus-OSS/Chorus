@@ -44,6 +44,7 @@ import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
+import org.chorus_oss.protocol.packets.MoveActorDeltaPacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
 import org.chorus_oss.protocol.packets.SetActorMotionPacket
 import org.chorus_oss.protocol.types.ActorLink
@@ -1541,31 +1542,37 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      *
      */
     open fun moveDelta() {
-        val pk = MoveEntityDeltaPacket()
-        pk.runtimeEntityId = this.getRuntimeID()
+        var flags: UShort = 0u
         if (prevPosition.x != position.x) {
-            pk.x = position.x.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_X.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_X
         }
         if (prevPosition.y != position.y) {
-            pk.y = position.y.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Y.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Y
         }
         if (prevPosition.z != position.z) {
-            pk.z = position.z.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Z.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Z
         }
         if (prevRotation.pitch != rotation.pitch) {
-            pk.pitch = rotation.pitch.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_PITCH.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_X
         }
         if (prevRotation.yaw != rotation.yaw) {
-            pk.yaw = rotation.yaw.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_YAW.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_Y
         }
         if (this.onGround) {
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_ON_GROUND.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_ON_GROUND
         }
+
+        val pk = MoveActorDeltaPacket(
+            flags = flags,
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = org.chorus_oss.protocol.types.Vector3f(position),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                rotation.pitch.toFloat(),
+                rotation.yaw.toFloat(),
+                rotation.yaw.toFloat(),
+            ),
+        )
+
         Server.broadcastPacket(viewers.values, pk)
     }
 
