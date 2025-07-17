@@ -75,7 +75,6 @@ import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.SetScorePacket
@@ -2499,10 +2498,10 @@ open class Player(
 
             level!!.sleepTicks = 0
 
-            this.dataPacket(
-                AnimatePacket(
-                    targetRuntimeID = this.getRuntimeID(),
-                    action = AnimatePacket.Action.WAKE_UP,
+            this.sendPacket(
+                org.chorus_oss.protocol.packets.AnimatePacket(
+                    action = org.chorus_oss.protocol.packets.AnimatePacket.Action.WakeUp,
+                    targetRuntimeID = this.getRuntimeID().toULong(),
                     actionData = null,
                 )
             )

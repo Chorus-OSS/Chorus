@@ -21,7 +21,7 @@ import org.chorus_oss.chorus.math.AxisAlignedBB.BBConsumer
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
+import org.chorus_oss.protocol.packets.AnimatePacket
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
@@ -483,7 +483,7 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
 
     fun onPaddle(animation: AnimatePacket.Action, value: Float) {
         val propertyId =
-            if (animation == AnimatePacket.Action.ROW_RIGHT) EntityDataTypes.ROW_TIME_RIGHT else EntityDataTypes.ROW_TIME_LEFT
+            if (animation == AnimatePacket.Action.RowRight) EntityDataTypes.ROW_TIME_RIGHT else EntityDataTypes.ROW_TIME_LEFT
 
         if (getDataProperty(propertyId).compareTo(value) != 0) {
             this.setDataProperty(propertyId, value)

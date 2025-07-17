@@ -21,7 +21,6 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.round
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.scoreboard.manager.IScoreboardManager
 import org.chorus_oss.chorus.utils.TickCachedBlockIterator
@@ -111,9 +110,9 @@ abstract class EntityLiving(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, n
 
                 //Critical hit
                 if (damager is Player && !damager.onGround) {
-                    val animate = AnimatePacket(
-                        action = AnimatePacket.Action.CRITICAL_HIT,
-                        targetRuntimeID = getRuntimeID()
+                    val animate = org.chorus_oss.protocol.packets.AnimatePacket(
+                        action = org.chorus_oss.protocol.packets.AnimatePacket.Action.CriticalHit,
+                        targetRuntimeID = getRuntimeID().toULong(),
                     )
 
                     level!!.addChunkPacket(damager.getChunkX(), damager.getChunkZ(), animate)

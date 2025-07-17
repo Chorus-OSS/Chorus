@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.event.player
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.event.Cancellable
 import org.chorus_oss.chorus.event.HandlerList
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
+import org.chorus_oss.protocol.packets.AnimatePacket
 
 class PlayerAnimationEvent : PlayerEvent, Cancellable {
     @JvmField
@@ -16,8 +16,8 @@ class PlayerAnimationEvent : PlayerEvent, Cancellable {
         this.player = player
         animationType = animatePacket.action
         rowingTime = when (animationType) {
-            AnimatePacket.Action.ROW_LEFT,
-            AnimatePacket.Action.ROW_RIGHT -> {
+            AnimatePacket.Action.RowLeft,
+            AnimatePacket.Action.RowRight -> {
                 val actionData = animatePacket.actionData as AnimatePacket.Action.RowingData
                 actionData.rowingTime
             }
@@ -27,7 +27,7 @@ class PlayerAnimationEvent : PlayerEvent, Cancellable {
     }
 
     @JvmOverloads
-    constructor(player: Player, animation: AnimatePacket.Action = AnimatePacket.Action.SWING_ARM) {
+    constructor(player: Player, animation: AnimatePacket.Action = AnimatePacket.Action.SwingArm) {
         this.player = player
         this.animationType = animation
         rowingTime = 0f

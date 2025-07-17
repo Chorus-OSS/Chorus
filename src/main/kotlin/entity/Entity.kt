@@ -3020,7 +3020,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
 
-    fun playActionAnimation(action: AnimatePacket.Action, rowingTime: Float) {
+    fun playActionAnimation(action: org.chorus_oss.protocol.packets.AnimatePacket.Action, rowingTime: Float) {
         val viewers: HashSet<Player> = HashSet(viewers.values)
         if (this.isPlayer) viewers.add(this as Player)
         playActionAnimation(action, rowingTime, viewers)
@@ -3036,12 +3036,12 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @param rowingTime the rowing time
      * @param players    可视玩家 Visible Player
      */
-    fun playActionAnimation(action: AnimatePacket.Action, rowingTime: Float, players: Collection<Player>) {
+    fun playActionAnimation(action: org.chorus_oss.protocol.packets.AnimatePacket.Action, rowingTime: Float, players: Collection<Player>) {
         Server.broadcastPacket(
-            players, AnimatePacket(
+            players, org.chorus_oss.protocol.packets.AnimatePacket(
                 action = action,
-                targetRuntimeID = this.getRuntimeID(),
-                actionData = AnimatePacket.Action.RowingData(
+                targetRuntimeID = this.getRuntimeID().toULong(),
+                actionData = org.chorus_oss.protocol.packets.AnimatePacket.Action.RowingData(
                     rowingTime = rowingTime
                 )
             )
