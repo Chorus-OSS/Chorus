@@ -1,9 +1,9 @@
 package org.chorus_oss.chorus.scoreboard.scorer
 
-import org.chorus_oss.chorus.network.protocol.SetScorePacket.ScoreInfo
 import org.chorus_oss.chorus.scoreboard.IScoreboard
 import org.chorus_oss.chorus.scoreboard.IScoreboardLine
 import org.chorus_oss.chorus.scoreboard.data.ScorerType
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardEntry
 
 /**
  * 计分板追踪对象
@@ -28,5 +28,5 @@ interface IScorer {
      * @param line
      * @return network information
      */
-    fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreInfo?
+    fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreboardEntry?
 }

@@ -1,9 +1,9 @@
 package org.chorus_oss.chorus.scoreboard.scorer
 
-import org.chorus_oss.chorus.network.protocol.SetScorePacket.ScoreInfo
 import org.chorus_oss.chorus.scoreboard.IScoreboard
 import org.chorus_oss.chorus.scoreboard.IScoreboardLine
 import org.chorus_oss.chorus.scoreboard.data.ScorerType
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardEntry
 
 class FakeScorer(override val name: String) : IScorer {
     override val scorerType: ScorerType
@@ -20,7 +20,14 @@ class FakeScorer(override val name: String) : IScorer {
         return false
     }
 
-    override fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreInfo {
-        return ScoreInfo(line.lineId, scoreboard.objectiveName, line.score, name)
+    override fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreboardEntry {
+        return ScoreboardEntry(
+            entryID = line.lineId,
+            objectiveName = scoreboard.objectiveName,
+            score = line.score,
+            identityType = ScoreboardEntry.Companion.IdentityType.FakePlayer,
+            entityUniqueID = null,
+            displayName = name,
+        )
     }
 }

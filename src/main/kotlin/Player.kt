@@ -74,10 +74,9 @@ import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.SetScorePacket
 import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -104,6 +103,7 @@ import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.*
 import org.chorus_oss.protocol.types.Vector3f
 import org.chorus_oss.protocol.types.camera.preset.CameraPreset
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardRemoveEntry
 import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlot
 import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlotOrder
 import org.jetbrains.annotations.ApiStatus
@@ -2499,8 +2499,8 @@ open class Player(
             level!!.sleepTicks = 0
 
             this.sendPacket(
-                org.chorus_oss.protocol.packets.AnimatePacket(
-                    action = org.chorus_oss.protocol.packets.AnimatePacket.Action.WakeUp,
+                AnimatePacket(
+                    action = AnimatePacket.Action.WakeUp,
                     targetRuntimeID = this.getRuntimeID().toULong(),
                     actionData = null,
                 )
@@ -5621,11 +5621,18 @@ open class Player(
     }
 
     override fun removeLine(line: IScoreboardLine) {
-        val packet = SetScorePacket()
-        packet.action = SetScorePacket.Action.REMOVE
-        val networkInfo = line.toNetworkInfo()
-        if (networkInfo != null) packet.infos.add(networkInfo)
-        this.dataPacket(packet)
+        val packet = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Remove,
+            removeEntries = listOfNotNull(line.toNetworkInfo()).map {
+                ScoreboardRemoveEntry(
+                    entryID = it.entryID,
+                    objectiveName = it.objectiveName,
+                    score = it.score,
+                )
+            },
+            modifyEntries = null
+        )
+        this.sendPacket(packet)
 
         val scorer = PlayerScorer(this)
         if (line.scorer == scorer && line.scoreboard.getViewers(DisplaySlot.BELOW_NAME).contains(this)) {
@@ -5634,11 +5641,12 @@ open class Player(
     }
 
     override fun updateScore(line: IScoreboardLine) {
-        val packet = SetScorePacket()
-        packet.action = SetScorePacket.Action.SET
-        val networkInfo = line.toNetworkInfo()
-        if (networkInfo != null) packet.infos.add(networkInfo)
-        this.dataPacket(packet)
+        val packet = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Modify,
+            removeEntries = null,
+            modifyEntries = listOfNotNull(line.toNetworkInfo())
+        )
+        this.sendPacket(packet)
 
         val scorer = PlayerScorer(this)
         if (line.scorer == scorer && line.scoreboard.getViewers(DisplaySlot.BELOW_NAME).contains(this)) {
@@ -5657,11 +5665,12 @@ open class Player(
         this.sendPacket(pk)
 
         //client won't storage the score of a scoreboard,so we should send the score to client
-        val pk2 = SetScorePacket()
-        pk2.infos =
-            scoreboard.lines.values.stream().map { obj -> obj.toNetworkInfo() }.toList().filterNotNull().toMutableList()
-        pk2.action = SetScorePacket.Action.SET
-        this.dataPacket(pk2)
+        val pk2 = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Modify,
+            removeEntries = null,
+            modifyEntries = scoreboard.lines.values.mapNotNull { it.toNetworkInfo() }
+        )
+        this.sendPacket(pk2)
 
         val scorer = PlayerScorer(this)
         val line = scoreboard.getLine(scorer)

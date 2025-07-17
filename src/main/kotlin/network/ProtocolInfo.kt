@@ -18,7 +18,6 @@ object ProtocolInfo {
     const val UPDATE_ATTRIBUTES_PACKET = 29
     const val CRAFTING_DATA_PACKET = 52
     const val AVAILABLE_COMMANDS_PACKET = 76
-    const val SET_SCORE_PACKET = 108
     const val LEVEL_SOUND_EVENT_PACKET = 123
     const val LEVEL_EVENT_GENERIC_PACKET = 124
     const val PLAYER_ENCHANT_OPTIONS_PACKET = 146
