@@ -26,7 +26,6 @@ import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.network.process.DataPacketManager
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.process.handler.*
-import org.chorus_oss.chorus.network.protocol.AvailableCommandsPacket
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.plugin.InternalPlugin
@@ -501,7 +500,6 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         get() = address!!.address.hostAddress
 
     fun syncAvailableCommands() {
-        val pk = AvailableCommandsPacket()
         val data: MutableMap<String, CommandDataVersions> = HashMap()
         var count = 0
         val commands = Server.instance.commandMap.commands
@@ -515,9 +513,10 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
                 data[command.name] = data0!!
             }
         }
+
         if (count > 0) {
-            //TODO: structure checking
-            pk.commands = data
+            // TODO: structure checking
+            val pk = org.chorus_oss.protocol.packets.AvailableCommandsPacket(data)
             this.sendPacket(pk)
         }
     }
