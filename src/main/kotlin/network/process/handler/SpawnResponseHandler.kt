@@ -8,20 +8,36 @@ import org.chorus_oss.chorus.entity.data.property.EntityProperty.Companion.getPl
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
+import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.BedrockSession
-import org.chorus_oss.chorus.network.protocol.StartGamePacket
 import org.chorus_oss.chorus.network.protocol.types.TrimData
 import org.chorus_oss.chorus.registry.ItemRegistry
 import org.chorus_oss.chorus.registry.ItemRuntimeIdRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.AvailableActorIdentifiersPacket
+import org.chorus_oss.protocol.packets.ItemRegistryPacket
 import org.chorus_oss.protocol.packets.RequestChunkRadiusPacket
 import org.chorus_oss.protocol.packets.SetLocalPlayerAsInitializedPacket
+import org.chorus_oss.protocol.packets.TrimDataPacket
+import org.chorus_oss.protocol.types.BlockPos
+import org.chorus_oss.protocol.types.BlocksEntry
+import org.chorus_oss.protocol.types.BroadcastMode
+import org.chorus_oss.protocol.types.ChatRestrictionLevel
+import org.chorus_oss.protocol.types.EditorWorldType
+import org.chorus_oss.protocol.types.EduSharedUriResource
+import org.chorus_oss.protocol.types.ExperimentData
+import org.chorus_oss.protocol.types.GameRule
+import org.chorus_oss.protocol.types.PlayerMovementSettings
+import org.chorus_oss.protocol.types.SpawnBiomeType
 import org.chorus_oss.protocol.types.TrimMaterial
 import org.chorus_oss.protocol.types.TrimPattern
+import org.chorus_oss.protocol.types.Vector3f
 import org.chorus_oss.protocol.types.item.ItemEntry
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandler(session) {
     init {
@@ -54,14 +70,14 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         }
 
         player!!.sendPacket(
-            org.chorus_oss.protocol.packets.ItemRegistryPacket(
+            ItemRegistryPacket(
                 items = entries.toList()
             )
         )
 
         log.debug("Sending actor identifiers")
         player.sendPacket(
-            org.chorus_oss.protocol.packets.AvailableActorIdentifiersPacket(
+            AvailableActorIdentifiersPacket(
                 ByteString(Registries.ENTITY.tag)
             )
         )
@@ -108,7 +124,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         this.session.syncCreativeContent()
 
         log.debug("Sending trim data")
-        val trimDataPacket = org.chorus_oss.protocol.packets.TrimDataPacket(
+        val trimDataPacket = TrimDataPacket(
             patterns = TrimData.trimPatterns.map(TrimPattern::invoke),
             materials = TrimData.trimMaterials.map(TrimMaterial::invoke),
         )
@@ -128,46 +144,111 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         }
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     private fun startGame() {
+        requireNotNull(player)
+
         val server: Server = Server.instance
-        val startPk = StartGamePacket()
-
-        startPk.entityUniqueId = player!!.getRuntimeID()
-        startPk.entityRuntimeId = player.getRuntimeID()
-        startPk.playerGamemode = Player.toNetworkGamemode(player.gamemode)
-
-        startPk.x = player.position.x.toFloat()
-        startPk.y =
-            (if (player.isOnGround()) player.position.y + player.getEyeHeight() else player.position.y).toFloat() //防止在地上生成容易陷进地里
-        startPk.z = player.position.z.toFloat()
-        startPk.yaw = player.rotation.yaw.toFloat()
-        startPk.pitch = player.rotation.pitch.toFloat()
-        startPk.seed = -1L
-        startPk.dimension = (player.level!!.dimension and 0xff).toByte()
-        startPk.worldGamemode = Player.toNetworkGamemode(server.defaultGamemode)
-        startPk.difficulty = server.getDifficulty()
-        val spawn = player.safeSpawn
-        startPk.spawnX = spawn.floorX
-        startPk.spawnY = spawn.floorY
-        startPk.spawnZ = spawn.floorZ
-        startPk.hasAchievementsDisabled = true
-        startPk.dayCycleStopTime = -1
-        startPk.rainLevel = 0f
-        startPk.lightningLevel = 0f
-        startPk.commandsEnabled = player.isEnableClientCommand()
-        startPk.gameRules = player.level!!.gameRules
-        startPk.levelId = ""
-        startPk.worldName = server.subMotd
-        startPk.generator = ((player.level!!.dimension + 1) and 0xff).toByte()
-            .toInt() //0 旧世界 Old world, 1 主世界 Main world, 2 下界 Nether, 3 末地 End
-        startPk.serverAuthoritativeMovement = server.getServerAuthoritativeMovement()
-        startPk.isInventoryServerAuthoritative = true //enable item stack request packet
-        startPk.blockNetworkIdsHashed = true //enable blockhash
-        // 写入自定义方块数据
-        // Write custom block data
-        startPk.blockProperties.addAll(Registries.BLOCK.customBlockDefinitionList)
-        startPk.playerPropertyData = getPlayerPropertyCache()
-        player.dataPacketImmediately(startPk)
+        val packet = org.chorus_oss.protocol.packets.StartGamePacket(
+            entityUniqueID = player.getUniqueID(),
+            entityRuntimeID = player.getRuntimeID().toULong(),
+            playerGameMode = Player.toNetworkGamemode(player.gamemode),
+            playerPosition = Vector3f(
+                player.position.x.toFloat(),
+                (if (player.isOnGround()) player.position.y + player.getEyeHeight() else player.position.y).toFloat(),
+                player.position.z.toFloat()
+            ),
+            pitch = player.rotation.pitch.toFloat(),
+            yaw = player.rotation.yaw.toFloat(),
+            worldSeed = -1,
+            spawnBiomeType = SpawnBiomeType.Default,
+            userDefinedBiomeName = "plains",
+            dimension = (player.level!!.dimension and 0xff),
+            generator = ((player.level!!.dimension + 1) and 0xff), // 0: Legacy, 1: Overworld, 2: Nether, 3: The End
+            worldGameMode = Player.toNetworkGamemode(server.defaultGamemode),
+            hardcore = false,
+            difficulty = server.getDifficulty(),
+            worldSpawn = BlockPos(player.safeSpawn),
+            achievementsDisabled = true,
+            editorWorldType = EditorWorldType.NotEditor,
+            createdInEditor = false,
+            exportedFromEditor = false,
+            dayCycleLockTime = -1,
+            educationEditionOffer = 0,
+            educationFeaturesEnabled = false,
+            educationProductID = "",
+            rainLevel = 0f,
+            lightningLevel = 0f,
+            confirmedPlatformLockedContent = false,
+            multiPlayerGame = true,
+            lanBroadcastEnabled = true,
+            xblBroadcastMode = BroadcastMode.Public,
+            platformBroadcastMode = BroadcastMode.Public,
+            commandsEnabled = player.isEnableClientCommand(),
+            texturePackRequired = false,
+            gameRules = player.level!!.gameRules.getGameRules().entries.map { it.toPair() }.map { GameRule(it) },
+            experiments = listOf(
+                ExperimentData("data_driven_items", true),
+                ExperimentData("data_driven_biomes", true),
+                ExperimentData("upcoming_creator_features", true),
+                ExperimentData("gametest", true),
+                ExperimentData("experimental_molang_features", true),
+                ExperimentData("cameras", true),
+            ),
+            experimentsPreviouslyToggled = true,
+            bonusChestEnabled = false,
+            startWithMapEnabled = false,
+            playerPermissions = 1,
+            serverChunkTickRadius = 4,
+            hasLockedBehaviourPack = false,
+            hasLockedTexturePack = false,
+            fromLockedWorldTemplate = false,
+            msaGamerTagsOnly = false,
+            fromWorldTemplate = false,
+            worldTemplateSettingsLocked = false,
+            onlySpawnV1Villagers = false,
+            personaDisabled = false,
+            customSkinsDisabled = false,
+            emoteChatMuted = false,
+            baseGameVersion = "*",
+            limitedWorldWidth = 16,
+            limitedWorldDepth = 16,
+            newNether = false,
+            educationSharedResourceUriResource = EduSharedUriResource("", ""),
+            forceExperimentalGameplay = null,
+            chatRestrictionLevel = ChatRestrictionLevel.None,
+            disablePlayerInteractions = false,
+            serverID = "",
+            worldID = "",
+            scenarioID = "",
+            ownerID = "",
+            levelID = "",
+            worldName = server.subMotd,
+            templateContentIdentity = "",
+            trial = false,
+            playerMovementSettings = PlayerMovementSettings(
+                rewindHistorySize = 0,
+                serverAuthoritativeBlockBreaking = server.getServerAuthoritativeMovement() > 0
+            ),
+            tick = 0,
+            enchantmentSeed = 0,
+            blocks = Registries.BLOCK.customBlockDefinitionList.map {
+                BlocksEntry(
+                    name = it.identifier,
+                    properties = org.chorus_oss.nbt.tags.CompoundTag(it.nbt)
+                )
+            },
+            multiPlayerCorrelationID = "",
+            serverAuthoritativeInventory = true,
+            gameVersion = ProtocolInfo.GAME_VERSION_NET,
+            propertyData = org.chorus_oss.nbt.tags.CompoundTag(getPlayerPropertyCache()),
+            serverBlockStateChecksum = 0u,
+            clientSideGeneration = false,
+            worldTemplateID = Uuid.fromLongs(0, 0),
+            useBlockNetworkIDHashes = true,
+            serverAuthoritativeSound = false,
+        )
+        player.sendPacketImmediately(packet)
     }
 
     override fun handle(pk: MigrationPacket<*>) {
