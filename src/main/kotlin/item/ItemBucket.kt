@@ -17,7 +17,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Identifier
 
 
@@ -293,7 +292,7 @@ open class ItemBucket : Item {
                     this.damage = 0 // Empty bucket
                     player.inventory.setItemInHand(this)
                 }
-                player.level!!.addLevelSoundEvent(target.position, LevelSoundEventPacket.SOUND_FIZZ)
+                player.level!!.addLevelSoundEvent(target.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Fizz)
                 player.level!!.addParticle(ExplodeParticle(target.position.add(0.5, 1.0, 0.5)))
             } else {
                 player.level!!.sendBlocks(

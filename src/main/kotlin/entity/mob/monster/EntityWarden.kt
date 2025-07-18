@@ -38,7 +38,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationListener
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import kotlin.math.abs
 
 class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), EntityWalkable, VibrationListener {
@@ -187,7 +186,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
         this.maxHealth = 500
         super.initEntity()
         this.setDataProperty(EntityDataTypes.HEARTBEAT_INTERVAL_TICKS, 40)
-        this.setDataProperty(EntityDataTypes.HEARTBEAT_SOUND_EVENT, LevelSoundEventPacket.SOUND_HEARTBEAT)
+        this.setDataProperty(EntityDataTypes.HEARTBEAT_SOUND_EVENT, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Heartbeat.id)
         //空闲声音
         this.setAmbientSoundEvent(Sound.MOB_WARDEN_IDLE)
         this.setAmbientSoundInterval(8.0f)

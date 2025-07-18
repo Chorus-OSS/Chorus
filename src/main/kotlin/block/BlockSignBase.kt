@@ -14,7 +14,6 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.CompassRoseDirection
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.Faceable
 import java.util.*
@@ -55,7 +54,7 @@ abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockSta
             ) {
                 level.addLevelSoundEvent(
                     position.add(0.5, 0.5, 0.5),
-                    LevelSoundEventPacket.SOUND_WAXED_SIGN_INTERACT_FAIL
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WaxedSignInteractFail
                 )
                 return
             }

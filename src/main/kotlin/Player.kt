@@ -76,7 +76,6 @@ import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -672,7 +671,7 @@ open class Player(
         val block = target.getSide(face)
         if (block.id == BlockID.FIRE || block.id == BlockID.SOUL_FIRE) {
             level!!.setBlock(block.position, Block.get(BlockID.AIR), true)
-            level!!.addLevelSoundEvent(block.position, LevelSoundEventPacket.SOUND_EXTINGUISH_FIRE)
+            level!!.addLevelSoundEvent(block.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.ExtinguishFire)
             return
         }
 
@@ -4232,7 +4231,7 @@ open class Player(
             this.lastPlayerdLevelUpSoundTime = this.age
             this.level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_LEVELUP,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Levelup,
                 min(7.0, (level / 5).toDouble()).toInt() shl 28,
                 "",
                 isBaby = false, isGlobal = false

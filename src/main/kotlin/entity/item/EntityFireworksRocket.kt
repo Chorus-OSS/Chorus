@@ -18,7 +18,6 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.DyeColor
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -135,7 +134,7 @@ open class EntityFireworksRocket(chunk: IChunk?, nbt: CompoundTag) : Entity(chun
                 pk.event = EntityEventPacket.FIREWORK_EXPLOSION
                 pk.eid = this.getRuntimeID()
 
-                level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.SOUND_LARGE_BLAST, -1, getNetworkID())
+                level!!.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.LargeBlast, -1, getNetworkID())
 
                 Server.broadcastPacket(viewers.values, pk)
 

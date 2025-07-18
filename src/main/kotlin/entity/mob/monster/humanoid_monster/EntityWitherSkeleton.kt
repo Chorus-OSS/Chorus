@@ -33,7 +33,6 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.function.Function
 
@@ -117,7 +116,7 @@ class EntityWitherSkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(c
             this.setItemInHand(Item.get(ItemID.STONE_SWORD))
         }
         // 设置凋零骷髅空闲状态播放空闲声音
-        this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, LevelSoundEventPacket.SOUND_AMBIENT)
+        this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id)
     }
 
     override fun getWidth(): Float {

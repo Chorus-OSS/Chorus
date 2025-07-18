@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 
 class BlockCake @JvmOverloads constructor(blockState: BlockState = properties.defaultState) :
     BlockTransparent(blockState) {
@@ -120,7 +119,7 @@ class BlockCake @JvmOverloads constructor(blockState: BlockState = properties.de
                 player.foodData?.addFood(2, 0.4f)
                 level.setBlock(this.position, this, true)
             }
-            level.addLevelSoundEvent(this.position, LevelSoundEventPacket.SOUND_BURP)
+            level.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Burp)
             level.vibrationManager.callVibrationEvent(
                 VibrationEvent(
                     player,

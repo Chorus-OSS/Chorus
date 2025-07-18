@@ -29,7 +29,6 @@ import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.particle.BoneMealParticle
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.registry.Registries
 import java.util.concurrent.ThreadLocalRandom
 
@@ -97,7 +96,7 @@ class BlockTurtleEgg @JvmOverloads constructor(blockstate: BlockState = properti
             val placeBlock = placeEvent.block
             level.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_PLACE,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Place,
                 placeBlock.runtimeId
             )
             item.setCount(item.getCount() - 1)

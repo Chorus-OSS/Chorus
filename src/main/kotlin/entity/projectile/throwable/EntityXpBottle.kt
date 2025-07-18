@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.level.particle.Particle
 import org.chorus_oss.chorus.level.particle.SpellParticle
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 class EntityXpBottle @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTag, shootingEntity: Entity? = null) :
@@ -67,7 +66,7 @@ class EntityXpBottle @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTag,
         val particle2: Particle = SpellParticle(this.position, 0x00385dc6)
         level!!.addParticle(particle2)
 
-        level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.SOUND_GLASS)
+        level!!.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Glass)
 
         level!!.dropExpOrb(this.position, ThreadLocalRandom.current().nextInt(3, 12))
     }

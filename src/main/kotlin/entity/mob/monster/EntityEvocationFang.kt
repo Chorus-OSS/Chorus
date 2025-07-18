@@ -13,7 +13,6 @@ import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 
 class EntityEvocationFang(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), EntityWalkable {
     var evocationIllager: EntityEvocationIllager? = null
@@ -27,7 +26,7 @@ class EntityEvocationFang(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chun
         super.initEntity()
         level!!.addLevelSoundEvent(
             this.position,
-            LevelSoundEventPacket.SOUND_FANG,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Fang,
             -1,
             EntityID.EVOCATION_FANG,
             false,

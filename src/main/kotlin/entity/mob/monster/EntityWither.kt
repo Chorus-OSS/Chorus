@@ -41,7 +41,6 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
@@ -175,7 +174,7 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
             deathTicks = 190
             level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_DEATH,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Death,
                 -1,
                 EntityID.WITHER,
                 false,

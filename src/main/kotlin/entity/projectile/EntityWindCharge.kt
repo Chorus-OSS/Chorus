@@ -14,7 +14,6 @@ import org.chorus_oss.chorus.level.particle.GenericParticle
 import org.chorus_oss.chorus.level.particle.Particle
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 
 open class EntityWindCharge @JvmOverloads constructor(
     chunk: IChunk?,
@@ -53,7 +52,7 @@ open class EntityWindCharge @JvmOverloads constructor(
                 }
             }
         }
-        level!!.addLevelSoundEvent(locator.position.add(0.0, 1.0), LevelSoundEventPacket.SOUND_WIND_CHARGE_BURST)
+        level!!.addLevelSoundEvent(locator.position.add(0.0, 1.0), org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WindChargeBurst)
         this.kill()
 
         return true
@@ -66,7 +65,7 @@ open class EntityWindCharge @JvmOverloads constructor(
         entity.attack(EntityDamageByEntityEvent(this, entity, DamageCause.PROJECTILE, 1f))
         level!!.addLevelSoundEvent(
             entity.locator.position.add(0.0, 1.0),
-            LevelSoundEventPacket.SOUND_WIND_CHARGE_BURST
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WindChargeBurst
         )
         level!!.addParticle(GenericParticle(this.position, Particle.TYPE_WIND_EXPLOSION))
         knockBack(entity)

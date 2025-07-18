@@ -30,7 +30,6 @@ import org.chorus_oss.chorus.level.particle.ItemBreakParticle
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.DyeColor
 import org.chorus_oss.chorus.utils.Utils
 import java.util.function.Function
@@ -206,12 +205,12 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
         if (this.isBaby()) {
             this.setDataProperty(
                 EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
-                LevelSoundEventPacket.SOUND_AMBIENT_BABY
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.AmbientBaby.id
             )
         } else {
             this.setDataProperty(
                 EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
-                LevelSoundEventPacket.SOUND_AMBIENT
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id
             )
         }
         if (!hasVariant()) {

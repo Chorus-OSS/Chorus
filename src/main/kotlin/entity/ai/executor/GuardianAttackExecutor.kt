@@ -11,7 +11,6 @@ import org.chorus_oss.chorus.entity.mob.monster.EntityMonster
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 
 class GuardianAttackExecutor(
     protected var memory: NullableMemoryType<out Entity>,
@@ -119,7 +118,7 @@ class GuardianAttackExecutor(
         entity.setDataProperty(EntityDataTypes.TARGET_EID, target!!.getRuntimeID())
         entity.level!!.addLevelSoundEvent(
             entity.position,
-            LevelSoundEventPacket.SOUND_MOB_WARNING,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.MobWarning,
             -1,
             entity.getEntityIdentifier(),
             false,

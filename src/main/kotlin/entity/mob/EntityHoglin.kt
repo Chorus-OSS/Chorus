@@ -36,7 +36,6 @@ import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Utils
 
 class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), EntityWalkable {
@@ -233,7 +232,7 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
             entity.setDataFlag(EntityFlag.ANGRY)
             entity.level!!.addLevelSoundEvent(
                 entity.position,
-                LevelSoundEventPacket.SOUND_ANGRY,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Angry,
                 -1,
                 EntityID.HOGLIN,
                 false,

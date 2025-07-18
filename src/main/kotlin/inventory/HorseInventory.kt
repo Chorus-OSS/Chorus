@@ -12,7 +12,6 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
 import org.chorus_oss.nbt.TagSerialization
 import org.chorus_oss.protocol.types.ContainerType
@@ -45,7 +44,7 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
                 (holder as EntityHorse).setDataFlag(EntityFlag.CAN_POWER_JUMP, false)
             } else {
                 holder.level!!.addLevelSoundEvent(
-                    holder.vector3, LevelSoundEventPacket.SOUND_SADDLE, -1,
+                    holder.vector3, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Saddle, -1,
                     (holder as EntityHorse).getEntityIdentifier(), false, false
                 )
                 (holder as EntityHorse).setDataFlag(EntityFlag.SADDLED)

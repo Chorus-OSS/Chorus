@@ -57,7 +57,6 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
@@ -386,14 +385,13 @@ class Level(
     @JvmOverloads
     fun addLevelSoundEvent(
         pos: Vector3,
-        type: Int,
+        type: org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType,
         data: Int,
         entityType: Int,
         isBaby: Boolean = false,
         isGlobal: Boolean = false
     ) {
-        var identifier = Registries.ENTITY.getEntityIdentifier(entityType)
-        if (identifier == null) identifier = ":"
+        val identifier = Registries.ENTITY.getEntityIdentifier(entityType)
         addLevelSoundEvent(pos, type, data, identifier, isBaby, isGlobal)
     }
 
@@ -401,7 +399,7 @@ class Level(
      * Broadcasts a LevelSound to players,use LevelSoundEventPacket
      *
      * @param pos        the pos
-     * @param type       the sound type id,get from[LevelSoundEventPacket]
+     * @param type       the sound type id,get from[org.chorus_oss.protocol.packets.LevelSoundEventPacket]
      * @param data       the extra data,default -1
      * @param identifier the identifier,default ":"
      * @param isBaby     the is baby,default false
@@ -411,28 +409,27 @@ class Level(
      * Broadcasts sound to players
      *
      * @param pos  position where sound should be played
-     * @param type ID of the sound from [org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket]
+     * @param type ID of the sound from [org.chorus_oss.protocol.packetsLevelSoundEventPacket]
      * @param data generic data that can affect sound
      */
     @JvmOverloads
     fun addLevelSoundEvent(
         pos: Vector3,
-        type: Int,
+        type: org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType,
         data: Int = -1,
         identifier: String = ":",
         isBaby: Boolean = false,
         isGlobal: Boolean = false
     ) {
-        val pk = LevelSoundEventPacket()
-        pk.sound = type
-        pk.extraData = data
-        pk.entityIdentifier = identifier
-        pk.x = pos.x.toFloat()
-        pk.y = pos.y.toFloat()
-        pk.z = pos.z.toFloat()
-        pk.isBabyMob = isBaby
-        pk.isGlobal = isGlobal
-
+        val pk = org.chorus_oss.protocol.packets.LevelSoundEventPacket(
+            soundType = type,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            extraData = data,
+            entityType = identifier,
+            babyMob = isBaby,
+            global = isGlobal,
+            actorUniqueID = -1,
+        )
         this.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
     }
 
@@ -984,13 +981,13 @@ class Level(
 
             this.addLevelSoundEvent(
                 vector,
-                LevelSoundEventPacket.SOUND_THUNDER,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Thunder,
                 -1,
                 Registries.ENTITY.getEntityNetworkId(EntityID.LIGHTNING_BOLT)
             )
             this.addLevelSoundEvent(
                 vector,
-                LevelSoundEventPacket.SOUND_EXPLODE,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Explode,
                 -1,
                 Registries.ENTITY.getEntityNetworkId(EntityID.LIGHTNING_BOLT)
             )
@@ -2857,7 +2854,7 @@ class Level(
         }
 
         if (playSound) {
-            this.addLevelSoundEvent(hand.position, LevelSoundEventPacket.SOUND_PLACE, hand.runtimeId)
+            this.addLevelSoundEvent(hand.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Place, hand.runtimeId)
         }
 
         if (item1.getCount() <= 0) {

@@ -13,7 +13,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.RedstoneComponent
 import org.chorus_oss.protocol.types.BlockPos
 
@@ -186,7 +185,7 @@ class BlockNoteblock @JvmOverloads constructor(blockstate: BlockState = properti
 
         level.addLevelSoundEvent(
             this.position,
-            LevelSoundEventPacket.SOUND_NOTE,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Note,
             instrument.ordinal shl 8 or this.strength
         )
 

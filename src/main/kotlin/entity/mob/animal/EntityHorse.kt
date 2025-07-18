@@ -50,7 +50,6 @@ import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.utils.Utils
 import org.chorus_oss.protocol.core.Packet
@@ -443,7 +442,7 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
      */
     fun playTameFailAnimation() {
         level!!.addLevelSoundEvent(
-            this.position, LevelSoundEventPacket.SOUND_MAD, -1, "minecraft:horse",
+            this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Mad, -1, "minecraft:horse",
             this.isBaby(), false
         )
         this.setDataFlag(EntityFlag.STANDING)

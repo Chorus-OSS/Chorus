@@ -45,7 +45,6 @@ import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.BossEventPacket
@@ -168,7 +167,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         if (currentTick % 2 == 0) {
             if (currentTick % (if (position.toHorizontal().distance(Vector2.ZERO) < 1) 10 else 20) == 0) {
                 level!!.addLevelSoundEvent(
-                    this.position, LevelSoundEventPacket.SOUND_FLAP, -1,
+                    this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Flap, -1,
                     this.getEntityIdentifier(), false, false
                 )
             }
@@ -193,7 +192,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
             deathTicks = 190
             level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_DEATH,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Death,
                 -1,
                 getEntityIdentifier(),
                 false,
