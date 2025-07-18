@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.LevelSoundEventPacket
 import java.util.*
 import kotlin.math.abs
@@ -48,10 +48,11 @@ class EntityElytraFirework(chunk: IChunk?, nbt: CompoundTag, private var followi
                     ++this.fireworkAge
                     hasUpdate = true
                     if (this.fireworkAge >= this.lifetime) {
-                        val pk: EntityEventPacket = EntityEventPacket()
-                        pk.data = 0
-                        pk.event = 25
-                        pk.eid = this.getRuntimeID()
+                        val pk = ActorEventPacket(
+                            actorRuntimeID = this.getRuntimeID().toULong(),
+                            eventType = ActorEventPacket.Companion.Type.FireworkExplosion,
+                            eventData = 0
+                        )
                         level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.Companion.SoundType.LargeBlast, -1, 72)
                         Server.broadcastPacket(viewers.values, pk)
                         this.kill()

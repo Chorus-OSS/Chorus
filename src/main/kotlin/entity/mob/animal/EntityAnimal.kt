@@ -9,7 +9,7 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 
@@ -32,10 +32,11 @@ abstract class EntityAnimal(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk,
     }
 
     protected fun sendBreedingAnimation(item: Item) {
-        val pk = EntityEventPacket()
-        pk.event = EntityEventPacket.EATING_ITEM
-        pk.eid = this.getRuntimeID()
-        pk.data = item.fullId
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.EatingItem,
+            eventData = item.fullId,
+        )
         Server.broadcastPacket(this.viewers.values, pk)
     }
 

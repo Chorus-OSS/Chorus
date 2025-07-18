@@ -16,7 +16,7 @@ import org.chorus_oss.chorus.inventory.EntityInventoryHolder
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.*
 
 /**
@@ -210,9 +210,11 @@ open class MeleeAttackExecutor(
     }
 
     protected fun playAttackAnimation(entity: EntityMob) {
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.ARM_SWING
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.ArmSwing,
+            eventData = 0
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

@@ -74,7 +74,6 @@ import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
@@ -4395,10 +4394,12 @@ open class Player(
                     //保存攻击玩家的实体在lastBeAttackEntity
                     this.lastBeAttackEntity = source.damager
                 }
-                val pk = EntityEventPacket()
-                pk.eid = this.getRuntimeID()
-                pk.event = EntityEventPacket.HURT_ANIMATION
-                this.dataPacket(pk)
+                val pk = ActorEventPacket(
+                    actorRuntimeID = this.getRuntimeID().toULong(),
+                    eventType = ActorEventPacket.Companion.Type.HurtAnimation,
+                    eventData = 0
+                )
+                this.sendPacket(pk)
             }
             return true
         } else {

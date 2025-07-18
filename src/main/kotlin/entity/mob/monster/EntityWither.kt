@@ -40,8 +40,8 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
@@ -180,9 +180,11 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
                 false,
                 false
             )
-            val packet = EntityEventPacket()
-            packet.event = EntityEventPacket.DEATH_ANIMATION
-            packet.eid = getRuntimeID()
+            val packet = ActorEventPacket(
+                actorRuntimeID = getRuntimeID().toULong(),
+                eventType = ActorEventPacket.Companion.Type.DeathAnimation,
+                eventData = 0
+            )
             Server.broadcastPacket(viewers.values, packet)
             setImmobile(true)
         } else {

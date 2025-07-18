@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityLiving
 import org.chorus_oss.chorus.entity.data.EntityFlag
 import org.chorus_oss.chorus.entity.mob.EntityMob
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 class BreezeJumpExecutor : EntityControl, IBehaviorExecutor {
@@ -50,9 +50,11 @@ class BreezeJumpExecutor : EntityControl, IBehaviorExecutor {
         motion.y = 0.6 + random.nextDouble(0.5)
         entity.setMotion(motion)
         entity.setDataFlag(EntityFlag.JUMP_GOAL_JUMP, false)
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.DUST_PARTICLES
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.DustParticles,
+            eventData = 0
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

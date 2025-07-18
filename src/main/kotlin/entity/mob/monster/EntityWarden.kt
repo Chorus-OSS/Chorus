@@ -37,7 +37,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationListener
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import kotlin.math.abs
 
 class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), EntityWalkable, VibrationListener {
@@ -214,9 +214,11 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
     override fun onVibrationArrive(event: VibrationEvent) {
         this.waitForVibration = false
         this.lastDetectTime = level!!.tick
-        val pk = EntityEventPacket()
-        pk.eid = this.getRuntimeID()
-        pk.event = EntityEventPacket.VIBRATION_DETECTED
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.VibrationDetected,
+            eventData = 0
+        )
         Server.broadcastPacket(this.viewers.values, pk)
 
         //handle anger value

@@ -35,8 +35,8 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), EntityWalkable {
     override fun getEntityIdentifier(): String {
@@ -194,10 +194,11 @@ class EntityHoglin(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), En
     }
 
     protected fun sendBreedingAnimation(item: Item) {
-        val pk: EntityEventPacket = EntityEventPacket()
-        pk.event = EntityEventPacket.EATING_ITEM
-        pk.eid = this.getRuntimeID()
-        pk.data = item.fullId
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.EatingItem,
+            eventData = item.fullId,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 

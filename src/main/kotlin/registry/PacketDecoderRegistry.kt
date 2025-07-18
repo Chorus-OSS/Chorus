@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.registry
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.PacketDecoder
 import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.network.protocol.LoginPacket
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -15,7 +14,6 @@ class PacketDecoderRegistry : IRegistry<Int, PacketDecoder<out DataPacket>?, Pac
         if (initialized.getAndSet(true)) return
 
         // Register all packets that are Client -> Server
-        register(ProtocolInfo.ENTITY_EVENT_PACKET, EntityEventPacket)
         register(ProtocolInfo.LOGIN_PACKET, LoginPacket)
     }
 

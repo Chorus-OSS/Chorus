@@ -21,9 +21,9 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.round
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.scoreboard.manager.IScoreboardManager
 import org.chorus_oss.chorus.utils.TickCachedBlockIterator
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.*
 import kotlin.math.sqrt
 
@@ -65,9 +65,11 @@ abstract class EntityLiving(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, n
         val wasAlive: Boolean = this.isAlive()
         super.setHealthSafe(health)
         if (this.isAlive() && !wasAlive) {
-            val pk = EntityEventPacket()
-            pk.eid = this.getRuntimeID()
-            pk.event = EntityEventPacket.RESPAWN
+            val pk = ActorEventPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                eventType = ActorEventPacket.Companion.Type.Respawn,
+                eventData = 0
+            )
             Server.broadcastPacket(hasSpawned.values, pk)
         }
     }
@@ -130,10 +132,11 @@ abstract class EntityLiving(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, n
                 this.knockBack(damager, source.damage.toDouble(), deltaX, deltaZ, source.knockBack.toDouble())
             }
 
-            val pk: EntityEventPacket = EntityEventPacket()
-            pk.eid = this.getRuntimeID()
-            pk.event =
-                if (this.health <= 0) EntityEventPacket.DEATH_ANIMATION else EntityEventPacket.HURT_ANIMATION
+            val pk = ActorEventPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                eventType = if (this.health <= 0) ActorEventPacket.Companion.Type.DeathAnimation else ActorEventPacket.Companion.Type.HurtAnimation,
+                eventData = 0
+            )
             Server.broadcastPacket(hasSpawned.values, pk)
 
             this.attackTime = source.attackCooldown

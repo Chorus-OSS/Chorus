@@ -9,7 +9,7 @@ import org.chorus_oss.chorus.item.ItemArrow
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
 
@@ -145,10 +145,11 @@ class EntityArrow @JvmOverloads constructor(
 
     override fun addHitEffect() {
         level!!.addSound(this.position, Sound.RANDOM_BOWHIT)
-        val packet: EntityEventPacket = EntityEventPacket()
-        packet.eid = getRuntimeID()
-        packet.event = EntityEventPacket.ARROW_SHAKE
-        packet.data = 7 // TODO Magic value. I have no idea why we have to set it to 7 here...
+        val packet = ActorEventPacket(
+            actorRuntimeID = getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.ArrowShake,
+            eventData = 7, // TODO: Magic value. I have no idea why we have to set it to 7 here...
+        )
         Server.broadcastPacket(hasSpawned.values, packet)
         onGround = true
     }

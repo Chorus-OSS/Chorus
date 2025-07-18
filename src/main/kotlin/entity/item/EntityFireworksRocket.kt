@@ -17,8 +17,8 @@ import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.utils.DyeColor
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
@@ -129,10 +129,11 @@ open class EntityFireworksRocket(chunk: IChunk?, nbt: CompoundTag) : Entity(chun
 
             hasUpdate = true
             if (this.fireworkAge >= this.lifetime) {
-                val pk: EntityEventPacket = EntityEventPacket()
-                pk.data = 0
-                pk.event = EntityEventPacket.FIREWORK_EXPLOSION
-                pk.eid = this.getRuntimeID()
+                val pk = ActorEventPacket(
+                    actorRuntimeID = this.getRuntimeID().toULong(),
+                    eventType = ActorEventPacket.Companion.Type.FireworkExplosion,
+                    eventData = 0,
+                )
 
                 level!!.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.LargeBlast, -1, getNetworkID())
 

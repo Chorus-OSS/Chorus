@@ -43,6 +43,7 @@ import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.MoveActorDeltaPacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
@@ -1126,10 +1127,12 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                         Effect.get(EffectType.ABSORPTION).setDuration(100).setAmplifier(1)
                     )
 
-                    val pk = EntityEventPacket()
-                    pk.eid = this.getRuntimeID()
-                    pk.event = EntityEventPacket.CONSUME_TOTEM
-                    player.dataPacket(pk)
+                    val pk = ActorEventPacket(
+                        actorRuntimeID = this.getRuntimeID().toULong(),
+                        eventType = ActorEventPacket.Companion.Type.ConsumeTotem,
+                        eventData = 0
+                    )
+                    player.sendPacket(pk)
 
                     if (isOffhand) {
                         player.offhandInventory.clear(0, true)

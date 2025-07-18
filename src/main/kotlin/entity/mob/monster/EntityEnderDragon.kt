@@ -44,9 +44,9 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
@@ -198,9 +198,11 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
                 false,
                 false
             )
-            val packet = EntityEventPacket()
-            packet.event = EntityEventPacket.ENDER_DRAGON_DEATH
-            packet.eid = getRuntimeID()
+            val packet = ActorEventPacket(
+                actorRuntimeID = getRuntimeID().toULong(),
+                eventType = ActorEventPacket.Companion.Type.EnderDragonDeath,
+                eventData = 0
+            )
             Server.broadcastPacket(viewers.values, packet)
             setImmobile(true)
         } else {

@@ -50,12 +50,12 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ChorusRandom
 import org.chorus_oss.chorus.utils.TradeRecipeBuildUtils
 import org.chorus_oss.chorus.utils.Utils
 import org.chorus_oss.nbt.TagSerialization
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
@@ -605,9 +605,11 @@ class EntityVillagerV2(chunk: IChunk?, nbt: CompoundTag?) : EntityMob(chunk, nbt
             if (source is EntityDamageByEntityEvent) {
                 if (source.damager is Player) {
                     addGossip(source.damager.loginChainData.xuid!!, Gossip.MINOR_NEGATIVE, 25)
-                    val pk = EntityEventPacket()
-                    pk.eid = getRuntimeID()
-                    pk.event = EntityEventPacket.VILLAGER_ANGRY
+                    val pk = ActorEventPacket(
+                        actorRuntimeID = getRuntimeID().toULong(),
+                        eventType = ActorEventPacket.Companion.Type.VillagerAngry,
+                        eventData = 0
+                    )
                     Server.broadcastPacket(viewers.values, pk)
                 }
             }

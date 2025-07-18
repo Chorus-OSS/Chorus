@@ -29,9 +29,9 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.level.particle.ItemBreakParticle
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.utils.DyeColor
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.function.Function
 import kotlin.math.max
 
@@ -237,10 +237,12 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
             if (!this.hasOwner()) {
                 player.inventory.decreaseCount(player.inventory.heldItemIndex)
                 if (Utils.rand(1, 3) == 3) {
-                    val packet = EntityEventPacket()
-                    packet.eid = this.getRuntimeID()
-                    packet.event = EntityEventPacket.TAME_SUCCESS
-                    player.dataPacket(packet)
+                    val packet = ActorEventPacket(
+                        actorRuntimeID = this.getRuntimeID().toULong(),
+                        eventType = ActorEventPacket.Companion.Type.TameSuccess,
+                        eventData = 0
+                    )
+                    player.sendPacket(packet)
 
                     this.maxHealth = 10
                     this.setHealthSafe(10f)
@@ -252,10 +254,12 @@ class EntityCat(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, nbt), En
 
                     return true
                 } else {
-                    val packet = EntityEventPacket()
-                    packet.eid = this.getRuntimeID()
-                    packet.event = EntityEventPacket.TAME_FAIL
-                    player.dataPacket(packet)
+                    val packet = ActorEventPacket(
+                        actorRuntimeID = this.getRuntimeID().toULong(),
+                        eventType = ActorEventPacket.Companion.Type.TameFail,
+                        eventData = 0
+                    )
+                    player.sendPacket(packet)
                 }
             } else {
                 player.inventory.decreaseCount(player.inventory.heldItemIndex)
