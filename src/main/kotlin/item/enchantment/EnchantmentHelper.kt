@@ -1,13 +1,20 @@
 package org.chorus_oss.chorus.item.enchantment
 
 import org.chorus_oss.chorus.block.BlockID
+import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_ID
+import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_MAP
+import org.chorus_oss.chorus.experimental.network.protocol.utils.EnchantmentOptionData
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Locator
-import org.chorus_oss.chorus.network.protocol.PlayerEnchantOptionsPacket.EnchantOptionData
 import org.chorus_oss.chorus.utils.ChorusRandom
+import org.chorus_oss.protocol.types.EnchantmentInstance
+import org.chorus_oss.protocol.types.EnchantmentOption
+import org.chorus_oss.protocol.types.item.ItemEnchantments
 import java.util.concurrent.atomic.AtomicReference
 import java.util.stream.Collectors
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
@@ -16,7 +23,7 @@ import kotlin.math.min
 object EnchantmentHelper {
     private const val MAX_BOOKSHELF_COUNT = 15
 
-    fun getEnchantOptions(tablePos: Locator, input: Item?, seed: Int): List<EnchantOptionData> {
+    fun getEnchantOptions(tablePos: Locator, input: Item?, seed: Int): List<EnchantmentOptionData> {
         if (input == null || input.hasEnchantments()) {
             return emptyList()
         }
@@ -91,12 +98,13 @@ object EnchantmentHelper {
         return bookshelfCount
     }
 
+    @OptIn(ExperimentalAtomicApi::class)
     private fun createEnchantOption(
         random: ChorusRandom,
         inputItem: Item,
         requiredXpLevel: Int,
         entry: Int
-    ): EnchantOptionData {
+    ): EnchantmentOptionData {
         var enchantingPower = requiredXpLevel
         val enchantability = inputItem.enchantAbility
         enchantingPower += random.nextInt(enchantability shr 2) + random.nextInt(enchantability shr 2) + 1
@@ -141,7 +149,26 @@ object EnchantmentHelper {
                 resultEnchantments.removeAt(random.nextInt(resultEnchantments.size - 1))
             }
         }
-        return EnchantOptionData(requiredXpLevel, getRandomOptionName(random), resultEnchantments, entry)
+        return EnchantmentOptionData(
+            index = entry,
+            enchantments = resultEnchantments,
+            data = EnchantmentOption(
+                cost = requiredXpLevel.toUInt(),
+                enchantments = ItemEnchantments(
+                    slot = 0,
+                    enchantmentSlice1 = resultEnchantments.map {
+                        EnchantmentInstance(
+                            type = it.id.toByte(),
+                            level = it.level.toByte()
+                        )
+                    },
+                    enchantmentSlice2 = emptyList(),
+                    enchantmentSlice3 = emptyList(),
+                ),
+                name = getRandomOptionName(random),
+                recipeNetworkID = ENCHANT_RECIPE_ID.fetchAndIncrement().toUInt()
+            )
+        ).also { ENCHANT_RECIPE_MAP[it.data.recipeNetworkID] = it }
     }
 
     private fun getAvailableEnchantments(enchantingPower: Int, item: Item): List<Enchantment> {

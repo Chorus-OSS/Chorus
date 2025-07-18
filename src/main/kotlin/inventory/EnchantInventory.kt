@@ -7,7 +7,6 @@ import org.chorus_oss.chorus.blockentity.BlockEntityNameable
 import org.chorus_oss.chorus.event.player.PlayerEnchantOptionsRequestEvent
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.enchantment.EnchantmentHelper
-import org.chorus_oss.chorus.network.protocol.PlayerEnchantOptionsPacket
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
 
 
@@ -38,15 +37,18 @@ class EnchantInventory(table: BlockEntityEnchantTable) : ContainerInventory(tabl
 
                     val event = PlayerEnchantOptionsRequestEvent(viewer, this, options)
                     if (!event.cancelled && !event.options.isEmpty()) {
-                        val pk = PlayerEnchantOptionsPacket()
-                        pk.options = event.options
-                        viewer.dataPacket(pk)
+                        val pk = org.chorus_oss.protocol.packets.PlayerEnchantOptionsPacket(
+                            options = event.options.map { it.data }
+                        )
+                        viewer.sendPacket(pk)
                     }
                 }
             } else {
                 for (viewer in this.viewers) {
-                    val pk = PlayerEnchantOptionsPacket()
-                    viewer.dataPacket(pk)
+                    val pk = org.chorus_oss.protocol.packets.PlayerEnchantOptionsPacket(
+                        options = emptyList(),
+                    )
+                    viewer.sendPacket(pk)
                 }
             }
         }
