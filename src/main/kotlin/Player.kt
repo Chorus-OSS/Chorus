@@ -2508,34 +2508,6 @@ open class Player(
         }
     }
 
-    fun awardAchievement(achievementId: String): Boolean {
-        if (!Server.instance.settings.levelSettings.default.achievements) {
-            return false
-        }
-
-        val achievement = Achievement.achievements.get(achievementId)
-
-        if (achievement == null || hasAchievement(achievementId)) {
-            return false
-        }
-
-        for (id in achievement.requires) {
-            if (!this.hasAchievement(id)) {
-                return false
-            }
-        }
-        val event = PlayerAchievementAwardedEvent(this, achievementId)
-        Server.instance.pluginManager.callEvent(event)
-
-        if (event.cancelled) {
-            return false
-        }
-
-        achievements.add(achievementId)
-        achievement.broadcast(this)
-        return true
-    }
-
     fun setGamemode(gamemode: Int): Boolean {
         return this.setGamemode(gamemode, false, null)
     }
@@ -5254,12 +5226,6 @@ open class Player(
                     })
                     if (ev.cancelled) {
                         return false
-                    }
-
-                    if (item.getSafeBlockState().toBlock() is BlockWood) {
-                        this.awardAchievement("mineWood")
-                    } else if (item.id == ItemID.DIAMOND) {
-                        this.awardAchievement("diamond")
                     }
 
                     val pk = TakeItemEntityPacket(
