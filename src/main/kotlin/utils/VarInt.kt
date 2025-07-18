@@ -21,18 +21,6 @@ object VarInt {
         return (v ushr 1) xor -(v and 1L)
     }
 
-    private fun read(stream: BinaryStream, maxSize: Int): Long {
-        var value: Long = 0
-        var size = 0
-        var b: Byte
-        while (((stream.byte.also { b = it }).toInt() and 0x80) == 0x80) {
-            value = value or ((b.toInt() and 0x7F).toLong() shl (size++ * 7))
-            require(size < maxSize) { "VarLong too big" }
-        }
-
-        return value or ((b.toInt() and 0x7F).toLong() shl (size * 7))
-    }
-
     @Throws(IOException::class)
     private fun read(stream: InputStream, maxSize: Int): Long {
         var value: Long = 0
@@ -47,28 +35,12 @@ object VarInt {
     }
 
     /**
-     * @param stream BinaryStream
-     * @return Signed int
-     */
-    fun readVarInt(stream: BinaryStream): Int {
-        return decodeZigZag32(readUnsignedVarInt(stream))
-    }
-
-    /**
      * @param stream InputStream
      * @return Signed int
      */
     @Throws(IOException::class)
     fun readVarInt(stream: InputStream): Int {
         return decodeZigZag32(readUnsignedVarInt(stream))
-    }
-
-    /**
-     * @param stream BinaryStream
-     * @return Unsigned int
-     */
-    fun readUnsignedVarInt(stream: BinaryStream): Long {
-        return read(stream, 5)
     }
 
     /**
@@ -81,14 +53,6 @@ object VarInt {
     }
 
     /**
-     * @param stream BinaryStream
-     * @return Signed long
-     */
-    fun readVarLong(stream: BinaryStream): Long {
-        return decodeZigZag64(readUnsignedVarLong(stream))
-    }
-
-    /**
      * @param stream InputStream
      * @return Signed long
      */
@@ -98,32 +62,12 @@ object VarInt {
     }
 
     /**
-     * @param stream BinaryStream
-     * @return Unsigned long
-     */
-    fun readUnsignedVarLong(stream: BinaryStream): Long {
-        return read(stream, 10)
-    }
-
-    /**
      * @param stream InputStream
      * @return Unsigned long
      */
     @Throws(IOException::class)
     fun readUnsignedVarLong(stream: InputStream): Long {
         return read(stream, 10)
-    }
-
-    private fun write(stream: BinaryStream, value: Long) {
-        var value1 = value
-        do {
-            var temp = (value1 and 127L).toByte()
-            value1 = value1 ushr 7
-            if (value1 != 0L) {
-                temp = (temp.toInt() or 128).toByte()
-            }
-            stream.putByte(temp)
-        } while (value1 != 0L)
     }
 
     @Throws(IOException::class)
@@ -140,28 +84,12 @@ object VarInt {
     }
 
     /**
-     * @param stream BinaryStream
-     * @param value  Signed int
-     */
-    fun writeVarInt(stream: BinaryStream, value: Int) {
-        writeUnsignedVarInt(stream, encodeZigZag32(value))
-    }
-
-    /**
      * @param stream OutputStream
      * @param value  Signed int
      */
     @Throws(IOException::class)
     fun writeVarInt(stream: OutputStream, value: Int) {
         writeUnsignedVarInt(stream, encodeZigZag32(value))
-    }
-
-    /**
-     * @param stream BinaryStream
-     * @param value  Unsigned int
-     */
-    fun writeUnsignedVarInt(stream: BinaryStream, value: Long) {
-        write(stream, value)
     }
 
     /**
@@ -174,28 +102,12 @@ object VarInt {
     }
 
     /**
-     * @param stream BinaryStream
-     * @param value  Signed long
-     */
-    fun writeVarLong(stream: BinaryStream, value: Long) {
-        writeUnsignedVarLong(stream, encodeZigZag64(value))
-    }
-
-    /**
      * @param stream OutputStream
      * @param value  Signed long
      */
     @Throws(IOException::class)
     fun writeVarLong(stream: OutputStream, value: Long) {
         writeUnsignedVarLong(stream, encodeZigZag64(value))
-    }
-
-    /**
-     * @param stream BinaryStream
-     * @param value  Unsigned long
-     */
-    fun writeUnsignedVarLong(stream: BinaryStream, value: Long) {
-        write(stream, value)
     }
 
     /**

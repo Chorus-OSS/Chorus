@@ -2,6 +2,8 @@ package org.chorus_oss.chorus.network.process.handler
 
 
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.decode
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createHandshakeJwt
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createKeyPair
@@ -9,7 +11,7 @@ import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.generateRan
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.getSecretKey
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.parseKey
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.LoginPacket
+import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.chorus.network.protocol.types.InputMode
 import org.chorus_oss.chorus.network.protocol.types.Platform
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -23,11 +25,16 @@ import java.util.regex.Pattern
 class LoginHandler(session: BedrockSession, private val consumer: Consumer<PlayerInfo>) :
     BedrockSessionPacketHandler(session) {
 
-    override fun handle(pk: LoginPacket) {
+    override fun handle(pk: MigrationPacket<*>) {
+        val packet = pk.packet
+        if (packet !is LoginPacket) return
+
         val server = session.server
 
+        val packetData = packet.decode()
+
         //check the player login time
-        if (pk.issueUnixTime != -1L && Server.instance.checkLoginTime && System.currentTimeMillis() - pk.issueUnixTime > 20000) {
+        if (packetData.chainData.issueUnixTime != -1L && Server.instance.checkLoginTime && System.currentTimeMillis() - packetData.chainData.issueUnixTime > 20000) {
             val message = "disconnectionScreen.noReason"
             log.debug("disconnection due to noReason")
             session.sendPlayStatus(
@@ -38,7 +45,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        val chainData = ClientChainData.read(pk)
+        val chainData = ClientChainData.read(packet)
 
         //verify the player if enable the xbox-auth
         if (!chainData.isXboxAuthed && server.settings.serverSettings.xboxAuth) {
@@ -104,8 +111,8 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        val uniqueId = pk.clientUUID!!
-        val username = pk.username!!
+        val uniqueId = packetData.chainData.clientUUID
+        val username = packetData.chainData.username
         val usernameMatcher = playerNamePattern.matcher(username)
 
         if (!usernameMatcher.matches() ||
@@ -117,13 +124,13 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        if (!pk.skin!!.isValid()) {
+        if (!packetData.skinData.skin.isValid()) {
             log.debug("disconnection due to invalidSkin")
             session.close("disconnectionScreen.invalidSkin")
             return
         }
 
-        val skin = pk.skin!!
+        val skin = packetData.skinData.skin
         if (server.settings.playerSettings.forceSkinTrusted) {
             skin.setTrusted(true)
         }

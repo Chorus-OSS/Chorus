@@ -34,6 +34,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.protocol.packets.PlayerSkinPacket
 import org.chorus_oss.protocol.types.DisconnectFailReason
 import org.jetbrains.annotations.ApiStatus
@@ -301,7 +302,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         Server.instance.pluginManager.callEvent(ev)
 
         val predictMaxBuffer = when (ev.packetId) {
-            ProtocolInfo.LOGIN_PACKET -> 10000000
+            LoginPacket.id -> 10000000
             PlayerSkinPacket.id -> 5000000
             else -> 25000
         }

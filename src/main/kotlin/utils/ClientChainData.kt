@@ -3,10 +3,14 @@ package org.chorus_oss.chorus.utils
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
+import kotlinx.io.Buffer
+import kotlinx.io.Source
+import kotlinx.io.readIntLe
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.mojangPublicKey
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.oldMojangPublicKey
-import org.chorus_oss.chorus.network.protocol.LoginPacket
 import org.jose4j.jws.JsonWebSignature
 import org.jose4j.lang.JoseException
 import java.nio.charset.StandardCharsets
@@ -28,7 +32,7 @@ import java.util.*
  *
  * To get chain data, you can use player.getLoginChainData() or read(loginPacket)
  */
-class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData {
+class ClientChainData private constructor(private val stream: Source) : LoginChainData {
     override var xuid: String? = null
         get() {
             return if (this.isWaterdog) {
@@ -50,14 +54,6 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
 
             return Server.instance.settings.baseSettings.waterdogpe
         }
-
-    override fun equals(other: Any?): Boolean {
-        return other is ClientChainData && bs == other.bs
-    }
-
-    override fun hashCode(): Int {
-        return bs.hashCode()
-    }
 
     override var username: String? = null
         private set
@@ -122,17 +118,17 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
     override var rawData: JsonObject? = null
         private set
 
-    private val bs: BinaryStream
-
     init {
-        buffer.offset = 0
-        bs = buffer
         decodeChainData()
         decodeSkinData()
     }
 
     private fun decodeSkinData() {
-        val skinToken = decodeToken(String(bs[bs.lInt])) ?: return
+        val skinToken = decodeToken(
+            Buffer().apply {
+                stream.readAtMostTo(this, stream.readIntLe().toLong())
+            }.readString()
+        ) ?: return
         if (skinToken.has("ClientRandomId")) this.clientId = skinToken["ClientRandomId"].asLong
         if (skinToken.has("ServerAddress")) this.serverAddress = skinToken["ServerAddress"].asString
         if (skinToken.has("DeviceModel")) this.deviceModel = skinToken["DeviceModel"].asString
@@ -166,9 +162,9 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
     }
 
     private fun decodeChainData() {
-        val chainString = String(
-            bs[bs.lInt], StandardCharsets.UTF_8
-        )
+        val chainString = Buffer().apply {
+            stream.readAtMostTo(this, stream.readIntLe().toLong())
+        }.readString()
 
         val jwt = JsonParser.parseString(chainString).asJsonObject
         val certificateString = jwt["Certificate"].asString
@@ -262,12 +258,12 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
     }
 
     companion object {
-        fun of(buffer: BinaryStream): ClientChainData {
-            return ClientChainData(buffer)
-        }
-
-        fun read(pk: LoginPacket): ClientChainData {
-            return of(pk.buffer!!)
+        fun read(pk: org.chorus_oss.protocol.packets.LoginPacket): ClientChainData {
+            return ClientChainData(
+                Buffer().apply {
+                    writeString(pk.connectionRequest)
+                }
+            )
         }
 
         const val UI_PROFILE_CLASSIC: Int = 0

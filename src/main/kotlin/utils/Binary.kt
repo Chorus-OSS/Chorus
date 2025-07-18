@@ -1,18 +1,6 @@
 package org.chorus_oss.chorus.utils
 
-import org.chorus_oss.chorus.entity.data.EntityDataFormat
-import org.chorus_oss.chorus.entity.data.EntityDataMap
-import org.chorus_oss.chorus.math.BlockVector3
-import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.math.Vector3f
-import org.chorus_oss.chorus.nbt.NBTIO.write
-import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import java.io.IOException
-import java.io.UncheckedIOException
-import java.nio.ByteOrder
-import java.nio.charset.StandardCharsets
 import java.util.*
-import java.util.function.Function
 
 object Binary {
     fun readUUID(bytes: ByteArray): UUID {
@@ -35,65 +23,6 @@ object Binary {
     @JvmStatic
     fun writeUUID(uuid: UUID): ByteArray {
         return appendBytes(writeLLong(uuid.mostSignificantBits), writeLLong(uuid.leastSignificantBits))
-    }
-
-    fun writeEntityData(entityDataMap: EntityDataMap): ByteArray {
-        val stream = BinaryStream()
-        stream.putUnsignedVarInt(entityDataMap.size.toLong()) //size
-        for ((key, data) in entityDataMap) {
-            stream.putUnsignedVarInt(key.getValue().toLong())
-            val transformer = key.getTransformer() as Function<Any, *>?
-            val applyData = transformer?.apply(data) ?: data
-
-            val format = EntityDataFormat.from(applyData)
-            stream.putUnsignedVarInt(format.ordinal.toLong())
-
-            when (format) {
-                EntityDataFormat.BYTE -> stream.putByte(applyData as Byte)
-                EntityDataFormat.SHORT -> stream.putLShort((applyData as Short).toInt())
-                EntityDataFormat.INT -> stream.putVarInt(applyData as Int)
-                EntityDataFormat.FLOAT -> stream.putLFloat(applyData as Float)
-                EntityDataFormat.STRING -> {
-                    val s = applyData as String
-                    stream.putUnsignedVarInt(s.toByteArray(StandardCharsets.UTF_8).size.toLong())
-                    stream.put(s.toByteArray(StandardCharsets.UTF_8))
-                }
-
-                EntityDataFormat.NBT -> try {
-                    stream.put(write(applyData as CompoundTag, ByteOrder.LITTLE_ENDIAN, true))
-                } catch (ee: IOException) {
-                    throw UncheckedIOException(ee)
-                }
-
-                EntityDataFormat.VECTOR3I -> {
-                    val pos = applyData as BlockVector3
-                    stream.putVarInt(pos.x)
-                    stream.putVarInt(pos.y)
-                    stream.putVarInt(pos.z)
-                }
-
-                EntityDataFormat.LONG -> stream.putVarLong(applyData as Long)
-                EntityDataFormat.VECTOR3F -> {
-                    val x: Float
-                    val y: Float
-                    val z: Float
-                    if (applyData is Vector3) {
-                        x = applyData.x.toFloat()
-                        y = applyData.y.toFloat()
-                        z = applyData.z.toFloat()
-                    } else {
-                        val v3data = applyData as Vector3f
-                        x = v3data.x
-                        y = v3data.y
-                        z = v3data.z
-                    }
-                    stream.putLFloat(x)
-                    stream.putLFloat(y)
-                    stream.putLFloat(z)
-                }
-            }
-        }
-        return stream.getBufferCopy()
     }
 
     fun writeLShort(s: Int): ByteArray {
@@ -163,18 +92,6 @@ object Binary {
             (l ushr 48).toByte(),
             (l ushr 56).toByte(),
         )
-    }
-
-    fun writeVarInt(v: Int): ByteArray {
-        val stream = BinaryStream()
-        stream.putVarInt(v)
-        return stream.getBufferCopy()
-    }
-
-    fun writeUnsignedVarInt(v: Long): ByteArray {
-        val stream = BinaryStream()
-        stream.putUnsignedVarInt(v)
-        return stream.getBufferCopy()
     }
 
     fun bytesToHexString(src: ByteArray?): String? {
