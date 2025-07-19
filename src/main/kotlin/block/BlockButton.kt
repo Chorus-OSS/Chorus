@@ -75,7 +75,8 @@ abstract class BlockButton(meta: BlockState) : BlockFlowable(meta), RedstoneComp
         setActivated(true, player)
         level.setBlock(this.position, this, direct = true, update = false)
         level.addLevelSoundEvent(
-            position.add(0.5, 0.5, 0.5), org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn,
+            position.add(0.5, 0.5, 0.5),
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn,
             blockState.blockStateHash()
         )
         if (Server.instance.settings.levelSettings.enableRedstone) {
@@ -102,7 +103,8 @@ abstract class BlockButton(meta: BlockState) : BlockFlowable(meta), RedstoneComp
                 isActivated = false
                 level.setBlock(this.position, this, direct = true, update = false)
                 level.addLevelSoundEvent(
-                    position.add(0.5, 0.5, 0.5), org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff,
+                    position.add(0.5, 0.5, 0.5),
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff,
                     blockState.blockStateHash()
                 )
 

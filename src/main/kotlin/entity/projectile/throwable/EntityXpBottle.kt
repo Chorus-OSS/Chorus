@@ -66,7 +66,10 @@ class EntityXpBottle @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTag,
         val particle2: Particle = SpellParticle(this.position, 0x00385dc6)
         level!!.addParticle(particle2)
 
-        level!!.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Glass)
+        level!!.addLevelSoundEvent(
+            this.position,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Glass
+        )
 
         level!!.dropExpOrb(this.position, ThreadLocalRandom.current().nextInt(3, 12))
     }

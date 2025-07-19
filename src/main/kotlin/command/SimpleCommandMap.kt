@@ -284,7 +284,8 @@ class SimpleCommandMap(private val server: Server) : CommandMap {
                     output = 0
                 }
             } else {
-                output = if (target.execute(sender, sentCommandLabel, args.map { it as String? }.toTypedArray())) 1 else 0
+                output =
+                    if (target.execute(sender, sentCommandLabel, args.map { it as String? }.toTypedArray())) 1 else 0
             }
         } catch (e: Exception) {
             log.error(

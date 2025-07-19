@@ -11,7 +11,6 @@ import org.chorus_oss.chorus.entity.ai.behavior.IBehavior
 import org.chorus_oss.chorus.entity.ai.behaviorgroup.BehaviorGroup
 import org.chorus_oss.chorus.entity.ai.behaviorgroup.IBehaviorGroup
 import org.chorus_oss.chorus.entity.ai.controller.FluctuateController
-import org.chorus_oss.chorus.entity.ai.controller.IController
 import org.chorus_oss.chorus.entity.ai.controller.LookController
 import org.chorus_oss.chorus.entity.ai.controller.WalkController
 import org.chorus_oss.chorus.entity.ai.evaluator.IBehaviorEvaluator
@@ -186,7 +185,10 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
         this.maxHealth = 500
         super.initEntity()
         this.setDataProperty(EntityDataTypes.HEARTBEAT_INTERVAL_TICKS, 40)
-        this.setDataProperty(EntityDataTypes.HEARTBEAT_SOUND_EVENT, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Heartbeat.id)
+        this.setDataProperty(
+            EntityDataTypes.HEARTBEAT_SOUND_EVENT,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Heartbeat.id
+        )
         //空闲声音
         this.setAmbientSoundEvent(Sound.MOB_WARDEN_IDLE)
         this.setAmbientSoundInterval(8.0f)

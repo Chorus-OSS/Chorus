@@ -32,7 +32,6 @@ import org.chorus_oss.chorus.utils.DyeColor
 import org.chorus_oss.chorus.utils.Utils
 import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.function.Function
-import kotlin.math.acos
 import kotlin.math.max
 
 /**

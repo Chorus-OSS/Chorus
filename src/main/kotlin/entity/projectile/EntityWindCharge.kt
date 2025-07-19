@@ -52,7 +52,10 @@ open class EntityWindCharge @JvmOverloads constructor(
                 }
             }
         }
-        level!!.addLevelSoundEvent(locator.position.add(0.0, 1.0), org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WindChargeBurst)
+        level!!.addLevelSoundEvent(
+            locator.position.add(0.0, 1.0),
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WindChargeBurst
+        )
         this.kill()
 
         return true

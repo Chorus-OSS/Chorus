@@ -89,8 +89,10 @@ operator fun AvailableCommandsPacket.Companion.invoke(from: Map<String, CommandD
                 name = it.name!!,
                 values = it.values.map { v ->
                     ChainedSubcommandValue(
-                        index = chainedSubcommandValues.indexOf(v.first!!).also { i -> require(i > -1) { "Invalid enum value: ${v.first}" } }.toUShort(),
-                        value = chainedSubcommandValues.indexOf(v.second!!).also { i -> require(i > -1) { "Invalid enum value: ${v.second}" } }.toUShort(),
+                        index = chainedSubcommandValues.indexOf(v.first!!)
+                            .also { i -> require(i > -1) { "Invalid enum value: ${v.first}" } }.toUShort(),
+                        value = chainedSubcommandValues.indexOf(v.second!!)
+                            .also { i -> require(i > -1) { "Invalid enum value: ${v.second}" } }.toUShort(),
                     )
                 }
             )
@@ -106,7 +108,8 @@ operator fun AvailableCommandsPacket.Companion.invoke(from: Map<String, CommandD
                 permissionLevel = CommandPermission.entries[version.permission],
                 aliasesOffset = if (version.aliases == null) (-1).toUInt() else enums.indexOf(version.aliases).toUInt(),
                 chainedSubcommandOffsets = subCommandData.map { d ->
-                    subCommandData.indexOf(d).also { i -> require(i > -1) { "Invalid subcommand index: $d" } }.toUShort()
+                    subCommandData.indexOf(d).also { i -> require(i > -1) { "Invalid subcommand index: $d" } }
+                        .toUShort()
                 },
                 overloads = version.overloads.values.map { o ->
                     CommandOverload(
@@ -123,6 +126,7 @@ operator fun AvailableCommandsPacket.Companion.invoke(from: Map<String, CommandD
                                             enums.indexOf(p.enumData) or ARG_FLAG_ENUM or ARG_FLAG_VALID
                                         }
                                     }
+
                                     p.type != null -> p.type.id or ARG_FLAG_VALID
                                     else -> throw IllegalStateException("No param type specified: $p")
                                 }.toUInt(),

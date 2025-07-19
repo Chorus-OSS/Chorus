@@ -36,19 +36,14 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.network.protocol.*
+import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.protocol.core.Packet
-import org.chorus_oss.protocol.packets.ActorEventPacket
-import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
-import org.chorus_oss.protocol.packets.MoveActorDeltaPacket
-import org.chorus_oss.protocol.packets.SetActorDataPacket
-import org.chorus_oss.protocol.packets.SetActorMotionPacket
-import org.chorus_oss.protocol.packets.UpdateAttributesPacket
+import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
@@ -711,9 +706,9 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             }
 
             if (this is Player) {
-                val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+                val packet = MobEffectPacket(
                     entityRuntimeID = player.getRuntimeID().toULong(),
-                    operation = org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Remove,
+                    operation = MobEffectPacket.Companion.Operation.Remove,
                     effectType = effect.getId(),
                     amplifier = 0,
                     particles = true,
@@ -759,11 +754,11 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
 
         if (this is Player) {
-            val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+            val packet = MobEffectPacket(
                 entityRuntimeID = player.getRuntimeID().toULong(),
                 operation = when (oldEffect) {
-                    null -> org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Add
-                    else -> org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Modify
+                    null -> MobEffectPacket.Companion.Operation.Add
+                    else -> MobEffectPacket.Companion.Operation.Modify
                 },
                 effectType = effect.getId(),
                 amplifier = effect.getAmplifier(),
@@ -943,7 +938,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         if (this.riding != null) {
             riding!!.spawnTo(player)
 
-            val packet = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+            val packet = SetActorLinkPacket(
                 actorLink = ActorLink(
                     riddenActorUniqueID = riding!!.getUniqueID(),
                     riderActorUniqueID = this.getUniqueID(),
@@ -958,7 +953,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     protected open fun createAddEntityPacket(): Packet {
-        return org.chorus_oss.protocol.packets.AddActorPacket(
+        return AddActorPacket(
             actorUniqueID = this.uniqueId,
             actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
@@ -991,9 +986,9 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     fun sendPotionEffects(player: Player) {
         for (effect: Effect in effects.values) {
-            val packet = org.chorus_oss.protocol.packets.MobEffectPacket(
+            val packet = MobEffectPacket(
                 entityRuntimeID = player.getRuntimeID().toULong(),
-                operation = org.chorus_oss.protocol.packets.MobEffectPacket.Companion.Operation.Add,
+                operation = MobEffectPacket.Companion.Operation.Add,
                 effectType = effect.getId(),
                 amplifier = effect.getAmplifier(),
                 particles = effect.isVisible(),
@@ -1036,7 +1031,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     open fun despawnFrom(player: Player) {
         if (hasSpawned.containsKey(player.loaderId)) {
-            val pk = org.chorus_oss.protocol.packets.RemoveActorPacket(
+            val pk = RemoveActorPacket(
                 actorUniqueID = this.getUniqueID()
             )
             player.sendPacket(pk)
@@ -1751,7 +1746,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     protected fun broadcastLinkPacket(rider: Entity, type: ActorLink.Companion.Type) {
-        val pk = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+        val pk = SetActorLinkPacket(
             actorLink = ActorLink(
                 riddenActorUniqueID = this.getUniqueID(),
                 riderActorUniqueID = rider.getUniqueID(),
@@ -1832,7 +1827,8 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     open fun syncAttributes() {
         val pk = UpdateAttributesPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
-            attributes = attributes.values.filter(Attribute::isSyncable).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            attributes = attributes.values.filter(Attribute::isSyncable)
+                .map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
             tick = 0u,
         )
         Server.broadcastPacket(viewers.values, pk)
@@ -3041,7 +3037,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
 
-    fun playActionAnimation(action: org.chorus_oss.protocol.packets.AnimatePacket.Action, rowingTime: Float) {
+    fun playActionAnimation(action: AnimatePacket.Action, rowingTime: Float) {
         val viewers: HashSet<Player> = HashSet(viewers.values)
         if (this.isPlayer) viewers.add(this as Player)
         playActionAnimation(action, rowingTime, viewers)
@@ -3057,12 +3053,16 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @param rowingTime the rowing time
      * @param players    可视玩家 Visible Player
      */
-    fun playActionAnimation(action: org.chorus_oss.protocol.packets.AnimatePacket.Action, rowingTime: Float, players: Collection<Player>) {
+    fun playActionAnimation(
+        action: AnimatePacket.Action,
+        rowingTime: Float,
+        players: Collection<Player>
+    ) {
         Server.broadcastPacket(
-            players, org.chorus_oss.protocol.packets.AnimatePacket(
+            players, AnimatePacket(
                 action = action,
                 targetRuntimeID = this.getRuntimeID().toULong(),
-                actionData = org.chorus_oss.protocol.packets.AnimatePacket.Action.RowingData(
+                actionData = AnimatePacket.Action.RowingData(
                     rowingTime = rowingTime
                 )
             )
@@ -3417,7 +3417,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
 
         fun playAnimationOnEntities(
-            animation: org.chorus_oss.protocol.packets.AnimateEntityPacket,
+            animation: AnimateEntityPacket,
             entities: List<Entity>
         ) {
             val viewers =

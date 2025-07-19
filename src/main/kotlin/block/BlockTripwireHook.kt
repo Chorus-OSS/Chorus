@@ -181,15 +181,27 @@ class BlockTripwireHook @JvmOverloads constructor(state: BlockState = properties
 
     private fun addSound(pos: Vector3, canConnect: Boolean, nextPowered: Boolean, attached: Boolean, powered: Boolean) {
         if (nextPowered && !powered) {
-            level.addLevelSoundEvent(pos, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn)
+            level.addLevelSoundEvent(
+                pos,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn
+            )
             Server.instance.pluginManager.callEvent(BlockRedstoneEvent(this, 0, 15))
         } else if (!nextPowered && powered) {
-            level.addLevelSoundEvent(pos, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff)
+            level.addLevelSoundEvent(
+                pos,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff
+            )
             Server.instance.pluginManager.callEvent(BlockRedstoneEvent(this, 15, 0))
         } else if (canConnect && !attached) {
-            level.addLevelSoundEvent(pos, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Attach)
+            level.addLevelSoundEvent(
+                pos,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Attach
+            )
         } else if (!canConnect && attached) {
-            level.addLevelSoundEvent(pos, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Detach)
+            level.addLevelSoundEvent(
+                pos,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Detach
+            )
         }
     }
 

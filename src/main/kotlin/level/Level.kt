@@ -376,7 +376,12 @@ class Level(
         val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
             eventID = event,
             serializedEventData = Buffer().apply {
-                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(data), this, TagSerialization.NetLE, false)
+                org.chorus_oss.nbt.Tag.serialize(
+                    org.chorus_oss.nbt.tags.CompoundTag(data),
+                    this,
+                    TagSerialization.NetLE,
+                    false
+                )
             }.readByteString()
         )
         this.addChunkPacket(pos.chunkX, pos.chunkZ, pk)
@@ -2854,7 +2859,11 @@ class Level(
         }
 
         if (playSound) {
-            this.addLevelSoundEvent(hand.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Place, hand.runtimeId)
+            this.addLevelSoundEvent(
+                hand.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Place,
+                hand.runtimeId
+            )
         }
 
         if (item1.getCount() <= 0) {

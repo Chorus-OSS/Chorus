@@ -44,8 +44,12 @@ class HorseInventory(holder: EntityHorse) : BaseInventory(holder, InventoryType.
                 (holder as EntityHorse).setDataFlag(EntityFlag.CAN_POWER_JUMP, false)
             } else {
                 holder.level!!.addLevelSoundEvent(
-                    holder.vector3, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Saddle, -1,
-                    (holder as EntityHorse).getEntityIdentifier(), false, false
+                    holder.vector3,
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Saddle,
+                    -1,
+                    (holder as EntityHorse).getEntityIdentifier(),
+                    false,
+                    false
                 )
                 (holder as EntityHorse).setDataFlag(EntityFlag.SADDLED)
                 (holder as EntityHorse).setDataFlag(EntityFlag.WASD_CONTROLLED)

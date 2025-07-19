@@ -49,7 +49,7 @@ object NBTIO {
         if (item.isBlock() && item.blockId == item.id) {
             tag.putCompound("Block", item.getSafeBlockState().blockStateTag.copy())
         }
-        tag.putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+        tag.putInt("version", ProtocolInfo.BLOCK_STATE_VERSION)
         return tag
     }
 
@@ -67,8 +67,8 @@ object NBTIO {
         //upgrade item
         if (tag1.contains("version")) {
             val ver = tag1.getInt("version")
-            if (ver < ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION) {
-                tag1 = updateItem(tag1, ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+            if (ver < ProtocolInfo.BLOCK_STATE_VERSION) {
+                tag1 = updateItem(tag1, ProtocolInfo.BLOCK_STATE_VERSION)
             }
         }
 
@@ -89,8 +89,8 @@ object NBTIO {
             //upgrade block
             if (block.contains("version")) {
                 val ver = block.getInt("version")
-                if (ver < ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION) {
-                    block = updateBlockState(block, ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+                if (ver < ProtocolInfo.BLOCK_STATE_VERSION) {
+                    block = updateBlockState(block, ProtocolInfo.BLOCK_STATE_VERSION)
                 }
             }
             val blockState = getBlockStateHelper(block)

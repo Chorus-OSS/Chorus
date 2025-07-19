@@ -135,7 +135,12 @@ open class EntityFireworksRocket(chunk: IChunk?, nbt: CompoundTag) : Entity(chun
                     eventData = 0,
                 )
 
-                level!!.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.LargeBlast, -1, getNetworkID())
+                level!!.addLevelSoundEvent(
+                    this.position,
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.LargeBlast,
+                    -1,
+                    getNetworkID()
+                )
 
                 Server.broadcastPacket(viewers.values, pk)
 

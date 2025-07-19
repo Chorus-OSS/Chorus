@@ -292,7 +292,10 @@ open class ItemBucket : Item {
                     this.damage = 0 // Empty bucket
                     player.inventory.setItemInHand(this)
                 }
-                player.level!!.addLevelSoundEvent(target.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Fizz)
+                player.level!!.addLevelSoundEvent(
+                    target.position,
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Fizz
+                )
                 player.level!!.addParticle(ExplodeParticle(target.position.add(0.5, 1.0, 0.5)))
             } else {
                 player.level!!.sendBlocks(

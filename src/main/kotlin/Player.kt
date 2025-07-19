@@ -74,7 +74,6 @@ import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -92,7 +91,6 @@ import org.chorus_oss.chorus.scoreboard.data.DisplaySlot
 import org.chorus_oss.chorus.scoreboard.displayer.IScoreboardViewer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
 import org.chorus_oss.chorus.utils.*
-import org.chorus_oss.chorus.utils.Binary.writeUUID
 import org.chorus_oss.chorus.utils.PortalHelper.moveToTheEnd
 import org.chorus_oss.chorus.utils.TextFormat.Companion.clean
 import org.chorus_oss.protocol.core.Packet
@@ -668,7 +666,10 @@ open class Player(
         val block = target.getSide(face)
         if (block.id == BlockID.FIRE || block.id == BlockID.SOUL_FIRE) {
             level!!.setBlock(block.position, Block.get(BlockID.AIR), true)
-            level!!.addLevelSoundEvent(block.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.ExtinguishFire)
+            level!!.addLevelSoundEvent(
+                block.position,
+                LevelSoundEventPacket.Companion.SoundType.ExtinguishFire
+            )
             return
         }
 
@@ -4228,7 +4229,7 @@ open class Player(
             this.lastPlayerdLevelUpSoundTime = this.age
             this.level!!.addLevelSoundEvent(
                 this.position,
-                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Levelup,
+                LevelSoundEventPacket.Companion.SoundType.Levelup,
                 min(7.0, (level / 5).toDouble()).toInt() shl 28,
                 "",
                 isBaby = false, isGlobal = false
@@ -4302,7 +4303,8 @@ open class Player(
     override fun syncAttributes() {
         val pk = UpdateAttributesPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
-            attributes = attributes.values.filter(Attribute::isSyncable).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            attributes = attributes.values.filter(Attribute::isSyncable)
+                .map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
             tick = 0u,
         )
         this.sendPacket(pk)

@@ -48,7 +48,12 @@ class EntityCrossbowFirework(chunk: IChunk?, nbt: CompoundTag) : EntityFireworks
                             eventType = ActorEventPacket.Companion.Type.FireworkExplosion,
                             eventData = 0
                         )
-                        level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.Companion.SoundType.LargeBlast, -1, 72)
+                        level!!.addLevelSoundEvent(
+                            this.position,
+                            LevelSoundEventPacket.Companion.SoundType.LargeBlast,
+                            -1,
+                            72
+                        )
                         Server.broadcastPacket(viewers.values, pk)
                         this.kill()
                     }

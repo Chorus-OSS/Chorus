@@ -15,24 +15,8 @@ import org.chorus_oss.chorus.registry.ItemRegistry
 import org.chorus_oss.chorus.registry.ItemRuntimeIdRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
-import org.chorus_oss.protocol.packets.AvailableActorIdentifiersPacket
-import org.chorus_oss.protocol.packets.ItemRegistryPacket
-import org.chorus_oss.protocol.packets.RequestChunkRadiusPacket
-import org.chorus_oss.protocol.packets.SetLocalPlayerAsInitializedPacket
-import org.chorus_oss.protocol.packets.TrimDataPacket
-import org.chorus_oss.protocol.types.BlockPos
-import org.chorus_oss.protocol.types.BlocksEntry
-import org.chorus_oss.protocol.types.BroadcastMode
-import org.chorus_oss.protocol.types.ChatRestrictionLevel
-import org.chorus_oss.protocol.types.EditorWorldType
-import org.chorus_oss.protocol.types.EduSharedUriResource
-import org.chorus_oss.protocol.types.ExperimentData
-import org.chorus_oss.protocol.types.GameRule
-import org.chorus_oss.protocol.types.PlayerMovementSettings
-import org.chorus_oss.protocol.types.SpawnBiomeType
-import org.chorus_oss.protocol.types.TrimMaterial
-import org.chorus_oss.protocol.types.TrimPattern
-import org.chorus_oss.protocol.types.Vector3f
+import org.chorus_oss.protocol.packets.*
+import org.chorus_oss.protocol.types.*
 import org.chorus_oss.protocol.types.item.ItemEntry
 import kotlin.math.max
 import kotlin.math.min
@@ -149,7 +133,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         requireNotNull(player)
 
         val server: Server = Server.instance
-        val packet = org.chorus_oss.protocol.packets.StartGamePacket(
+        val packet = StartGamePacket(
             entityUniqueID = player.getUniqueID(),
             entityRuntimeID = player.getRuntimeID().toULong(),
             playerGameMode = Player.toNetworkGamemode(player.gamemode),
@@ -240,7 +224,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             },
             multiPlayerCorrelationID = "",
             serverAuthoritativeInventory = true,
-            gameVersion = ProtocolInfo.GAME_VERSION_NET,
+            gameVersion = ProtocolInfo.VERSION,
             propertyData = org.chorus_oss.nbt.tags.CompoundTag(getPlayerPropertyCache()),
             serverBlockStateChecksum = 0u,
             clientSideGeneration = false,

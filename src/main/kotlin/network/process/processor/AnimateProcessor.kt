@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.event.player.PlayerAnimationEvent
 import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.process.DataPacketProcessor
 import org.chorus_oss.protocol.packets.AnimatePacket
 import org.chorus_oss.protocol.packets.AnimatePacket.Action

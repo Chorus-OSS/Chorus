@@ -118,7 +118,10 @@ class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
         super.initEntity()
         this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_INTERVAL, 8)
         this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_INTERVAL_RANGE, 16)
-        this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id)
+        this.setDataProperty(
+            EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id
+        )
         if (this.isBaby()) {
             this.setDataProperty(
                 EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,

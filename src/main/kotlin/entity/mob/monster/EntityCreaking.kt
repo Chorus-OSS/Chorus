@@ -152,7 +152,12 @@ class EntityCreaking(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nb
                     putFloat("HeartY", creakingHeart!!.position.y.toFloat())
                     putFloat("HeartZ", creakingHeart!!.position.z.toFloat())
                 }
-                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(tag), this, TagSerialization.NetLE, false)
+                org.chorus_oss.nbt.Tag.serialize(
+                    org.chorus_oss.nbt.tags.CompoundTag(tag),
+                    this,
+                    TagSerialization.NetLE,
+                    false
+                )
             }.readByteString()
         )
         Server.broadcastPacket(this.viewers.values, packet)

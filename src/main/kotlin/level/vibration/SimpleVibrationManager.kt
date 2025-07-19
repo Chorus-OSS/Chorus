@@ -70,7 +70,12 @@ class SimpleVibrationManager(protected var level: Level) : VibrationManager {
         val packet = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
             eventID = org.chorus_oss.protocol.packets.LevelEventPacket.PARTICLE_VIBRATION_SIGNAL,
             serializedEventData = Buffer().apply {
-                org.chorus_oss.nbt.Tag.serialize(org.chorus_oss.nbt.tags.CompoundTag(tag), this, TagSerialization.NetLE, false)
+                org.chorus_oss.nbt.Tag.serialize(
+                    org.chorus_oss.nbt.tags.CompoundTag(tag),
+                    this,
+                    TagSerialization.NetLE,
+                    false
+                )
             }.readByteString()
         )
         // TODO: 只对在视野范围内的玩家发包

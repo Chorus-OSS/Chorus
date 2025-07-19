@@ -416,7 +416,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     }
 
     fun rebuildPacket() {
-        val packet = org.chorus_oss.protocol.packets.CraftingDataPacket(
+        org.chorus_oss.protocol.packets.CraftingDataPacket(
             recipes = listOf(),
             potionRecipes = listOf(),
             potionContainerChangeRecipes = listOf(),
@@ -424,7 +424,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             clearRecipes = true,
         )
 
-        val buffer = Buffer()
+        Buffer()
 
         val buf = ByteBufAllocator.DEFAULT.ioBuffer(64)
 
@@ -734,7 +734,8 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
                             this.register(smeltingRecipe)
                         }
                         // this can be removed once duplicate recipes no longer exist
-                        catch (_: Exception) { }
+                        catch (_: Exception) {
+                        }
                     }
                 }
             }
@@ -793,6 +794,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
                         val count = if (data.containsKey("count")) data["count"]!!.jsonPrimitive.int else 1
                         ItemTagDescriptor(itemTag, count)
                     }
+
                     "complex_alias" -> {
                         val itemId = data["name"]!!.jsonPrimitive.content
                         val count = data["count"]!!.jsonPrimitive.int
@@ -800,6 +802,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
                         item.disableMeta()
                         DefaultDescriptor(item)
                     }
+
                     else -> {    // only other possibility is the "default" type
                         val itemId = data["itemId"]!!.jsonPrimitive.content
                         val count = if (data.containsKey("count")) data["count"]!!.jsonPrimitive.int else 1

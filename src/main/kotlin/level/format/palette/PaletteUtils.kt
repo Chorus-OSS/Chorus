@@ -44,7 +44,7 @@ object PaletteUtils {
                     if (name == "version") {
                         val version = input.readInt()
                         byteBuf.resetReaderIndex()
-                        if (version != ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION) {
+                        if (version != ProtocolInfo.BLOCK_STATE_VERSION) {
                             return Pair(null, getSemVersion(version))
                         }
                         val result = ByteArray(end - byteBuf.readerIndex())

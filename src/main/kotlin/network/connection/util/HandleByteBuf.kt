@@ -13,7 +13,10 @@ import org.chorus_oss.chorus.nbt.NBTIO.write
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.chorus.recipe.descriptor.*
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.Binary
+import org.chorus_oss.chorus.utils.ByteBufVarInt
+import org.chorus_oss.chorus.utils.LittleEndianByteBufOutputStream
+import org.chorus_oss.chorus.utils.Utils
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

@@ -119,7 +119,10 @@ class BlockCake @JvmOverloads constructor(blockState: BlockState = properties.de
                 player.foodData?.addFood(2, 0.4f)
                 level.setBlock(this.position, this, true)
             }
-            level.addLevelSoundEvent(this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Burp)
+            level.addLevelSoundEvent(
+                this.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Burp
+            )
             level.vibrationManager.callVibrationEvent(
                 VibrationEvent(
                     player,

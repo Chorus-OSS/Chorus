@@ -50,12 +50,18 @@ class ItemChorusFruit @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
             }
 
             // Sounds are broadcast at both source and destination
-            level.addLevelSoundEvent(player.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport)
+            level.addLevelSoundEvent(
+                player.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport
+            )
             player.teleport(
                 Vector3(x + 0.5, (y + 1).toDouble(), z + 0.5),
                 PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT
             )
-            level.addLevelSoundEvent(player.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport)
+            level.addLevelSoundEvent(
+                player.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport
+            )
 
             break
         }

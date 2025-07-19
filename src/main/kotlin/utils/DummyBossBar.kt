@@ -7,10 +7,10 @@ import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataMap
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.actor_data.ActorDataType

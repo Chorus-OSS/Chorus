@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.mob.villagers.EntityVillagerV2
 import org.chorus_oss.chorus.event.inventory.CraftItemEvent
 import org.chorus_oss.chorus.event.inventory.EnchantItemEvent
-import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_ID
 import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_ID_START
 import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_MAP
 import org.chorus_oss.chorus.inventory.EnchantInventory

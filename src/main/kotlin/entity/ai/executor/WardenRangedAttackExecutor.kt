@@ -116,7 +116,11 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
             val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
                 eventID = org.chorus_oss.protocol.packets.LevelEventPacket.SONIC_EXPLOSION,
                 serializedEventData = Buffer().apply {
-                    val tag = org.chorus_oss.nbt.tags.CompoundTag(createVec3fTag(from.add(relativeVector.multiply(i / length)).asVector3f()))
+                    val tag = org.chorus_oss.nbt.tags.CompoundTag(
+                        createVec3fTag(
+                            from.add(relativeVector.multiply(i / length)).asVector3f()
+                        )
+                    )
                     org.chorus_oss.nbt.Tag.serialize(tag, this, TagSerialization.NetLE, false)
                 }.readByteString()
             )

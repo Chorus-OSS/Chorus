@@ -116,7 +116,10 @@ class EntityWitherSkeleton(chunk: IChunk?, nbt: CompoundTag?) : EntitySkeleton(c
             this.setItemInHand(Item.get(ItemID.STONE_SWORD))
         }
         // 设置凋零骷髅空闲状态播放空闲声音
-        this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id)
+        this.setDataProperty(
+            EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id
+        )
     }
 
     override fun getWidth(): Float {

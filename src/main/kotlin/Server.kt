@@ -1853,7 +1853,7 @@ class Server internal constructor(
         get() = Chorus.CODENAME
 
     val version: String
-        get() = ProtocolInfo.GAME_VERSION_STR
+        get() = "v${ProtocolInfo.VERSION}"
 
     val apiVersion: String
         get() = Chorus.API_VERSION

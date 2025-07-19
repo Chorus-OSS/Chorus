@@ -11,13 +11,13 @@ import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.generateRan
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.getSecretKey
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.parseKey
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.chorus.network.protocol.types.InputMode
 import org.chorus_oss.chorus.network.protocol.types.Platform
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.utils.ClientChainData
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.LoginPacket
 import java.net.InetSocketAddress
 import java.util.function.Consumer
 import java.util.regex.Pattern
