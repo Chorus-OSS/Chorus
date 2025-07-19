@@ -5,22 +5,14 @@ import io.netty.buffer.ByteBufAllocator
 import io.netty.util.ByteProcessor
 import io.netty.util.internal.ObjectUtil
 import io.netty.util.internal.StringUtil
-import org.chorus_oss.chorus.block.Block
-import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemDurable
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.level.GameRule
-import org.chorus_oss.chorus.level.GameRules
-import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO.read
 import org.chorus_oss.chorus.nbt.NBTIO.write
-import org.chorus_oss.chorus.nbt.stream.LittleEndianByteBufInputStreamNBTInputStream
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.chorus.recipe.descriptor.*
-import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.*
 import java.io.IOException
 import java.io.InputStream
@@ -701,12 +693,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         return buf.writeCharSequence(sequence, charset)
     }
 
-    fun readString(): String {
-        val bytes = ByteArray(this.readUnsignedVarInt())
-        buf.readBytes(bytes)
-        return String(bytes, StandardCharsets.UTF_8)
-    }
-
     fun writeString(str: String): ByteBuf {
         val bytes = str.toByteArray(StandardCharsets.UTF_8)
         this.writeUnsignedVarInt(bytes.size)
@@ -717,207 +703,17 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         this.writeBytes(Binary.writeUUID(uuid))
     }
 
-    fun readUUID(): UUID {
-        val bytes = ByteArray(16)
-        this.readBytes(bytes)
-        return Binary.readUUID(bytes)
-    }
-
-    fun writeImage(image: SerializedImage) {
-        this.writeIntLE(image.width)
-        this.writeIntLE(image.height)
-        this.writeUnsignedVarInt(image.data.size)
-        this.writeBytes(image.data)
-    }
-
-    fun readImage(): SerializedImage {
-        val width = this.readIntLE()
-        val height = this.readIntLE()
-        val bytes = ByteArray(this.readUnsignedVarInt())
-        this.readBytes(bytes)
-        return SerializedImage(width, height, bytes)
-    }
-
-    fun readByteArray(): ByteArray {
-        val bytes = ByteArray(readUnsignedVarInt())
-        readBytes(bytes)
-        return bytes
-    }
-
     fun writeByteArray(bytes: ByteArray) {
         writeUnsignedVarInt(bytes.size)
         this.writeBytes(bytes)
-    }
-
-    fun writeSkin(skin: Skin) {
-        this.writeString(skin.getSkinId())
-        this.writeString(skin.getPlayFabId())
-        this.writeString(skin.getSkinResourcePatch())
-        this.writeImage(skin.getSkinData())
-
-        val animations = skin.getAnimations()
-        this.writeIntLE(animations.size)
-        for (animation in animations) {
-            this.writeImage(animation.image)
-            this.writeIntLE(animation.type)
-            this.writeFloatLE(animation.frames)
-            this.writeIntLE(animation.expression)
-        }
-
-        this.writeImage(skin.getCapeData())
-        this.writeString(skin.getGeometryData())
-        this.writeString(skin.getGeometryDataEngineVersion()!!)
-        this.writeString(skin.getAnimationData())
-        this.writeString(skin.getCapeId())
-        this.writeString(skin.getFullSkinId())
-        this.writeString(skin.getArmSize()!!)
-        this.writeString(skin.getSkinColor()!!)
-        val pieces = skin.getPersonaPieces()
-        this.writeIntLE(pieces.size)
-        for (piece in pieces) {
-            this.writeString(piece.id)
-            this.writeString(piece.type)
-            this.writeString(piece.packId)
-            this.writeBoolean(piece.isDefault)
-            this.writeString(piece.productId)
-        }
-
-        val tints = skin.getTintColors()
-        this.writeIntLE(tints.size)
-        for (tint in tints) {
-            this.writeString(tint.pieceType)
-            val colors: List<String> = tint.colors
-            this.writeIntLE(colors.size)
-            for (color in colors) {
-                this.writeString(color)
-            }
-        }
-
-        this.writeBoolean(skin.isPremium())
-        this.writeBoolean(skin.isPersona())
-        this.writeBoolean(skin.isCapeOnClassic())
-        this.writeBoolean(skin.isPrimaryUser())
-        this.writeBoolean(skin.isOverridingPlayerAppearance())
     }
 
     fun writeUnsignedVarInt(value: Int) {
         ByteBufVarInt.writeUnsignedInt(this, value)
     }
 
-    fun readUnsignedVarInt(): Int {
-        return ByteBufVarInt.readUnsignedInt(this)
-    }
-
     fun writeVarInt(value: Int) {
         ByteBufVarInt.writeInt(this, value)
-    }
-
-    fun readVarInt(): Int {
-        return ByteBufVarInt.readInt(this)
-    }
-
-    fun writeUnsignedVarLong(value: Long) {
-        ByteBufVarInt.writeUnsignedLong(this, value)
-    }
-
-    fun readUnsignedVarLong(): Long {
-        return ByteBufVarInt.readUnsignedLong(this)
-    }
-
-    fun writeVarLong(value: Long) {
-        ByteBufVarInt.writeLong(this, value)
-    }
-
-    fun readSlot(): Item {
-        return this.readSlot(false)
-    }
-
-    fun readSlot(instanceItem: Boolean): Item {
-        val runtimeId = this.readVarInt()
-        if (runtimeId == 0) {
-            return Item.AIR
-        }
-
-        val count = readShortLE().toInt()
-        val damage = readUnsignedVarInt()
-
-        var netId: Int? = null
-        if (!instanceItem) {
-            val hasNetId = readBoolean()
-            if (hasNetId) {
-                netId = this.readVarInt()
-            }
-        }
-        val blockRuntimeId = this.readVarInt()
-
-        var compoundTag: CompoundTag? = null
-        val canPlace: Array<String>
-        val canBreak: Array<String>
-        val item: Item
-        if (blockRuntimeId == 0) {
-            item = get(Registries.ITEM_RUNTIMEID.getIdentifier(runtimeId), damage, count)
-        } else {
-            item = get(Registries.ITEM_RUNTIMEID.getIdentifier(runtimeId), damage, count)
-            val blockState = Registries.BLOCKSTATE[blockRuntimeId]
-            if (blockState != null) {
-                item.blockState = blockState
-            }
-        }
-
-        if (netId != null) {
-            item.netId = (netId)
-        }
-
-        val bytes = ByteArray(readUnsignedVarInt())
-        readBytes(bytes)
-        val buf = ByteBufAllocator.DEFAULT.ioBuffer(bytes.size)
-        buf.writeBytes(bytes)
-        try {
-            LittleEndianByteBufInputStream(buf).use { stream ->
-                val nbtSize = stream.readShort().toInt()
-                if (nbtSize > 0) {
-                    val ls = LittleEndianByteBufInputStreamNBTInputStream(stream)
-                    compoundTag = ls.readTag() as CompoundTag?
-                } else if (nbtSize == -1) {
-                    val tagCount = stream.readUnsignedByte()
-                    require(tagCount == 1) { "Expected 1 tag but got $tagCount" }
-                    val ls = LittleEndianByteBufInputStreamNBTInputStream(stream)
-                    compoundTag = ls.readTag() as CompoundTag?
-                }
-
-                canPlace = Array(stream.readInt()) {
-                    stream.readUTF()
-                }
-
-                canBreak = Array(stream.readInt()) {
-                    stream.readUTF()
-                }
-
-                if (item.id == ItemID.SHIELD) {
-                    stream.readLong() // blockingTicks
-                }
-                if (compoundTag != null) {
-                    if (compoundTag.contains("__DamageConflict__")) {
-                        compoundTag.put("Damage", compoundTag.removeAndGet("__DamageConflict__")!!)
-                    }
-                    item.setCompoundTag(compoundTag)
-                }
-                val canPlaces = canPlace.map { Block.get(it) }.toTypedArray()
-                if (canPlaces.isNotEmpty()) {
-                    item.setCanPlaceOn(canPlaces)
-                }
-
-                val canBreaks = canBreak.map { Block.get(it) }.toTypedArray()
-                if (canBreaks.isNotEmpty()) {
-                    item.setCanPlaceOn(canBreaks)
-                }
-                return item
-            }
-        } catch (e: IOException) {
-            throw IllegalStateException("Unable to read item user data", e)
-        } finally {
-            buf.release()
-        }
     }
 
     @JvmOverloads
@@ -1039,43 +835,10 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         this.writeVarInt(itemDescriptor.count)
     }
 
-    fun writeBlockVector3(x: Int, y: Int, z: Int) {
-        this.writeVarInt(x)
-        this.writeUnsignedVarInt(y)
-        this.writeVarInt(z)
-    }
-
-    fun readVector3f(): Vector3f {
-        return Vector3f(this.readFloatLE(), this.readFloatLE(), this.readFloatLE())
-    }
-
     fun writeVector3f(x: Float, y: Float, z: Float) {
         this.writeFloatLE(x)
         this.writeFloatLE(y)
         this.writeFloatLE(z)
-    }
-
-    fun writeGameRules(gameRules: GameRules) {
-        val rules = gameRules.getGameRules().toMutableMap()
-        rules.keys.removeIf(GameRule::isDeprecated)
-
-        this.writeUnsignedVarInt(rules.size)
-        rules.forEach { (gameRule, value) ->
-            this.writeString(gameRule.gameRuleName.lowercase())
-            value.write(this)
-        }
-    }
-
-    fun writeActorUniqueID(actorUniqueID: Long) {
-        this.writeVarLong(actorUniqueID)
-    }
-
-    fun readActorRuntimeID(): Long {
-        return this.readUnsignedVarLong()
-    }
-
-    fun writeActorRuntimeID(actorRuntimeID: Long) {
-        this.writeUnsignedVarLong(actorRuntimeID)
     }
 
     fun <T> writeArray(array: Collection<T>, biConsumer: BiConsumer<HandleByteBuf, T>) {

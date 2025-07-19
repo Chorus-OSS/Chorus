@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.nbt.tag
 
-import io.netty.util.internal.EmptyArrays
 import org.jetbrains.annotations.UnmodifiableView
 import java.util.*
 import kotlin.math.max
@@ -202,11 +201,11 @@ open class CompoundTag @JvmOverloads constructor(open val tags: MutableMap<Strin
     }
 
     open fun getByteArray(name: String): ByteArray {
-        return (tags[name] as ByteArrayTag?)?.data ?: EmptyArrays.EMPTY_BYTES
+        return (tags[name] as ByteArrayTag?)?.data ?: byteArrayOf()
     }
 
     open fun getIntArray(name: String): IntArray {
-        return (tags[name] as IntArrayTag?)?.data ?: EmptyArrays.EMPTY_INTS
+        return (tags[name] as IntArrayTag?)?.data ?: intArrayOf()
     }
 
     open fun getCompound(name: String): CompoundTag {

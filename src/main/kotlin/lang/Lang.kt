@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.lang
 
 import com.google.gson.reflect.TypeToken
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.utils.JSONUtils
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.*
@@ -102,7 +101,7 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
      * @return the string
      */
     fun tr(key: String): String {
-        return tr(key, *EmptyArrays.EMPTY_STRINGS)
+        return tr(key, *emptyArray())
     }
 
     /**

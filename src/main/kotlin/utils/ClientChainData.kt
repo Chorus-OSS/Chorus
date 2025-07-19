@@ -7,6 +7,7 @@ import kotlinx.io.Buffer
 import kotlinx.io.Source
 import kotlinx.io.readIntLe
 import kotlinx.io.readString
+import kotlinx.io.write
 import kotlinx.io.writeString
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.mojangPublicKey
@@ -261,7 +262,7 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
         fun read(pk: org.chorus_oss.protocol.packets.LoginPacket): ClientChainData {
             return ClientChainData(
                 Buffer().apply {
-                    writeString(pk.connectionRequest)
+                    write(pk.connectionRequest)
                 }
             )
         }

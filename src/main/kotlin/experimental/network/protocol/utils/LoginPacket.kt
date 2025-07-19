@@ -12,11 +12,10 @@ import org.chorus_oss.chorus.utils.SkinAnimation
 import org.chorus_oss.protocol.packets.LoginPacket
 import java.nio.charset.StandardCharsets
 import java.util.*
-import kotlin.math.min
 
 fun LoginPacket.decode(): LoginData {
     val data = Buffer().also { buf ->
-        buf.writeString(this.connectionRequest)
+        buf.write(this.connectionRequest)
     }
 
     return LoginData(
@@ -38,9 +37,7 @@ data class ChainData(
 )
 
 private fun decodeChainData(stream: Source): ChainData {
-    val chainString = Buffer().apply {
-        stream.readAtMostTo(this, stream.readIntLe().toLong())
-    }.readString()
+    val chainString = stream.readString(stream.readIntLe().toLong())
 
     val jwt = JsonParser.parseString(chainString).asJsonObject
     val certificateString = jwt["Certificate"].asString
@@ -94,11 +91,7 @@ data class SkinData(
 private fun decodeSkinData(stream: Source): SkinData {
     var clientID: Long = 0
 
-    val skinToken = decodeJWT(
-        Buffer().apply {
-            stream.readAtMostTo(this, stream.readIntLe().toLong())
-        }.readString()
-    )
+    val skinToken = decodeJWT(stream.readString(stream.readIntLe().toLong()))
     if (skinToken!!.has("ClientRandomId")) clientID = skinToken["ClientRandomId"].asLong
 
     val skin = Skin()

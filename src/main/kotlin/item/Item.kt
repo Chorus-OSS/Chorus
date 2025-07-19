@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.item
 
 import com.google.gson.annotations.SerializedName
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockAir
@@ -46,7 +45,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     var blockState: BlockState? = null
 
     protected var hasMeta: Boolean = true
-    var compoundTag: ByteArray = EmptyArrays.EMPTY_BYTES
+    var compoundTag: ByteArray = byteArrayOf()
         private set
     private var cachedNBT: CompoundTag? = null
     private fun idConvertToName(): String {
@@ -621,7 +620,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
                 }
             }
 
-            return lines.toArray(EmptyArrays.EMPTY_STRINGS)
+            return lines.toTypedArray()
         }
 
     /**
@@ -709,14 +708,14 @@ abstract class Item : Cloneable, ItemID, Loggable {
     }
 
     fun clearNamedTag(): Item {
-        this.compoundTag = EmptyArrays.EMPTY_BYTES
+        this.compoundTag = byteArrayOf()
         this.cachedNBT = null
         return this
     }
 
     fun writeCompoundTag(tag: CompoundTag?): ByteArray {
         if (tag == null) {
-            return EmptyArrays.EMPTY_BYTES
+            return byteArrayOf()
         }
         try {
             return NBTIO.write(tag, ByteOrder.LITTLE_ENDIAN)
@@ -1250,7 +1249,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     }
 
     public override fun clone(): Item {
-        var tags = EmptyArrays.EMPTY_BYTES
+        var tags = byteArrayOf()
         if (this.hasCompoundTag()) {
             tags = compoundTag.clone()
         }

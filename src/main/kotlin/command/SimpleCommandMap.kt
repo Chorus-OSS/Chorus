@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.command
 
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.defaults.*
@@ -244,7 +243,7 @@ class SimpleCommandMap(private val server: Server) : CommandMap {
         }
 
         val sentCommandLabel = parsed.removeAt(0).lowercase() //command name
-        val args = parsed.toArray(EmptyArrays.EMPTY_STRINGS)
+        val args = parsed.toTypedArray()
         val target = this.getCommand(sentCommandLabel)
 
         if (target == null) {
@@ -285,7 +284,7 @@ class SimpleCommandMap(private val server: Server) : CommandMap {
                     output = 0
                 }
             } else {
-                output = if (target.execute(sender, sentCommandLabel, args)) 1 else 0
+                output = if (target.execute(sender, sentCommandLabel, args.map { it as String? }.toTypedArray())) 1 else 0
             }
         } catch (e: Exception) {
             log.error(

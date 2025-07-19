@@ -7,7 +7,6 @@ import com.google.common.base.Strings
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.Sets
-import io.netty.util.internal.EmptyArrays
 import io.netty.util.internal.PlatformDependent
 import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.block.*
@@ -587,7 +586,6 @@ open class Player(
         this.displayName = playerInfo.username
         this.loginChainData = playerInfo.data
         this.uuid = playerInfo.uuid
-        this.rawUUID = writeUUID(playerInfo.uuid)
         this.skin = (playerInfo.skin)
     }
 
@@ -3316,7 +3314,7 @@ open class Player(
      * @see .sendTranslation
      */
     @JvmOverloads
-    fun sendTranslation(message: String, parameters: Array<String> = EmptyArrays.EMPTY_STRINGS) {
+    fun sendTranslation(message: String, parameters: Array<String> = emptyArray()) {
         val packet = TextPacket(
 
             textType = when (Server.instance.settings.baseSettings.forceServerTranslate) {

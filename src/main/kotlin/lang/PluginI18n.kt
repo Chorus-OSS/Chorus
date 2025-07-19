@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.lang
 
 import com.google.common.base.Preconditions
 import com.google.gson.reflect.TypeToken
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.plugin.PluginBase
 import org.chorus_oss.chorus.utils.JSONUtils
@@ -43,7 +42,7 @@ class PluginI18n(private val plugin: PluginBase) {
      * @return the string
      */
     fun tr(lang: LangCode?, key: String): String {
-        return tr(lang, key, *EmptyArrays.EMPTY_STRINGS)
+        return tr(lang, key, *emptyArray())
     }
 
     /**

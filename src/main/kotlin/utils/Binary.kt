@@ -3,35 +3,10 @@ package org.chorus_oss.chorus.utils
 import java.util.*
 
 object Binary {
-    fun readUUID(bytes: ByteArray): UUID {
-        return UUID(
-            readLLong(bytes), readLLong(
-                byteArrayOf(
-                    bytes[8],
-                    bytes[9],
-                    bytes[10],
-                    bytes[11],
-                    bytes[12],
-                    bytes[13],
-                    bytes[14],
-                    bytes[15]
-                )
-            )
-        )
-    }
 
     @JvmStatic
     fun writeUUID(uuid: UUID): ByteArray {
         return appendBytes(writeLLong(uuid.mostSignificantBits), writeLLong(uuid.leastSignificantBits))
-    }
-
-    fun writeLShort(s: Int): ByteArray {
-        var s1 = s
-        s1 = s1 and 0xffff
-        return byteArrayOf(
-            (s1 and 0xFF).toByte(),
-            ((s1 ushr 8) and 0xFF).toByte()
-        )
     }
 
     fun readInt(bytes: ByteArray): Int {
@@ -48,37 +23,6 @@ object Binary {
             ((i ushr 8) and 0xFF).toByte(),
             (i and 0xFF).toByte()
         )
-    }
-
-    fun readLInt(bytes: ByteArray): Int {
-        return ((bytes[3].toInt() and 0xff) shl 24) +
-                ((bytes[2].toInt() and 0xff) shl 16) +
-                ((bytes[1].toInt() and 0xff) shl 8) +
-                (bytes[0].toInt() and 0xff)
-    }
-
-    fun writeLInt(i: Int): ByteArray {
-        return byteArrayOf(
-            (i and 0xFF).toByte(),
-            ((i ushr 8) and 0xFF).toByte(),
-            ((i ushr 16) and 0xFF).toByte(),
-            ((i ushr 24) and 0xFF).toByte()
-        )
-    }
-
-    fun writeLFloat(f: Float): ByteArray {
-        return writeLInt(java.lang.Float.floatToIntBits(f))
-    }
-
-    fun readLLong(bytes: ByteArray): Long {
-        return ((bytes[7].toLong() shl 56) +
-                ((bytes[6].toInt() and 0xFF).toLong() shl 48) +
-                ((bytes[5].toInt() and 0xFF).toLong() shl 40) +
-                ((bytes[4].toInt() and 0xFF).toLong() shl 32) +
-                ((bytes[3].toInt() and 0xFF).toLong() shl 24) +
-                ((bytes[2].toInt() and 0xFF) shl 16) +
-                ((bytes[1].toInt() and 0xFF) shl 8) +
-                ((bytes[0].toInt() and 0xFF)))
     }
 
     fun writeLLong(l: Long): ByteArray {

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.command
 
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.blockentity.ICommandBlock
@@ -25,7 +24,7 @@ abstract class Command @JvmOverloads constructor(
     name: String,
     description: String = "",
     usageMessage: String? = null,
-    aliases: Array<String> = EmptyArrays.EMPTY_STRINGS
+    aliases: Array<String> = emptyArray()
 ) {
     @JvmField
     val name: String

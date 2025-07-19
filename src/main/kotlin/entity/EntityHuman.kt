@@ -24,7 +24,6 @@ import kotlin.uuid.Uuid
 
 open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk, nbt) {
     lateinit var uuid: UUID
-    protected lateinit var rawUUID: ByteArray
     override lateinit var skin: Skin
 
     override fun getWidth(): Float {
@@ -62,14 +61,6 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
 
     override fun setUUID(uuid: UUID) {
         this.uuid = uuid
-    }
-
-    fun setRawUniqueId(rawUUID: ByteArray) {
-        this.rawUUID = rawUUID
-    }
-
-    fun getRawUniqueId(): ByteArray {
-        return rawUUID
     }
 
     override fun initEntity() {

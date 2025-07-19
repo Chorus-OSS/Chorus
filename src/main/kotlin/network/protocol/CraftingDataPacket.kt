@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.network.protocol
 import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
-import org.chorus_oss.chorus.network.protocol.types.MaterialReducerDataEntry
 import org.chorus_oss.chorus.network.protocol.types.RecipeUnlockingRequirement
 import org.chorus_oss.chorus.network.protocol.types.RecipeUnlockingRequirement.UnlockingContext
 import org.chorus_oss.chorus.recipe.*
@@ -11,12 +10,7 @@ import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
 
 import java.util.*
 
-data class CraftingDataPacket(
-    val craftingEntries: List<Recipe>,
-    val potionMixes: List<BrewingRecipe>,
-    val containerMixes: List<ContainerRecipe>,
-    val materialReducers: List<MaterialReducerDataEntry>
-) : DataPacket() {
+class CraftingDataPacket : DataPacket() {
     private val entries: MutableList<Recipe> = mutableListOf()
     private val brewingEntries: MutableList<BrewingRecipe> = mutableListOf()
     private val containerEntries: MutableList<ContainerRecipe> = mutableListOf()

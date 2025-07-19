@@ -2,12 +2,11 @@ package org.chorus_oss.chorus.registry
 
 
 import com.google.common.collect.Collections2
-import com.google.gson.internal.LinkedTreeMap
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
-import io.netty.util.ReferenceCountUtil
 import io.netty.util.collection.CharObjectHashMap
-import io.netty.util.internal.EmptyArrays
+import kotlinx.io.Buffer
+import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
@@ -20,17 +19,16 @@ import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
 import org.chorus_oss.chorus.recipe.descriptor.ItemDescriptor
 import org.chorus_oss.chorus.recipe.descriptor.ItemDescriptorType
 import org.chorus_oss.chorus.recipe.descriptor.ItemTagDescriptor
-import org.chorus_oss.chorus.utils.Config
 import org.chorus_oss.chorus.utils.Identifier
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils
 import java.io.IOException
+import java.io.Reader
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
-    val vanillaRecipeParser: VanillaRecipeParser = VanillaRecipeParser(this)
     private val recipeMaps = EnumMap<RecipeType, MutableMap<Int, MutableSet<Recipe>>>(
         RecipeType::class.java
     )
@@ -345,6 +343,9 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     val craftingPacket: ByteBuf
         get() = buffer!!.copy()
 
+    val packet: Buffer
+        get() = Companion.packet.copy()
+
     fun getRecipeByNetworkId(networkId: Int): Recipe {
         return networkIdRecipeList[networkId - 1]
     }
@@ -364,10 +365,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     override fun reload() {
         isLoad.set(false)
         recipeCount = 0
-        if (buffer != null) {
-            buffer!!.release()
-            buffer = null
-        }
+        Companion.packet.clear()
         recipeMaps.clear()
         recipeXpMap.clear()
         allRecipeMaps.clear()
@@ -376,26 +374,15 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     }
 
     @Throws(RegisterException::class)
-    override fun register(key: String, recipe: Recipe) {
-        if (recipe is CraftingRecipe) {
-            val item: Item = recipe.results.first()
-            val id = Utils.dataToUUID(
-                recipeCount.toString(),
-                item.id,
-                item.damage.toString(),
-                item.getCount().toString(),
-                item.compoundTag.contentToString()
-            )
-            if (recipe.uuid == null) recipe.uuid = id
+    override fun register(key: String, value: Recipe) {
+        if (allRecipeMaps.putIfAbsent(value.recipeId, value) != null) {
+            throw RegisterException("Duplicate recipe ${value.recipeId} type ${value.type}")
         }
-        if (allRecipeMaps.putIfAbsent(recipe.recipeId, recipe) != null) {
-            throw RegisterException("Duplicate recipe ${recipe.recipeId} type ${recipe.type}")
-        }
-        val recipeMap = recipeMaps.computeIfAbsent(recipe.type) { HashMap() }
-        val r: MutableSet<Recipe> = recipeMap.computeIfAbsent(recipe.ingredients.size) { HashSet() }
-        r.add(recipe)
+        val recipeMap = recipeMaps.computeIfAbsent(value.type) { HashMap() }
+        val r: MutableSet<Recipe> = recipeMap.computeIfAbsent(value.ingredients.size) { HashSet() }
+        r.add(value)
         ++recipeCount
-        when (recipe.type) {
+        when (value.type) {
             RecipeType.STONECUTTER,
             RecipeType.SHAPELESS,
             RecipeType.CARTOGRAPHY,
@@ -404,7 +391,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             RecipeType.SMITHING_TRIM,
             RecipeType.SHAPED,
             RecipeType.MULTI -> networkIdRecipeList.add(
-                recipe
+                value
             )
 
             else -> Unit
@@ -425,18 +412,23 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         recipeMaps.values.forEach { obj -> obj.clear() }
         allRecipeMaps.clear()
         recipeCount = 0
-        ReferenceCountUtil.safeRelease(buffer)
-        buffer = null
+        Companion.packet.clear()
     }
 
     fun rebuildPacket() {
-        val buf = ByteBufAllocator.DEFAULT.ioBuffer(64)
-        val pk = CraftingDataPacket(
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf()
+        val packet = org.chorus_oss.protocol.packets.CraftingDataPacket(
+            recipes = listOf(),
+            potionRecipes = listOf(),
+            potionContainerChangeRecipes = listOf(),
+            materialReducers = emptyList(),
+            clearRecipes = true,
         )
+
+        val buffer = Buffer()
+
+        val buf = ByteBufAllocator.DEFAULT.ioBuffer(64)
+
+        val pk = CraftingDataPacket()
         pk.cleanRecipes = true
 
         pk.addNetworkIdRecipe(networkIdRecipeList)
@@ -460,207 +452,253 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             pk.addContainerRecipe(recipe)
         }
         pk.encode(of(buf))
-        buffer = buf
+        Companion.buffer = buf
     }
 
     private fun loadRecipes() {
-        //load xp config
-        val furnaceXpConfig = Config(Config.JSON)
-        try {
-            Server::class.java.classLoader.getResourceAsStream("furnace_xp.json").use { r ->
-                furnaceXpConfig.load(r)
+        val furnaceXPJSON = try {
+            Server::class.java.classLoader.getResourceAsStream("furnace_xp.json")!!.use {
+                Json.parseToJsonElement(it.bufferedReader().use(Reader::readText))
             }
-        } catch (e: IOException) {
-            log.warn("Failed to load furnace xp config")
-        }
+        } catch (_: IOException) {
+            log.warn("Failed to load furnace_xp.json")
+            JsonObject(emptyMap())
+        }.jsonObject
 
         // INFORMATION:
         // This code is used to read the recipes.json provided by endstone, but since
         // we do not have that data at the moment (for 1.21.20), we use recipes.json provided by Kaooot:
         // https://github.com/Kaooot/bedrock-network-data
         // We can use the original reader again, once endstone generates data again
-        val recipeConfig = Config(Config.JSON)
-        try {
-            Server::class.java.classLoader.getResourceAsStream("recipes.json").use { r ->
-                recipeConfig.load(r)
-                //load potionMixes
-                val potionMixes: List<Map<String, Any>> = recipeConfig.getList("potionMixes") as List<Map<String, Any>>
-                for (recipe in potionMixes) {
-                    val inputId = recipe["inputId"] as String?
-                    val inputMeta = (recipe["inputMeta"] as Double).toInt()
+        val recipesJSON = try {
+            Server::class.java.classLoader.getResourceAsStream("recipes.json")!!.use {
+                Json.parseToJsonElement(it.bufferedReader().use(Reader::readText))
+            }
+        } catch (_: IOException) {
+            log.warn("Failed to load recipes.json")
+            JsonObject(emptyMap())
+        }.jsonObject
 
-                    val reagentId = recipe["reagentId"] as String?
-                    val reagentMeta = (recipe["reagentMeta"] as Double).toInt()
+        run {
+            val potionMixes = recipesJSON["potionMixes"]!!.jsonArray.map { it.jsonObject }
+            for (recipe in potionMixes) {
+                val inputId = recipe["inputId"]!!.jsonPrimitive.content
+                val inputMeta = recipe["inputMeta"]!!.jsonPrimitive.int
 
-                    val outputId = recipe["outputId"] as String?
-                    val outputMeta = (recipe["outputMeta"] as Double).toInt()
+                val reagentId = recipe["reagentId"]!!.jsonPrimitive.content
+                val reagentMeta = recipe["reagentMeta"]!!.jsonPrimitive.int
 
-                    val inputItem = get(inputId!!, inputMeta)
-                    val reagentItem = get(reagentId!!, reagentMeta)
-                    val outputItem = get(outputId!!, outputMeta)
+                val outputId = recipe["outputId"]!!.jsonPrimitive.content
+                val outputMeta = recipe["outputMeta"]!!.jsonPrimitive.int
 
-                    if (inputItem.isNothing || reagentItem.isNothing || outputItem.isNothing) {
-                        continue
+                val inputItem = get(inputId, inputMeta)
+                val reagentItem = get(reagentId, reagentMeta)
+                val outputItem = get(outputId, outputMeta)
+
+                if (inputItem.isNothing || reagentItem.isNothing || outputItem.isNothing) {
+                    continue
+                }
+                register(
+                    BrewingRecipe(
+                        inputItem,
+                        reagentItem,
+                        outputItem
+                    )
+                )
+            }
+        }
+
+        run {
+            val containerMixes = recipesJSON["containerMixes"]!!.jsonArray.map { it.jsonObject }
+            for (containerMix in containerMixes) {
+                val inputId = containerMix["inputId"]!!.jsonPrimitive.content
+                val reagentId = containerMix["reagentId"]!!.jsonPrimitive.content
+                val outputId = containerMix["outputId"]!!.jsonPrimitive.content
+
+                this.register(
+                    ContainerRecipe(
+                        Item.get(inputId),
+                        Item.get(reagentId),
+                        Item.get(outputId)
+                    )
+                )
+            }
+        }
+
+        run {
+            val recipes = recipesJSON["recipes"]!!.jsonArray.map { it.jsonObject }
+            for (recipe in recipes) {
+                val block = recipe["block"]?.jsonPrimitive?.contentOrNull ?: continue
+
+                when (block) {
+                    "smithing_table" -> {
+                        val recipeId = recipe["id"]!!.jsonPrimitive.content
+
+                        val baseDescriptor = parseDescription(
+                            (recipe["base"]!!.jsonObject),
+                            ParseType.SMITHING_TABLE
+                        )
+                        val additionDescriptor = parseDescription(
+                            (recipe["addition"]!!.jsonObject),
+                            ParseType.SMITHING_TABLE
+                        )
+                        val templateDescriptor = parseDescription(
+                            (recipe["template"]!!.jsonObject),
+                            ParseType.SMITHING_TABLE
+                        )
+
+                        if (recipe.containsKey("result")) { // is smithing transform recipe
+                            val result = recipe["result"]!!.jsonObject
+                            val itemId = result["id"]!!.jsonPrimitive.content
+                            val count = result["count"]!!.jsonPrimitive.int
+                            this.register(
+                                SmithingTransformRecipe(
+                                    recipeId,
+                                    get(itemId, 0, count),
+                                    baseDescriptor,
+                                    additionDescriptor,
+                                    templateDescriptor
+                                )
+                            )
+                        } else {    // is smithing trim recipe
+                            this.register(
+                                SmithingTrimRecipe(
+                                    recipeId,
+                                    baseDescriptor,
+                                    additionDescriptor,
+                                    templateDescriptor,
+                                    "smithing_table"
+                                )
+                            )
+                        }
                     }
-                    register(
-                        BrewingRecipe(
-                            inputItem,
-                            reagentItem,
-                            outputItem
-                        )
-                    )
 
-                    // Endstone Reader
-//                Map<String, Object> input = (Map<String, Object>) recipe.get("input");
-//                String inputId = input.get("item").toString();
-//                int inputMeta = Utils.toInt(input.get("data"));
-//
-//                Map<String, Object> output = (Map<String, Object>) recipe.get("output");
-//                String outputId = output.get("item").toString();
-//                int outputMeta = Utils.toInt(output.get("data"));
-//
-//                Map<String, Object> reagent = (Map<String, Object>) recipe.get("reagent");
-//                String reagentId = reagent.get("item").toString();
-//                int reagentMeta = Utils.toInt(reagent.get("data"));
-//
-//                Item inputItem = Item.get(inputId, inputMeta);
-//                Item reagentItem = Item.get(reagentId, reagentMeta);
-//                Item outputItem = Item.get(outputId, outputMeta);
-//                if (inputItem.isNull() || reagentItem.isNull() || outputItem.isNull()) {
-//                    continue;
-//                }
-//                register(new BrewingRecipe(
-//                        inputItem,
-//                        reagentItem,
-//                        outputItem
-//                ));
-                }
+                    "stonecutter" -> {
+                        val inputParseType = ParseType.STONECUTTER_INPUT
+                        val outputParseType = ParseType.STONECUTTER_OUTPUT
 
-                //load containerMixes
-                val containerMixes: List<Map<String, Any>> =
-                    recipeConfig.getList("containerMixes") as List<Map<String, Any>>
-                for (containerMix in containerMixes) {
-                    val inputId = containerMix["inputId"] as String?
-                    val reagentId = containerMix["reagentId"] as String?
-                    val outputId = containerMix["outputId"] as String?
+                        val recipeId = recipe["id"]!!.jsonPrimitive.content
+                        val uuid = UUID.fromString(recipe["uuid"]!!.jsonPrimitive.content)
+                        val priority = recipe["priority"]!!.jsonPrimitive.int
 
-                    this.register(
-                        ContainerRecipe(
-                            Item.get(inputId!!),
-                            Item.get(reagentId!!),
-                            Item.get(outputId!!)
-                        )
-                    )
+                        val outputs = recipe["output"]!!.jsonArray.map { it.jsonObject }.toMutableList()
+                        val primaryResultData = outputs.removeFirst()
+                        val primaryResult = parseDescription(primaryResultData, outputParseType)
 
-                    // Endstone Reader
-//                String fromItemId = containerMix.get("input").toString();
-//                String ingredient = containerMix.get("reagent").toString();
-//                String toItemId = containerMix.get("output").toString();
-//                register(new ContainerRecipe(Item.get(fromItemId), Item.get(ingredient), Item.get(toItemId)));
-                }
+                        val ingredients: MutableList<ItemDescriptor> = ArrayList()
+                        val inputs = recipe["input"]!!.jsonArray.map { it.jsonObject }
 
-                //load all other recipes (Not Endstone Reader)
-                val recipes: List<Map<String, Any>> = recipeConfig.getList("recipes") as List<Map<String, Any>>
-                for (recipe in recipes) {
-                    val block = recipe["block"] as String? ?: continue
-
-                    when (block) {
-                        "smithing_table" -> {
-                            val recipeId = recipe["id"] as String?
-
-                            val baseDescriptor = parseDescription(
-                                (recipe["base"] as Map<String, Any>),
-                                ParseType.SMITHING_TABLE
-                            )
-                            val additionDescriptor = parseDescription(
-                                (recipe["addition"] as Map<String, Any>),
-                                ParseType.SMITHING_TABLE
-                            )
-                            val templateDescriptor = parseDescription(
-                                (recipe["template"] as Map<String, Any>),
-                                ParseType.SMITHING_TABLE
-                            )
-
-                            if (recipe.containsKey("result")) { // is smithing transform recipe
-                                val result = recipe["result"] as Map<String, Any>
-                                val itemId = result["id"] as String?
-                                val count = (result["count"] as Double).toInt()
-                                this.register(
-                                    SmithingTransformRecipe(
-                                        recipeId!!,
-                                        get(itemId!!, 0, count),
-                                        baseDescriptor,
-                                        additionDescriptor,
-                                        templateDescriptor
-                                    )
-                                )
-                            } else {    // is smithing trim recipe
-                                this.register(
-                                    SmithingTrimRecipe(
-                                        recipeId!!,
-                                        baseDescriptor,
-                                        additionDescriptor,
-                                        templateDescriptor,
-                                        "smithing_table"
-                                    )
-                                )
-                            }
+                        for (input in inputs) {
+                            ingredients.add(parseDescription(input, inputParseType))
                         }
 
-                        "stonecutter" -> {
-                            val inputParseType = ParseType.STONECUTTER_INPUT
-                            val outputParseType = ParseType.STONECUTTER_OUTPUT
+                        this.register(
+                            StonecutterRecipe(
+                                recipeId,
+                                uuid,
+                                priority,
+                                primaryResult.toItem(),
+                                ingredients.first().toItem(),
+                                RecipeUnlockingRequirement(
+                                    RecipeUnlockingRequirement.UnlockingContext.ALWAYS_UNLOCKED
+                                )
+                            )
+                        )
+                    }
 
-                            val recipeId = recipe["id"] as String?
-                            val uuid = UUID.fromString(recipe["uuid"] as String?)
-                            val priority = (recipe["priority"] as Double).toInt()
+                    "cartography_table" -> {
+                        val inputParseType = ParseType.CARTOGRAPHY_TABLE_INPUT
+                        val outputParseType = ParseType.CARTOGRAPHY_TABLE_OUTPUT
 
-                            val outputs = recipe["output"] as MutableList<Map<String, Any>>
-                            val primaryResultData = outputs.removeFirst()
-                            val primaryResult = parseDescription(primaryResultData, outputParseType)
+                        val recipeId = recipe["id"]!!.jsonPrimitive.content
+                        val uuid = UUID.fromString(recipe["uuid"]!!.jsonPrimitive.content)
+                        val priority = recipe["priority"]!!.jsonPrimitive.int
 
-                            val ingredients: MutableList<ItemDescriptor> = ArrayList()
-                            val inputs = recipe["input"] as List<Map<String, Any>>
+                        val outputs = recipe["output"]!!.jsonArray.map { it.jsonObject }.toMutableList()
+                        val primaryResultData = outputs.removeFirst()
+                        val primaryResult = parseDescription(primaryResultData, outputParseType)
 
-                            for (input in inputs) {
-                                ingredients.add(parseDescription(input, inputParseType))
+                        val ingredients: MutableList<ItemDescriptor> = ArrayList()
+                        val inputs = recipe["input"]!!.jsonArray.map { it.jsonObject }
+
+                        for (input in inputs) {
+                            ingredients.add(parseDescription(input, inputParseType))
+                        }
+
+                        this.register(
+                            CartographyRecipe(
+                                recipeId,
+                                uuid,
+                                priority,
+                                primaryResult.toItem(),
+                                ingredients,
+                                RecipeUnlockingRequirement(
+                                    RecipeUnlockingRequirement.UnlockingContext.ALWAYS_UNLOCKED
+                                )
+                            )
+                        )
+                    }
+
+                    "crafting_table" -> {
+                        val inputParseType = ParseType.CRAFTING_TABLE_INPUT
+                        val outputParseType = ParseType.CRAFTING_TABLE_OUTPUT
+
+                        val recipeId = recipe["id"]!!.jsonPrimitive.content
+                        val uuid = UUID.fromString(recipe["uuid"]!!.jsonPrimitive.content)
+                        val priority = recipe["priority"]!!.jsonPrimitive.int
+
+                        val outputs = recipe["output"]!!.jsonArray.map { it.jsonObject }.toMutableList()
+                        val primaryResultData = outputs.removeFirst()
+                        val primaryResult = parseDescription(primaryResultData, outputParseType)
+
+                        if (recipe.containsKey("shape")) {
+                            val extraResults: MutableList<Item> = ArrayList()
+                            for (output in outputs) {
+                                extraResults.add(parseDescription(output, outputParseType).toItem())
+                            }
+
+                            val shape = (recipe["shape"]!!.jsonArray.map { it.jsonPrimitive.content }).toTypedArray()
+
+                            val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
+
+                            val inputs = recipe["input"]!!.jsonObject
+
+                            for ((key, value) in inputs) {
+                                val patternKey = key[0]
+                                val ingredientData = value.jsonObject
+
+                                ingredients[patternKey] = parseDescription(
+                                    ingredientData,
+                                    inputParseType
+                                )
                             }
 
                             this.register(
-                                StonecutterRecipe(
+                                ShapedRecipe(
                                     recipeId,
                                     uuid,
                                     priority,
                                     primaryResult.toItem(),
-                                    ingredients.first().toItem(),
+                                    shape,
+                                    ingredients,
+                                    extraResults,
+                                    false,
                                     RecipeUnlockingRequirement(
                                         RecipeUnlockingRequirement.UnlockingContext.ALWAYS_UNLOCKED
                                     )
                                 )
                             )
-                        }
-
-                        "cartography_table" -> {
-                            val inputParseType = ParseType.CARTOGRAPHY_TABLE_INPUT
-                            val outputParseType = ParseType.CARTOGRAPHY_TABLE_OUTPUT
-
-                            val recipeId = recipe["id"] as String?
-                            val uuid = UUID.fromString(recipe["uuid"] as String?)
-                            val priority = (recipe["priority"] as Double).toInt()
-
-                            val outputs = recipe["output"] as MutableList<Map<String, Any>>
-                            val primaryResultData = outputs.removeFirst()
-                            val primaryResult = parseDescription(primaryResultData, outputParseType)
+                        } else {    // is shapeless recipe
 
                             val ingredients: MutableList<ItemDescriptor> = ArrayList()
-                            val inputs = recipe["input"] as List<Map<String, Any>>
+                            val inputs = recipe["input"]!!.jsonArray.map { it.jsonObject }
 
                             for (input in inputs) {
                                 ingredients.add(parseDescription(input, inputParseType))
                             }
 
                             this.register(
-                                CartographyRecipe(
+                                ShapelessRecipe(
                                     recipeId,
                                     uuid,
                                     priority,
@@ -672,153 +710,71 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
                                 )
                             )
                         }
+                    }
 
-                        "crafting_table" -> {
-                            var inputParseType = ParseType.CRAFTING_TABLE_INPUT
-                            var outputParseType = ParseType.CRAFTING_TABLE_OUTPUT
+                    "furnace", "blast_furnace", "smoker", "campfire", "soul_campfire" -> {
+                        val inputData = recipe["input"]!!.jsonObject
+                        val outputData = recipe["output"]!!.jsonObject
+                        val inputItem = parseDescription(inputData, ParseType.FURNACE_INPUT).toItem()
+                        val outputItem = parseDescription(outputData, ParseType.FURNACE_OUTPUT).toItem()
 
-                            when (block) {
-                                "cartography_table" -> {
-                                    inputParseType = ParseType.CARTOGRAPHY_TABLE_INPUT
-                                    outputParseType = ParseType.CARTOGRAPHY_TABLE_OUTPUT
-                                }
-                            }
-
-                            val recipeId = recipe["id"] as String?
-                            val uuid = UUID.fromString(recipe["uuid"] as String?)
-                            val priority = (recipe["priority"] as Double).toInt()
-
-                            val outputs = recipe["output"] as MutableList<Map<String, Any>>
-                            val primaryResultData = outputs.removeFirst()
-                            val primaryResult = parseDescription(primaryResultData, outputParseType)
-
-                            if (recipe.containsKey("shape")) {
-                                val extraResults: MutableList<Item> = ArrayList()
-                                for (output in outputs) {
-                                    extraResults.add(parseDescription(output, outputParseType).toItem())
-                                }
-
-                                val shape = (recipe["shape"] as List<String>).toTypedArray()
-
-                                val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
-
-                                val inputs = recipe["input"] as LinkedTreeMap<String, Any>
-
-                                for ((key, value) in inputs) {
-                                    val patternKey = key[0]
-                                    val ingredientData = value as Map<String, Any>
-
-                                    ingredients[patternKey] = parseDescription(
-                                        ingredientData,
-                                        inputParseType
-                                    )
-                                }
-
-                                this.register(
-                                    ShapedRecipe(
-                                        recipeId,
-                                        uuid,
-                                        priority,
-                                        primaryResult.toItem(),
-                                        shape,
-                                        ingredients,
-                                        extraResults,
-                                        false,
-                                        RecipeUnlockingRequirement(
-                                            RecipeUnlockingRequirement.UnlockingContext.ALWAYS_UNLOCKED
-                                        )
-                                    )
-                                )
-                            } else {    // is shapeless recipe
-
-                                val ingredients: MutableList<ItemDescriptor> = ArrayList()
-                                val inputs = recipe["input"] as List<Map<String, Any>>
-
-                                for (input in inputs) {
-                                    ingredients.add(parseDescription(input, inputParseType))
-                                }
-
-                                this.register(
-                                    ShapelessRecipe(
-                                        recipeId,
-                                        uuid,
-                                        priority,
-                                        primaryResult.toItem(),
-                                        ingredients,
-                                        RecipeUnlockingRequirement(
-                                            RecipeUnlockingRequirement.UnlockingContext.ALWAYS_UNLOCKED
-                                        )
-                                    )
-                                )
-                            }
+                        val smeltingRecipe = when (block) {
+                            "blast_furnace" -> BlastFurnaceRecipe(outputItem, inputItem)
+                            "smoker" -> SmokerRecipe(outputItem, inputItem)
+                            "campfire" -> CampfireRecipe(outputItem, inputItem)
+                            "soul_campfire" -> SoulCampfireRecipe(outputItem, inputItem)
+                            else -> FurnaceRecipe(outputItem, inputItem)
                         }
 
-                        "furnace", "blast_furnace", "smoker", "campfire", "soul_campfire" -> {
-                            val inputData = recipe["input"] as Map<String, Any>
-                            val outputData = recipe["output"] as Map<String, Any>
-                            val inputItem = parseDescription(inputData, ParseType.FURNACE_INPUT).toItem()
-                            val outputItem = parseDescription(outputData, ParseType.FURNACE_OUTPUT).toItem()
-
-                            val smeltingRecipe = when (block) {
-                                "blast_furnace" -> BlastFurnaceRecipe(outputItem, inputItem)
-                                "smoker" -> SmokerRecipe(outputItem, inputItem)
-                                "campfire" -> CampfireRecipe(outputItem, inputItem)
-                                "soul_campfire" -> SoulCampfireRecipe(outputItem, inputItem)
-                                else -> FurnaceRecipe(outputItem, inputItem)
-                            }
-
-                            val xp = furnaceXpConfig.getDouble(inputItem.id + ":" + inputItem.damage)
-                            if (xp != 0.0) {
-                                this.setRecipeXp(smeltingRecipe, xp)
-                            }
-
-                            try {
-                                this.register(smeltingRecipe)
-                            } catch (e: Exception) {     //this can be removed once duplicate recipes no longer exist
-                            }
+                        furnaceXPJSON["${inputItem.id}:${inputItem.damage}"]?.jsonPrimitive?.doubleOrNull?.let {
+                            this.setRecipeXp(smeltingRecipe, it)
                         }
+
+                        try {
+                            this.register(smeltingRecipe)
+                        }
+                        // this can be removed once duplicate recipes no longer exist
+                        catch (_: Exception) { }
                     }
                 }
             }
-        } catch (e: IOException) {
-            log.warn("Failed to load recipes config")
         }
 
         // Allow to rename without crafting
         register(
             CartographyRecipe(
-                get(ItemID.EMPTY_MAP, 0, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.EMPTY_MAP, 0, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.EMPTY_MAP, 0, 1, byteArrayOf(), false),
+                listOf(get(ItemID.EMPTY_MAP, 0, 1, byteArrayOf(), false))
             )
         )
         register(
             CartographyRecipe(
-                get(ItemID.EMPTY_MAP, 2, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.EMPTY_MAP, 2, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.EMPTY_MAP, 2, 1, byteArrayOf(), false),
+                listOf(get(ItemID.EMPTY_MAP, 2, 1, byteArrayOf(), false))
             )
         )
         register(
             CartographyRecipe(
-                get(ItemID.FILLED_MAP, 0, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.FILLED_MAP, 0, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.FILLED_MAP, 0, 1, byteArrayOf(), false),
+                listOf(get(ItemID.FILLED_MAP, 0, 1, byteArrayOf(), false))
             )
         )
         register(
             CartographyRecipe(
-                get(ItemID.FILLED_MAP, 3, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.FILLED_MAP, 3, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.FILLED_MAP, 3, 1, byteArrayOf(), false),
+                listOf(get(ItemID.FILLED_MAP, 3, 1, byteArrayOf(), false))
             )
         )
         register(
             CartographyRecipe(
-                get(ItemID.FILLED_MAP, 4, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.FILLED_MAP, 4, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.FILLED_MAP, 4, 1, byteArrayOf(), false),
+                listOf(get(ItemID.FILLED_MAP, 4, 1, byteArrayOf(), false))
             )
         )
         register(
             CartographyRecipe(
-                get(ItemID.FILLED_MAP, 5, 1, EmptyArrays.EMPTY_BYTES, false),
-                listOf(get(ItemID.FILLED_MAP, 5, 1, EmptyArrays.EMPTY_BYTES, false))
+                get(ItemID.FILLED_MAP, 5, 1, byteArrayOf(), false),
+                listOf(get(ItemID.FILLED_MAP, 5, 1, byteArrayOf(), false))
             )
         )
     }
@@ -828,62 +784,62 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
      *
      * @return parsed ItemDescriptor
      */
-    private fun parseDescription(data: Map<String, Any>, parseType: ParseType): ItemDescriptor {
-        var descriptor: ItemDescriptor? = null
-
-        when (parseType) {
+    private fun parseDescription(data: JsonObject, parseType: ParseType): ItemDescriptor {
+        return when (parseType) {
             ParseType.SMITHING_TABLE, ParseType.CRAFTING_TABLE_INPUT, ParseType.CARTOGRAPHY_TABLE_INPUT, ParseType.STONECUTTER_INPUT -> {
-                if (data["type"] == "item_tag") {
-                    val itemTag = data["itemTag"] as String?
-                    val count = if (data.containsKey("count")) Utils.toInt(data["count"]!!) else 1
-                    descriptor = ItemTagDescriptor(itemTag!!, count)
-                } else if (data["type"] == "complex_alias") {
-                    val itemId = data["name"] as String?
-                    val count = (data["count"] as Double).toInt()
-                    val item = get(itemId!!, 0, count)
-                    item.disableMeta()
-                    descriptor = DefaultDescriptor(item)
-                } else {    // only other possibility is the "default" type
-                    val itemId = data["itemId"] as String
-                    val count = if (data.containsKey("count")) Utils.toInt(data["count"]!!) else 1
-                    val meta = (data["auxValue"] as Double).toInt().toShort()
-                    val item: Item
-                    if (meta == Short.MAX_VALUE || meta.toInt() == -1) {
-                        item = get(itemId, 0, count)
-                        item.disableMeta()
-                    } else {
-                        item = get(itemId, meta.toInt(), count)
+                when (data["type"]!!.jsonPrimitive.content) {
+                    "item_tag" -> {
+                        val itemTag = data["itemTag"]!!.jsonPrimitive.content
+                        val count = if (data.containsKey("count")) data["count"]!!.jsonPrimitive.int else 1
+                        ItemTagDescriptor(itemTag, count)
                     }
-                    descriptor = DefaultDescriptor(item)
+                    "complex_alias" -> {
+                        val itemId = data["name"]!!.jsonPrimitive.content
+                        val count = data["count"]!!.jsonPrimitive.int
+                        val item = get(itemId, 0, count)
+                        item.disableMeta()
+                        DefaultDescriptor(item)
+                    }
+                    else -> {    // only other possibility is the "default" type
+                        val itemId = data["itemId"]!!.jsonPrimitive.content
+                        val count = if (data.containsKey("count")) data["count"]!!.jsonPrimitive.int else 1
+                        val meta = data["auxValue"]!!.jsonPrimitive.int.toShort()
+                        val item: Item
+                        if (meta == Short.MAX_VALUE || meta.toInt() == -1) {
+                            item = get(itemId, 0, count)
+                            item.disableMeta()
+                        } else {
+                            item = get(itemId, meta.toInt(), count)
+                        }
+                        DefaultDescriptor(item)
+                    }
                 }
             }
 
             ParseType.CRAFTING_TABLE_OUTPUT, ParseType.CARTOGRAPHY_TABLE_OUTPUT, ParseType.STONECUTTER_OUTPUT, ParseType.FURNACE_INPUT, ParseType.FURNACE_OUTPUT -> {
-                val id = data["id"] as String?
+                val id = data["id"]!!.jsonPrimitive.content
                 var count = 1
                 var meta: Short = 0
 
                 if (data.containsKey("count")) {
-                    count = (data["count"] as Double).toInt()
+                    count = data["count"]!!.jsonPrimitive.int
                 }
 
                 if (data.containsKey("damage")) {
-                    meta = (data["damage"] as Double).toInt().toShort()
+                    meta = data["damage"]!!.jsonPrimitive.int.toShort()
                 }
 
                 val item: Item
 
                 if (meta == Short.MAX_VALUE || meta.toInt() == -1) {
-                    item = get(id!!, 0, count)
+                    item = get(id, 0, count)
                     item.disableMeta()
                 } else {
-                    item = get(id!!, meta.toInt(), count)
+                    item = get(id, meta.toInt(), count)
                 }
-                descriptor = DefaultDescriptor(item)
+                DefaultDescriptor(item)
             }
         }
-
-        return descriptor
     }
 
     internal enum class ParseType {
@@ -1032,7 +988,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
                 val nbt = data["nbt"] as String?
                 val nbtBytes: ByteArray? = if (nbt != null) Base64.getDecoder()
-                    .decode(nbt) else EmptyArrays.EMPTY_BYTES //TODO: idk how to fix nbt, cuz we don't use Cloudburst NBT
+                    .decode(nbt) else byteArrayOf() //TODO: idk how to fix nbt, cuz we don't use Cloudburst NBT
 
                 var meta: Int? = null
                 if (data.containsKey("data")) meta = Utils.toInt(data["data"]!!)
@@ -1065,6 +1021,8 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         private val isLoad = AtomicBoolean(false)
         var recipeCount: Int = 0
             private set
+
+        private var packet: Buffer = Buffer()
 
         /**
          * 缓存着配方数据包
@@ -1114,9 +1072,8 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             return r.substring(0, r.lastIndexOf("_and_")) + "_" + type.name.lowercase()
         }
 
-        fun setCraftingPacket(craftingPacket: ByteBuf) {
-            ReferenceCountUtil.safeRelease(buffer)
-            buffer = craftingPacket.retain()
+        fun setPacket(packet: Buffer) {
+            this.packet = packet
         }
     }
 }
