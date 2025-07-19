@@ -1,8 +1,8 @@
 package org.chorus_oss.chorus.level.particle
 
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.core.Packet
 import java.util.*
 
 
@@ -15,7 +15,7 @@ abstract class Particle : Vector3 {
 
     constructor(x: Double, y: Double, z: Double) : super(x, y, z)
 
-    abstract fun encode(): Array<DataPacket>
+    abstract fun encode(): List<Packet>
 
     companion object {
         val TYPE_UNDEFINED: Int = Utils.dynamic(0)

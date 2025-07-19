@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.event.entity.ProjectileLaunchEvent
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.cos
@@ -171,13 +171,13 @@ class GhastShootExecutor(
         entity.setDataProperty(EntityDataTypes.TARGET_EID, target!!.getRuntimeID())
         entity.setDataFlag(EntityFlag.CHARGED, true)
         entity.setDataProperty(EntityDataTypes.CHARGE_AMOUNT, 0x1)
-        entity.level!!.addLevelEvent(entity.position, LevelEventPacket.EVENT_SOUND_GHAST_WARNING)
+        entity.level!!.addLevelEvent(entity.position, LevelEventPacket.SOUND_GHAST_WARNING)
     }
 
     private fun endShootSequence(entity: Entity) {
         entity.setDataProperty(EntityDataTypes.TARGET_EID, 0L)
         entity.setDataFlag(EntityFlag.CHARGED, false)
         entity.setDataProperty(EntityDataTypes.CHARGE_AMOUNT, 0x0)
-        entity.level!!.addLevelEvent(entity.position, LevelEventPacket.EVENT_SOUND_GHAST_FIREBALL)
+        entity.level!!.addLevelEvent(entity.position, LevelEventPacket.SOUND_GHAST_FIREBALL)
     }
 }

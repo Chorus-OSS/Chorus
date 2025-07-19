@@ -24,9 +24,10 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Faceable
 import org.chorus_oss.chorus.utils.RedstoneComponent
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
@@ -180,13 +181,7 @@ open class BlockDispenser @JvmOverloads constructor(blockstate: BlockState = pro
             }
         }
 
-        val pk = LevelEventPacket()
-
         val facing = blockFace
-
-        pk.x = 0.5f + facing.xOffset * 0.7f
-        pk.y = 0.5f + facing.yOffset * 0.7f
-        pk.z = 0.5f + facing.zOffset * 0.7f
 
         if (target == null) {
             level.addSound(this.position, Sound.RANDOM_CLICK, 1.0f, 1.2f)
@@ -198,8 +193,15 @@ open class BlockDispenser @JvmOverloads constructor(blockstate: BlockState = pro
             )
         }
 
-        pk.evid = LevelEventPacket.EVENT_PARTICLE_SHOOT
-        pk.data = 7
+        val pk = LevelEventPacket(
+            eventType = LevelEventPacket.PARTICLE_SHOOT,
+            position = Vector3f(
+                x = 0.5f + facing.xOffset * 0.7f,
+                y = 0.5f + facing.yOffset * 0.7f,
+                z = 0.5f + facing.zOffset * 0.7f,
+            ),
+            eventData = 7
+        )
         level.addChunkPacket(position.chunkX, position.chunkZ, pk)
 
         val origin: Item = target

@@ -16,7 +16,7 @@ import org.chorus_oss.chorus.level.particle.SmokeParticle
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.min
@@ -558,7 +558,7 @@ abstract class BlockLiquid(state: BlockState) : BlockTransparent(state) {
         val random: Random = ThreadLocalRandom.current()
         level.addLevelEvent(
             pos.add(0.5, 0.5, 0.5),
-            LevelEventPacket.EVENT_SOUND_FIZZ,
+            LevelEventPacket.SOUND_FIZZ,
             ((random.nextFloat() - random.nextFloat()) * 800).toInt() + 2600
         )
 

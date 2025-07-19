@@ -23,7 +23,7 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Hash
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
@@ -357,9 +357,9 @@ class Explosion protected constructor(private val source: Locator, size: Double,
         }
         level.addSound(this.source.position, Sound.RANDOM_EXPLODE)
         level.addLevelEvent(
-            this.source.position, LevelEventPacket.EVENT_PARTICLE_EXPLOSION, size.toFloat().roundToInt()
+            this.source.position, LevelEventPacket.PARTICLE_EXPLOSION, size.toFloat().roundToInt()
         )
-        level.addLevelEvent(this.source.position, LevelEventPacket.EVENT_PARTICLE_BLOCK_EXPLOSION, data)
+        level.addLevelEvent(this.source.position, LevelEventPacket.PARTICLE_BLOCK_EXPLOSION, data)
 
         return true
     }

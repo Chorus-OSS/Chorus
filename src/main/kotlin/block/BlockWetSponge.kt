@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.item.ItemTool
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.particle.CloudParticle
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 class BlockWetSponge @JvmOverloads constructor(state: BlockState = properties.defaultState) :
@@ -36,7 +36,7 @@ class BlockWetSponge @JvmOverloads constructor(state: BlockState = properties.de
         if (level.dimension != Level.DIMENSION_NETHER) return true
 
         level.setBlock(block.position, BlockSponge(), true, true)
-        level.addLevelEvent(block.position.add(0.5, 0.875, 0.5), LevelEventPacket.EVENT_CAULDRON_EXPLODE)
+        level.addLevelEvent(block.position.add(0.5, 0.875, 0.5), LevelEventPacket.CAULDRON_EXPLODE)
         val random = ThreadLocalRandom.current()
 
         for (i in 0..7) {

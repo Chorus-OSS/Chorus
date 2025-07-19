@@ -56,7 +56,7 @@ import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
@@ -350,25 +350,21 @@ class Level(
     }
 
     fun addLevelEvent(type: Int, data: Int, x: Float, y: Float, z: Float) {
-        val packet = LevelEventPacket()
-        packet.evid = type
-        packet.x = x
-        packet.y = y
-        packet.z = z
-        packet.data = data
-
+        val packet = LevelEventPacket(
+            eventType = type,
+            position = org.chorus_oss.protocol.types.Vector3f(x, y, z),
+            eventData = data,
+        )
         this.addChunkPacket(floor(x).toInt() shr 4, floor(z).toInt() shr 4, packet)
     }
 
     @JvmOverloads
     fun addLevelEvent(pos: Vector3, event: Int, data: Int = 0) {
-        val pk = LevelEventPacket()
-        pk.evid = event
-        pk.x = pos.x.toFloat()
-        pk.y = pos.y.toFloat()
-        pk.z = pos.z.toFloat()
-        pk.data = data
-
+        val pk = LevelEventPacket(
+            eventType = event,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            eventData = data,
+        )
         addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
     }
 
@@ -456,7 +452,7 @@ class Level(
             }
         } else {
             for (p in packets) {
-                Server.broadcastPacket(players, p)
+                Server.broadcastPacket(players.toList(), p)
             }
         }
     }
@@ -882,16 +878,20 @@ class Level(
                     val player = Server.instance.getPlayer(key)
                     if (player != null) {
                         if (isRaining) {
-                            val pk = LevelEventPacket()
-                            pk.evid = LevelEventPacket.EVENT_START_RAINING
-                            pk.data = rainTime
-                            player.dataPacket(pk)
+                            val pk = LevelEventPacket(
+                                eventType = LevelEventPacket.START_RAINING,
+                                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                                eventData = rainTime,
+                            )
+                            player.sendPacket(pk)
                             playerWeatherShowMap.put(key, 1)
                             if (isThundering()) {
-                                val pk2 = LevelEventPacket()
-                                pk2.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-                                pk2.data = thunderTime
-                                player.dataPacket(pk)
+                                val pk2 = LevelEventPacket(
+                                    eventType = LevelEventPacket.START_THUNDERSTORM,
+                                    position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                                    eventData = thunderTime,
+                                )
+                                player.sendPacket(pk2)
                                 playerWeatherShowMap.put(key, 2)
                             }
                         }
@@ -1069,14 +1069,17 @@ class Level(
     }
 
     fun sendBlockExtraData(x: Int, y: Int, z: Int, id: Int, data: Int, players: Array<Player>) {
-        val pk = LevelEventPacket()
-        pk.evid = LevelEventPacket.EVENT_SET_DATA
-        pk.x = x + 0.5f
-        pk.y = y + 0.5f
-        pk.z = z + 0.5f
-        pk.data = (data shl 8) or id
+        val pk = LevelEventPacket(
+            eventType = 4000,
+            position = org.chorus_oss.protocol.types.Vector3f(
+                x = x + 0.5f,
+                y = y + 0.5f,
+                z = z + 0.5f,
+            ),
+            eventData = (data shl 8) or id
+        )
 
-        Server.broadcastPacket(players, pk)
+        Server.broadcastPacket(players.toList(), pk)
     }
 
     fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3>) {
@@ -4067,20 +4070,25 @@ class Level(
 
         this.isRaining = raining
 
-        val pk = LevelEventPacket()
-        if (raining) {
-            pk.evid = LevelEventPacket.EVENT_START_RAINING
-            val time = ThreadLocalRandom.current().nextInt(12000) + 12000 // These numbers are from Minecraft
-            pk.data = time
-            rainTime = time
+        val pk = if (raining) {
+            rainTime = ThreadLocalRandom.current().nextInt(12000) + 12000 // These numbers are from Minecraft
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = rainTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_RAINING
             rainTime = ThreadLocalRandom.current().nextInt(168000) + 12000
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
 
         for (p in getPlayers().values) {
             playerWeatherShowMap.put(p.getEntityName(), if (raining) 1 else 0)
-            p.dataPacket(pk)
+            p.sendPacket(pk)
         }
 
         return true
@@ -4105,21 +4113,25 @@ class Level(
 
         this.thundering = thundering
 
-        val pk = LevelEventPacket()
-        // These numbers are from Minecraft
-        if (thundering) {
-            pk.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-            val time = ThreadLocalRandom.current().nextInt(12000) + 3600
-            pk.data = time
-            thunderTime = time
+        val pk = if (thundering) {
+            thunderTime = ThreadLocalRandom.current().nextInt(12000) + 3600
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = thunderTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_THUNDERSTORM
             thunderTime = ThreadLocalRandom.current().nextInt(168000) + 12000
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
 
         for (p in getPlayers().values) {
             playerWeatherShowMap.put(p.getEntityName(), if (isRaining) 2 else 0)
-            p.dataPacket(pk)
+            p.sendPacket(pk)
         }
 
         return true
@@ -4131,25 +4143,35 @@ class Level(
             players1 = getPlayers().values.toTypedArray()
         }
 
-        val pk = LevelEventPacket()
-
-        if (this.isRaining) {
-            pk.evid = LevelEventPacket.EVENT_START_RAINING
-            pk.data = this.rainTime
+        val pk = if (this.isRaining) {
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = rainTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_RAINING
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
+        Server.broadcastPacket(players1.toList(), pk)
 
-        Server.broadcastPacket(players1, pk)
-
-        if (this.isThundering()) {
-            pk.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-            pk.data = this.thunderTime
+        val pk2 = if (this.isThundering()) {
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = thunderTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_THUNDERSTORM
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
-
-        Server.broadcastPacket(players1, pk)
+        Server.broadcastPacket(players1.toList(), pk2)
     }
 
     fun sendWeather(player: Player?) {

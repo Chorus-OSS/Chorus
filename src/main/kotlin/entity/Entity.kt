@@ -36,7 +36,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
@@ -1107,7 +1107,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 }
                 //复活图腾实现
                 if (totem) {
-                    level!!.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_TOTEM_USED)
+                    level!!.addLevelEvent(this.position, LevelEventPacket.SOUND_TOTEM_USED)
                     level!!.addParticleEffect(this.position, ParticleEffect.TOTEM)
 
                     this.extinguish()

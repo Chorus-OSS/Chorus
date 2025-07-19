@@ -9,6 +9,5 @@ object ProtocolInfo {
 
     val BLOCK_STATE_VERSION = (GAME_VERSION.major shl 24) or (GAME_VERSION.minor shl 16) or (GAME_VERSION.patch shl 8)
 
-    const val LEVEL_EVENT_PACKET = 25
     const val CRAFTING_DATA_PACKET = 52
 }

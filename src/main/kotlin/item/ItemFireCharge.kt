@@ -8,7 +8,7 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.event.block.BlockIgniteEvent
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 class ItemFireCharge @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
@@ -50,7 +50,7 @@ class ItemFireCharge @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
 
                 if (!e.cancelled) {
                     level.setBlock(fire.position, fire, true)
-                    level.addLevelEvent(block.position, LevelEventPacket.EVENT_SOUND_GHAST_FIREBALL, 78642)
+                    level.addLevelEvent(block.position, LevelEventPacket.SOUND_GHAST_FIREBALL, 78642)
                     level.scheduleUpdate(fire, fire.tickRate() + ThreadLocalRandom.current().nextInt(10))
                 }
                 if (player.isSurvival) {

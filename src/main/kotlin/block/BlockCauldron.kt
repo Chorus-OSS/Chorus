@@ -22,7 +22,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
 import kotlin.math.sqrt
 
@@ -141,7 +141,7 @@ class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSol
                     cauldron.clearCustomColor()
                     level.addLevelEvent(
                         position.add(0.5, 0.375 + fillLevel * 0.125, 0.5),
-                        LevelEventPacket.EVENT_CAULDRON_TAKE_WATER
+                        LevelEventPacket.CAULDRON_TAKE_WATER
                     )
                 }
             } else if (item.isWater || item.isLava || item.isPowderSnow) {
@@ -290,7 +290,7 @@ class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSol
 
                     level.addLevelEvent(
                         position.add(0.5, 0.375 + fillLevel * 0.125, 0.5),
-                        LevelEventPacket.EVENT_CAULDRON_FILL_POTION
+                        LevelEventPacket.CAULDRON_FILL_POTION
                     )
                 }
 
@@ -344,7 +344,7 @@ class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSol
 
                     level.addLevelEvent(
                         position.add(0.5, 0.375 + fillLevel * 0.125, 0.5),
-                        LevelEventPacket.EVENT_CAULDRON_TAKE_POTION
+                        LevelEventPacket.CAULDRON_TAKE_POTION
                     )
                 }
 

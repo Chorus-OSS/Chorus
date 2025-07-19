@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.RedstoneComponent
 import kotlin.math.max
@@ -123,7 +123,7 @@ abstract class BlockRedstoneComparator(blockstate: BlockState) : BlockRedstoneDi
 
         level.addLevelEvent(
             position.add(0.5, 0.5, 0.5),
-            LevelEventPacket.EVENT_ACTIVATE_BLOCK,
+            LevelEventPacket.ACTIVATE_BLOCK,
             if (this.mode == Mode.SUBTRACT) 500 else 550
         )
         level.setBlock(this.position, this, true, false)

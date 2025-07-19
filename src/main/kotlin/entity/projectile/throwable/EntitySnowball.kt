@@ -60,9 +60,9 @@ class EntitySnowball @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTag,
 
     override fun addHitEffect() {
         val particles: Int = nextParticleCount()
-        val particlePackets: Array<DataPacket> = GenericParticle(this.position, Particle.TYPE_SNOWBALL_POOF).encode()
+        val particlePackets = GenericParticle(this.position, Particle.TYPE_SNOWBALL_POOF).encode()
         val length: Int = particlePackets.size
-        val allPackets: Array<DataPacket> = Array(length * particles) { i ->
+        val allPackets = Array(length * particles) { i ->
             particlePackets[i % length]
         }
         val chunkX: Int = position.x.toInt() shr 4

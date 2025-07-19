@@ -4,11 +4,13 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.block.BlockFromToEvent
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.abs
 
@@ -76,13 +78,11 @@ class BlockDragonEgg(blockState: BlockState = properties.defaultState) : BlockFa
                 val diffX = position.floorX - to.position.floorX
                 val diffY = position.floorY - to.position.floorY
                 val diffZ = position.floorZ - to.position.floorZ
-                val pk = LevelEventPacket()
-                pk.evid = LevelEventPacket.EVENT_PARTICLE_DRAGON_EGG
-                pk.data =
-                    (((((abs(diffX.toDouble()).toInt() shl 16) or (abs(diffY.toDouble()).toInt() shl 8)) or abs(diffZ.toDouble()).toInt()) or ((if (diffX < 0) 1 else 0) shl 24)) or ((if (diffY < 0) 1 else 0) shl 25)) or ((if (diffZ < 0) 1 else 0) shl 26)
-                pk.x = position.floorX.toFloat()
-                pk.y = position.floorY.toFloat()
-                pk.z = position.floorZ.toFloat()
+                val pk = LevelEventPacket(
+                    eventType = LevelEventPacket.PARTICLE_DRAGON_EGG,
+                    position = Vector3f(position.floor()),
+                    eventData = (((((abs(diffX.toDouble()).toInt() shl 16) or (abs(diffY.toDouble()).toInt() shl 8)) or abs(diffZ.toDouble()).toInt()) or ((if (diffX < 0) 1 else 0) shl 24)) or ((if (diffY < 0) 1 else 0) shl 25)) or ((if (diffZ < 0) 1 else 0) shl 26)
+                )
                 level.addChunkPacket(
                     position.floorX shr 4,
                     position.floorZ shr 4, pk

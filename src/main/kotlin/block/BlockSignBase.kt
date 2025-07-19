@@ -13,7 +13,7 @@ import org.chorus_oss.chorus.level.particle.WaxOnParticle
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.CompassRoseDirection
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.Faceable
 import java.util.*
@@ -84,7 +84,7 @@ abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockSta
                     }
                     blockEntity.setColor(front, color)
                     blockEntity.spawnToAll()
-                    level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_DYE_USED)
+                    level.addLevelEvent(this.position, LevelEventPacket.SOUND_DYE_USED)
                     if ((player.gamemode and 0x01) == 0) {
                         item.count--
                     }
@@ -104,7 +104,7 @@ abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockSta
                     }
                     blockEntity.setGlowing(front, true)
                     blockEntity.spawnToAll()
-                    level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_INK_SACE_USED)
+                    level.addLevelEvent(this.position, LevelEventPacket.SOUND_INK_SACE_USED)
                     if ((player.gamemode and 0x01) == 0) {
                         item.count--
                     }

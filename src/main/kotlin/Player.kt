@@ -73,7 +73,7 @@ import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -601,12 +601,11 @@ open class Player(
 
             if (miningTimeRequired > 0) {
                 val breakTick = ceil(miningTimeRequired * 20).toInt()
-                val pk = LevelEventPacket()
-                pk.evid = LevelEventPacket.EVENT_BLOCK_UPDATE_BREAK
-                pk.x = breakingBlock!!.position.x.toFloat()
-                pk.y = breakingBlock!!.position.y.toFloat()
-                pk.z = breakingBlock!!.position.z.toFloat()
-                pk.data = 65535 / breakTick
+                val pk = LevelEventPacket(
+                    eventType = LevelEventPacket.BLOCK_UPDATE_BREAK,
+                    position = Vector3f(breakingBlock!!.position),
+                    eventData = 65535 / breakTick,
+                )
                 level!!.addChunkPacket(
                     breakingBlock!!.position.floorX shr 4,
                     breakingBlock!!.position.floorZ shr 4, pk
@@ -699,12 +698,11 @@ open class Player(
             } else target.calculateBreakTime(inventory.itemInHand, this)
             val breakTime = ceil(miningTimeRequired * 20).toInt()
             if (breakTime > 0) {
-                val pk = LevelEventPacket()
-                pk.evid = LevelEventPacket.EVENT_BLOCK_START_BREAK
-                pk.x = pos.x.toFloat()
-                pk.y = pos.y.toFloat()
-                pk.z = pos.z.toFloat()
-                pk.data = 65535 / breakTime
+                val pk = LevelEventPacket(
+                    eventType = LevelEventPacket.BLOCK_START_BREAK,
+                    position = Vector3f(pos),
+                    eventData = 65535 / breakTime,
+                )
                 level!!.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
 
                 if (level!!.isAntiXrayEnabled && level!!.antiXraySystem!!.isPreDeObfuscate) {
@@ -721,12 +719,11 @@ open class Player(
 
     fun onBlockBreakAbort(pos: Vector3) {
         if (pos.distanceSquared(this.position) < 1000) { // same as with ACTION_START_BREAK
-            val pk = LevelEventPacket()
-            pk.evid = LevelEventPacket.EVENT_BLOCK_STOP_BREAK
-            pk.x = pos.x.toFloat()
-            pk.y = pos.y.toFloat()
-            pk.z = pos.z.toFloat()
-            pk.data = 0
+            val pk = LevelEventPacket(
+                eventType = LevelEventPacket.BLOCK_STOP_BREAK,
+                position = Vector3f(pos),
+                eventData = 0,
+            )
             level!!.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
         }
         this.blockBreakProgress = 0.0
@@ -5247,7 +5244,7 @@ open class Player(
             if (entity.getPickupDelay() <= 0) {
                 var exp = entity.getExp()
                 entity.kill()
-                level!!.addLevelEvent(LevelEventPacket.EVENT_SOUND_EXPERIENCE_ORB_PICKUP, 0, this.position)
+                level!!.addLevelEvent(LevelEventPacket.SOUND_EXPERIENCE_ORB_PICKUP, 0, this.position)
                 pickedXPOrb = tick
 
                 //Mending
