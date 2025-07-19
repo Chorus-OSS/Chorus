@@ -144,7 +144,7 @@ open class EntityBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityVehicle(chunk, 
             bodyYaw = this.rotation.yaw.toFloat(),
             attributes = this.attributes.values.map(AttributeValue::invoke),
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,

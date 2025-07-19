@@ -37,7 +37,6 @@ import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.protocol.packets.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
@@ -967,7 +966,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             bodyYaw = this.rotation.yaw.toFloat(),
             attributes = this.attributes.values.map(AttributeValue::invoke),
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,
@@ -1004,7 +1003,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         val pk = SetActorDataPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
             actorDataMap = ActorDataMap(data ?: this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             tick = 0uL
         )
         player.sendPacket(pk)
@@ -1015,7 +1014,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         val pk = SetActorDataPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
             actorDataMap = ActorDataMap(data ?: this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             tick = 0uL
         )
         for (player: Player in players) {
@@ -3179,11 +3178,11 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
     }
 
-    fun propertySyncData(): PropertySyncData {
-        val intArray = intProperties.values.toIntArray()
-        val floatArray = floatProperties.values.toFloatArray()
+    fun properties(): ActorProperties {
+        val intArray = intProperties.values.mapIndexed { index, i -> ActorProperties.Companion.IntProperty(index.toUInt(), i) }
+        val floatArray = floatProperties.values.mapIndexed { index, i -> ActorProperties.Companion.FloatProperty(index.toUInt(), i) }
 
-        return PropertySyncData(intArray, floatArray)
+        return ActorProperties(intArray, floatArray)
     }
 
     fun getAttributes(): MutableMap<Int, Attribute> {

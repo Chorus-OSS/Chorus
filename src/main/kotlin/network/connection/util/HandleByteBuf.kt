@@ -28,7 +28,6 @@ import java.nio.channels.ScatteringByteChannel
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.*
-import java.util.function.BiConsumer
 
 class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
     private val buf: ByteBuf = ObjectUtil.checkNotNull(buf, "buf")
@@ -836,19 +835,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
         }
 
         this.writeVarInt(itemDescriptor.count)
-    }
-
-    fun writeVector3f(x: Float, y: Float, z: Float) {
-        this.writeFloatLE(x)
-        this.writeFloatLE(y)
-        this.writeFloatLE(z)
-    }
-
-    fun <T> writeArray(array: Collection<T>, biConsumer: BiConsumer<HandleByteBuf, T>) {
-        this.writeUnsignedVarInt(array.size)
-        for (`val` in array) {
-            biConsumer.accept(this, `val`)
-        }
     }
 
     override fun indexOf(fromIndex: Int, toIndex: Int, value: Byte): Int {

@@ -302,7 +302,7 @@ class EntityFishingHook @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundT
                 this.entityDataMap[EntityDataTypes.OWNER_EID] = shootingEntity?.getRuntimeID() ?: -1
                 ActorDataMap(this.entityDataMap)
             },
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,

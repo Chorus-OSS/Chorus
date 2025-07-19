@@ -11,13 +11,13 @@ import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.generateRan
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.getSecretKey
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.parseKey
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.types.InputMode
-import org.chorus_oss.chorus.network.protocol.types.Platform
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.utils.ClientChainData
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.LoginPacket
+import org.chorus_oss.protocol.types.InputMode
+import org.chorus_oss.protocol.types.Platform
 import java.net.InetSocketAddress
 import java.util.function.Consumer
 import java.util.regex.Pattern
@@ -93,8 +93,8 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
 
         // Verify if the CurrentInputMode is valid
         val currentInputMode = chainData.currentInputMode
-        if (currentInputMode <= InputMode.UNDEFINED.ordinal ||
-            currentInputMode >= InputMode.COUNT.ordinal
+        if (currentInputMode <= InputMode.Undefined.ordinal ||
+            currentInputMode >= InputMode.entries.size
         ) {
             log.debug("disconnection due to invalid input mode")
             session.close("§cPacket handling error")
@@ -103,8 +103,8 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
 
         // Verify if the DefaultInputMode is valid
         val defaultInputMode = chainData.defaultInputMode
-        if (defaultInputMode <= InputMode.UNDEFINED.ordinal ||
-            defaultInputMode >= InputMode.COUNT.ordinal
+        if (defaultInputMode <= InputMode.Undefined.ordinal ||
+            defaultInputMode >= InputMode.entries.size
         ) {
             log.debug("disconnection due to invalid input mode")
             session.close("§cPacket handling error")
@@ -179,11 +179,11 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
     private fun getPredictedDeviceOS(chainData: ClientChainData): Int {
         val titleId = chainData.titleId
         return when (titleId) {
-            "896928775" -> Platform.WINDOWS_10.id
-            "2047319603" -> Platform.SWITCH.id
-            "1739947436" -> Platform.ANDROID.id
-            "2044456598" -> Platform.PLAYSTATION.id
-            "1828326430" -> Platform.XBOX_ONE.id
+            "896928775" -> Platform.Windows10.id
+            "2047319603" -> Platform.Switch.id
+            "1739947436" -> Platform.Android.id
+            "2044456598" -> Platform.PlayStation.id
+            "1828326430" -> Platform.XboxOne.id
             "1810924247" -> Platform.IOS.id
             else -> 0
         }

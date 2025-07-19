@@ -206,7 +206,7 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
                             vehicleAngularVelocity = 0f,
                         )
                     },
-                    actorProperties = ActorProperties(this.propertySyncData()),
+                    actorProperties = this.properties(),
                     buildPlatform = Platform.Unknown, // TODO: buildPlatform
                     deviceID = "" // TODO: DeviceID
                 )

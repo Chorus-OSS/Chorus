@@ -127,7 +127,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
                 this.attributes.values.map(AttributeValue::invoke)
             },
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,
