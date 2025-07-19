@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.registry
 
 
-import com.google.common.collect.Collections2
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.util.collection.CharObjectHashMap
@@ -52,10 +51,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         get() {
             val result = HashSet<ShapelessRecipe>()
             for (s in recipeMaps[RecipeType.SHAPELESS]!!.values) {
-                result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as ShapelessRecipe })
+                result.addAll(s.map { d: Recipe -> d as ShapelessRecipe })
             }
             return result
         }
@@ -75,9 +71,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<ShapedRecipe>()
             for (s in recipeMaps[RecipeType.SHAPED]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as ShapedRecipe })
+                    s.map { d: Recipe -> d as ShapedRecipe })
             }
             return result
         }
@@ -98,10 +92,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val recipe = recipeMaps[RecipeType.FURNACE]
             if (recipe != null) {
                 for (s in recipe.values) {
-                    result.addAll(
-                        Collections2.transform(
-                            s
-                        ) { d: Recipe -> d as FurnaceRecipe })
+                    result.addAll(s.map { d: Recipe -> d as FurnaceRecipe })
                 }
             }
             return result
@@ -124,10 +115,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val recipe = recipeMaps[RecipeType.BLAST_FURNACE]
             if (recipe != null) {
                 for (s in recipe.values) {
-                    result.addAll(
-                        Collections2.transform(
-                            s
-                        ) { d: Recipe -> d as BlastFurnaceRecipe })
+                    result.addAll(s.map { d: Recipe -> d as BlastFurnaceRecipe })
                 }
             }
             return result
@@ -150,10 +138,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val smoker = recipeMaps[RecipeType.SMOKER]
             if (smoker != null) {
                 for (s in smoker.values) {
-                    result.addAll(
-                        Collections2.transform(
-                            s
-                        ) { d: Recipe -> d as SmokerRecipe })
+                    result.addAll(s.map { d: Recipe -> d as SmokerRecipe })
                 }
             }
             return result
@@ -177,19 +162,13 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val r1 = recipeMaps[RecipeType.CAMPFIRE]
             if (r1 != null) {
                 for (s in r1.values) {
-                    result.addAll(
-                        Collections2.transform(
-                            s
-                        ) { d: Recipe -> d as CampfireRecipe })
+                    result.addAll(s.map { d: Recipe -> d as CampfireRecipe })
                 }
             }
             val r3 = recipeMaps[RecipeType.SOUL_CAMPFIRE]
             if (r3 != null) {
                 for (s in r3.values) {
-                    result.addAll(
-                        Collections2.transform(
-                            s
-                        ) { d: Recipe -> d as CampfireRecipe })
+                    result.addAll(s.map { d: Recipe -> d as CampfireRecipe })
                 }
             }
             return result
@@ -210,9 +189,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<MultiRecipe>()
             for (s in recipeMaps[RecipeType.MULTI]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as MultiRecipe })
+                    s.map { d: Recipe -> d as MultiRecipe })
             }
             return result
         }
@@ -232,9 +209,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<StonecutterRecipe>()
             for (s in recipeMaps[RecipeType.STONECUTTER]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as StonecutterRecipe })
+                    s.map { d: Recipe -> d as StonecutterRecipe })
             }
             return result
         }
@@ -254,9 +229,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<CartographyRecipe>()
             for (s in recipeMaps[RecipeType.CARTOGRAPHY]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as CartographyRecipe })
+                    s.map { d: Recipe -> d as CartographyRecipe })
             }
             return result
         }
@@ -279,9 +252,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<SmithingTransformRecipe>()
             for (s in recipeMaps[RecipeType.SMITHING_TRANSFORM]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as SmithingTransformRecipe })
+                    s.map { d: Recipe -> d as SmithingTransformRecipe })
             }
             return result
         }
@@ -301,9 +272,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<BrewingRecipe>()
             for (s in recipeMaps[RecipeType.BREWING]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as BrewingRecipe })
+                    s.map { d: Recipe -> d as BrewingRecipe })
             }
             return result
         }
@@ -323,9 +292,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
             val result = HashSet<ContainerRecipe>()
             for (s in recipeMaps[RecipeType.CONTAINER]!!.values) {
                 result.addAll(
-                    Collections2.transform(
-                        s
-                    ) { d: Recipe -> d as ContainerRecipe })
+                    s.map { d: Recipe -> d as ContainerRecipe })
             }
             return result
         }
