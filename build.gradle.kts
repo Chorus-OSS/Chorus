@@ -60,8 +60,6 @@ dependencies {
     implementation(libs.cryptography.core)
     implementation(libs.cryptography.random)
     implementation(libs.cryptography.provider.jdk)
-    implementation(libs.jwt)
-    implementation(libs.jwt.ecdsa)
     implementation(libs.ktoml.core)
     implementation(libs.ktoml.file)
     implementation(libs.json)

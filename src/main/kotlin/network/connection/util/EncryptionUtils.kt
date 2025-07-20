@@ -127,7 +127,7 @@ object EncryptionUtils {
     }
 
     /**
-     * Create handshake JWS used in the [org.chorus_oss.chorus.network.connection.packet.ServerToClientHandshakePacket]
+     * Create handshake JWS used in the [org.chorus_oss.protocol.packets.ServerToClientHandshakePacket]
      * which completes the encryption handshake.
      *
      * @param serverKeyPair used to sign the JWT
