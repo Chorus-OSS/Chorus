@@ -1,6 +1,9 @@
 package org.chorus_oss.chorus.lang
 
 import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.plugin.PluginBase
 import org.chorus_oss.chorus.utils.JSONUtils
@@ -301,8 +304,9 @@ class PluginI18n(private val plugin: PluginBase) {
 
     private fun reloadLang(lang: LangCode?, reader: BufferedReader): Boolean {
         val d = MULTI_LANGUAGE[lang]
-        val map: MutableMap<String, String> =
-            JSONUtils.from(reader, object : TypeToken<MutableMap<String, String>>() {})
+        val map = Json.parseToJsonElement(reader.readText()).jsonObject.entries.associate {
+            it.key to it.value.jsonPrimitive.content
+        }.toMutableMap()
         if (d == null) {
             MULTI_LANGUAGE[lang] = map
         } else {
@@ -314,7 +318,9 @@ class PluginI18n(private val plugin: PluginBase) {
 
     @Throws(IOException::class)
     private fun parseLang(reader: BufferedReader): MutableMap<String, String> {
-        return JSONUtils.from(reader, object : TypeToken<MutableMap<String, String>>() {})
+        return Json.parseToJsonElement(reader.readText()).jsonObject.entries.associate {
+            it.key to it.value.jsonPrimitive.content
+        }.toMutableMap()
     }
 
     companion object : Loggable

@@ -77,7 +77,6 @@ import org.chorus_oss.chorus.tags.BlockTags
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.chorus.utils.JSONUtils.from
-import org.chorus_oss.chorus.utils.JSONUtils.toPretty
 import org.chorus_oss.chorus.utils.Utils.allThreadDumps
 import org.chorus_oss.chorus.utils.Utils.getExceptionMessage
 import org.chorus_oss.chorus.utils.Utils.readFile
@@ -1995,7 +1994,7 @@ class Server internal constructor(
         if (config.exists()) {
             try {
                 levelConfig = from(config, LevelConfig::class.java)
-                FileUtils.write(config, toPretty(levelConfig), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -2020,7 +2019,7 @@ class Server internal constructor(
             levelConfig = LevelConfig(getProviderName(provider), true, map)
             try {
                 config.createNewFile()
-                FileUtils.write(config, toPretty(levelConfig), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig), StandardCharsets.UTF_8)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
@@ -2088,7 +2087,7 @@ class Server internal constructor(
         if (config.exists()) {
             try {
                 levelConfig1 = from(FileReader(config), LevelConfig::class.java)
-                FileUtils.write(config, toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 log.error("The levelConfig is not exists under the {} path", path)
                 return false
@@ -2097,7 +2096,7 @@ class Server internal constructor(
             try {
                 jpath.toFile().mkdirs()
                 config.createNewFile()
-                FileUtils.write(config, toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }

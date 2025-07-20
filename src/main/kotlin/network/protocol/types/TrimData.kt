@@ -1,7 +1,9 @@
 package org.chorus_oss.chorus.network.protocol.types
 
-import com.google.gson.JsonObject
-import org.chorus_oss.chorus.utils.JSONUtils
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 object TrimData {
     var trimPatterns: List<TrimPattern> = emptyList()
@@ -12,20 +14,25 @@ object TrimData {
             TrimData::class.java.classLoader.getResourceAsStream("trim_data.json").use { stream ->
                 stream ?: throw Exception("trim_data.json could not be loaded")
 
-                val obj = JSONUtils.from(stream, JsonObject::class.java)
+                val obj = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject
                 val l1 = mutableListOf<TrimPattern>()
                 val l2 = mutableListOf<TrimMaterial>()
-                for (e in obj.getAsJsonArray("patterns").asList()) {
-                    val asJsonObject = e.asJsonObject
-                    l1.add(TrimPattern(asJsonObject["itemName"].asString, asJsonObject["patternId"].asString))
+                for (e in obj["patterns"]!!.jsonArray) {
+                    val asJsonObject = e.jsonObject
+                    l1.add(
+                        TrimPattern(
+                            asJsonObject["itemName"]!!.jsonPrimitive.content,
+                            asJsonObject["patternId"]!!.jsonPrimitive.content,
+                        )
+                    )
                 }
-                for (e in obj.getAsJsonArray("materials").asList()) {
-                    val asJsonObject = e.asJsonObject
+                for (e in obj["materials"]!!.jsonArray) {
+                    val asJsonObject = e.jsonObject
                     l2.add(
                         TrimMaterial(
-                            asJsonObject["materialId"].asString,
-                            asJsonObject["color"].asString,
-                            asJsonObject["itemName"].asString
+                            asJsonObject["materialId"]!!.jsonPrimitive.content,
+                            asJsonObject["color"]!!.jsonPrimitive.content,
+                            asJsonObject["itemName"]!!.jsonPrimitive.content,
                         )
                     )
                 }

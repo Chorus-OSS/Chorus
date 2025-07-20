@@ -1,11 +1,12 @@
 package org.chorus_oss.chorus.tags
 
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.utils.JSONUtils
 import org.jetbrains.annotations.UnmodifiableView
 import java.io.IOException
-import java.io.InputStreamReader
 import java.util.*
 
 object ItemTags {
@@ -58,16 +59,17 @@ object ItemTags {
     const val WOODEN_TIER: String = "minecraft:wooden_tier"
     const val WOOL: String = "minecraft:wool"
 
-    private val TAG_2_ITEMS = HashMap<String, MutableSet<String>>()
-    private val ITEM_2_TAGS = HashMap<String, MutableSet<String>>()
+    private val TAG_2_ITEMS = mutableMapOf<String, MutableSet<String>>()
+    private val ITEM_2_TAGS = mutableMapOf<String, MutableSet<String>>()
 
     init {
         try {
             Server::class.java.classLoader.getResourceAsStream("item_tags.json").use { stream ->
-                val typeToken: TypeToken<HashMap<String, HashSet<String>>> =
-                    object : TypeToken<HashMap<String, HashSet<String>>>() {}
                 checkNotNull(stream)
-                val map = JSONUtils.from(InputStreamReader(stream), typeToken)
+
+                val map = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject.entries.associate {
+                    it.key to it.value.jsonArray.map { v -> v.jsonPrimitive.content }.toMutableSet()
+                }
                 TAG_2_ITEMS.putAll(map)
                 for ((key, value) in TAG_2_ITEMS) {
                     for (item in value) {

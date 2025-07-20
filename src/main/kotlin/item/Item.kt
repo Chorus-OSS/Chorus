@@ -1,6 +1,9 @@
 package org.chorus_oss.chorus.item
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockAir
@@ -122,15 +125,15 @@ abstract class Item : Cloneable, ItemID, Loggable {
 
     fun readItemJsonComponents(components: ItemJsonComponents) {
         if (components.canPlaceOn != null) this.setCanPlaceOn(
-            Arrays.stream(
-                components.canPlaceOn!!.blocks
-            ).map { str: String -> Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str") }
-                .toList().toTypedArray())
+            components.canPlaceOn!!.blocks.map { str ->
+                Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str")
+            }.toTypedArray()
+        )
         if (components.canDestroy != null) this.setCanDestroy(
-            Arrays.stream(
-                components.canDestroy!!.blocks
-            ).map { str: String -> Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str") }
-                .toList().toTypedArray())
+            components.canDestroy!!.blocks.map { str ->
+                Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str")
+            }.toTypedArray()
+        )
         if (components.itemLock != null) itemLockMode = when (components.itemLock!!.mode) {
             ItemLock.LOCK_IN_SLOT -> ItemLockMode.LOCK_IN_SLOT
             ItemLock.LOCK_IN_INVENTORY -> ItemLockMode.LOCK_IN_INVENTORY
@@ -1394,41 +1397,43 @@ abstract class Item : Cloneable, ItemID, Loggable {
         return tag.contains("minecraft:keep_on_death")
     }
 
-    class ItemJsonComponents private constructor() {
-        class CanPlaceOn {
-            lateinit var blocks: Array<String>
-        }
+    @Serializable
+    data class ItemJsonComponents(
+        @SerialName("can_place_on")
+        var canPlaceOn: CanPlaceOn? = null,
+        @SerialName("can_destroy")
+        var canDestroy: CanDestroy? = null,
+        @SerialName("item_lock")
+        var itemLock: ItemLock? = null,
+        @SerialName("keep_on_death")
+        var keepOnDeath: KeepOnDeath? = null
+    ) {
+        @Serializable
+        data class CanPlaceOn(
+            var blocks: List<String> = emptyList(),
+        )
 
-        class CanDestory {
-            lateinit var blocks: Array<String>
-        }
+        @Serializable
+        data class CanDestroy(
+            var blocks: List<String> = emptyList(),
+        )
 
-        class ItemLock {
+        @Serializable
+        data class ItemLock(
             var mode: String? = null
-
+        ) {
             companion object {
                 const val LOCK_IN_INVENTORY: String = "lock_in_inventory"
                 const val LOCK_IN_SLOT: String = "lock_in_slot"
             }
         }
 
+        @Serializable
         class KeepOnDeath
 
-        @SerializedName(value = "minecraft:can_place_on", alternate = ["can_place_on"])
-        var canPlaceOn: CanPlaceOn? = null
-
-        @SerializedName(value = "minecraft:can_destroy", alternate = ["can_destroy"])
-        var canDestroy: CanDestory? = null
-
-        @SerializedName(value = "minecraft:item_lock", alternate = ["item_lock"])
-        var itemLock: ItemLock? = null
-
-        @SerializedName(value = "minecraft:keep_on_death", alternate = ["keep_on_death"])
-        var keepOnDeath: KeepOnDeath? = null
-
         companion object {
-            fun fromJson(json: String?): ItemJsonComponents {
-                return JSONUtils.from(json, ItemJsonComponents::class.java)
+            fun fromJson(json: String): ItemJsonComponents {
+                return Json.decodeFromString(json)
             }
         }
     }
