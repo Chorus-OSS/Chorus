@@ -1682,8 +1682,6 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @return `true` if the mounting successful
      */
     open fun mountEntity(entity: Entity, mode: ActorLink.Companion.Type): Boolean {
-        requireNonNull(entity, "The target of the mounting entity can't be null")
-
         if (isPassenger(entity) || entity.riding != null && !entity.riding!!.dismountEntity(entity, false)) {
             return false
         }
@@ -3289,7 +3287,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         fun createEntity(identifier: Identifier, pos: Locator, vararg args: Any?): Entity? {
             return createEntity(
                 identifier.toString(),
-                requireNonNull(pos.chunk)!!,
+                pos.chunk,
                 getDefaultNBT(pos.position),
                 *args
             )
@@ -3308,7 +3306,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
          */
         @JvmStatic
         fun createEntity(name: String, pos: Locator, vararg args: Any?): Entity? {
-            return createEntity(name, requireNonNull(pos.chunk)!!, getDefaultNBT(pos.position), *args)
+            return createEntity(name, pos.chunk, getDefaultNBT(pos.position), *args)
         }
 
         /**
