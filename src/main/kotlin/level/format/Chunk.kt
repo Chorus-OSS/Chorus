@@ -753,7 +753,7 @@ class Chunk : IChunk {
         }
 
         override fun build(): Chunk {
-            Preconditions.checkNotNull(levelProvider)
+            checkNotNull(levelProvider)
             return Chunk(
                 state,
                 chunkX,
@@ -767,7 +767,7 @@ class Chunk : IChunk {
         }
 
         override fun emptyChunk(chunkX: Int, chunkZ: Int): Chunk {
-            Preconditions.checkNotNull(levelProvider)
+            checkNotNull(levelProvider)
             return Chunk(chunkX, chunkZ, levelProvider!!)
         }
     }

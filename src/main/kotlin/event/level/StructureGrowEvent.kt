@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.event.HandlerList
 import java.util.*
 
 class StructureGrowEvent(val block: Block, private val blocks: MutableList<Block>) :
-    LevelEvent(Objects.requireNonNull(block.level)), Cancellable {
+    LevelEvent(block.level), Cancellable {
     var blockList: List<Block>
         get() = this.blocks
         set(blocks) {

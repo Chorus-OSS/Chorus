@@ -38,7 +38,7 @@ class CompoundTagEditHelper(var rootTag: MutableMap<String, Any?>) {
     }
 
     fun pushChild(name: String?) {
-        Objects.requireNonNull(name, "name")
+        requireNotNull(name) { "name" }
         check(tag is Map<*, *>) { "Tag is not of Compound type" }
         parentTag.addLast(this.tag as MutableMap<String, Any?>?)
         tagName.addLast(name)

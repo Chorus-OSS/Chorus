@@ -21,7 +21,7 @@ data class SemVersion(val major: Int, val minor: Int, val patch: Int, val revisi
             if (versions.size() == 0) {
                 return SemVersion(0, 0, 0, 0, 0)
             }
-            Preconditions.checkArgument(versions.size() == 5)
+            check(versions.size() == 5)
 
             return SemVersion(
                 versions[0].data,

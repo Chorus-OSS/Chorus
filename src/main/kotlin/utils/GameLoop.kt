@@ -145,7 +145,7 @@ class GameLoop private constructor(
         }
 
         fun loopCountPerSec(loopCountPerSec: Int): GameLoopBuilder {
-            Preconditions.checkArgument(loopCountPerSec in 1..1024)
+            check(loopCountPerSec in 1..1024)
             this.loopCountPerSec = loopCountPerSec
             return this
         }

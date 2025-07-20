@@ -48,11 +48,9 @@ class CompressionCodec(val strategy: CompressionStrategy, private val prefixed: 
     @Throws(Exception::class)
     override fun decode(ctx: ChannelHandlerContext, msg: BedrockBatchWrapper, out: MutableList<Any>) {
         val compressed = msg.compressed!!.slice()
-        Preconditions.checkArgument(
-            compressed.capacity() <= Server.instance.settings.networkSettings.maxDecompressSize,
-            "Compressed data size is too big: %s",
-            compressed.capacity()
-        )
+        check(
+            compressed.capacity() <= Server.instance.settings.networkSettings.maxDecompressSize
+        ) { "Compressed data size is too big: ${compressed.capacity()}" }
 
         val compression: BatchCompression?
         if (this.prefixed) {

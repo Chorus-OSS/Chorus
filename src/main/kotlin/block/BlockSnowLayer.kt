@@ -223,9 +223,9 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
 
     @JvmOverloads
     fun melt(layers: Int = 2): Boolean {
-        Preconditions.checkArgument(layers > 0, "Layers must be positive, got {}", layers)
+        check(layers > 0) { "Layers must be positive, got $layers" }
         var toMelt: Block = this
-        while (toMelt.getPropertyValue(CommonBlockProperties.HEIGHT) === CommonBlockProperties.HEIGHT.max) {
+        while (toMelt.getPropertyValue(CommonBlockProperties.HEIGHT) == CommonBlockProperties.HEIGHT.max) {
             val up = toMelt.up()
             if (up.id != BlockID.SNOW_LAYER) {
                 break

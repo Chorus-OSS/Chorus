@@ -82,7 +82,6 @@ class Skin {
     }
 
     fun setSkinData(skinData: SerializedImage) {
-        Objects.requireNonNull(skinData, "skinData")
         this.skinData = skinData
     }
 
@@ -119,7 +118,7 @@ class Skin {
     }
 
     fun getSkinResourcePatch(): String {
-        return Objects.requireNonNullElse(this.skinResourcePatch, "")
+        return this.skinResourcePatch
     }
 
     fun setSkinResourcePatch(skinResourcePatch: String?) {
@@ -135,8 +134,7 @@ class Skin {
     }
 
     fun setCapeData(capeData: ByteArray) {
-        Objects.requireNonNull(capeData, "capeData")
-        Preconditions.checkArgument(capeData.size == SINGLE_SKIN_SIZE || capeData.isEmpty(), "Invalid legacy cape")
+        check(capeData.size == SINGLE_SKIN_SIZE || capeData.isEmpty()) { "Invalid legacy cape" }
         setCapeData(SerializedImage(64, 32, capeData))
     }
 
@@ -145,7 +143,6 @@ class Skin {
     }
 
     fun setCapeData(capeData: SerializedImage) {
-        Objects.requireNonNull(capeData, "capeData")
         this.capeData = capeData
     }
 
@@ -166,7 +163,6 @@ class Skin {
     }
 
     fun setGeometryData(geometryData: String) {
-        Preconditions.checkNotNull(geometryData, "geometryData")
         if (geometryData != this.geometryData) {
             this.geometryData = geometryData
         }
@@ -177,7 +173,6 @@ class Skin {
     }
 
     fun setAnimationData(animationData: String) {
-        Preconditions.checkNotNull(animationData, "animationData")
         if (animationData != this.animationData) {
             this.animationData = animationData
         }

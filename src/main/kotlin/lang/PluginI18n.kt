@@ -174,7 +174,7 @@ class PluginI18n(private val plugin: PluginBase) {
             if (!file.exists()) {
                 throw FileNotFoundException()
             }
-            Preconditions.checkArgument(file.name.endsWith(".json"))
+            check(file.name.endsWith(".json"))
             FileInputStream(file).use { stream ->
                 MULTI_LANGUAGE.put(
                     langName,

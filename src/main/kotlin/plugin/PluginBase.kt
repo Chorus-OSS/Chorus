@@ -180,25 +180,21 @@ abstract class PluginBase : Plugin {
     }
 
     override fun saveResource(filename: String, outputName: String, replace: Boolean): Boolean {
-        Preconditions.checkArgument(filename != null && outputName != null, "Filename can not be null!")
-        Preconditions.checkArgument(
-            !filename.trim { it <= ' ' }.isEmpty() && !outputName.trim { it <= ' ' }.isEmpty(),
-            "Filename can not be empty!"
-        )
+        check(
+            !filename.trim { it <= ' ' }.isEmpty() && !outputName.trim { it <= ' ' }.isEmpty()
+        ) { "Filename can not be empty!" }
 
         val out = File(dataFolder, outputName)
         if (!out.exists() || replace) {
             try {
                 getResource(filename).use { resource ->
-                    if (resource != null) {
-                        val outFolder = out.parentFile
-                        if (!outFolder.exists()) {
-                            outFolder.mkdirs()
-                        }
-                        Utils.writeFile(out, resource)
-
-                        return true
+                    val outFolder = out.parentFile
+                    if (!outFolder.exists()) {
+                        outFolder.mkdirs()
                     }
+                    Utils.writeFile(out, resource)
+
+                    return true
                 }
             } catch (e: IOException) {
                 log.error(

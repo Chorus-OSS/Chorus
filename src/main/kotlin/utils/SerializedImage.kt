@@ -8,7 +8,6 @@ class SerializedImage(val width: Int, val height: Int, val data: ByteArray) {
         val EMPTY: SerializedImage = SerializedImage(0, 0, byteArrayOf())
 
         fun fromLegacy(skinData: ByteArray): SerializedImage {
-            Objects.requireNonNull(skinData, "skinData")
             return when (skinData.size) {
                 Skin.SINGLE_SKIN_SIZE -> SerializedImage(32, 32, skinData)
                 Skin.SKIN_64_32_SIZE -> SerializedImage(64, 32, skinData)

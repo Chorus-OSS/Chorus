@@ -12,13 +12,13 @@ abstract class TestEventHandler<T : Event?> protected constructor() {
     init {
         val parameterizedTypeReferenceSubclass = findParameterizedTypeReferenceSubclass(this.javaClass)
         val type = parameterizedTypeReferenceSubclass.genericSuperclass
-        Preconditions.checkArgument(type is ParameterizedType, "Type must be a parameterized type")
-        val parameterizedType = type as ParameterizedType
+        check(type is ParameterizedType) { "Type must be a parameterized type" }
+        val parameterizedType = type
         val actualTypeArguments = parameterizedType.actualTypeArguments
-        Preconditions.checkArgument(actualTypeArguments.size == 1, "Number of type arguments must be 1") // 设置结果
+        check(actualTypeArguments.size == 1) { "Number of type arguments must be 1" } // 设置结果
         this.type = actualTypeArguments[0]
         val actualTypeArgument = type.actualTypeArguments[0]
-        Preconditions.checkArgument(actualTypeArgument is Class<*>, "Type must be a class type")
+        check(actualTypeArgument is Class<*>) { "Type must be a class type" }
         this.eventClass = actualTypeArgument as Class<T>
     }
 

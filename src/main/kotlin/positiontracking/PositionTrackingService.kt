@@ -120,7 +120,7 @@ class PositionTrackingService(folder: File) : Closeable {
     @Synchronized
     @Throws(IOException::class)
     fun startTracking(player: Player, trackingHandler: Int, validate: Boolean): PositionTracking? {
-        Preconditions.checkArgument(trackingHandler >= 0, "Tracking handler must be positive")
+        check(trackingHandler >= 0) { "Tracking handler must be positive" }
         if (isTracking(player, trackingHandler, validate)) {
             val position = getPosition(trackingHandler)
             if (position != null) {

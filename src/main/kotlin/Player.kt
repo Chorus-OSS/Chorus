@@ -2346,8 +2346,6 @@ open class Player(
      * @param pos 出生点位置
      */
     fun setSpawn(pos: Locator, spawnPointType: SpawnPointType?) {
-        Preconditions.checkNotNull(pos)
-        Preconditions.checkNotNull(pos.level)
         this.spawnPoint = Locator(
             pos.position.x, pos.position.y, pos.position.z,
             level!!
@@ -4820,7 +4818,6 @@ open class Player(
      * @return the window id
      */
     fun getWindowId(inventory: Inventory): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4847,7 +4844,6 @@ open class Player(
      * @return The unique identifier assigned to the window if successfully added and opened; -1 if the window fails to be added.
      */
     fun addWindow(inventory: Inventory): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4868,7 +4864,6 @@ open class Player(
     }
 
     fun addWindow(inventory: Inventory, forceId: Int?): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4915,7 +4910,6 @@ open class Player(
      * @param inventory the inventory
      */
     fun removeWindow(inventory: Inventory) {
-        Preconditions.checkNotNull(inventory)
         if (!permanentWindows.contains(windows[inventory])) {
             val windowId = this.getWindowId(inventory)
             this.closingWindowId = windowId

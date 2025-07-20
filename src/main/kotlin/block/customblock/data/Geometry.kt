@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block.customblock.data
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 class Geometry(name: String) : NBTData {
@@ -9,8 +8,7 @@ class Geometry(name: String) : NBTData {
     private val boneVisibilities: MutableMap<String, String> = LinkedHashMap()
 
     init {
-        Preconditions.checkNotNull(name)
-        Preconditions.checkArgument(name.isNotBlank())
+        check(name.isNotBlank())
         this.geometryName = name
     }
 
@@ -21,8 +19,7 @@ class Geometry(name: String) : NBTData {
      * Control the visibility that the bone of geometry
      */
     fun boneVisibility(boneName: String, isVisibility: Boolean): Geometry {
-        Preconditions.checkNotNull(boneName)
-        Preconditions.checkArgument(boneName.isNotBlank())
+        check(boneName.isNotBlank())
         boneVisibilities[boneName] = if (isVisibility) "true" else "false"
         return this
     }
@@ -34,14 +31,12 @@ class Geometry(name: String) : NBTData {
      * Control the visibility that the bone of geometry
      */
     fun boneVisibility(boneName: String, condition: String): Geometry {
-        Preconditions.checkNotNull(boneName)
-        Preconditions.checkArgument(boneName.isNotBlank())
+        check(boneName.isNotBlank())
         boneVisibilities[boneName] = condition
         return this
     }
 
     fun culling(cullingName: String): Geometry {
-        Preconditions.checkNotNull(cullingName)
         this.culling = cullingName
         return this
     }

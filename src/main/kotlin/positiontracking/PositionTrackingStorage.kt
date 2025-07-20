@@ -58,7 +58,7 @@ class PositionTrackingStorage @JvmOverloads constructor(startIndex: Int, persist
      */
     init {
         var maxStorage = maxStorage
-        Preconditions.checkArgument(startIndex > 0, "Start index must be positive. Got {}", startIndex)
+        check(startIndex > 0) { "Start index must be positive. Got $startIndex"}
         this.startingHandler = startIndex
         if (maxStorage <= 0) {
             maxStorage = DEFAULT_MAX_STORAGE
@@ -146,19 +146,13 @@ class PositionTrackingStorage @JvmOverloads constructor(startIndex: Int, persist
     }
 
     private fun validateHandler(trackingHandler: Int) {
-        Preconditions.checkArgument(
-            trackingHandler >= startingHandler,
-            "The trackingHandler {} is too low for this storage (starts at {})",
-            trackingHandler,
-            startingHandler
-        )
+        check(
+            trackingHandler >= startingHandler
+        ) { "The trackingHandler $trackingHandler is too low for this storage (starts at $startingHandler)" }
         val limit = startingHandler + maxStorage
-        Preconditions.checkArgument(
-            trackingHandler <= limit,
-            "The trackingHandler {} is too high for this storage (ends at {})",
-            trackingHandler,
-            limit
-        )
+        check(
+            trackingHandler <= limit
+        ) { "The trackingHandler $trackingHandler is too high for this storage (ends at $limit)" }
     }
 
     /**

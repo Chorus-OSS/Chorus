@@ -13,7 +13,7 @@ class JarPluginResourcePackLoader(protected val jarPath: File) : ResourcePackLoa
     override fun loadPacks(): List<ResourcePack> {
         val baseLang = Server.instance.lang
         val loadedResourcePacks: MutableList<ResourcePack> = ArrayList()
-        for (jar in Objects.requireNonNull<Array<File>>(jarPath.listFiles())) {
+        for (jar in requireNotNull(jarPath.listFiles())) {
             try {
                 var resourcePack: ResourcePack? = null
                 val fileExt = Files.getFileExtension(jar.name)

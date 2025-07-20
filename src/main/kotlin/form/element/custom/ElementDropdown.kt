@@ -27,10 +27,9 @@ class ElementDropdown(var text: String, var options: MutableList<String>, var de
     }
 
     override fun toJson(): JsonObject {
-        Preconditions.checkArgument(
-            0 > this.defaultOption || this.defaultOption < options.size,
-            "Default option not an index"
-        )
+        check(
+            0 > this.defaultOption || this.defaultOption < options.size
+        ) { "Default option not an index" }
 
         `object`.addProperty("type", "dropdown")
         `object`.addProperty("text", this.text)

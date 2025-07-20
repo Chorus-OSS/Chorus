@@ -42,7 +42,7 @@ class OptionalValue<T> internal constructor(private val value: T?) {
         private val EMPTY: OptionalValue<*> = OptionalValue<Any?>(null)
 
         fun <T> of(value: T): OptionalValue<T> {
-            return OptionalValue(Objects.requireNonNull(value))
+            return OptionalValue(requireNotNull(value))
         }
 
         fun <T> ofNullable(value: T?): OptionalValue<T> {

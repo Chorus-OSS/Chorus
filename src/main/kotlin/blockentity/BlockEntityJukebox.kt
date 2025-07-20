@@ -28,7 +28,6 @@ class BlockEntityJukebox(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable
             .getBlockIdAt(floorX, floorY, floorZ) === BlockID.JUKEBOX
 
     fun setRecordItem(recordItem: Item) {
-        Objects.requireNonNull(recordItem, "Record item cannot be null")
         this.recordItem = recordItem
     }
 

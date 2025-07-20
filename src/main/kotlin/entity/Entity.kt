@@ -48,7 +48,6 @@ import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.awt.Color
 import java.util.*
-import java.util.Objects.requireNonNull
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong

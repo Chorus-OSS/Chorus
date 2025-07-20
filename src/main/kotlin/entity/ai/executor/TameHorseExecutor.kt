@@ -50,7 +50,7 @@ class TameHorseExecutor @JvmOverloads constructor(
      * @param tameProbability          马被驯服的概率(取值范围1-100)<br></br>Probability of a horse being tamed (value range 1-100)
      */
     init {
-        Preconditions.checkArgument(tameProbability > 0 && tameProbability <= 100)
+        check(tameProbability > 0 && tameProbability <= 100)
         this.tameProbability = tameProbability
         this.tick1 = 0
     }

@@ -550,7 +550,7 @@ class LevelDBProvider(override val level: Level, override val path: String) : Le
         fun isValid(path: String?): Boolean {
             val isValid = (File(path, "level.dat").exists()) && File(path, "db").isDirectory
             if (isValid) {
-                for (file in Objects.requireNonNull(File(path, "db").listFiles())) {
+                for (file in requireNotNull(File(path, "db").listFiles())) {
                     if (file.name.endsWith(".ldb")) {
                         return true
                     }

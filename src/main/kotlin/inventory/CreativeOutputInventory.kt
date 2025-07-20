@@ -43,7 +43,6 @@ class CreativeOutputInventory(private val player: Player) : Inventory {
     }
 
     override fun addItem(vararg slots: Item): Array<Item> {
-        Preconditions.checkNotNull(slots[0])
         this.item = slots[0]
         return arrayOf(item)
     }

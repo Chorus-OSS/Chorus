@@ -49,7 +49,7 @@ class JSONTickingAreaStorage(path: String) : TickingAreaStorage {
     override fun readTickingArea(): MutableMap<String, TickingArea> {
         val rootDir = File(filePath.toString())
         val aMap: MutableMap<String, TickingArea> = HashMap<String, TickingArea>()
-        for (each in Objects.requireNonNull<Array<File>>(rootDir.listFiles())) {
+        for (each in requireNotNull(rootDir.listFiles())) {
             val jsonFile = File(each, "tickingarea.json")
             if (jsonFile.exists()) {
                 try {

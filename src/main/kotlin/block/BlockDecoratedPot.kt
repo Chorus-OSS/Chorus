@@ -57,11 +57,11 @@ class BlockDecoratedPot(blockState: BlockState = properties.defaultState) : Bloc
     }
 
     override var blockFace: BlockFace
-        get() = fromHorizontalIndex(getPropertyValue<Int, IntPropertyType>(CommonBlockProperties.DIRECTION))
+        get() = fromHorizontalIndex(getPropertyValue(CommonBlockProperties.DIRECTION))
         set(face) {
-            setPropertyValue<Int, IntPropertyType>(
+            setPropertyValue(
                 CommonBlockProperties.DIRECTION,
-                Objects.requireNonNullElse(face, BlockFace.SOUTH).horizontalIndex
+                face.horizontalIndex
             )
         }
 

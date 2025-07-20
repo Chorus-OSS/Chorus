@@ -30,10 +30,9 @@ class ElementStepSlider(
     }
 
     override fun toJson(): JsonObject {
-        Preconditions.checkArgument(
-            this.defaultStep > -1 && this.defaultStep < steps.size,
-            "Default option not within range"
-        )
+        check(
+            this.defaultStep > -1 && this.defaultStep < steps.size
+        ) { "Default option not within range" }
 
         `object`.addProperty("type", "step_slider")
         `object`.addProperty("text", this.text)

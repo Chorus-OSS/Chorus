@@ -519,7 +519,7 @@ class Server internal constructor(
         val file = File(this.dataPath + "/worlds")
         if (!file.isDirectory) throw RuntimeException("worlds isn't directory")
         //load all world from `worlds` folder
-        for (f in Objects.requireNonNull(file.listFiles { obj: File -> obj.isDirectory })) {
+        for (f in requireNotNull(file.listFiles { obj: File -> obj.isDirectory })) {
             val levelConfig = getLevelConfig(f.name)
             if (levelConfig != null && !levelConfig.enable) {
                 continue
@@ -1472,7 +1472,6 @@ class Server internal constructor(
      * @return 玩家实例，可为空<br></br>Player example, can be empty
      */
     fun getPlayer(uuid: UUID): Optional<Player> {
-        Preconditions.checkNotNull(uuid, "uuid")
         return Optional.ofNullable(playerList[uuid])
     }
 
@@ -1546,7 +1545,6 @@ class Server internal constructor(
      * @return 玩家<br></br>player
      */
     fun getOfflinePlayer(uuid: UUID): IPlayer {
-        Preconditions.checkNotNull(uuid, "uuid")
         val onlinePlayer = getPlayer(uuid)
         if (onlinePlayer.isPresent) {
             return onlinePlayer.get()

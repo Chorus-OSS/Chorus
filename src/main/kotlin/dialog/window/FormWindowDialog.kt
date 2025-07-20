@@ -36,7 +36,7 @@ class FormWindowDialog @JvmOverloads constructor(
 
     init {
         try {
-            BufferedReader(InputStreamReader(Objects.requireNonNull(javaClass.classLoader.getResourceAsStream("npc_data.json")))).use { reader ->
+            BufferedReader(InputStreamReader(requireNotNull(javaClass.classLoader.getResourceAsStream("npc_data.json")))).use { reader ->
                 this.skinData = reader.lines().collect(
                     Collectors.joining("\n")
                 )

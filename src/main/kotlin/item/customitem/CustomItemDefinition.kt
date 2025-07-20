@@ -71,13 +71,13 @@ data class CustomItemDefinition(@JvmField val identifier: String, @JvmField val 
         }
 
         fun texture(texture: String): SimpleBuilder {
-            Preconditions.checkArgument(!texture.isBlank(), "texture name is blank")
+            check(!texture.isBlank()) { "texture name is blank" }
             this.texture = texture
             return this
         }
 
         fun name(name: String): SimpleBuilder {
-            Preconditions.checkArgument(!name.isBlank(), "name is blank")
+            check(!name.isBlank()) { "name is blank" }
             this.name = name
             return this
         }
@@ -227,7 +227,7 @@ data class CustomItemDefinition(@JvmField val identifier: String, @JvmField val 
         }
 
         protected fun calculateID(): CustomItemDefinition {
-            Preconditions.checkNotNull(texture, "You must define the texture through SimpleBuilder#texture method!")
+            checkNotNull(texture) { "You must define the texture through SimpleBuilder#texture method!" }
             //定义材质
             nbt.getCompound("components")
                 .getCompound("item_properties")

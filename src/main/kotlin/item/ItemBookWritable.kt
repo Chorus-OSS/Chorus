@@ -17,10 +17,9 @@ abstract class ItemBookWritable : Item {
      * Returns whether the given page exists in this book.
      */
     fun pageExists(pageId: Int): Boolean {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
         if (this.hasCompoundTag()) {
             val tag = this.namedTag
             if (tag!!.contains("pages") && tag["pages"] is ListTag<*>) {
@@ -34,10 +33,9 @@ abstract class ItemBookWritable : Item {
      * Returns a string containing the content of a page (which could be empty), or null if the page doesn't exist.
      */
     fun getPageText(pageId: Int): String? {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
         if (this.hasCompoundTag()) {
             val tag = this.namedTag
             if (tag!!.contains("pages") && tag["pages"] is ListTag<*>) {
@@ -55,11 +53,10 @@ abstract class ItemBookWritable : Item {
      * @return boolean indicating success
      */
     fun setPageText(pageId: Int, pageText: String): Boolean {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
-        Preconditions.checkArgument(pageText.length <= 256, "Text length " + pageText.length + " is out of range")
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
+        check(pageText.length <= 256) { "Text length ${pageText.length} is out of range" }
         val tag = if (this.hasCompoundTag()) {
             this.namedTag
         } else if (pageText.isEmpty()) {
@@ -91,10 +88,9 @@ abstract class ItemBookWritable : Item {
      * @return boolean indicating success
      */
     fun addPage(pageId: Int): Boolean {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
         val tag = if (this.hasCompoundTag()) this.namedTag else CompoundTag()
         val pages: ListTag<CompoundTag>
         if (!tag!!.contains("pages") || tag["pages"] !is ListTag<*>) {
@@ -116,10 +112,9 @@ abstract class ItemBookWritable : Item {
      * @return boolean indicating success
      */
     fun deletePage(pageId: Int): Boolean {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
         if (this.hasCompoundTag()) {
             val tag = this.namedTag
             if (tag!!.contains("pages") && tag["pages"] is ListTag<*>) {
@@ -143,11 +138,10 @@ abstract class ItemBookWritable : Item {
      */
     @JvmOverloads
     fun insertPage(pageId: Int, pageText: String = ""): Boolean {
-        Preconditions.checkArgument(
-            pageId >= 0 && pageId < 50,
-            "Page number $pageId is out of range"
-        )
-        Preconditions.checkArgument(pageText.length <= 256, "Text length " + pageText.length + " is out of range")
+        check(
+            pageId >= 0 && pageId < 50
+        ) { "Page number $pageId is out of range" }
+        check(pageText.length <= 256) { "Text length ${pageText.length} is out of range" }
         val tag = if (this.hasCompoundTag()) this.namedTag else CompoundTag()
         val pages: ListTag<CompoundTag>
         if (!tag!!.contains("pages") || tag["pages"] !is ListTag<*>) {
@@ -174,14 +168,12 @@ abstract class ItemBookWritable : Item {
      * @return boolean indicating success
      */
     fun swapPages(pageId1: Int, pageId2: Int): Boolean {
-        Preconditions.checkArgument(
-            pageId1 >= 0 && pageId1 < 50,
-            "Page number $pageId1 is out of range"
-        )
-        Preconditions.checkArgument(
-            pageId2 >= 0 && pageId2 < 50,
-            "Page number $pageId2 is out of range"
-        )
+        check(
+            pageId1 >= 0 && pageId1 < 50
+        ) { "Page number $pageId1 is out of range" }
+        check(
+            pageId2 >= 0 && pageId2 < 50
+        ) { "Page number $pageId2 is out of range" }
         if (this.hasCompoundTag()) {
             val tag = this.namedTag
             if (tag!!.contains("pages") && tag["pages"] is ListTag<*>) {

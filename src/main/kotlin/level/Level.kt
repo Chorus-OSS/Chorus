@@ -321,8 +321,8 @@ class Level(
     }
 
     fun addSound(pos: Vector3, sound: Sound, volume: Float, pitch: Float, vararg players: Player) {
-        Preconditions.checkArgument(volume in 0.0..1.0, "Sound volume must be between 0 and 1")
-        Preconditions.checkArgument(pitch >= 0, "Sound pitch must be higher than 0")
+        check(volume in 0.0..1.0) { "Sound volume must be between 0 and 1" }
+        check(pitch >= 0) { "Sound pitch must be higher than 0" }
 
         val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
             soundName = sound.sound,
@@ -3426,7 +3426,7 @@ class Level(
         }
 
     fun requestChunk(x: Int, z: Int, player: Player) {
-        Preconditions.checkArgument(player.loaderId > 0, player.getEntityName() + " has no chunk loader")
+        check(player.loaderId > 0) { "${player.getEntityName()} has no chunk loader" }
         val index = chunkHash(x, z)
         val playerInt2ObjectMap = chunkSendQueue.computeIfAbsent(index) { ConcurrentHashMap<Int, Player>() }
         playerInt2ObjectMap[player.loaderId] = player
@@ -3557,16 +3557,14 @@ class Level(
     }
 
     fun scheduleBlockEntityUpdate(entity: BlockEntity) {
-        Preconditions.checkNotNull(entity, "entity")
-        Preconditions.checkArgument(entity.level === this, "BlockEntity is not in this level")
+        check(entity.level === this) { "BlockEntity is not in this level" }
         if (!updateBlockEntities.contains(entity)) {
             updateBlockEntities.add(entity)
         }
     }
 
     fun removeBlockEntity(entity: BlockEntity) {
-        Preconditions.checkNotNull(entity, "entity")
-        Preconditions.checkArgument(entity.level === this, "BlockEntity is not in this level")
+        check(entity.level === this) { "BlockEntity is not in this level" }
         blockEntities.remove(entity.id)
         updateBlockEntities.remove(entity)
     }

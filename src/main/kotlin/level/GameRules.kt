@@ -39,9 +39,6 @@ class GameRules private constructor() {
 
     @Throws(IllegalArgumentException::class)
     fun setGameRule(gameRule: GameRule, value: String) {
-        Preconditions.checkNotNull(gameRule, "gameRule")
-        Preconditions.checkNotNull(value, "value")
-
         when (getGameRuleType(gameRule)) {
             Type.BOOLEAN -> {
                 if (value.equals("true", true)) {
@@ -59,31 +56,27 @@ class GameRules private constructor() {
         }
     }
 
-    fun getBoolean(gameRule: GameRule?): Boolean {
+    fun getBoolean(gameRule: GameRule): Boolean {
         return gameRules[gameRule]!!.valueAsBoolean
     }
 
-    fun getInteger(gameRule: GameRule?): Int {
-        Preconditions.checkNotNull(gameRule, "gameRule")
+    fun getInteger(gameRule: GameRule): Int {
         return gameRules[gameRule]!!.valueAsInteger
     }
 
-    fun getFloat(gameRule: GameRule?): Float {
-        Preconditions.checkNotNull(gameRule, "gameRule")
+    fun getFloat(gameRule: GameRule): Float {
         return gameRules[gameRule]!!.valueAsFloat
     }
 
-    fun getString(gameRule: GameRule?): String {
-        Preconditions.checkNotNull(gameRule, "gameRule")
+    fun getString(gameRule: GameRule): String {
         return gameRules[gameRule]!!.value.toString()
     }
 
-    fun getGameRuleType(gameRule: GameRule?): Type {
-        Preconditions.checkNotNull(gameRule, "gameRule")
+    fun getGameRuleType(gameRule: GameRule): Type {
         return gameRules[gameRule]!!.type
     }
 
-    fun hasRule(gameRule: GameRule?): Boolean {
+    fun hasRule(gameRule: GameRule): Boolean {
         return gameRules.containsKey(gameRule)
     }
 
@@ -102,7 +95,6 @@ class GameRules private constructor() {
     }
 
     fun readNBT(nbt: CompoundTag) {
-        Preconditions.checkNotNull(nbt)
         for (key in nbt.tags.keys) {
             val gameRule: Optional<GameRule> = GameRule.parseString(key)
             if (!gameRule.isPresent) {

@@ -49,9 +49,7 @@ abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockSta
             val blockEntity =
                 level.getBlockEntity(this.position) as? BlockEntitySign ?: return
             // If a sign is waxed, it cannot be modified.
-            if (blockEntity.isWaxed || (Objects.requireNonNull<Player?>(player)
-                    .isSneaking() && item.id != BlockID.AIR)
-            ) {
+            if (blockEntity.isWaxed || (requireNotNull(player).isSneaking() && item.id != BlockID.AIR)) {
                 level.addLevelSoundEvent(
                     position.add(0.5, 0.5, 0.5),
                     org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.WaxedSignInteractFail

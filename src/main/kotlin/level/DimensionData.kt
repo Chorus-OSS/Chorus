@@ -28,9 +28,7 @@ class DimensionData @JvmOverloads constructor(
         }
         this.height = height
 
-        this.chunkSectionCount = Objects.requireNonNullElseGet(
-            chunkSectionCount
-        ) { this.height shr 4 + (if ((this.height and 15) == 0) 0 else 1) }
+        this.chunkSectionCount = chunkSectionCount ?: (this.height shr 4 + (if ((this.height and 15) == 0) 0 else 1))
     }
 
     val minSectionY: Int

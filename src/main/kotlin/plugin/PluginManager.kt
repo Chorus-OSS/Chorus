@@ -165,7 +165,7 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
             }
 
             for (loader in loaders.values) {
-                for (file in Objects.requireNonNull<Array<File>>(dictionary.listFiles { _, name ->
+                for (file in requireNotNull(dictionary.listFiles { _, name ->
                     for (pattern in loader.pluginFilters) {
                         if (pattern.matcher(name).matches()) {
                             return@listFiles true

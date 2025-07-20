@@ -59,10 +59,9 @@ abstract class Generator(val dimensionData: DimensionData, val settings: Map<Str
     @JvmOverloads
     fun asyncGenerate(
         chunk: IChunk,
-        to: String? = end!!.name(),
+        to: String = end!!.name(),
         callback: Consumer<ChunkGenerateContext> = Consumer { }
     ) {
-        Preconditions.checkNotNull(to)
         val context = ChunkGenerateContext(this, level, chunk)
         asyncGenerate0(context, start, to) { callback.accept(context) }
     }

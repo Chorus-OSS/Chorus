@@ -80,7 +80,7 @@ object JSONUtils {
      * JSON deserialization
      */
     fun <V> from(reader: Reader, type: Class<V>?): V {
-        val jsonReader = JsonReader(Objects.requireNonNull(reader))
+        val jsonReader = JsonReader(reader)
         return GSON.fromJson(jsonReader, type)
     }
 
@@ -88,7 +88,7 @@ object JSONUtils {
      * JSON deserialization
      */
     fun <V> from(reader: Reader, typeToken: TypeToken<V>?): V {
-        val jsonReader = JsonReader(Objects.requireNonNull(reader))
+        val jsonReader = JsonReader(reader)
         return GSON.fromJson(jsonReader, typeToken)
     }
 
@@ -96,7 +96,7 @@ object JSONUtils {
      * JSON deserialization
      */
     fun <V> from(inputStream: InputStream, type: Class<V>?): V {
-        val reader = JsonReader(InputStreamReader(Objects.requireNonNull(inputStream)))
+        val reader = JsonReader(InputStreamReader(inputStream))
         return GSON.fromJson(reader, type)
     }
 
@@ -104,7 +104,7 @@ object JSONUtils {
      * JSON deserialization
      */
     fun <V> from(inputStream: InputStream, typeToken: TypeToken<V>): V {
-        val reader = JsonReader(InputStreamReader(Objects.requireNonNull(inputStream)))
+        val reader = JsonReader(InputStreamReader(inputStream))
         return GSON.fromJson(reader, typeToken.type)
     }
 
@@ -112,7 +112,7 @@ object JSONUtils {
      * JSON deserialization（List）
      */
     fun <V> fromList(inputStream: InputStream, type: Class<V>): List<V> {
-        val reader = JsonReader(InputStreamReader(Objects.requireNonNull(inputStream)))
+        val reader = JsonReader(InputStreamReader(inputStream))
         val typeToken = TypeToken.getParameterized(
             ArrayList::class.java, type
         ) as TypeToken<List<V>>
