@@ -44,7 +44,6 @@ import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.crypto.SecretKey
 
 class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     private val closed = AtomicBoolean()

@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.block
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
-import org.chorus_oss.chorus.block.property.type.IntPropertyType
 import org.chorus_oss.chorus.blockentity.BlockEntityDecoratedPot
 import org.chorus_oss.chorus.blockentity.BlockEntityID
 import org.chorus_oss.chorus.item.Item
@@ -11,7 +10,6 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromHorizontalIndex
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.Faceable
-import java.util.*
 
 class BlockDecoratedPot(blockState: BlockState = properties.defaultState) : BlockFlowable(blockState), Faceable,
     BlockEntityHolder<BlockEntityDecoratedPot> {

@@ -123,13 +123,16 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
         if (skinToken.contains("GameVersion")) this.gameVersion = skinToken["GameVersion"]!!.jsonPrimitive.content
         if (skinToken.contains("GuiScale")) this.guiScale = skinToken["GuiScale"]!!.jsonPrimitive.int
         if (skinToken.contains("LanguageCode")) this.languageCode = skinToken["LanguageCode"]!!.jsonPrimitive.content
-        if (skinToken.contains("CurrentInputMode")) this.currentInputMode = skinToken["CurrentInputMode"]!!.jsonPrimitive.int
-        if (skinToken.contains("DefaultInputMode")) this.defaultInputMode = skinToken["DefaultInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("CurrentInputMode")) this.currentInputMode =
+            skinToken["CurrentInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("DefaultInputMode")) this.defaultInputMode =
+            skinToken["DefaultInputMode"]!!.jsonPrimitive.int
         if (skinToken.contains("UIProfile")) this.uIProfile = skinToken["UIProfile"]!!.jsonPrimitive.int
         if (skinToken.contains("CapeData")) this.capeData = skinToken["CapeData"]!!.jsonPrimitive.content
         if (skinToken.contains("Waterdog_IP")) this.waterdogIP = skinToken["Waterdog_IP"]!!.jsonPrimitive.content
         if (skinToken.contains("Waterdog_XUID")) this.waterdogXUID = skinToken["Waterdog_XUID"]!!.jsonPrimitive.content
-        if (skinToken.contains("MaxViewDistance")) this.maxViewDistance = skinToken["MaxViewDistance"]!!.jsonPrimitive.int
+        if (skinToken.contains("MaxViewDistance")) this.maxViewDistance =
+            skinToken["MaxViewDistance"]!!.jsonPrimitive.int
         if (skinToken.contains("MemoryTier")) this.memoryTier = skinToken["MemoryTier"]!!.jsonPrimitive.int
 
         if (this.isWaterdog) {
@@ -166,11 +169,13 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
             if (chainMap.contains("extraData")) {
                 val extra = chainMap["extraData"]!!.jsonObject
                 if (extra.contains("displayName")) this.username = extra["displayName"]!!.jsonPrimitive.content
-                if (extra.contains("identity")) this.clientUUID = UUID.fromString(extra["identity"]!!.jsonPrimitive.content)
+                if (extra.contains("identity")) this.clientUUID =
+                    UUID.fromString(extra["identity"]!!.jsonPrimitive.content)
                 if (extra.contains("XUID")) this.xuid = extra["XUID"]!!.jsonPrimitive.content
                 if (extra.contains("titleId")) this.titleId = extra["titleId"]!!.jsonPrimitive.content
             }
-            if (chainMap.contains("identityPublicKey")) this.identityPublicKey = chainMap["identityPublicKey"]!!.jsonPrimitive.content
+            if (chainMap.contains("identityPublicKey")) this.identityPublicKey =
+                chainMap["identityPublicKey"]!!.jsonPrimitive.content
         }
 
         if (!isXboxAuthed) {
@@ -188,8 +193,12 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
             val jwt = iterator.next()
 
             val parts = jwt.split(".", limit = 3)
-            val header = Json.parseToJsonElement(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[0]).decodeToString()).jsonObject
-            val payload = Json.parseToJsonElement(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[1]).decodeToString()).jsonObject
+            val header = Json.parseToJsonElement(
+                Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[0]).decodeToString()
+            ).jsonObject
+            val payload = Json.parseToJsonElement(
+                Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[1]).decodeToString()
+            ).jsonObject
 
             val x5us = header["x5u"]?.jsonPrimitive?.content ?: return false
             val expectedKey = EncryptionUtils.parseKey(x5us)

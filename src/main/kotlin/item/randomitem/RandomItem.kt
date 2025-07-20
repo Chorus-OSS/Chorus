@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.item.randomitem
 
-import java.util.*
-
 object RandomItem {
     private val selectors: MutableMap<Selector, Float> = HashMap()
 

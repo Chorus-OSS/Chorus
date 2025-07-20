@@ -16,7 +16,6 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.Faceable
 import org.chorus_oss.protocol.packets.LevelEventPacket
-import java.util.*
 
 abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockState), Faceable {
     override val hardness: Double

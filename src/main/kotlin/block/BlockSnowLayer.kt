@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.property.CommonBlockProperties

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block.customblock
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.customblock.data.*
 import org.chorus_oss.chorus.block.customblock.data.Materials.RenderMethod

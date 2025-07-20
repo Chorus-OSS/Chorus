@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.nbt.tag
 
-import org.chorus_oss.chorus.utils.Binary
-
 class ByteArrayTag(var data: ByteArray) : Tag<ByteArray>() {
     constructor() : this(ByteArray(0))
 
@@ -9,7 +7,7 @@ class ByteArrayTag(var data: ByteArray) : Tag<ByteArray>() {
         get() = TAG_BYTE_ARRAY
 
     override fun toString(): String {
-        return "ByteArrayTag " + " (data: 0x" + Binary.bytesToHexString(data, true) + " [" + data.size + " bytes])"
+        return "ByteArrayTag " + " (data: 0x" + data.toHexString() + " [" + data.size + " bytes])"
     }
 
     override fun toSNBT(): String {

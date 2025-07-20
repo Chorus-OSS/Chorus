@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.CompoundTagView

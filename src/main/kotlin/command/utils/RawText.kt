@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.command.utils
 
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Player
@@ -13,7 +12,6 @@ import org.chorus_oss.chorus.scoreboard.scorer.EntityScorer
 import org.chorus_oss.chorus.scoreboard.scorer.FakeScorer
 import org.chorus_oss.chorus.scoreboard.scorer.IScorer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
-import org.chorus_oss.chorus.utils.JSONUtils
 import java.util.stream.Collectors
 
 

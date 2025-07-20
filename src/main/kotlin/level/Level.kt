@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.level
 
 
-import com.google.common.base.Preconditions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -3258,7 +3257,7 @@ class Level(
             }
         }
         subTickGameLoop = GameLoop.builder()
-            .onTick(Consumer<GameLoop> { currentTick: GameLoop -> this.subTick(currentTick) })
+            .onTick({ currentTick: GameLoop -> this.subTick(currentTick) })
             .onStop(Runnable { log.debug("$levelName SubTick is closed!") })
             .loopCountPerSec(20)
             .build()

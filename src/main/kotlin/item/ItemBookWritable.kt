@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.item
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 

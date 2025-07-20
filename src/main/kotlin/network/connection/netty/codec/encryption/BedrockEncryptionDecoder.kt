@@ -6,8 +6,6 @@ import io.netty.handler.codec.CorruptedFrameException
 import io.netty.handler.codec.MessageToMessageDecoder
 import org.chorus_oss.chorus.network.connection.netty.BedrockBatchWrapper
 import java.util.concurrent.atomic.AtomicLong
-import javax.crypto.Cipher
-import javax.crypto.SecretKey
 
 class BedrockEncryptionDecoder(val key: AES.CTR.Key) :
     MessageToMessageDecoder<BedrockBatchWrapper>() {

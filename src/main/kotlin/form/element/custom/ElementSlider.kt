@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.form.element.custom
 
-import com.google.common.base.Preconditions
 import com.google.gson.JsonObject
 
 class ElementSlider(

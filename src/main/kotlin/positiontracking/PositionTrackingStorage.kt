@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.positiontracking
 
-import com.google.common.base.Preconditions
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import java.io.*
@@ -58,7 +57,7 @@ class PositionTrackingStorage @JvmOverloads constructor(startIndex: Int, persist
      */
     init {
         var maxStorage = maxStorage
-        check(startIndex > 0) { "Start index must be positive. Got $startIndex"}
+        check(startIndex > 0) { "Start index must be positive. Got $startIndex" }
         this.startingHandler = startIndex
         if (maxStorage <= 0) {
             maxStorage = DEFAULT_MAX_STORAGE

@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.event.level
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.event.Cancellable
 import org.chorus_oss.chorus.event.HandlerList
-import java.util.*
 
 class StructureGrowEvent(val block: Block, private val blocks: MutableList<Block>) :
     LevelEvent(block.level), Cancellable {

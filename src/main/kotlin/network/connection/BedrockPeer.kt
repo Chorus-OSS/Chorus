@@ -28,7 +28,6 @@ import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.crypto.SecretKey
 
 /**
  * A Bedrock peer that represents a single network connection to the remote peer.

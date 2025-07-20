@@ -16,7 +16,10 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.tags.ItemTags
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.Identifier
+import org.chorus_oss.chorus.utils.JSONUtils
+import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.chorus.utils.TextFormat
 import org.jetbrains.annotations.ApiStatus
 import java.io.IOException
 import java.io.UncheckedIOException
@@ -1097,9 +1100,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     override fun toString(): String {
         return "Item(name=\"${idConvertToName()}\", id=\"${this.id}\", meta=${this.meta}, count=${this.count}${
             if (this.hasCompoundTag()) ", tags=0x${
-                Binary.bytesToHexString(
-                    compoundTag
-                )
+                compoundTag.toHexString()
             }" else ")"
         }"
     }

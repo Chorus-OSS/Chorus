@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.blockentity
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.BlockChiseledBookshelf
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.format.IChunk

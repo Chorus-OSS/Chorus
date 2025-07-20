@@ -1,14 +1,15 @@
 package org.chorus_oss.chorus.entity.data
 
 
-import com.google.common.base.Preconditions
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.PersonaPiece
+import org.chorus_oss.chorus.utils.PersonaPieceTint
+import org.chorus_oss.chorus.utils.SerializedImage
+import org.chorus_oss.chorus.utils.SkinAnimation
 import org.jose4j.json.internal.json_simple.JSONObject
 import org.jose4j.json.internal.json_simple.JSONValue
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets
 import java.util.*
 
 class Skin {
@@ -100,11 +101,7 @@ class Skin {
     }
 
     fun generateSkinId(name: String) {
-        val data: ByteArray = Binary.appendBytes(
-            getSkinData().data, getSkinResourcePatch().toByteArray(
-                StandardCharsets.UTF_8
-            )
-        )
+        val data: ByteArray = getSkinData().data + getSkinResourcePatch().toByteArray()
         this.skinId = UUID.nameUUIDFromBytes(data).toString() + "." + name
     }
 

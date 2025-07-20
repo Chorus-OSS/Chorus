@@ -26,7 +26,6 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.MinecartType
 import org.chorus_oss.chorus.utils.Rail
-import java.util.*
 import kotlin.math.*
 
 abstract class EntityMinecartAbstract(chunk: IChunk?, nbt: CompoundTag) : EntityVehicle(chunk, nbt) {

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.network.connection.netty.codec.compression
 
-import com.google.common.base.Preconditions
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageCodec

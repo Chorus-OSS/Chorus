@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.level
 
-import java.util.*
-
 class DimensionData @JvmOverloads constructor(
     val dimensionName: String,
     val dimensionId: Int,

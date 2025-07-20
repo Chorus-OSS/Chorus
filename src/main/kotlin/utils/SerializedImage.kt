@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.utils
 
 import org.chorus_oss.chorus.entity.data.Skin
-import java.util.*
 
 class SerializedImage(val width: Int, val height: Int, val data: ByteArray) {
     companion object {

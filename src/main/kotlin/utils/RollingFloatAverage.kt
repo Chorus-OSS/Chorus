@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.utils
 
-import java.util.*
-
 class RollingFloatAverage(private val maxSize: Int) {
     private val queue: ArrayDeque<Float> = ArrayDeque()
     private var sum: Float = 0f

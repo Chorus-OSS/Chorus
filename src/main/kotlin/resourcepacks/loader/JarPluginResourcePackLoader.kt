@@ -6,7 +6,6 @@ import org.chorus_oss.chorus.resourcepacks.JarPluginResourcePack
 import org.chorus_oss.chorus.resourcepacks.ResourcePack
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.File
-import java.util.*
 
 
 class JarPluginResourcePackLoader(protected val jarPath: File) : ResourcePackLoader {
