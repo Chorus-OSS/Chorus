@@ -86,8 +86,6 @@ class PermissibleBase(opable: ServerOperator?) : Permissible {
     override fun removeAttachment(attachment: PermissionAttachment) {
         if (attachments.contains(attachment)) {
             attachments.remove(attachment)
-            val ex = attachment.removalCallback
-            ex?.attachmentRemoved(attachment)
             this.recalculatePermissions()
         }
     }

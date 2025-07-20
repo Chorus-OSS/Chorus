@@ -25,14 +25,14 @@ class BedrockPong(
     fun toByteBuf(): ByteBuf {
         val joiner = StringJoiner(";", "", ";")
             .add(this.edition)
-            .add(toString(this.motd))
+            .add(this.motd ?: "")
             .add(protocolVersion.toString())
-            .add(toString(this.version))
+            .add(this.version ?: "")
             .add(playerCount.toString())
             .add(maximumPlayerCount.toString())
             .add(java.lang.Long.toUnsignedString(this.serverId))
-            .add(toString(this.subMotd))
-            .add(toString(this.gameType))
+            .add(this.subMotd ?: "")
+            .add(this.gameType ?: "")
             .add(if (this.nintendoLimited) "0" else "1")
             .add(ipv4Port.toString())
             .add(ipv6Port.toString())
@@ -45,11 +45,5 @@ class BedrockPong(
 
     fun update() {
         channel!!.config().advertisement = this.toByteBuf()
-    }
-
-    companion object {
-        private fun toString(string: String?): String {
-            return string ?: ""
-        }
     }
 }

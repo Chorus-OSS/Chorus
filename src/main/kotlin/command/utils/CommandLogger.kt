@@ -46,7 +46,7 @@ class CommandLogger(
     ) : this(command, sender, commandLabel, args, CommandOutputContainer(), plugin)
 
     fun addSuccess(message: String): CommandLogger {
-        return this.addSuccess(message, *CommandOutputContainer.EMPTY_STRING)
+        return this.addSuccess(message, *emptyArray<String>())
     }
 
     fun addSuccess(key: String, params: List<String>): CommandLogger {
@@ -85,7 +85,7 @@ class CommandLogger(
      * @return the command logger
      */
     fun addError(message: String): CommandLogger {
-        return this.addError(message, *CommandOutputContainer.EMPTY_STRING)
+        return this.addError(message, *emptyArray<String>())
     }
 
     /**
@@ -113,7 +113,7 @@ class CommandLogger(
      * @return the command logger
      */
     fun addMessage(key: String): CommandLogger {
-        return this.addMessage(key, *CommandOutputContainer.EMPTY_STRING)
+        return this.addMessage(key, *emptyArray<String>())
     }
 
     /**
@@ -135,14 +135,14 @@ class CommandLogger(
                 } else {
                     i18n.tr(Server.instance.baseLangCode, key, *params)
                 }
-                outputContainer.messages.add(CommandOutputMessage(text, *CommandOutputContainer.EMPTY_STRING))
+                outputContainer.messages.add(CommandOutputMessage(text, *emptyArray<String>()))
                 return this
             }
         }
         outputContainer.messages.add(
             CommandOutputMessage(
                 Server.instance.lang.tr(key, *params),
-                *CommandOutputContainer.EMPTY_STRING
+                *emptyArray<String>()
             )
         )
         return this
@@ -175,7 +175,7 @@ class CommandLogger(
      * Add an error message that the target selector matches too many targets
      */
     fun addNoTargetMatch(): CommandLogger {
-        this.addError("commands.generic.noTargetMatch", *CommandOutputContainer.EMPTY_STRING)
+        this.addError("commands.generic.noTargetMatch", *emptyArray<String>())
         return this
     }
 
@@ -183,7 +183,7 @@ class CommandLogger(
      * 添加一条目标选择器匹配目标过多的错误信息
      */
     fun addTooManyTargets(): CommandLogger {
-        this.addError("commands.generic.tooManyTargets", *CommandOutputContainer.EMPTY_STRING)
+        this.addError("commands.generic.tooManyTargets", *emptyArray<String>())
         return this
     }
 
@@ -238,7 +238,7 @@ class CommandLogger(
      * @return the command logger
      */
     fun addOutOfWorld(): CommandLogger {
-        this.addError("commands.generic.outOfWorld", *CommandOutputContainer.EMPTY_STRING)
+        this.addError("commands.generic.outOfWorld", *emptyArray<String>())
         return this
     }
 

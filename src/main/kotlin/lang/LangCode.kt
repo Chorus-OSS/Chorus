@@ -2,6 +2,7 @@ package org.chorus_oss.chorus.lang
 
 import org.chorus_oss.chorus.utils.Loggable
 
+@Suppress("EnumEntryName", "SpellCheckingInspection")
 enum class LangCode(private val string: String) {
     en_US("English (United States)"),
     en_GB("English (United Kingdom)"),

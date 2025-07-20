@@ -4,7 +4,6 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.*
 import org.chorus_oss.chorus.blockentity.BlockEntityPistonArm
-import org.chorus_oss.chorus.entity.Entity.Companion.createEntity
 import org.chorus_oss.chorus.entity.data.*
 import org.chorus_oss.chorus.entity.data.property.*
 import org.chorus_oss.chorus.entity.effect.Effect

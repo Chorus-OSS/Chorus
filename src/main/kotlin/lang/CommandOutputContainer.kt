@@ -33,8 +33,4 @@ class CommandOutputContainer : Cloneable {
     override fun clone(): CommandOutputContainer {
         return super.clone() as CommandOutputContainer
     }
-
-    companion object {
-        val EMPTY_STRING: Array<String> = arrayOf()
-    }
 }

@@ -34,7 +34,7 @@ class BlockStateUpdaterBase : Updater {
         val LEGACY_BLOCK_DATA_MAP: MutableMap<String, Array<Map<String, Any?>>> = HashMap()
 
         init {
-            val node: kotlinx.serialization.json.JsonObject
+            val node: JsonObject
             try {
                 Updater::class.java.classLoader.getResourceAsStream("legacy_block_data_map.json").use { stream ->
                     checkNotNull(stream)
@@ -54,17 +54,18 @@ class BlockStateUpdaterBase : Updater {
             }
         }
 
-        private fun convertStateToCompound(node: kotlinx.serialization.json.JsonObject): Map<String, Any?> {
+        private fun convertStateToCompound(node: JsonObject): Map<String, Any?> {
             val tag: MutableMap<String, Any?> = LinkedHashMap()
             val iterator = node.entries.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
                 val name: String = entry.key
                 val value = entry.value
-                if (value is kotlinx.serialization.json.JsonPrimitive) {
+                if (value is JsonPrimitive) {
                     val primitive = entry.value.jsonPrimitive
 
-                    tag[name] = primitive.booleanOrNull ?: primitive.intOrNull ?: primitive.contentOrNull ?: throw UnsupportedOperationException("Invalid state type")
+                    tag[name] = primitive.booleanOrNull ?: primitive.intOrNull ?: primitive.contentOrNull
+                            ?: throw UnsupportedOperationException("Invalid state type")
                 } else throw UnsupportedOperationException("Invalid state type")
             }
             return tag
