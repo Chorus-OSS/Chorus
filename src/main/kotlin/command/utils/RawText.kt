@@ -1,7 +1,9 @@
 package org.chorus_oss.chorus.command.utils
 
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.CommandSender
@@ -15,49 +17,29 @@ import org.chorus_oss.chorus.utils.JSONUtils
 import java.util.stream.Collectors
 
 
-class RawText private constructor(base: Component) {
-    private var base: Component? = null
-
-    init {
-        this.base = base
-    }
-
+class RawText private constructor(private var base: Component) {
     fun preParse(sender: CommandSender) {
-        preParse(sender, base!!)
+        preParse(sender, base)
     }
 
     fun toRawText(): String {
-        return JSONUtils.to(base)
+        return Json.encodeToString(base)
     }
 
 
+    @Serializable
     class Component {
-        @SerializedName("text")
-        var component_text: String? = null
+        var text: String? = null
+        var selector: String? = null
+        var translate: String? = null
+        var with: Component? = null
+        var score: ScoreComponent? = null
+        var rawtext: MutableList<Component>? = null
 
-        @SerializedName("selector")
-        var component_selector: String? = null
-
-        @SerializedName("translate")
-        var component_translate: String? = null
-
-        @SerializedName("with")
-        var component_translate_with: Any? = null
-
-        @SerializedName("score")
-        var component_score: ScoreComponent? = null
-
-        @SerializedName("rawtext")
-        var component_rawtext: MutableList<Component>? = null
-
+        @Serializable
         class ScoreComponent {
-            @SerializedName("name")
             val name: String? = null
-
-            @SerializedName("objective")
             val objective: String? = null
-
-            @SerializedName("value")
             val value: Int? = null
         }
 
@@ -72,24 +54,24 @@ class RawText private constructor(base: Component) {
 
         val type: ComponentType?
             get() {
-                if (component_text != null) {
+                if (text != null) {
                     return ComponentType.TEXT
                 }
-                if (component_selector != null) {
+                if (selector != null) {
                     return ComponentType.SELECTOR
                 }
-                if (component_translate != null) {
-                    if (component_translate_with != null) {
+                if (translate != null) {
+                    if (with != null) {
                         return ComponentType.TRANSLATE_WITH
                     }
                     return ComponentType.TRANSLATE
                 }
-                if (component_score != null) {
-                    if (component_score!!.name != null && component_score!!.objective != null) {
+                if (score != null) {
+                    if (score!!.name != null && score!!.objective != null) {
                         return ComponentType.SCORE
                     }
                 }
-                if (component_rawtext != null) {
+                if (rawtext != null) {
                     return ComponentType.RAWTEXT
                 }
                 return null
@@ -97,21 +79,17 @@ class RawText private constructor(base: Component) {
     }
 
     override fun toString(): String {
-        return JSONUtils.to(this.base)
+        return Json.encodeToString(this.base)
     }
 
     companion object {
-        fun fromRawText(rawText: String?): RawText {
-            val base = JSONUtils.from(
-                rawText,
-                Component::class.java
-            )
-            return RawText(base)
+        fun fromRawText(rawText: String): RawText {
+            return RawText(Json.decodeFromString<Component>(rawText))
         }
 
         private fun preParse(sender: CommandSender, cps: Component) {
             if (cps.type != Component.ComponentType.RAWTEXT) return
-            val components = cps.component_rawtext
+            val components = cps.rawtext
             for (component in components!!.toTypedArray<Component>()) {
                 if (component.type == Component.ComponentType.SCORE) {
                     val newComponent = preParseScore(component, sender)
@@ -127,14 +105,7 @@ class RawText private constructor(base: Component) {
                     preParse(sender, component)
                 }
                 if (component.type == Component.ComponentType.TRANSLATE_WITH) {
-                    if (component.component_translate_with is Map<*, *>) {
-                        val cp = JSONUtils.from(
-                            JSONUtils.to(component.component_translate_with),
-                            Component::class.java
-                        )
-                        preParse(sender, cp)
-                        component.component_translate_with = cp
-                    }
+                    preParse(sender, component.with!!)
                 }
             }
         }
@@ -143,11 +114,11 @@ class RawText private constructor(base: Component) {
             component: Component,
             sender: CommandSender
         ): Component? {
-            val scoreboard = Server.instance.scoreboardManager.getScoreboard(component.component_score!!.objective)
+            val scoreboard = Server.instance.scoreboardManager.getScoreboard(component.score!!.objective)
                 ?: return null
-            val name_str = component.component_score!!.name!!
+            val name_str = component.score!!.name!!
             var scorer: IScorer? = null
-            var value = component.component_score!!.value
+            var value = component.score!!.value
 
             if (name_str == "*") {
                 if (!sender.isEntity) return null
@@ -166,7 +137,7 @@ class RawText private constructor(base: Component) {
 
             if (value == null) value = scoreboard.getLine(scorer)!!.score
             val newComponent = Component()
-            newComponent.component_text = (value.toString())
+            newComponent.text = (value.toString())
             return newComponent
         }
 
@@ -176,7 +147,7 @@ class RawText private constructor(base: Component) {
         ): Component? {
             val entities: List<Entity>
             try {
-                entities = EntitySelectorAPI.Companion.api.matchEntities(sender, component.component_selector!!)
+                entities = EntitySelectorAPI.Companion.api.matchEntities(sender, component.selector!!)
             } catch (e: Exception) {
                 return null
             }
@@ -184,7 +155,7 @@ class RawText private constructor(base: Component) {
             val entities_str =
                 entities.stream().map { obj: Entity -> obj.getEntityName() }.collect(Collectors.joining(", "))
             val newComponent = Component()
-            newComponent.component_text = (entities_str)
+            newComponent.text = (entities_str)
             return newComponent
         }
     }
