@@ -1,16 +1,12 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.reflect.TypeToken
 import dev.whyoleg.cryptography.algorithms.ECDSA
 import kotlinx.io.*
+import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
-import org.jose4j.jws.JsonWebSignature
-import java.nio.charset.StandardCharsets
-import java.time.Instant
 import java.util.*
+import kotlin.io.encoding.Base64
 
 /**
  * ClientChainData is a container of chain data sent from clients.
@@ -119,22 +115,22 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
                 stream.readAtMostTo(this, stream.readIntLe().toLong())
             }.readString()
         ) ?: return
-        if (skinToken.has("ClientRandomId")) this.clientId = skinToken["ClientRandomId"].asLong
-        if (skinToken.has("ServerAddress")) this.serverAddress = skinToken["ServerAddress"].asString
-        if (skinToken.has("DeviceModel")) this.deviceModel = skinToken["DeviceModel"].asString
-        if (skinToken.has("DeviceOS")) this.deviceOS = skinToken["DeviceOS"].asInt
-        if (skinToken.has("DeviceId")) this.deviceId = skinToken["DeviceId"].asString
-        if (skinToken.has("GameVersion")) this.gameVersion = skinToken["GameVersion"].asString
-        if (skinToken.has("GuiScale")) this.guiScale = skinToken["GuiScale"].asInt
-        if (skinToken.has("LanguageCode")) this.languageCode = skinToken["LanguageCode"].asString
-        if (skinToken.has("CurrentInputMode")) this.currentInputMode = skinToken["CurrentInputMode"].asInt
-        if (skinToken.has("DefaultInputMode")) this.defaultInputMode = skinToken["DefaultInputMode"].asInt
-        if (skinToken.has("UIProfile")) this.uIProfile = skinToken["UIProfile"].asInt
-        if (skinToken.has("CapeData")) this.capeData = skinToken["CapeData"].asString
-        if (skinToken.has("Waterdog_IP")) this.waterdogIP = skinToken["Waterdog_IP"].asString
-        if (skinToken.has("Waterdog_XUID")) this.waterdogXUID = skinToken["Waterdog_XUID"].asString
-        if (skinToken.has("MaxViewDistance")) this.maxViewDistance = skinToken["MaxViewDistance"].asInt
-        if (skinToken.has("MemoryTier")) this.memoryTier = skinToken["MemoryTier"].asInt
+        if (skinToken.contains("ClientRandomId")) this.clientId = skinToken["ClientRandomId"]!!.jsonPrimitive.long
+        if (skinToken.contains("ServerAddress")) this.serverAddress = skinToken["ServerAddress"]!!.jsonPrimitive.content
+        if (skinToken.contains("DeviceModel")) this.deviceModel = skinToken["DeviceModel"]!!.jsonPrimitive.content
+        if (skinToken.contains("DeviceOS")) this.deviceOS = skinToken["DeviceOS"]!!.jsonPrimitive.int
+        if (skinToken.contains("DeviceId")) this.deviceId = skinToken["DeviceId"]!!.jsonPrimitive.content
+        if (skinToken.contains("GameVersion")) this.gameVersion = skinToken["GameVersion"]!!.jsonPrimitive.content
+        if (skinToken.contains("GuiScale")) this.guiScale = skinToken["GuiScale"]!!.jsonPrimitive.int
+        if (skinToken.contains("LanguageCode")) this.languageCode = skinToken["LanguageCode"]!!.jsonPrimitive.content
+        if (skinToken.contains("CurrentInputMode")) this.currentInputMode = skinToken["CurrentInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("DefaultInputMode")) this.defaultInputMode = skinToken["DefaultInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("UIProfile")) this.uIProfile = skinToken["UIProfile"]!!.jsonPrimitive.int
+        if (skinToken.contains("CapeData")) this.capeData = skinToken["CapeData"]!!.jsonPrimitive.content
+        if (skinToken.contains("Waterdog_IP")) this.waterdogIP = skinToken["Waterdog_IP"]!!.jsonPrimitive.content
+        if (skinToken.contains("Waterdog_XUID")) this.waterdogXUID = skinToken["Waterdog_XUID"]!!.jsonPrimitive.content
+        if (skinToken.contains("MaxViewDistance")) this.maxViewDistance = skinToken["MaxViewDistance"]!!.jsonPrimitive.int
+        if (skinToken.contains("MemoryTier")) this.memoryTier = skinToken["MemoryTier"]!!.jsonPrimitive.int
 
         if (this.isWaterdog) {
             isXboxAuthed = true
@@ -144,11 +140,9 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
     }
 
     private fun decodeToken(token: String): JsonObject? {
-        val base = token.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (base.size < 2) return null
-        val json = String(Base64.getDecoder().decode(base[1]), StandardCharsets.UTF_8)
-        //Server.instance.getLogger().debug(json);
-        return JSONUtils.from(json, JsonObject::class.java)
+        val base = token.split(".", limit = 3)
+        val json = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(base[1]).decodeToString()
+        return Json.parseToJsonElement(json).jsonObject
     }
 
     private fun decodeChainData() {
@@ -156,10 +150,10 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
             stream.readAtMostTo(this, stream.readIntLe().toLong())
         }.readString()
 
-        val jwt = JsonParser.parseString(chainString).asJsonObject
-        val certificateString = jwt["Certificate"].asString
-        val certificate = JsonParser.parseString(certificateString).asJsonObject
-        val chain = certificate["chain"].asJsonArray.map { it.asString }
+        val jwt = Json.parseToJsonElement(chainString).jsonObject
+        val certificateString = jwt["Certificate"]!!.jsonPrimitive.content
+        val certificate = Json.parseToJsonElement(certificateString).jsonObject
+        val chain = certificate["chain"]!!.jsonArray.map { it.jsonPrimitive.content }
 
         this.isXboxAuthed = try {
             verifyChain(chain)
@@ -169,14 +163,14 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
 
         for (c in chain) {
             val chainMap = decodeToken(c) ?: continue
-            if (chainMap.has("extraData")) {
-                val extra = chainMap["extraData"].asJsonObject
-                if (extra.has("displayName")) this.username = extra["displayName"].asString
-                if (extra.has("identity")) this.clientUUID = UUID.fromString(extra["identity"].asString)
-                if (extra.has("XUID")) this.xuid = extra["XUID"].asString
-                if (extra.has("titleId")) this.titleId = extra["titleId"].asString
+            if (chainMap.contains("extraData")) {
+                val extra = chainMap["extraData"]!!.jsonObject
+                if (extra.contains("displayName")) this.username = extra["displayName"]!!.jsonPrimitive.content
+                if (extra.contains("identity")) this.clientUUID = UUID.fromString(extra["identity"]!!.jsonPrimitive.content)
+                if (extra.contains("XUID")) this.xuid = extra["XUID"]!!.jsonPrimitive.content
+                if (extra.contains("titleId")) this.titleId = extra["titleId"]!!.jsonPrimitive.content
             }
-            if (chainMap.has("identityPublicKey")) this.identityPublicKey = chainMap["identityPublicKey"].asString
+            if (chainMap.contains("identityPublicKey")) this.identityPublicKey = chainMap["identityPublicKey"]!!.jsonPrimitive.content
         }
 
         if (!isXboxAuthed) {
@@ -189,10 +183,15 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
         var lastKey: ECDSA.PublicKey? = null
         var mojangKeyVerified = false
         val iterator = chains.iterator()
-        val epoch = Instant.now().epochSecond
+        val epoch = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
         while (iterator.hasNext()) {
-            val jws = JsonWebSignature.fromCompactSerialization(iterator.next()) as JsonWebSignature
-            val x5us = jws.getHeader("x5u") ?: return false
+            val jwt = iterator.next()
+
+            val parts = jwt.split(".", limit = 3)
+            val header = Json.parseToJsonElement(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[0]).decodeToString()).jsonObject
+            val payload = Json.parseToJsonElement(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[1]).decodeToString()).jsonObject
+
+            val x5us = header["x5u"]?.jsonPrimitive?.content ?: return false
             val expectedKey = EncryptionUtils.parseKey(x5us)
             // First key is self-signed
             if (lastKey == null) {
@@ -209,22 +208,14 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
                 mojangKeyVerified = true
             }
 
-            val payload = JSONUtils.from(jws.payload, object : TypeToken<Map<String, Any>>() {})
-
             // chain expiry check
-            val chainExpiresObj = payload["exp"]
-            val chainExpires: Long
-            if (chainExpiresObj is Number) {
-                chainExpires = chainExpiresObj.toLong()
-            } else {
-                throw RuntimeException("Unsupported expiry time format")
-            }
+            val chainExpires: Long = payload["exp"]!!.jsonPrimitive.long
             if (chainExpires < epoch) {
                 // chain has already expires
                 return false
             }
 
-            val base64key = payload["identityPublicKey"] as? String ?: throw RuntimeException("No key found")
+            val base64key = payload["identityPublicKey"]!!.jsonPrimitive.content
             lastKey = EncryptionUtils.parseKey(base64key)
         }
         return mojangKeyVerified
