@@ -59,7 +59,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.cryptography.core)
     implementation(libs.cryptography.random)
-    implementation(libs.cryptography.provider.jdk)
+    implementation(libs.cryptography.provider.optimal)
     implementation(libs.ktoml.core)
     implementation(libs.ktoml.file)
     implementation(libs.json)

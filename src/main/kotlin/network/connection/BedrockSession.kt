@@ -3,6 +3,7 @@ package org.chorus_oss.chorus.network.connection
 import com.github.oxo42.stateless4j.StateMachine
 import com.github.oxo42.stateless4j.StateMachineConfig
 import com.github.oxo42.stateless4j.delegates.Action
+import dev.whyoleg.cryptography.algorithms.AES
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
@@ -283,7 +284,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         peer.setCompression(algorithm)
     }
 
-    fun enableEncryption(key: SecretKey) {
+    fun enableEncryption(key: AES.CTR.Key) {
         check(!isSubClient) { "Encryption can only be enabled by the primary session" }
         peer.enableEncryption(key)
     }

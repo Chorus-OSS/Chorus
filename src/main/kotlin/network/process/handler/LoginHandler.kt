@@ -1,14 +1,11 @@
 package org.chorus_oss.chorus.network.process.handler
 
 
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
 import org.chorus_oss.chorus.experimental.network.protocol.utils.decode
 import org.chorus_oss.chorus.network.connection.BedrockSession
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createHandshakeJwt
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createKeyPair
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.generateRandomToken
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.getSecretKey
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.parseKey
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
@@ -205,24 +202,21 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
     }
 
     private fun enableEncryption(data: ClientChainData) {
+        val encryptionToken = EncryptionUtils.generateRandomToken()
         try {
-            val clientKey = parseKey(data.identityPublicKey)
-            val encryptionKeyPair = createKeyPair()
-            val encryptionToken = generateRandomToken()
-            val encryptionKey = getSecretKey(
-                encryptionKeyPair.private, clientKey,
-                encryptionToken
-            )
-            val handshakeJwt = createHandshakeJwt(encryptionKeyPair, encryptionToken)
+            val clientKey = EncryptionUtils.parseKey(data.identityPublicKey!!)
+            val pair = EncryptionUtils.generateKeyPair()
+            val key = EncryptionUtils.getSecretKey(pair.privateKey, clientKey, encryptionToken)
+            val handshakeJWT = runBlocking { EncryptionUtils.createHandshakeJWT(pair, encryptionToken) }
             // WTF
             if (session.isDisconnected) {
                 return
             }
             val pk = org.chorus_oss.protocol.packets.ServerToClientHandshakePacket(
-                jwt = handshakeJwt
+                jwt = handshakeJWT
             )
             session.sendPacketImmediately(pk)
-            session.enableEncryption(encryptionKey)
+            session.enableEncryption(key)
 
             session.machine.fire(SessionState.Encryption)
         } catch (e: Exception) {

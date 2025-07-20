@@ -13,23 +13,24 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 object EncryptionUtils {
     @Suppress("SpellCheckingInspection")
-    val mojangPublicKey: ECDSA.PublicKey =
+    val mojangPublicKey: ECDSA.PublicKey by lazy {
         parseKey("MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp")
+    }
 
-    val ecdsa = CryptographyProvider.Default.get(ECDSA)
-    val aes = CryptographyProvider.Default.get(AES.CTR)
-    val digest = CryptographyProvider.Default.get(SHA256)
-    val ecdh = CryptographyProvider.Default.get(ECDH)
+    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA) }
+    val aes by lazy { CryptographyProvider.Default.get(AES.CTR) }
+    val digest by lazy { CryptographyProvider.Default.get(SHA256) }
+    val ecdh by lazy { CryptographyProvider.Default.get(ECDH) }
 
     val curve = EC.Curve.P384
     val publicFormat = EC.PublicKey.Format.DER
     val privateFormat = EC.PrivateKey.Format.DER
 
-    val keyGenerator = ecdsa.keyPairGenerator(curve)
-    val publicKeyDecoder = ecdsa.publicKeyDecoder(curve)
+    val keyGenerator by lazy { ecdsa.keyPairGenerator(curve) }
+    val publicKeyDecoder by lazy { ecdsa.publicKeyDecoder(curve) }
 
-    val ecdhPrivateKeyDecoder = ecdh.privateKeyDecoder(curve)
-    val ecdhPublicKeyDecoder = ecdh.publicKeyDecoder(curve)
+    val ecdhPrivateKeyDecoder by lazy { ecdh.privateKeyDecoder(curve) }
+    val ecdhPublicKeyDecoder by lazy { ecdh.publicKeyDecoder(curve) }
 
     @OptIn(ExperimentalEncodingApi::class)
     fun parseKey(b64: String): ECDSA.PublicKey {

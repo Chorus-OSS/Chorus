@@ -1,5 +1,6 @@
 package org.chorus_oss.chorus.network.connection
 
+import dev.whyoleg.cryptography.algorithms.AES
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -15,7 +16,6 @@ import org.chorus_oss.chorus.network.connection.netty.codec.compression.Compress
 import org.chorus_oss.chorus.network.connection.netty.codec.encryption.BedrockEncryptionDecoder
 import org.chorus_oss.chorus.network.connection.netty.codec.encryption.BedrockEncryptionEncoder
 import org.chorus_oss.chorus.network.connection.netty.initializer.BedrockChannelInitializer
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
@@ -129,10 +129,7 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
         channel.flush()
     }
 
-    fun enableEncryption(secretKey: SecretKey) {
-        Objects.requireNonNull(secretKey, "secretKey")
-        require(secretKey.algorithm == "AES") { "Invalid key algorithm" }
-        // Check if the codecs exist in the pipeline
+    fun enableEncryption(key: AES.CTR.Key) {
         check(
             !(channel.pipeline().get(BedrockEncryptionEncoder::class.java) != null ||
                     channel.pipeline().get(BedrockEncryptionDecoder::class.java) != null)
@@ -140,11 +137,11 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
 
         channel.pipeline().addAfter(
             FrameIdCodec.NAME, BedrockEncryptionEncoder.NAME,
-            BedrockEncryptionEncoder(secretKey, EncryptionUtils.createCipher(true, secretKey))
+            BedrockEncryptionEncoder(key)
         )
         channel.pipeline().addAfter(
             FrameIdCodec.NAME, BedrockEncryptionDecoder.NAME,
-            BedrockEncryptionDecoder(secretKey, EncryptionUtils.createCipher(false, secretKey))
+            BedrockEncryptionDecoder(key)
         )
 
         log.debug("Encryption enabled for {}", socketAddress)

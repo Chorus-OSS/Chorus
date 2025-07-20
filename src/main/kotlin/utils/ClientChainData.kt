@@ -3,18 +3,12 @@ package org.chorus_oss.chorus.utils
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
+import dev.whyoleg.cryptography.algorithms.ECDSA
 import kotlinx.io.*
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.mojangPublicKey
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.oldMojangPublicKey
+import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
 import org.jose4j.jws.JsonWebSignature
-import org.jose4j.lang.JoseException
 import java.nio.charset.StandardCharsets
-import java.security.KeyFactory
-import java.security.NoSuchAlgorithmException
-import java.security.interfaces.ECPublicKey
-import java.security.spec.InvalidKeySpecException
-import java.security.spec.X509EncodedKeySpec
 import java.time.Instant
 import java.util.*
 
@@ -192,14 +186,14 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
 
     @Throws(Exception::class)
     private fun verifyChain(chains: List<String>): Boolean {
-        var lastKey: ECPublicKey? = null
+        var lastKey: ECDSA.PublicKey? = null
         var mojangKeyVerified = false
         val iterator = chains.iterator()
         val epoch = Instant.now().epochSecond
         while (iterator.hasNext()) {
             val jws = JsonWebSignature.fromCompactSerialization(iterator.next()) as JsonWebSignature
             val x5us = jws.getHeader("x5u") ?: return false
-            val expectedKey = generateKey(x5us)
+            val expectedKey = EncryptionUtils.parseKey(x5us)
             // First key is self-signed
             if (lastKey == null) {
                 lastKey = expectedKey
@@ -207,15 +201,11 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
                 return false
             }
 
-            if (!verify(lastKey, jws)) {
-                return false
-            }
-
             if (mojangKeyVerified) {
                 return !iterator.hasNext()
             }
 
-            if (lastKey == mojangPublicKey || lastKey == oldMojangPublicKey) {
+            if (lastKey == EncryptionUtils.mojangPublicKey) {
                 mojangKeyVerified = true
             }
 
@@ -234,23 +224,10 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
                 return false
             }
 
-            val base64key =
-                payload["identityPublicKey"] as? String ?: throw RuntimeException("No key found")
-            lastKey = generateKey(base64key)
+            val base64key = payload["identityPublicKey"] as? String ?: throw RuntimeException("No key found")
+            lastKey = EncryptionUtils.parseKey(base64key)
         }
         return mojangKeyVerified
-    }
-
-    private fun verify(key: ECPublicKey?, jws: JsonWebSignature?): Boolean {
-        try {
-            if (key == null || jws == null) {
-                return false
-            }
-            jws.key = key
-            return jws.verifySignature()
-        } catch (e: JoseException) {
-            throw RuntimeException(e)
-        }
     }
 
     companion object {
@@ -264,11 +241,5 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
 
         const val UI_PROFILE_CLASSIC: Int = 0
         const val UI_PROFILE_POCKET: Int = 1
-
-        @Throws(NoSuchAlgorithmException::class, InvalidKeySpecException::class)
-        private fun generateKey(base64: String): ECPublicKey {
-            return KeyFactory.getInstance("EC")
-                .generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(base64))) as ECPublicKey
-        }
     }
 }

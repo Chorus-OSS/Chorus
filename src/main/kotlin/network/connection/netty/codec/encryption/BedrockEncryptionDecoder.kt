@@ -1,5 +1,6 @@
 package org.chorus_oss.chorus.network.connection.netty.codec.encryption
 
+import dev.whyoleg.cryptography.algorithms.AES
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.CorruptedFrameException
 import io.netty.handler.codec.MessageToMessageDecoder
@@ -8,37 +9,34 @@ import java.util.concurrent.atomic.AtomicLong
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 
-class BedrockEncryptionDecoder(val key: SecretKey, private val cipher: Cipher) :
+class BedrockEncryptionDecoder(val key: AES.CTR.Key) :
     MessageToMessageDecoder<BedrockBatchWrapper>() {
     private val packetCounter = AtomicLong()
 
     @Throws(Exception::class)
     override fun decode(ctx: ChannelHandlerContext, msg: BedrockBatchWrapper, out: MutableList<Any>) {
-        val inBuffer = msg.compressed!!.nioBuffer()
-        val outBuffer = inBuffer.duplicate()
+        val inBuffer = msg.compressed ?: return
+        val encrypted = ByteArray(inBuffer.readableBytes()).also { inBuffer.readBytes(it) }
 
-        // Copy-safe so we can use the same buffer.
-        cipher.update(inBuffer, outBuffer)
+        val decrypted = key.cipher().decryptBlocking(encrypted)
 
-        val output = msg.compressed!!.readSlice(msg.compressed!!.readableBytes() - 8)
+        val payload = decrypted.copyOfRange(0, decrypted.size - 8)
 
         if (VALIDATE) {
-            val trailer = msg.compressed!!.readSlice(8)
-
-            val actual = ByteArray(8)
-            trailer.readBytes(actual)
+            val trailer = decrypted.copyOfRange(decrypted.size - 8, decrypted.size)
 
             val expected: ByteArray = BedrockEncryptionEncoder.Companion.generateTrailer(
-                output,
+                ctx.alloc().buffer(payload.size).writeBytes(payload),
                 key, this.packetCounter
             )
 
-            if (!expected.contentEquals(actual)) {
+            if (!expected.contentEquals(trailer)) {
                 throw CorruptedFrameException("Invalid encryption trailer")
             }
         }
 
-        msg.setCompressed(output.retain())
+        val outBuf = ctx.alloc().buffer(payload.size).writeBytes(payload)
+        msg.setCompressed(outBuf.retain())
         out.add(msg.retain())
     }
 
