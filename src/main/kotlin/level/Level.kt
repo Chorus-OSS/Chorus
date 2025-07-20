@@ -28,7 +28,6 @@ import org.chorus_oss.chorus.event.block.BlockUpdateEvent
 import org.chorus_oss.chorus.event.level.*
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
 import org.chorus_oss.chorus.event.weather.LightningStrikeEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
@@ -55,8 +54,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
@@ -64,6 +61,7 @@ import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.nbt.TagSerialization
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.types.BlockPos
 import org.chorus_oss.protocol.types.ChunkPos
 import java.awt.Color
@@ -111,8 +109,8 @@ class Level(
      */
     private val chunkLoaders = HashMap<Long, MutableMap<Int, ChunkLoader>>()
 
-    // Computation atomicity may be required in addChunkPacket(int, int, DataPacket)
-    private val chunkPackets = ConcurrentHashMap<Long, Deque<DataPacket>>()
+    // Computation atomicity may be required in addChunkPacket(int, int, Packet)
+    private val chunkPackets = ConcurrentHashMap<Long, Deque<Packet>>()
 
     private val unloadQueue = ConcurrentHashMap<Long, Long>()
     private val tickCachedBlocks = ConcurrentHashMap<Long, TickCachedBlockStore>()
@@ -588,16 +586,12 @@ class Level(
         }
     }
 
-    fun addChunkPacket(chunkX: Int, chunkZ: Int, packet: DataPacket?) {
+    fun addChunkPacket(chunkX: Int, chunkZ: Int, packet: Packet) {
         val index = chunkHash(chunkX, chunkZ)
         val packets = chunkPackets.computeIfAbsent(
             index
-        ) { ConcurrentLinkedDeque<DataPacket>() }
+        ) { ConcurrentLinkedDeque() }
         packets.add(packet)
-    }
-
-    fun addChunkPacket(x: Int, z: Int, packet: Packet) {
-        addChunkPacket(x, z, MigrationPacket(packet))
     }
 
     @JvmOverloads
@@ -3438,7 +3432,7 @@ class Level(
         playerInt2ObjectMap[player.loaderId] = player
     }
 
-    private fun sendChunk(x: Int, z: Int, index: Long, packet: DataPacket) {
+    private fun sendChunk(x: Int, z: Int, index: Long, packet: Packet) {
         for (player in chunkSendQueue[index]?.values ?: return) {
             if (player.isConnected() && player.usedChunks.contains(index)) {
                 player.sendChunk(x, z, packet)

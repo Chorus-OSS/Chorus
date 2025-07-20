@@ -12,19 +12,18 @@ import org.chorus_oss.chorus.entity.projectile.abstract_arrow.EntityArrow
 import org.chorus_oss.chorus.event.player.PlayerHackDetectedEvent
 import org.chorus_oss.chorus.event.player.PlayerKickEvent
 import org.chorus_oss.chorus.event.player.PlayerMouseOverEntityEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.InteractPacket
 
-class InteractProcessor : DataPacketProcessor<MigrationPacket<InteractPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<InteractPacket>) {
-        val player = player.player
+class InteractProcessor : PacketProcessor<InteractPacket> {
+    override fun handle(player: Player, packet: InteractPacket) {
+
         if (!player.spawned || !player.isAlive()) {
             return
         }
 
-        val targetEntity = player.level!!.getEntity(pk.packet.targetRuntimeID.toLong())
+        val targetEntity = player.level!!.getEntity(packet.targetRuntimeID.toLong())
 
         if (targetEntity == null || !player.isAlive() || !targetEntity.isAlive()) {
             return
@@ -50,9 +49,9 @@ class InteractProcessor : DataPacketProcessor<MigrationPacket<InteractPacket>>()
             return
         }
 
-        when (pk.packet.action) {
+        when (packet.action) {
             InteractPacket.Companion.Action.InteractUpdate -> {
-                if (pk.packet.targetRuntimeID.toLong() == 0L) {
+                if (packet.targetRuntimeID.toLong() == 0L) {
                     return
                 }
                 Server.instance.pluginManager.callEvent(PlayerMouseOverEntityEvent(player, targetEntity))
@@ -88,7 +87,7 @@ class InteractProcessor : DataPacketProcessor<MigrationPacket<InteractPacket>>()
         }
     }
 
-    override val packetId: Int = InteractPacket.id
+    override val packetID: Int = InteractPacket.id
 
     companion object : Loggable
 }

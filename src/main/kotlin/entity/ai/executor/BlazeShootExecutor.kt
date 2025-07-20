@@ -15,8 +15,8 @@ import org.chorus_oss.chorus.event.entity.ProjectileLaunchEvent
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.cos
 import kotlin.math.min

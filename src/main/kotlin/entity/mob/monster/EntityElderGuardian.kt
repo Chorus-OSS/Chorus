@@ -41,8 +41,8 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.types.Vector3f
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Function

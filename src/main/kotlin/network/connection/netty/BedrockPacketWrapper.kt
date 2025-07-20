@@ -3,13 +3,13 @@ package org.chorus_oss.chorus.network.connection.netty
 import io.netty.buffer.ByteBuf
 import io.netty.util.AbstractReferenceCounted
 import io.netty.util.ReferenceCountUtil
-import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.protocol.core.Packet
 
 class BedrockPacketWrapper(
     var packetId: Int,
     var senderSubClientId: Int,
     var targetSubClientId: Int,
-    var packet: DataPacket?,
+    var packet: Packet?,
     var packetBuffer: ByteBuf?
 ) : AbstractReferenceCounted() {
     var headerLength = 0

@@ -7,24 +7,21 @@ import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.entity.item.EntityMinecartAbstract
 import org.chorus_oss.chorus.entity.mob.animal.EntityHorse
 import org.chorus_oss.chorus.event.player.*
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Transform
 import org.chorus_oss.chorus.level.Transform.Companion.fromObject
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.PlayerAuthInputPacket
 import org.chorus_oss.protocol.types.InputFlag
 import org.chorus_oss.protocol.types.PlayerActionType
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthInputPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<PlayerAuthInputPacket>) {
-        val packet = pk.packet
+class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
+    override fun handle(player: Player, packet: PlayerAuthInputPacket) {
 
-        val player = player.player
         if (!packet.blockActions.isNullOrEmpty()) {
             for (action in packet.blockActions) {
                 //hack 自从1.19.70开始，创造模式剑客户端不会发送PREDICT_DESTROY_BLOCK，但仍然发送START_DESTROY_BLOCK，过滤掉
@@ -65,12 +62,12 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
         // As of 1.18 this is now used for sending item stack requests such as when mining a block.
         val itemStackRequest = packet.itemStackRequest
         if (itemStackRequest != null) {
-            val dataPacketManager = player.session.dataPacketManager
+            val dataPacketManager = player.session.packetManager
             if (dataPacketManager != null) {
                 val itemStackRequestPacket = org.chorus_oss.protocol.packets.ItemStackRequestPacket(
                     requests = listOf(itemStackRequest)
                 )
-                dataPacketManager.processPacket(player, MigrationPacket(itemStackRequestPacket))
+                dataPacketManager.processPacket(player, itemStackRequestPacket)
             }
         }
 
@@ -222,7 +219,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
         player.player.offerMovementTask(clientLoc)
     }
 
-    override val packetId: Int = PlayerAuthInputPacket.id
+    override val packetID: Int = PlayerAuthInputPacket.id
 
     companion object {
         private fun check(clientLoc: Transform, player: Player): Boolean {

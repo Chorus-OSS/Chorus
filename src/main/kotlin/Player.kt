@@ -43,8 +43,7 @@ import org.chorus_oss.chorus.event.inventory.InventoryPickupItemEvent
 import org.chorus_oss.chorus.event.inventory.InventoryPickupTridentEvent
 import org.chorus_oss.chorus.event.player.*
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent.TeleportCause
-import org.chorus_oss.chorus.event.server.DataPacketSendEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.event.server.PacketSendEvent
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.form.window.Form
@@ -69,11 +68,9 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -2365,14 +2362,14 @@ open class Player(
         this.sendPacket(pk)
     }
 
-    fun sendChunk(x: Int, z: Int, packet: DataPacket) {
+    fun sendChunk(x: Int, z: Int, packet: Packet) {
         if (!this.isConnected()) {
             return
         }
 
         chunkLoadCount++
         playerChunkManager.usedChunks.add(chunkHash(x, z))
-        this.dataPacket(packet)
+        this.sendPacket(packet)
 
         if (this.spawned) {
             for (entity in level!!.getChunkEntities(x, z).values) {
@@ -2381,10 +2378,6 @@ open class Player(
                 }
             }
         }
-    }
-
-    fun sendChunk(x: Int, z: Int, packet: Packet) {
-        sendChunk(x, z, MigrationPacket(packet))
     }
 
 
@@ -2407,15 +2400,8 @@ open class Player(
     }
 
 
-    /**
-     * @param packet 发送的数据包<br></br>packet to send
-     */
-    fun dataPacket(packet: DataPacket) {
-        session.sendPacket(packet)
-    }
-
     fun sendPacket(packet: Packet) {
-        session.sendPacket(MigrationPacket(packet))
+        session.sendPacket(packet)
     }
 
     val ping: Int
@@ -5531,22 +5517,17 @@ open class Player(
         this.hasSeenCredits = hasSeenCredits
     }
 
-
-    fun dataPacketImmediately(packet: DataPacket): Boolean {
+    fun sendPacketImmediately(packet: Packet): Boolean {
         if (!this.isConnected()) {
             return false
         }
-        val ev = DataPacketSendEvent(this, packet)
+        val ev = PacketSendEvent(this, packet)
         Server.instance.pluginManager.callEvent(ev)
         if (ev.cancelled) {
             return false
         }
         session.sendPacketImmediately(packet)
         return true
-    }
-
-    fun sendPacketImmediately(packet: Packet): Boolean {
-        return dataPacketImmediately(MigrationPacket(packet))
     }
 
     /**

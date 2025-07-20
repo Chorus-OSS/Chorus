@@ -13,7 +13,6 @@ import kotlinx.io.Buffer
 import kotlinx.serialization.builtins.ByteArraySerializer
 import org.chorus_oss.chorus.GameMockExtension
 import org.chorus_oss.chorus.network.connection.netty.initializer.BedrockChannelInitializer
-import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable

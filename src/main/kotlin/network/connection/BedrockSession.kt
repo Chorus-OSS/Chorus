@@ -7,23 +7,21 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufAllocator
 import io.netty.buffer.Unpooled
 import io.netty.util.internal.PlatformDependent
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.data.CommandDataVersions
 import org.chorus_oss.chorus.event.player.PlayerCreationEvent
 import org.chorus_oss.chorus.event.server.DataPacketDecodeEvent
-import org.chorus_oss.chorus.event.server.DataPacketReceiveEvent
-import org.chorus_oss.chorus.event.server.DataPacketSendEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.event.server.PacketReceiveEvent
+import org.chorus_oss.chorus.event.server.PacketSendEvent
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.PacketHandler
-import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.connection.netty.BedrockBatchWrapper
 import org.chorus_oss.chorus.network.connection.netty.BedrockPacketWrapper
 import org.chorus_oss.chorus.network.connection.netty.codec.packet.BedrockPacketCodec
-import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
-import org.chorus_oss.chorus.network.process.DataPacketManager
+import org.chorus_oss.chorus.network.process.PacketManager
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.network.process.handler.*
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
@@ -34,6 +32,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.core.PacketRegistry
 import org.chorus_oss.protocol.packets.CraftingDataPacket
 import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.protocol.packets.PlayerSkinPacket
@@ -44,14 +43,13 @@ import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.Consumer
 import javax.crypto.SecretKey
 
 class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     private val closed = AtomicBoolean()
-    private val inbound: Queue<DataPacket> = PlatformDependent.newSpscQueue()
+    private val inbound: Queue<Packet> = PlatformDependent.newSpscQueue()
     private val nettyThreadOwned = AtomicBoolean(false)
-    private val consumer = AtomicReference<Consumer<DataPacket>?>(null)
+    private val consumer = AtomicReference<((Packet) -> Unit)?>(null)
 
     @JvmField
     val machine: StateMachine<SessionState, SessionState>
@@ -71,7 +69,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         // from session start to log in sequence complete, netty threads own the session
         this.setNettyThreadOwned(true)
 
-        this.setPacketConsumer { pk: DataPacket ->
+        this.setPacketConsumer { pk ->
             try {
                 this.handleDataPacket(pk)
             } catch (e: Exception) {
@@ -161,7 +159,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         return nettyThreadOwned.get()
     }
 
-    fun setPacketConsumer(consumer: Consumer<DataPacket>?) {
+    fun setPacketConsumer(consumer: ((Packet) -> Unit)?) {
         this.consumer.set(consumer)
     }
 
@@ -172,21 +170,17 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         peer.flush()
     }
 
-    fun sendPacket(packet: DataPacket) {
+    fun sendPacket(packet: Packet) {
         if (isDisconnected) {
             return
         }
-        val ev = DataPacketSendEvent(player, packet)
+        val ev = PacketSendEvent(player, packet)
         Server.instance.pluginManager.callEvent(ev)
         if (ev.cancelled) {
             return
         }
         peer.sendPacket(this.subClientId, 0, packet)
         this.logOutbound(packet)
-    }
-
-    fun sendPacket(packet: Packet) {
-        this.sendPacket(MigrationPacket(packet))
     }
 
     fun sendPlayStatus(status: org.chorus_oss.protocol.packets.PlayStatusPacket.Companion.Status, immediate: Boolean) {
@@ -216,12 +210,12 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         peer.sendRawPacket(msg)
     }
 
-    fun sendPacketImmediately(packet: DataPacket) {
+    fun sendPacketImmediately(packet: Packet) {
         if (isDisconnected) {
             return
         }
 
-        val ev = DataPacketSendEvent(player, packet)
+        val ev = PacketSendEvent(player, packet)
         Server.instance.pluginManager.callEvent(ev)
         if (ev.cancelled) {
             return
@@ -231,15 +225,11 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         this.logOutbound(packet)
     }
 
-    fun sendPacketImmediately(packet: Packet) {
-        sendPacketImmediately(MigrationPacket(packet))
-    }
-
-    fun sendPacketSync(packet: DataPacket) {
+    fun sendPacketSync(packet: Packet) {
         if (isDisconnected) {
             return
         }
-        val ev = DataPacketSendEvent(player, packet)
+        val ev = PacketSendEvent(player, packet)
         Server.instance.pluginManager.callEvent(ev)
         if (ev.cancelled) {
             return
@@ -248,21 +238,24 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         this.logOutbound(packet)
     }
 
-    fun sendPacketSync(packet: Packet) {
-        sendPacketSync(MigrationPacket(packet))
-    }
-
     fun sendNetworkSettingsPacket(pk: org.chorus_oss.protocol.packets.NetworkSettingsPacket) {
         val alloc = peer.channel.alloc()
         val buf1 = alloc.buffer(16)
         val header = alloc.ioBuffer(5)
-        val msg = BedrockPacketWrapper(0, subClientId, 0, MigrationPacket(pk), null)
+        val msg = BedrockPacketWrapper(0, subClientId, 0, pk, null)
         try {
             val bedrockPacketCodec = peer.channel.pipeline().get(BedrockPacketCodec.NAME) as BedrockPacketCodec
             val packet = msg.packet
-            msg.packetId = packet!!.pid()
+            msg.packetId = packet!!.id
             bedrockPacketCodec.encodeHeader(buf1, msg)
-            packet.encode(HandleByteBuf.of(buf1))
+            buf1.writeBytes(
+                Buffer().apply {
+                    requireNotNull(PacketRegistry[packet]) { "PacketCodec not registered for $packet" }.serialize(
+                        packet,
+                        this
+                    )
+                }.readByteArray()
+            )
 
             val batch: BedrockBatchWrapper = BedrockBatchWrapper.newInstance()
             val buf2 = alloc.compositeDirectBuffer(2)
@@ -315,13 +308,13 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
         if (nettyThreadOwned.get()) {
             val c = consumer.get()
-            c?.accept(packet)
+            c?.invoke(packet)
         } else {
             inbound.add(packet)
         }
     }
 
-    protected fun logOutbound(packet: DataPacket) {
+    protected fun logOutbound(packet: Packet) {
         if (Server.instance.isLoggedPacket(packet)) {
             log.info(
                 "Outbound {}({}): {}",
@@ -335,7 +328,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         }
     }
 
-    protected fun logInbound(packet: DataPacket) {
+    protected fun logInbound(packet: Packet) {
         if (Server.instance.isLoggedPacket(packet)) {
             log.info(
                 "Inbound {}({}): {}",
@@ -470,8 +463,8 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     protected fun onClientRespawn() {
     }
 
-    fun handleDataPacket(packet: DataPacket) {
-        val ev = DataPacketReceiveEvent(player, packet)
+    fun handleDataPacket(packet: Packet) {
+        val ev = PacketReceiveEvent(player, packet)
         Server.instance.pluginManager.callEvent(ev)
 
         if (ev.cancelled) return
@@ -482,7 +475,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         if (inGamePacketHandler is InGamePacketHandler) {
             inGamePacketHandler.managerHandle(packet)
         } else {
-            packet.handle(this.packetHandler!!)
+            this.packetHandler?.handle(packet)
         }
     }
 
@@ -491,7 +484,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         if (c != null) {
             while (true) {
                 val packet = inbound.poll() ?: break
-                c.accept(packet)
+                c.invoke(packet)
             }
         } else {
             inbound.clear()
@@ -564,7 +557,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     val server: Server
         get() = Server.instance
 
-    val dataPacketManager: DataPacketManager?
+    val packetManager: PacketManager?
         get() {
             val inGamePacketHandler = this.packetHandler
             return if (inGamePacketHandler != null && inGamePacketHandler is InGamePacketHandler) {

@@ -21,6 +21,7 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
             unlockingRequirement = RecipeUnlockingRequirement(from.requirement),
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.ShapelessRecipe -> ShapelessRecipe(
             recipeID = from.recipeId,
             input = from.ingredients.map(ItemDescriptorCount::invoke),
@@ -37,6 +38,7 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
             unlockingRequirement = RecipeUnlockingRequirement(from.requirement),
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.ShapedRecipe -> ShapedRecipe(
             recipeID = from.recipeId,
             width = from.width,
@@ -54,6 +56,7 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
             unlockingRequirement = RecipeUnlockingRequirement(from.requirement),
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.SmithingTransformRecipe -> SmithingTransformRecipe(
             recipeID = from.recipeId,
             template = ItemDescriptorCount(from.template),
@@ -63,6 +66,7 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
             block = "smithing_table",
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.SmithingTrimRecipe -> SmithingTrimRecipe(
             recipeID = from.recipeId,
             template = ItemDescriptorCount(from.ingredients[0]),
@@ -71,10 +75,12 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
             block = from.tag,
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.MultiRecipe -> MultiRecipe(
             uuid = Uuid(from.id),
             recipeNetworkID = NetworkID++,
         )
+
         is org.chorus_oss.chorus.recipe.SmeltingRecipe -> {
             val item = from.input.toItem()
             val output = ItemInstance(from.result)
@@ -95,6 +101,7 @@ operator fun Recipe.Companion.invoke(from: org.chorus_oss.chorus.recipe.Recipe):
                     output = output,
                     block = block
                 )
+
                 false -> FurnaceRecipe(
                     itemNetworkID = item.runtimeId,
                     output = output,

@@ -1,11 +1,11 @@
 package org.chorus_oss.chorus.network.process.handler
 
 import kotlinx.io.bytestring.ByteString
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.ResourcePackChunkDataPacket
 import org.chorus_oss.protocol.packets.ResourcePackChunkRequestPacket
 import org.chorus_oss.protocol.packets.ResourcePackDataInfoPacket
@@ -32,10 +32,10 @@ class ResourcePackHandler(session: BedrockSession) : BedrockSessionPacketHandler
         session.sendPacket(infoPacket)
     }
 
-    override fun handle(pk: MigrationPacket<*>) {
-        when (pk.packet) {
-            is ResourcePackChunkRequestPacket -> handleRequest(pk.packet)
-            is org.chorus_oss.protocol.packets.ResourcePackClientResponsePacket -> handleResponse(pk.packet)
+    override fun handle(packet: Packet) {
+        when (packet) {
+            is ResourcePackChunkRequestPacket -> handleRequest(packet)
+            is org.chorus_oss.protocol.packets.ResourcePackClientResponsePacket -> handleResponse(packet)
         }
     }
 

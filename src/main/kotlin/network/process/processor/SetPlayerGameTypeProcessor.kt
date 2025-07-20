@@ -3,16 +3,13 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.Command
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.lang.TranslationContainer
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.SetPlayerGameTypePacket
 import org.chorus_oss.protocol.types.GameType
 
-class SetPlayerGameTypeProcessor : DataPacketProcessor<MigrationPacket<SetPlayerGameTypePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<SetPlayerGameTypePacket>) {
-        val packet = pk.packet
-
+class SetPlayerGameTypeProcessor : PacketProcessor<SetPlayerGameTypePacket> {
+    override fun handle(player: Player, packet: SetPlayerGameTypePacket) {
         if (packet.gameType.ordinal != player.gamemode && player.player.hasPermission("chorus.command.gamemode")) {
             player.player.setGamemode(
                 when (packet.gameType) {
@@ -32,5 +29,5 @@ class SetPlayerGameTypeProcessor : DataPacketProcessor<MigrationPacket<SetPlayer
         }
     }
 
-    override val packetId: Int = SetPlayerGameTypePacket.id
+    override val packetID: Int = SetPlayerGameTypePacket.id
 }

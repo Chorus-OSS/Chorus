@@ -2,16 +2,13 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.item.ItemFood
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.ActorEventPacket
 
-class EntityEventProcessor : DataPacketProcessor<MigrationPacket<ActorEventPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<ActorEventPacket>) {
-        val packet = pk.packet
+class EntityEventProcessor : PacketProcessor<ActorEventPacket> {
+    override fun handle(player: Player, packet: ActorEventPacket) {
 
-        val player = player.player
         if (!player.spawned || !player.isAlive()) {
             return
         }
@@ -42,5 +39,5 @@ class EntityEventProcessor : DataPacketProcessor<MigrationPacket<ActorEventPacke
         }
     }
 
-    override val packetId: Int = ActorEventPacket.id
+    override val packetID: Int = ActorEventPacket.id
 }

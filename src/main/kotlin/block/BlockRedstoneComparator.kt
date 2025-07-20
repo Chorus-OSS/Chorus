@@ -15,9 +15,9 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.RedstoneComponent
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import kotlin.math.max
 
 abstract class BlockRedstoneComparator(blockstate: BlockState) : BlockRedstoneDiode(blockstate),

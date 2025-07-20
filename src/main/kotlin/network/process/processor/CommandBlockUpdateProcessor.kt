@@ -5,22 +5,20 @@ import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
 import org.chorus_oss.chorus.blockentity.BlockEntityCommandBlock
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
+import org.chorus_oss.protocol.packets.CommandBlockUpdatePacket
+import org.chorus_oss.protocol.types.CommandBlockMode
 import java.util.function.Consumer
 
-class CommandBlockUpdateProcessor :
-    DataPacketProcessor<MigrationPacket<org.chorus_oss.protocol.packets.CommandBlockUpdatePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<org.chorus_oss.protocol.packets.CommandBlockUpdatePacket>) {
-        val packet = pk.packet
-
+class CommandBlockUpdateProcessor : PacketProcessor<CommandBlockUpdatePacket> {
+    override fun handle(player: Player, packet: CommandBlockUpdatePacket) {
         if (player.player.isOp && player.player.isCreative) {
             if (packet.isBlock) {
                 val commandBlockData =
-                    packet.commandBlockHolderData as org.chorus_oss.protocol.packets.CommandBlockUpdatePacket.Companion.CommandBlockData
+                    packet.commandBlockHolderData as CommandBlockUpdatePacket.Companion.CommandBlockData
 
                 val blockEntity = player.player.level!!.getBlockEntity(
                     Vector3(commandBlockData.blockPosition)
@@ -30,19 +28,19 @@ class CommandBlockUpdateProcessor :
 
                     //change commandblock type
                     when (commandBlockData.commandBlockMode) {
-                        org.chorus_oss.protocol.types.CommandBlockMode.Repeating -> if (cmdBlock.id !== BlockID.REPEATING_COMMAND_BLOCK) {
+                        CommandBlockMode.Repeating -> if (cmdBlock.id !== BlockID.REPEATING_COMMAND_BLOCK) {
                             cmdBlock = Block.get(BlockID.REPEATING_COMMAND_BLOCK).setPropertyValues(
                                 cmdBlock.propertyValues
                             )
                             blockEntity.scheduleUpdate()
                         }
 
-                        org.chorus_oss.protocol.types.CommandBlockMode.Chain -> if (cmdBlock.id !== BlockID.CHAIN_COMMAND_BLOCK) {
+                        CommandBlockMode.Chain -> if (cmdBlock.id !== BlockID.CHAIN_COMMAND_BLOCK) {
                             cmdBlock =
                                 Block.get(BlockID.CHAIN_COMMAND_BLOCK).setPropertyValues(cmdBlock.propertyValues)
                         }
 
-                        org.chorus_oss.protocol.types.CommandBlockMode.Normal -> if (cmdBlock.id !== BlockID.COMMAND_BLOCK) {
+                        CommandBlockMode.Normal -> if (cmdBlock.id !== BlockID.COMMAND_BLOCK) {
                             cmdBlock = Block.get(BlockID.COMMAND_BLOCK).setPropertyValues(cmdBlock.propertyValues)
                         }
                     }
@@ -60,7 +58,7 @@ class CommandBlockUpdateProcessor :
                     //redstone mode / auto
                     val isRedstoneMode = commandBlockData.redstoneMode
                     blockEntity.isAuto = !isRedstoneMode
-                    if (!isRedstoneMode && commandBlockData.commandBlockMode == org.chorus_oss.protocol.types.CommandBlockMode.Normal) {
+                    if (!isRedstoneMode && commandBlockData.commandBlockMode == CommandBlockMode.Normal) {
                         blockEntity.trigger()
                     }
                     blockEntity.levelBlockAround.forEach(Consumer { b: Block -> b.onUpdate(Level.BLOCK_UPDATE_REDSTONE) }) //update redstone
@@ -70,5 +68,5 @@ class CommandBlockUpdateProcessor :
         }
     }
 
-    override val packetId: Int = org.chorus_oss.protocol.packets.CommandBlockUpdatePacket.id
+    override val packetID: Int = CommandBlockUpdatePacket.id
 }

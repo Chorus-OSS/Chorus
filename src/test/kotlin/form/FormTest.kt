@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.TestEventHandler
 import org.chorus_oss.chorus.TestPlayer
 import org.chorus_oss.chorus.TestPluginManager
 import org.chorus_oss.chorus.event.player.PlayerFormRespondedEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.element.simple.ButtonImage
 import org.chorus_oss.chorus.form.element.simple.ElementButton
@@ -43,7 +42,7 @@ class FormTest {
 
 
         test.send(player, 1)
-        val dataPacketManager = player.session.dataPacketManager
+        val dataPacketManager = player.session.packetManager
         val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
             formID = 1u,
             responseData = "[\"1\",\"input\",\"\",\"6\",\"0\",\"false\"]",
@@ -83,7 +82,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
+        dataPacketManager.processPacket(player, modalFormResponsePacket)
         testPluginManager.resetAll()
     }
 
@@ -105,7 +104,7 @@ class FormTest {
 
         test.send(player, 1)
 
-        val dataPacketManager = player.session.dataPacketManager
+        val dataPacketManager = player.session.packetManager
 
         val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
             formID = 1u,
@@ -134,7 +133,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
+        dataPacketManager.processPacket(player, modalFormResponsePacket)
         testPluginManager.resetAll()
     }
 
@@ -145,7 +144,7 @@ class FormTest {
         test.content = ("1028346237")
         test.send(player, 1)
 
-        val dataPacketManager = player.session.dataPacketManager
+        val dataPacketManager = player.session.packetManager
 
         val modalFormResponsePacket = org.chorus_oss.protocol.packets.ModalFormResponsePacket(
             formID = 1u,
@@ -170,7 +169,7 @@ class FormTest {
                 }
             ))
 
-        dataPacketManager.processPacket(player, MigrationPacket(modalFormResponsePacket))
+        dataPacketManager.processPacket(player, modalFormResponsePacket)
         testPluginManager.resetAll()
     }
 }

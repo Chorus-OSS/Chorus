@@ -36,7 +36,6 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
@@ -3179,8 +3178,10 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     fun properties(): ActorProperties {
-        val intArray = intProperties.values.mapIndexed { index, i -> ActorProperties.Companion.IntProperty(index.toUInt(), i) }
-        val floatArray = floatProperties.values.mapIndexed { index, i -> ActorProperties.Companion.FloatProperty(index.toUInt(), i) }
+        val intArray =
+            intProperties.values.mapIndexed { index, i -> ActorProperties.Companion.IntProperty(index.toUInt(), i) }
+        val floatArray =
+            floatProperties.values.mapIndexed { index, i -> ActorProperties.Companion.FloatProperty(index.toUInt(), i) }
 
         return ActorProperties(intArray, floatArray)
     }

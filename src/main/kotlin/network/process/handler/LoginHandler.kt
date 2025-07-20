@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.network.process.handler
 
 
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.decode
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createHandshakeJwt
@@ -15,6 +14,7 @@ import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.utils.ClientChainData
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.protocol.types.InputMode
 import org.chorus_oss.protocol.types.Platform
@@ -25,8 +25,7 @@ import java.util.regex.Pattern
 class LoginHandler(session: BedrockSession, private val consumer: Consumer<PlayerInfo>) :
     BedrockSessionPacketHandler(session) {
 
-    override fun handle(pk: MigrationPacket<*>) {
-        val packet = pk.packet
+    override fun handle(packet: Packet) {
         if (packet !is LoginPacket) return
 
         val server = session.server

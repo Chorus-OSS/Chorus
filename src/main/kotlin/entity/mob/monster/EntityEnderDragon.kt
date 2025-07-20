@@ -49,7 +49,6 @@ import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
-import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.*

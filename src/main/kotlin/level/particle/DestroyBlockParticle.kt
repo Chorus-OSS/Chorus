@@ -2,8 +2,8 @@ package org.chorus_oss.chorus.level.particle
 
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.types.Vector3f
 
 class DestroyBlockParticle(pos: Vector3, block: Block) : Particle(pos.x, pos.y, pos.z) {

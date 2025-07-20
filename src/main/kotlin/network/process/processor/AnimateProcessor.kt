@@ -4,15 +4,12 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.event.player.PlayerAnimationEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.AnimatePacket
 import org.chorus_oss.protocol.packets.AnimatePacket.Action
 
-class AnimateProcessor : DataPacketProcessor<MigrationPacket<AnimatePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<AnimatePacket>) {
-        val packet = pk.packet
-
+class AnimateProcessor : PacketProcessor<AnimatePacket> {
+    override fun handle(player: Player, packet: AnimatePacket) {
         if (!player.spawned || !player.isAlive()) {
             return
         }
@@ -58,5 +55,5 @@ class AnimateProcessor : DataPacketProcessor<MigrationPacket<AnimatePacket>>() {
         )
     }
 
-    override val packetId: Int = AnimatePacket.id
+    override val packetID: Int = AnimatePacket.id
 }

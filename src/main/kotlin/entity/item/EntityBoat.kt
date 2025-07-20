@@ -24,7 +24,6 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.AnimatePacket
 import org.chorus_oss.protocol.types.ActorLink
-import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import kotlin.math.abs

@@ -20,8 +20,8 @@ import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Faceable
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 open class BlockFrame @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :

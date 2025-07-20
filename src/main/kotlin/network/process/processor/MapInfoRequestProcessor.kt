@@ -4,20 +4,16 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.blockentity.BlockEntityItemFrame
 import org.chorus_oss.chorus.event.player.PlayerMapInfoRequestEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemFilledMap
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.chorus.scheduler.AsyncTask
 import org.chorus_oss.protocol.packets.MapInfoRequestPacket
 
 
-class MapInfoRequestProcessor : DataPacketProcessor<MigrationPacket<MapInfoRequestPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<MapInfoRequestPacket>) {
-        val packet = pk.packet
-
-        val player = player.player
+class MapInfoRequestProcessor : PacketProcessor<MapInfoRequestPacket> {
+    override fun handle(player: Player, packet: MapInfoRequestPacket) {
         var mapItem: Item? = null
         var index = 0
         var offhand = false
@@ -90,7 +86,7 @@ class MapInfoRequestProcessor : DataPacketProcessor<MigrationPacket<MapInfoReque
         }
     }
 
-    override val packetId: Int = MapInfoRequestPacket.id
+    override val packetID: Int = MapInfoRequestPacket.id
 
     private fun checkMapItemValid(item: Item?, pk: MapInfoRequestPacket): Boolean {
         return item is ItemFilledMap && item.mapId == pk.mapID

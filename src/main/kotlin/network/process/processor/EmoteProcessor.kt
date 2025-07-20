@@ -1,16 +1,14 @@
 package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.UUIDValidator
+import org.chorus_oss.protocol.packets.EmotePacket
 
 
-class EmoteProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protocol.packets.EmotePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<org.chorus_oss.protocol.packets.EmotePacket>) {
-        val packet = pk.packet
-
+class EmoteProcessor : PacketProcessor<EmotePacket> {
+    override fun handle(player: Player, packet: EmotePacket) {
         if (!player.player.spawned) {
             return
         }
@@ -33,11 +31,11 @@ class EmoteProcessor : DataPacketProcessor<MigrationPacket<org.chorus_oss.protoc
         }
 
         for (viewer in player.player.viewers.values) {
-            viewer.dataPacket(pk)
+            viewer.sendPacket(packet)
         }
     }
 
-    override val packetId: Int = org.chorus_oss.protocol.packets.EmotePacket.id
+    override val packetID: Int = EmotePacket.id
 
     companion object : Loggable
 }

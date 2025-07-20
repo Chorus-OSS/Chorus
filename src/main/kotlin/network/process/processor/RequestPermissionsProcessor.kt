@@ -3,21 +3,18 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerHackDetectedEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.Controllable
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.RequestPermissionsPacket
 
-class RequestPermissionsProcessor : DataPacketProcessor<MigrationPacket<RequestPermissionsPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<RequestPermissionsPacket>) {
-        val packet = pk.packet
-
-        if (!player.player.isOp) {
+class RequestPermissionsProcessor : PacketProcessor<RequestPermissionsPacket> {
+    override fun handle(player: Player, packet: RequestPermissionsPacket) {
+        if (!player.isOp) {
             val event =
-                PlayerHackDetectedEvent(player.player, PlayerHackDetectedEvent.HackType.PERMISSION_REQUEST)
+                PlayerHackDetectedEvent(player, PlayerHackDetectedEvent.HackType.PERMISSION_REQUEST)
             Server.instance.pluginManager.callEvent(event)
 
-            if (event.isKick) player.player.kick("Illegal permission operation", true)
+            if (event.isKick) player.kick("Illegal permission operation", true)
 
             return
         }
@@ -32,5 +29,5 @@ class RequestPermissionsProcessor : DataPacketProcessor<MigrationPacket<RequestP
         }
     }
 
-    override val packetId: Int = RequestPermissionsPacket.id
+    override val packetID: Int = RequestPermissionsPacket.id
 }

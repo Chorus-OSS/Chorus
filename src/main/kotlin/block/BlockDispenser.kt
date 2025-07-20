@@ -24,9 +24,9 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.Faceable
 import org.chorus_oss.chorus.utils.RedstoneComponent
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.types.Vector3f
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom

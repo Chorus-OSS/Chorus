@@ -29,7 +29,6 @@ import org.chorus_oss.chorus.event.level.LevelLoadEvent
 import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
@@ -55,7 +54,6 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -427,7 +425,6 @@ class Server internal constructor(
 
         run {
             Registries.POTION.init()
-            Registries.PACKET_DECODER.init()
             Registries.ENTITY.init()
             Registries.BLOCKENTITY.init()
             Registries.BLOCKSTATE_ITEMMETA.init()
@@ -619,7 +616,6 @@ class Server internal constructor(
         log.info("Reloading Registries...")
         run {
             Registries.POTION.reload()
-            Registries.PACKET_DECODER.reload()
             Registries.ENTITY.reload()
             Registries.BLOCKENTITY.reload()
             Registries.BLOCKSTATE_ITEMMETA.reload()
@@ -2373,17 +2369,11 @@ class Server internal constructor(
         }
     }
 
-    fun isIgnoredPacket(packet: DataPacket): Boolean {
-        if (packet is MigrationPacket<*>) {
-            return settings.debugSettings.ignoredPackets.contains(packet.packet::class.java.simpleName)
-        }
+    fun isIgnoredPacket(packet: Packet): Boolean {
         return settings.debugSettings.ignoredPackets.contains(packet::class.java.simpleName)
     }
 
-    fun isLoggedPacket(packet: DataPacket): Boolean {
-        if (packet is MigrationPacket<*>) {
-            return settings.debugSettings.loggedPackets.contains(packet.packet::class.java.simpleName)
-        }
+    fun isLoggedPacket(packet: Packet): Boolean {
         return settings.debugSettings.loggedPackets.contains(packet::class.java.simpleName)
     }
 
@@ -2425,9 +2415,9 @@ class Server internal constructor(
         /**
          * @see .broadcastPacket
          */
-        fun broadcastPacket(players: Collection<Player>, packet: DataPacket) {
+        fun broadcastPacket(players: Collection<Player>, packet: Packet) {
             for (player in players) {
-                player.dataPacket(packet)
+                player.sendPacket(packet)
             }
         }
 
@@ -2439,14 +2429,16 @@ class Server internal constructor(
          * @param players 接受数据包的所有玩家<br></br>All players receiving the data package
          * @param packet  数据包
          */
-        fun broadcastPacket(players: Array<Player>, packet: DataPacket) {
+        fun broadcastPacket(players: Array<Player>, packet: Packet) {
             for (player in players) {
-                player.dataPacket(packet)
+                player.sendPacket(packet)
             }
         }
 
         fun broadcastPacket(players: Iterable<Player>, packet: Packet) {
-            broadcastPacket(players.toList(), MigrationPacket(packet))
+            for (player in players) {
+                player.sendPacket(packet)
+            }
         }
 
         /**`

@@ -6,15 +6,12 @@ import org.chorus_oss.chorus.dialog.response.FormResponseDialog
 import org.chorus_oss.chorus.dialog.window.FormWindowDialog
 import org.chorus_oss.chorus.entity.mob.EntityNPC
 import org.chorus_oss.chorus.event.player.PlayerDialogRespondedEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.NPCRequestPacket
 
-class NPCRequestProcessor : DataPacketProcessor<MigrationPacket<NPCRequestPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<NPCRequestPacket>) {
-        val packet = pk.packet
+class NPCRequestProcessor : PacketProcessor<NPCRequestPacket> {
+    override fun handle(player: Player, packet: NPCRequestPacket) {
 
-        val player = player.player
         //若sceneName字段为空，则为玩家在编辑NPC，我们并不需要记录对话框，直接通过entityRuntimeId获取实体即可
         val entity = player.level!!.getEntity(packet.entityRuntimeID.toLong())
         if (packet.sceneName.isEmpty() && entity is EntityNPC) {
@@ -65,5 +62,5 @@ class NPCRequestProcessor : DataPacketProcessor<MigrationPacket<NPCRequestPacket
         }
     }
 
-    override val packetId: Int = NPCRequestPacket.id
+    override val packetID: Int = NPCRequestPacket.id
 }

@@ -22,8 +22,8 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import kotlin.math.sqrt
 
 class BlockCauldron(blockState: BlockState = properties.defaultState) : BlockSolid(blockState),

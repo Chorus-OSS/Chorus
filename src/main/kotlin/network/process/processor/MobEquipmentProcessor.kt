@@ -2,22 +2,19 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.entity.data.EntityFlag
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.HumanInventory
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.enchantment.Enchantment.Companion.getEnchantments
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.MobEquipmentPacket
 
 
-class MobEquipmentProcessor : DataPacketProcessor<MigrationPacket<MobEquipmentPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<MobEquipmentPacket>) {
-        val packet = pk.packet
+class MobEquipmentProcessor : PacketProcessor<MobEquipmentPacket> {
+    override fun handle(player: Player, packet: MobEquipmentPacket) {
 
-        val player = player.player
         if (!player.spawned || !player.isAlive()) {
             return
         }
@@ -82,7 +79,7 @@ class MobEquipmentProcessor : DataPacketProcessor<MigrationPacket<MobEquipmentPa
         player.setDataFlag(EntityFlag.USING_ITEM, false)
     }
 
-    override val packetId: Int = MobEquipmentPacket.id
+    override val packetID: Int = MobEquipmentPacket.id
 
     companion object : Loggable
 }

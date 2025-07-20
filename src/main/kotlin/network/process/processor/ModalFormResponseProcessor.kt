@@ -4,22 +4,20 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerFormRespondedEvent
 import org.chorus_oss.chorus.event.player.PlayerSettingsRespondedEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.form.element.Element
 import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.response.CustomResponse
 import org.chorus_oss.chorus.form.response.ElementResponse
 import org.chorus_oss.chorus.form.window.CustomForm
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.ModalFormResponsePacket
 
-class ModalFormResponseProcessor : DataPacketProcessor<MigrationPacket<ModalFormResponsePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<ModalFormResponsePacket>) {
-        val packet = pk.packet
+class ModalFormResponseProcessor : PacketProcessor<ModalFormResponsePacket> {
+    override fun handle(player: Player, packet: ModalFormResponsePacket) {
         val data = packet.responseData ?: "null"
 
-        val player = player.player
+
         if (!player.spawned || !player.isAlive()) {
             return
         }
@@ -63,7 +61,7 @@ class ModalFormResponseProcessor : DataPacketProcessor<MigrationPacket<ModalForm
         } else log.warn("{} sent unknown form id {}", player.getEntityName(), packet.formID.toInt())
     }
 
-    override val packetId: Int = ModalFormResponsePacket.id
+    override val packetID: Int = ModalFormResponsePacket.id
 
     companion object : Loggable
 }

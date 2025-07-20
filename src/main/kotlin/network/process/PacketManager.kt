@@ -1,42 +1,40 @@
 package org.chorus_oss.chorus.network.process
 
 import org.chorus_oss.chorus.Player
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.process.processor.*
+import org.chorus_oss.protocol.core.Packet
 
-/**
- * DataPacketManager is a static class to manage DataPacketProcessors and process DataPackets.
- */
-class DataPacketManager {
-    private val PROCESSORS = HashMap<Int, DataPacketProcessor<out DataPacket>>(300)
+class PacketManager {
+    private val processors = HashMap<Int, PacketProcessor<out Packet>>(300)
 
     init {
         registerDefaultProcessors()
     }
 
-    fun registerProcessor(vararg processors: DataPacketProcessor<out DataPacket>) {
+    fun register(vararg processors: PacketProcessor<out Packet>) {
         for (processor in processors) {
-            PROCESSORS[processor.packetId] = processor
+            this@PacketManager.processors[processor.packetID] = processor
         }
     }
 
     fun canProcess(packetId: Int): Boolean {
-        return PROCESSORS.containsKey(packetId)
+        return processors.containsKey(packetId)
     }
 
-    fun <T : DataPacket> processPacket(player: Player, packet: T) {
-        val processor = PROCESSORS[packet.pid()] as DataPacketProcessor<T>?
+    fun <T : Packet> processPacket(player: Player, packet: T) {
+        @Suppress("UNCHECKED_CAST")
+        val processor = processors[packet.id] as? PacketProcessor<T>?
         if (processor != null) {
             processor.handle(player, packet)
         } else {
             throw UnsupportedOperationException(
-                "No processor found for packet " + packet::class.java.name + " with id " + packet.pid() + "."
+                "No processor found for packet " + packet::class.java.name + " with id " + packet.id + "."
             )
         }
     }
 
     fun registerDefaultProcessors() {
-        registerProcessor(
+        register(
             LoginProcessor(),
             InventoryTransactionProcessor(),
             PlayerSkinProcessor(),

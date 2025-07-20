@@ -5,18 +5,14 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.player.PlayerCommandPreprocessEvent
 import org.chorus_oss.chorus.event.player.PlayerHackDetectedEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.CommandRequestPacket
 import java.util.concurrent.TimeUnit
 
-class CommandRequestProcessor :
-    DataPacketProcessor<MigrationPacket<CommandRequestPacket>>() {
+class CommandRequestProcessor : PacketProcessor<CommandRequestPacket> {
     val rateLimiter: RateLimiter = RateLimiter.create(500.0)
 
-    override fun handle(player: Player, pk: MigrationPacket<CommandRequestPacket>) {
-        val packet = pk.packet
-
+    override fun handle(player: Player, packet: CommandRequestPacket) {
         val length = packet.command.length
         if (!rateLimiter.tryAcquire(length, 300, TimeUnit.MILLISECONDS)) {
             val event = PlayerHackDetectedEvent(player.player, PlayerHackDetectedEvent.HackType.COMMAND_SPAM)
@@ -36,5 +32,5 @@ class CommandRequestProcessor :
         Server.instance.executeCommand(playerCommandPreprocessEvent.player, playerCommandPreprocessEvent.message!!)
     }
 
-    override val packetId: Int = CommandRequestPacket.id
+    override val packetID: Int = CommandRequestPacket.id
 }

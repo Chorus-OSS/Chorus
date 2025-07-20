@@ -2,17 +2,14 @@ package org.chorus_oss.chorus.network.process.processor
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.level.Transform.Companion.fromObject
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.MovePlayerPacket
 
-class MovePlayerProcessor : DataPacketProcessor<MigrationPacket<MovePlayerPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<MovePlayerPacket>) {
-        val packet = pk.packet
+class MovePlayerProcessor : PacketProcessor<MovePlayerPacket> {
+    override fun handle(player: Player, packet: MovePlayerPacket) {
 
-        val player = player.player
         if (Server.instance.getServerAuthoritativeMovement() > 0) {
             return
         }
@@ -39,5 +36,5 @@ class MovePlayerProcessor : DataPacketProcessor<MigrationPacket<MovePlayerPacket
         )
     }
 
-    override val packetId: Int = MovePlayerPacket.id
+    override val packetID: Int = MovePlayerPacket.id
 }

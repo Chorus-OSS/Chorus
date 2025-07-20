@@ -81,7 +81,9 @@ class BlockDragonEgg(blockState: BlockState = properties.defaultState) : BlockFa
                 val pk = LevelEventPacket(
                     eventType = LevelEventPacket.PARTICLE_DRAGON_EGG,
                     position = Vector3f(position.floor()),
-                    eventData = (((((abs(diffX.toDouble()).toInt() shl 16) or (abs(diffY.toDouble()).toInt() shl 8)) or abs(diffZ.toDouble()).toInt()) or ((if (diffX < 0) 1 else 0) shl 24)) or ((if (diffY < 0) 1 else 0) shl 25)) or ((if (diffZ < 0) 1 else 0) shl 26)
+                    eventData = (((((abs(diffX.toDouble()).toInt() shl 16) or (abs(diffY.toDouble()).toInt() shl 8)) or abs(
+                        diffZ.toDouble()
+                    ).toInt()) or ((if (diffX < 0) 1 else 0) shl 24)) or ((if (diffY < 0) 1 else 0) shl 25)) or ((if (diffZ < 0) 1 else 0) shl 26)
                 )
                 level.addChunkPacket(
                     position.floorX shr 4,

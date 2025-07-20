@@ -5,7 +5,6 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.data.property.EntityProperty.Companion.getPacketCache
 import org.chorus_oss.chorus.entity.data.property.EntityProperty.Companion.getPlayerPropertyCache
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.network.ProtocolInfo
@@ -15,6 +14,7 @@ import org.chorus_oss.chorus.registry.ItemRegistry
 import org.chorus_oss.chorus.registry.ItemRuntimeIdRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.*
 import org.chorus_oss.protocol.types.item.ItemEntry
@@ -235,8 +235,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
         player.sendPacketImmediately(packet)
     }
 
-    override fun handle(pk: MigrationPacket<*>) {
-        val packet = pk.packet
+    override fun handle(packet: Packet) {
         when (packet) {
             is RequestChunkRadiusPacket -> handleRadius(packet)
             is SetLocalPlayerAsInitializedPacket -> handleInitialized(packet)

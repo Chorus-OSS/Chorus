@@ -3,15 +3,12 @@ package org.chorus_oss.chorus.network.process.processor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.command.Command
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.lang.TranslationContainer
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.SetDifficultyPacket
 
-class SetDifficultyProcessor : DataPacketProcessor<MigrationPacket<SetDifficultyPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<SetDifficultyPacket>) {
-        val packet = pk.packet
-
+class SetDifficultyProcessor : PacketProcessor<SetDifficultyPacket> {
+    override fun handle(player: Player, packet: SetDifficultyPacket) {
         if (!player.player.spawned || !player.player.hasPermission("chorus.command.difficulty")) {
             return
         }
@@ -29,5 +26,5 @@ class SetDifficultyProcessor : DataPacketProcessor<MigrationPacket<SetDifficulty
         )
     }
 
-    override val packetId: Int = SetDifficultyPacket.id
+    override val packetID: Int = SetDifficultyPacket.id
 }

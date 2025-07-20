@@ -13,9 +13,9 @@ import org.chorus_oss.chorus.level.particle.WaxOnParticle
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.CompassRoseDirection
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.Faceable
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.*
 
 abstract class BlockSignBase(blockState: BlockState) : BlockTransparent(blockState), Faceable {
