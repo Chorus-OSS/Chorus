@@ -2,16 +2,16 @@ package org.chorus_oss.chorus.registry
 
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufAllocator
+import io.netty.buffer.Unpooled
 import io.netty.util.collection.CharObjectHashMap
 import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.network.connection.util.HandleByteBuf.Companion.of
-import org.chorus_oss.chorus.network.protocol.CraftingDataPacket
 import org.chorus_oss.chorus.network.protocol.types.RecipeUnlockingRequirement
 import org.chorus_oss.chorus.recipe.*
 import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
@@ -21,6 +21,7 @@ import org.chorus_oss.chorus.recipe.descriptor.ItemTagDescriptor
 import org.chorus_oss.chorus.utils.Identifier
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.CraftingDataPacket
 import java.io.IOException
 import java.io.Reader
 import java.util.*
@@ -308,7 +309,9 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     }
 
     val craftingPacket: ByteBuf
-        get() = buffer!!.copy()
+        get() = Unpooled.buffer().apply {
+            this.writeBytes(packet.readByteArray())
+        }
 
     val packet: Buffer
         get() = Companion.packet.copy()
@@ -383,43 +386,26 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
     }
 
     fun rebuildPacket() {
-        org.chorus_oss.protocol.packets.CraftingDataPacket(
-            recipes = listOf(),
-            potionRecipes = listOf(),
-            potionContainerChangeRecipes = listOf(),
-            materialReducers = emptyList(),
-            clearRecipes = true,
-        )
+        val recipes = listOf(
+            networkIdRecipeList,
+            furnaceRecipeMap.toList(),
+            smokerRecipeMap.toList(),
+            blastFurnaceRecipeMap.toList(),
+            campfireRecipeMap.toList(),
+        ).flatten()
+        val potionRecipes = brewingRecipeMap.toList()
+        val potionContainerChangeRecipes = containerRecipeMap.toList()
 
-        Buffer()
+        Companion.packet = Buffer().apply {
+            val pk = CraftingDataPacket(
+                recipes,
+                potionRecipes,
+                potionContainerChangeRecipes,
+                true,
+            )
 
-        val buf = ByteBufAllocator.DEFAULT.ioBuffer(64)
-
-        val pk = CraftingDataPacket()
-        pk.cleanRecipes = true
-
-        pk.addNetworkIdRecipe(networkIdRecipeList)
-
-        for (recipe in furnaceRecipeMap) {
-            pk.addFurnaceRecipe(recipe)
+            CraftingDataPacket.serialize(pk, this)
         }
-        for (recipe in smokerRecipeMap) {
-            pk.addSmokerRecipe(recipe)
-        }
-        for (recipe in blastFurnaceRecipeMap) {
-            pk.addBlastFurnaceRecipe(recipe)
-        }
-        for (recipe in campfireRecipeMap) {
-            pk.addCampfireRecipeRecipe(recipe)
-        }
-        for (recipe in brewingRecipeMap) {
-            pk.addBrewingRecipe(recipe)
-        }
-        for (recipe in containerRecipeMap) {
-            pk.addContainerRecipe(recipe)
-        }
-        pk.encode(of(buf))
-        Companion.buffer = buf
     }
 
     private fun loadRecipes() {
@@ -994,10 +980,6 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
         private var packet: Buffer = Buffer()
 
-        /**
-         * 缓存着配方数据包
-         */
-        private var buffer: ByteBuf? = null
         fun computeRecipeIdWithItem(results: Collection<Item>, inputs: Collection<Item>, type: RecipeType): String {
             val inputs1: List<Item> = ArrayList(inputs)
             return computeRecipeId(results, inputs1.stream().map { item: Item? ->

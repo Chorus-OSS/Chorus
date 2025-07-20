@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.level
 
 import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
 import java.util.*
 
 class GameRules private constructor() {
@@ -115,26 +114,10 @@ class GameRules private constructor() {
     }
 
     enum class Type {
-        UNKNOWN {
-            override fun write(pk: HandleByteBuf, value: Value<*>) {}
-        },
-        BOOLEAN {
-            override fun write(pk: HandleByteBuf, value: Value<*>) {
-                pk.writeBoolean(value.valueAsBoolean)
-            }
-        },
-        INTEGER {
-            override fun write(pk: HandleByteBuf, value: Value<*>) {
-                pk.writeUnsignedVarInt(value.valueAsInteger)
-            }
-        },
-        FLOAT {
-            override fun write(pk: HandleByteBuf, value: Value<*>) {
-                pk.writeFloatLE(value.valueAsFloat)
-            }
-        };
-
-        abstract fun write(pk: HandleByteBuf, value: Value<*>)
+        UNKNOWN,
+        BOOLEAN,
+        INTEGER,
+        FLOAT;
     }
 
     class Value<T>(val type: Type, var value: T) {
@@ -179,12 +162,6 @@ class GameRules private constructor() {
                 }
                 return value as Float
             }
-
-        fun write(stream: HandleByteBuf) {
-            stream.writeBoolean(this.isCanBeChanged)
-            stream.writeUnsignedVarInt(type.ordinal)
-            type.write(stream, this)
-        }
     }
 
     companion object {

@@ -85,6 +85,7 @@ import org.chorus_oss.chorus.utils.Utils.allThreadDumps
 import org.chorus_oss.chorus.utils.Utils.getExceptionMessage
 import org.chorus_oss.chorus.utils.Utils.readFile
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.CraftingDataPacket
 import org.chorus_oss.protocol.types.Color
 import org.iq80.leveldb.CompressionType
 import org.iq80.leveldb.DB
@@ -1872,7 +1873,7 @@ class Server internal constructor(
      * @param player 玩家
      */
     fun sendRecipeList(player: Player) {
-        player.session.sendRawPacket(ProtocolInfo.CRAFTING_DATA_PACKET, Registries.RECIPE.craftingPacket)
+        player.session.sendRawPacket(CraftingDataPacket.id, Registries.RECIPE.craftingPacket)
     }
 
     /**

@@ -8,6 +8,4 @@ object ProtocolInfo {
     val GAME_VERSION = SemVersion(1, 21, 9, 3, 0)
 
     val BLOCK_STATE_VERSION = (GAME_VERSION.major shl 24) or (GAME_VERSION.minor shl 16) or (GAME_VERSION.patch shl 8)
-
-    const val CRAFTING_DATA_PACKET = 52
 }

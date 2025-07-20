@@ -6,17 +6,7 @@ import io.netty.util.ByteProcessor
 import io.netty.util.internal.ObjectUtil
 import io.netty.util.internal.StringUtil
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.item.ItemDurable
-import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.nbt.NBTIO.read
-import org.chorus_oss.chorus.nbt.NBTIO.write
-import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.recipe.descriptor.*
-import org.chorus_oss.chorus.utils.Binary
-import org.chorus_oss.chorus.utils.ByteBufVarInt
-import org.chorus_oss.chorus.utils.LittleEndianByteBufOutputStream
-import org.chorus_oss.chorus.utils.Utils
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -26,8 +16,6 @@ import java.nio.channels.FileChannel
 import java.nio.channels.GatheringByteChannel
 import java.nio.channels.ScatteringByteChannel
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.util.*
 
 class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
     private val buf: ByteBuf = ObjectUtil.checkNotNull(buf, "buf")
@@ -693,148 +681,6 @@ class HandleByteBuf private constructor(buf: ByteBuf) : ByteBuf() {
 
     override fun writeCharSequence(sequence: CharSequence, charset: Charset): Int {
         return buf.writeCharSequence(sequence, charset)
-    }
-
-    fun writeString(str: String): ByteBuf {
-        val bytes = str.toByteArray(StandardCharsets.UTF_8)
-        this.writeUnsignedVarInt(bytes.size)
-        return buf.writeBytes(bytes)
-    }
-
-    fun writeUUID(uuid: UUID) {
-        this.writeBytes(Binary.writeUUID(uuid))
-    }
-
-    fun writeByteArray(bytes: ByteArray) {
-        writeUnsignedVarInt(bytes.size)
-        this.writeBytes(bytes)
-    }
-
-    fun writeUnsignedVarInt(value: Int) {
-        ByteBufVarInt.writeUnsignedInt(this, value)
-    }
-
-    fun writeVarInt(value: Int) {
-        ByteBufVarInt.writeInt(this, value)
-    }
-
-    @JvmOverloads
-    fun writeSlot(item: Item?, instanceItem: Boolean = false) {
-        if (item == null || item.isNothing) {
-            writeByte(0.toByte().toInt())
-            return
-        }
-
-        val networkId = item.runtimeId
-        writeVarInt(networkId) //write item runtimeId
-        writeShortLE(item.getCount()) //write item count
-        writeUnsignedVarInt(item.damage) //write damage value
-
-
-        if (!instanceItem) {
-            writeBoolean(item.isUsingNetId) // isUsingNetId
-            if (item.isUsingNetId) {
-                writeVarInt(item.getNetId()) // netId
-            }
-        }
-
-        writeVarInt(if (item.isBlock()) item.getSafeBlockState().blockStateHash() else 0)
-
-        val userDataBuf = ByteBufAllocator.DEFAULT.ioBuffer()
-        try {
-            LittleEndianByteBufOutputStream(userDataBuf).use { stream ->
-                val data = item.damage
-                if (item is ItemDurable && data != 0) {
-                    val nbt = item.compoundTag
-                    val tag = if (nbt.isEmpty()) {
-                        CompoundTag()
-                    } else {
-                        read(nbt, ByteOrder.LITTLE_ENDIAN)
-                    }
-                    if (tag.contains("Damage")) {
-                        tag.put("__DamageConflict__", tag.removeAndGet("Damage")!!)
-                    }
-                    tag.putInt("Damage", data)
-                    stream.writeShort(-1)
-                    stream.writeByte(1) // Hardcoded in current version
-                    stream.write(write(tag, ByteOrder.LITTLE_ENDIAN))
-                } else if (item.hasCompoundTag()) {
-                    stream.writeShort(-1)
-                    stream.writeByte(1) // Hardcoded in current version
-                    stream.write(write(item.namedTag!!, ByteOrder.LITTLE_ENDIAN))
-                } else {
-                    userDataBuf.writeShortLE(0)
-                }
-
-                val canPlaceOn = extractStringList(item, "CanPlaceOn") //write canPlace
-                stream.writeInt(canPlaceOn.size)
-                for (string in canPlaceOn) {
-                    stream.writeUTF(string)
-                }
-
-                val canDestroy = extractStringList(item, "CanDestroy") //write canBreak
-                stream.writeInt(canDestroy.size)
-                for (string in canDestroy) {
-                    stream.writeUTF(string)
-                }
-
-                if (item.id == ItemID.SHIELD) {
-                    stream.writeLong(0) //BlockingTicks // todo add BlockingTicks to Item Class. Find out what Blocking Ticks are
-                }
-
-                val bytes = Utils.convertByteBuf2Array(userDataBuf)
-                writeByteArray(bytes)
-            }
-        } catch (e: IOException) {
-            throw IllegalStateException("Unable to write item user data", e)
-        } finally {
-            userDataBuf.release()
-        }
-    }
-
-    fun writeRecipeIngredient(itemDescriptor: ItemDescriptor) {
-        val type = itemDescriptor.type
-        this.writeByte(type.ordinal.toByte().toInt())
-        when (type) {
-            ItemDescriptorType.DEFAULT -> {
-                val ingredient = itemDescriptor.toItem()
-                if (ingredient.isNothing) {
-                    this.writeShortLE(0)
-                    this.writeVarInt(0) // item == null ? 0 : item.getCount()
-                    return
-                }
-                val networkId = ingredient.runtimeId
-                val damage = if (ingredient.hasMeta()) ingredient.damage else 0x7fff
-                this.writeShortLE(networkId)
-                this.writeShortLE(damage)
-            }
-
-            ItemDescriptorType.MOLANG -> {
-                val molangDescriptor = itemDescriptor as MolangDescriptor
-                this.writeString(molangDescriptor.tagExpression)
-                this.writeByte(molangDescriptor.molangVersion.toByte().toInt())
-            }
-
-            ItemDescriptorType.COMPLEX_ALIAS -> {
-                val complexAliasDescriptor = itemDescriptor as ComplexAliasDescriptor
-                this.writeString(complexAliasDescriptor.name)
-            }
-
-            ItemDescriptorType.ITEM_TAG -> {
-                val tagDescriptor = itemDescriptor as ItemTagDescriptor
-                this.writeString(tagDescriptor.itemTag)
-            }
-
-            ItemDescriptorType.DEFERRED -> {
-                val deferredDescriptor = itemDescriptor as DeferredDescriptor
-                this.writeString(deferredDescriptor.fullName)
-                this.writeShortLE(deferredDescriptor.auxValue)
-            }
-
-            else -> Unit
-        }
-
-        this.writeVarInt(itemDescriptor.count)
     }
 
     override fun indexOf(fromIndex: Int, toIndex: Int, value: Byte): Int {

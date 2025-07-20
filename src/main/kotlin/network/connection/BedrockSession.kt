@@ -34,6 +34,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.ByteBufVarInt
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.CraftingDataPacket
 import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.protocol.packets.PlayerSkinPacket
 import org.chorus_oss.protocol.types.DisconnectFailReason
@@ -523,7 +524,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     fun syncCraftingData() {
-        this.sendRawPacket(ProtocolInfo.CRAFTING_DATA_PACKET, Registries.RECIPE.craftingPacket)
+        this.sendRawPacket(CraftingDataPacket.id, Registries.RECIPE.craftingPacket)
     }
 
     fun syncCreativeContent() {
