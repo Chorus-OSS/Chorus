@@ -6,6 +6,9 @@ import com.google.gson.TypeAdapter
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileReader
 import java.io.IOException
 import java.io.Reader
 import java.lang.reflect.Type
@@ -68,9 +71,24 @@ object JSONUtils {
         return GSON.fromJson(jsonReader, typeToken)
     }
 
+    fun <V> from(reader: Reader, type: Class<V>?): V {
+        val jsonReader = JsonReader(reader)
+        return GSON.fromJson(jsonReader, type)
+    }
+
     fun <V> from(json: String?, type: Type?): V {
         return GSON.fromJson(json, type)
     }
+
+    fun <V> from(file: File, type: Class<V>): V {
+        try {
+            val reader = JsonReader(FileReader(file))
+            return GSON.fromJson(reader, type)
+        } catch (e: FileNotFoundException) {
+            throw RuntimeException("gson from error, file path: ${file.path}, type: $type", e)
+        }
+    }
+
 
     fun <V> to(list: List<V>?): String {
         return GSON.toJson(list)

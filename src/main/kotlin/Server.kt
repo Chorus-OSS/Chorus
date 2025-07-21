@@ -1992,7 +1992,7 @@ class Server internal constructor(
         val levelConfig: LevelConfig
         if (config.exists()) {
             try {
-                levelConfig = from(config, LevelConfig::class.java)
+                levelConfig = JSONUtils.from(config, LevelConfig::class.java)
                 FileUtils.write(config, JSONUtils.toPretty(levelConfig), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -2085,8 +2085,8 @@ class Server internal constructor(
         val config = jpath.resolve("config.json").toFile()
         if (config.exists()) {
             try {
-                levelConfig1 = from(FileReader(config), LevelConfig::class.java)
-                FileUtils.write(config, JSONUtils.toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
+                levelConfig1 = JSONUtils.from(FileReader(config), LevelConfig::class.java)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig1), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 log.error("The levelConfig is not exists under the {} path", path)
                 return false
