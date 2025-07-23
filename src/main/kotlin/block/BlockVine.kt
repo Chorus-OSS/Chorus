@@ -345,12 +345,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
                 BlockFace.WEST -> 0x02
                 BlockFace.NORTH -> 0x04
                 BlockFace.EAST -> 0x08
-                else -> {
-                    0x01
-                    0x02
-                    0x04
-                    0x08
-                }
+                else -> 0x01
             }
         }
     }

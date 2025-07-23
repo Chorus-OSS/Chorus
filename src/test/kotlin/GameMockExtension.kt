@@ -26,8 +26,7 @@ import org.chorus_oss.chorus.level.format.leveldb.LevelDBProvider
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.connection.BedrockSession
-import org.chorus_oss.chorus.network.process.DataPacketManager
-import org.chorus_oss.chorus.network.DataPacket
+import org.chorus_oss.chorus.network.process.PacketManager
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.permission.BanList
 import org.chorus_oss.chorus.plugin.JavaPluginLoader
@@ -138,7 +137,6 @@ class GameMockExtension : MockitoExtension() {
         init {
             Mockito.mockStatic(Server::class.java).use { serverMockedStatic ->
                 serverMockedStatic.`when`<Any> { Server.instance }.thenReturn(server)
-                Registries.PACKET_DECODER.init()
                 Registries.ENTITY.init()
                 Profession.init()
                 Registries.BLOCKENTITY.init()
@@ -279,12 +277,10 @@ class GameMockExtension : MockitoExtension() {
                 Skin(),
                 Mockito.mock(ClientChainData::class.java)
             )
-            val dataPacketManager = DataPacketManager()
-            Mockito.`when`(serverSession.dataPacketManager).thenReturn(dataPacketManager)
-            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any<DataPacket>())
-            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any<Packet>())
-            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any<DataPacket>())
-            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any<Packet>())
+            val packetManager = PacketManager()
+            Mockito.`when`(serverSession.packetManager).thenReturn(packetManager)
+            Mockito.doNothing().`when`(serverSession).sendPacketImmediately(ArgumentMatchers.any())
+            Mockito.doNothing().`when`(serverSession).sendPacket(ArgumentMatchers.any())
             player = TestPlayer(serverSession, info)
             player.adventureSettings = AdventureSettings(player)
             player.loggedIn = true

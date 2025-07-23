@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
@@ -166,14 +165,14 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
             level.sendBlocks(
                 target,
                 blocks,
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 0,
                 false
             )
             level.sendBlocks(
                 target,
                 blocks,
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 1,
                 false
             )
@@ -184,14 +183,14 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
         level.sendBlocks(
             target,
             blocks,
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
             0,
             false
         )
         level.sendBlocks(
             target,
             blocks,
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
             1,
             false
         )
@@ -223,9 +222,9 @@ class BlockSnowLayer @JvmOverloads constructor(blockstate: BlockState = properti
 
     @JvmOverloads
     fun melt(layers: Int = 2): Boolean {
-        Preconditions.checkArgument(layers > 0, "Layers must be positive, got {}", layers)
+        check(layers > 0) { "Layers must be positive, got $layers" }
         var toMelt: Block = this
-        while (toMelt.getPropertyValue(CommonBlockProperties.HEIGHT) === CommonBlockProperties.HEIGHT.max) {
+        while (toMelt.getPropertyValue(CommonBlockProperties.HEIGHT) == CommonBlockProperties.HEIGHT.max) {
             val up = toMelt.up()
             if (up.id != BlockID.SNOW_LAYER) {
                 break

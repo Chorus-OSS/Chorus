@@ -12,7 +12,6 @@ import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
 import org.chorus_oss.chorus.event.player.*
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
@@ -23,7 +22,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.InventoryTransactionPacket
@@ -34,13 +33,11 @@ import org.chorus_oss.protocol.types.inventory.transaction.UseItemTransactionDat
 import java.util.*
 import kotlin.math.abs
 
-class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<InventoryTransactionPacket>>() {
+class InventoryTransactionProcessor : PacketProcessor<InventoryTransactionPacket> {
     private var lastUsedItem: Item? = null
 
-    override fun handle(player: Player, pk: MigrationPacket<InventoryTransactionPacket>) {
-        val packet = pk.packet
+    override fun handle(player: Player, packet: InventoryTransactionPacket) {
 
-        val player = player.player
         if (player.isSpectator) {
             player.sendAllInventories()
             return
@@ -106,10 +103,10 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
         }
     }
 
-    override val packetId: Int = InventoryTransactionPacket.id
+    override val packetID: Int = InventoryTransactionPacket.id
 
     private fun handleUseItemOnEntity(player: Player, pk: InventoryTransactionPacket) {
-        val player = player.player
+
         val useItemOnEntityData = pk.transactionData as UseItemOnEntityTransactionData
         val target = player.level!!.getEntity(useItemOnEntityData.entityRuntimeID.toLong()) ?: return
         val type = useItemOnEntityData.actionType
@@ -263,7 +260,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
     }
 
     private fun handleUseItem(player: Player, pk: InventoryTransactionPacket) {
-        val player = player.player
+
         val useItemData = pk.transactionData as UseItemTransactionData
         val blockVector = Vector3(useItemData.blockPosition).asBlockVector3()
         val face = BlockFace.entries[abs(useItemData.blockFace % BlockFace.entries.size)]
@@ -334,12 +331,12 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                 player.level!!.sendBlocks(
                     arrayOf(player),
                     arrayOf<Block?>(target, block),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS.toInt()
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS
                 )
                 player.level!!.sendBlocks(
                     arrayOf(player), arrayOf(
                         target.getLevelBlockAtLayer(1), block.getLevelBlockAtLayer(1)
-                    ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS.toInt(), 1
+                    ), org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_NO_GRAPHICS, 1
                 )
             }
 
@@ -380,7 +377,7 @@ class InventoryTransactionProcessor : DataPacketProcessor<MigrationPacket<Invent
                         arrayOf(player), arrayOf(
                             target.position
                         ),
-                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
+                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY, 0
                     )
 
                     val blockEntity = player.level!!.getBlockEntity(blockVector.asVector3())

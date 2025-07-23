@@ -1,5 +1,6 @@
 package org.chorus_oss.chorus.network.connection
 
+import dev.whyoleg.cryptography.algorithms.AES
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -7,7 +8,6 @@ import io.netty.handler.codec.DecoderException
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.ScheduledFuture
 import io.netty.util.internal.PlatformDependent
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.netty.BedrockPacketWrapper
 import org.chorus_oss.chorus.network.connection.netty.codec.FrameIdCodec
 import org.chorus_oss.chorus.network.connection.netty.codec.batch.BedrockBatchDecoder
@@ -16,9 +16,9 @@ import org.chorus_oss.chorus.network.connection.netty.codec.compression.Compress
 import org.chorus_oss.chorus.network.connection.netty.codec.encryption.BedrockEncryptionDecoder
 import org.chorus_oss.chorus.network.connection.netty.codec.encryption.BedrockEncryptionEncoder
 import org.chorus_oss.chorus.network.connection.netty.initializer.BedrockChannelInitializer
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
 import org.cloudburstmc.netty.channel.raknet.RakDisconnectReason
 import org.cloudburstmc.netty.channel.raknet.RakServerChannel
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption
@@ -28,7 +28,6 @@ import java.net.SocketAddress
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.crypto.SecretKey
 
 /**
  * A Bedrock peer that represents a single network connection to the remote peer.
@@ -101,11 +100,11 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
      * @param targetClientId the target client id
      * @param packet         the packet
      */
-    fun sendPacket(senderClientId: Int, targetClientId: Int, packet: DataPacket?) {
+    fun sendPacket(senderClientId: Int, targetClientId: Int, packet: Packet?) {
         packetQueue.add(BedrockPacketWrapper(0, senderClientId, targetClientId, packet, null))
     }
 
-    fun sendPacketSync(senderClientId: Int, targetClientId: Int, packet: DataPacket?) {
+    fun sendPacketSync(senderClientId: Int, targetClientId: Int, packet: Packet?) {
         channel.writeAndFlush(BedrockPacketWrapper(0, senderClientId, targetClientId, packet, null))
             .syncUninterruptibly()
     }
@@ -117,7 +116,7 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
      * @param targetClientId the target client id
      * @param packet         the packet
      */
-    fun sendPacketImmediately(senderClientId: Int, targetClientId: Int, packet: DataPacket?) {
+    fun sendPacketImmediately(senderClientId: Int, targetClientId: Int, packet: Packet?) {
         channel.writeAndFlush(BedrockPacketWrapper(0, senderClientId, targetClientId, packet, null))
     }
 
@@ -129,10 +128,7 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
         channel.flush()
     }
 
-    fun enableEncryption(secretKey: SecretKey) {
-        Objects.requireNonNull(secretKey, "secretKey")
-        require(secretKey.algorithm == "AES") { "Invalid key algorithm" }
-        // Check if the codecs exist in the pipeline
+    fun enableEncryption(key: AES.CTR.Key) {
         check(
             !(channel.pipeline().get(BedrockEncryptionEncoder::class.java) != null ||
                     channel.pipeline().get(BedrockEncryptionDecoder::class.java) != null)
@@ -140,11 +136,11 @@ class BedrockPeer(val channel: Channel, private val sessionFactory: BedrockSessi
 
         channel.pipeline().addAfter(
             FrameIdCodec.NAME, BedrockEncryptionEncoder.NAME,
-            BedrockEncryptionEncoder(secretKey, EncryptionUtils.createCipher(true, secretKey))
+            BedrockEncryptionEncoder(key)
         )
         channel.pipeline().addAfter(
             FrameIdCodec.NAME, BedrockEncryptionDecoder.NAME,
-            BedrockEncryptionDecoder(secretKey, EncryptionUtils.createCipher(false, secretKey))
+            BedrockEncryptionDecoder(key)
         )
 
         log.debug("Encryption enabled for {}", socketAddress)

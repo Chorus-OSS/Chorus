@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.entity.data
 
-import com.google.common.base.Preconditions
 import java.util.*
 
 class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
@@ -23,7 +22,6 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     }
 
     fun setFlag(flag: EntityFlag, value: Boolean): EntityFlag {
-        Objects.requireNonNull(flag, "flag")
         val flags: EnumSet<EntityFlag> = this.getOrCreateFlags()
         if (value) {
             flags.add(flag)
@@ -35,13 +33,11 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     }
 
     fun existFlag(flag: EntityFlag): Boolean {
-        Objects.requireNonNull(flag, "flag")
         val flags: EnumSet<EntityFlag> = this.getOrCreateFlags()
         return flags.contains(flag)
     }
 
     fun putFlags(flags: EnumSet<EntityFlag>): EnumSet<EntityFlag> {
-        Objects.requireNonNull(flags, "flags")
         map[EntityDataTypes.FLAGS] = flags
         map[EntityDataTypes.FLAGS_2] = flags
         return flags
@@ -52,7 +48,6 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     }
 
     fun <T : Any> getOrDefault(type: EntityDataType<T>, defaultValue: T): T {
-        Objects.requireNonNull(type, "type")
         val `object`: Any = map.getOrDefault(type, defaultValue)
         return try {
             `object` as T
@@ -86,8 +81,6 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
 
     override fun put(key: EntityDataType<*>, value: Any): Any? {
         var value1: Any = value
-        Preconditions.checkNotNull(key, "type")
-        Preconditions.checkNotNull(value1, "value was null for %s", key)
         if (key === EntityDataTypes.FLAGS || key === EntityDataTypes.FLAGS_2) {
             return this.putFlags(value1 as EnumSet<EntityFlag>)
         }
@@ -111,7 +104,6 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     }
 
     override fun putAll(from: Map<out EntityDataType<*>, Any>) {
-        Preconditions.checkNotNull(map, "map")
         this.map.putAll(map)
     }
 

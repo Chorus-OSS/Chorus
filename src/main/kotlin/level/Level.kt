@@ -1,11 +1,12 @@
 package org.chorus_oss.chorus.level
 
 
-import com.google.common.base.Preconditions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.Buffer
 import kotlinx.io.bytestring.ByteString
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.*
@@ -26,7 +27,6 @@ import org.chorus_oss.chorus.event.block.BlockUpdateEvent
 import org.chorus_oss.chorus.event.level.*
 import org.chorus_oss.chorus.event.player.PlayerInteractEvent
 import org.chorus_oss.chorus.event.weather.LightningStrikeEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
@@ -53,16 +53,14 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.BlockUpdateScheduler
 import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.nbt.TagSerialization
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import org.chorus_oss.protocol.types.BlockPos
 import org.chorus_oss.protocol.types.ChunkPos
 import java.awt.Color
@@ -110,8 +108,8 @@ class Level(
      */
     private val chunkLoaders = HashMap<Long, MutableMap<Int, ChunkLoader>>()
 
-    // Computation atomicity may be required in addChunkPacket(int, int, DataPacket)
-    private val chunkPackets = ConcurrentHashMap<Long, Deque<DataPacket>>()
+    // Computation atomicity may be required in addChunkPacket(int, int, Packet)
+    private val chunkPackets = ConcurrentHashMap<Long, Deque<Packet>>()
 
     private val unloadQueue = ConcurrentHashMap<Long, Long>()
     private val tickCachedBlocks = ConcurrentHashMap<Long, TickCachedBlockStore>()
@@ -322,8 +320,8 @@ class Level(
     }
 
     fun addSound(pos: Vector3, sound: Sound, volume: Float, pitch: Float, vararg players: Player) {
-        Preconditions.checkArgument(volume in 0.0..1.0, "Sound volume must be between 0 and 1")
-        Preconditions.checkArgument(pitch >= 0, "Sound pitch must be higher than 0")
+        check(volume in 0.0..1.0) { "Sound volume must be between 0 and 1" }
+        check(pitch >= 0) { "Sound pitch must be higher than 0" }
 
         val packet = org.chorus_oss.protocol.packets.PlaySoundPacket(
             soundName = sound.sound,
@@ -349,47 +347,49 @@ class Level(
     }
 
     fun addLevelEvent(type: Int, data: Int, x: Float, y: Float, z: Float) {
-        val packet = LevelEventPacket()
-        packet.evid = type
-        packet.x = x
-        packet.y = y
-        packet.z = z
-        packet.data = data
-
+        val packet = LevelEventPacket(
+            eventType = type,
+            position = org.chorus_oss.protocol.types.Vector3f(x, y, z),
+            eventData = data,
+        )
         this.addChunkPacket(floor(x).toInt() shr 4, floor(z).toInt() shr 4, packet)
     }
 
     @JvmOverloads
     fun addLevelEvent(pos: Vector3, event: Int, data: Int = 0) {
-        val pk = LevelEventPacket()
-        pk.evid = event
-        pk.x = pos.x.toFloat()
-        pk.y = pos.y.toFloat()
-        pk.z = pos.z.toFloat()
-        pk.data = data
-
+        val pk = LevelEventPacket(
+            eventType = event,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            eventData = data,
+        )
         addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
     }
 
     fun addLevelEvent(pos: Vector3, event: Int, data: CompoundTag) {
-        val pk: LevelEventGenericPacket = LevelEventGenericPacket()
-        pk.eventId = event
-        pk.tag = data
-
+        val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
+            eventID = event,
+            serializedEventData = Buffer().apply {
+                org.chorus_oss.nbt.Tag.serialize(
+                    org.chorus_oss.nbt.tags.CompoundTag(data),
+                    this,
+                    TagSerialization.NetLE,
+                    false
+                )
+            }.readByteString()
+        )
         this.addChunkPacket(pos.chunkX, pos.chunkZ, pk)
     }
 
     @JvmOverloads
     fun addLevelSoundEvent(
         pos: Vector3,
-        type: Int,
+        type: org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType,
         data: Int,
         entityType: Int,
         isBaby: Boolean = false,
         isGlobal: Boolean = false
     ) {
-        var identifier = Registries.ENTITY.getEntityIdentifier(entityType)
-        if (identifier == null) identifier = ":"
+        val identifier = Registries.ENTITY.getEntityIdentifier(entityType)
         addLevelSoundEvent(pos, type, data, identifier, isBaby, isGlobal)
     }
 
@@ -397,7 +397,7 @@ class Level(
      * Broadcasts a LevelSound to players,use LevelSoundEventPacket
      *
      * @param pos        the pos
-     * @param type       the sound type id,get from[LevelSoundEventPacket]
+     * @param type       the sound type id,get from[org.chorus_oss.protocol.packets.LevelSoundEventPacket]
      * @param data       the extra data,default -1
      * @param identifier the identifier,default ":"
      * @param isBaby     the is baby,default false
@@ -407,28 +407,27 @@ class Level(
      * Broadcasts sound to players
      *
      * @param pos  position where sound should be played
-     * @param type ID of the sound from [org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket]
+     * @param type ID of the sound from [org.chorus_oss.protocol.packetsLevelSoundEventPacket]
      * @param data generic data that can affect sound
      */
     @JvmOverloads
     fun addLevelSoundEvent(
         pos: Vector3,
-        type: Int,
+        type: org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType,
         data: Int = -1,
         identifier: String = ":",
         isBaby: Boolean = false,
         isGlobal: Boolean = false
     ) {
-        val pk = LevelSoundEventPacket()
-        pk.sound = type
-        pk.extraData = data
-        pk.entityIdentifier = identifier
-        pk.x = pos.x.toFloat()
-        pk.y = pos.y.toFloat()
-        pk.z = pos.z.toFloat()
-        pk.isBabyMob = isBaby
-        pk.isGlobal = isGlobal
-
+        val pk = org.chorus_oss.protocol.packets.LevelSoundEventPacket(
+            soundType = type,
+            position = org.chorus_oss.protocol.types.Vector3f(pos),
+            extraData = data,
+            entityType = identifier,
+            babyMob = isBaby,
+            global = isGlobal,
+            actorUniqueID = -1,
+        )
         this.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
     }
 
@@ -450,7 +449,7 @@ class Level(
             }
         } else {
             for (p in packets) {
-                Server.broadcastPacket(players, p)
+                Server.broadcastPacket(players.toList(), p)
             }
         }
     }
@@ -586,16 +585,12 @@ class Level(
         }
     }
 
-    fun addChunkPacket(chunkX: Int, chunkZ: Int, packet: DataPacket?) {
+    fun addChunkPacket(chunkX: Int, chunkZ: Int, packet: Packet) {
         val index = chunkHash(chunkX, chunkZ)
         val packets = chunkPackets.computeIfAbsent(
             index
-        ) { ConcurrentLinkedDeque<DataPacket>() }
+        ) { ConcurrentLinkedDeque() }
         packets.add(packet)
-    }
-
-    fun addChunkPacket(x: Int, z: Int, packet: Packet) {
-        addChunkPacket(x, z, MigrationPacket(packet))
     }
 
     @JvmOverloads
@@ -820,7 +815,7 @@ class Level(
                                     this.sendBlocks(
                                         playerArray,
                                         blocksArray,
-                                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+                                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL
                                     )
                                 }
                             }
@@ -876,16 +871,20 @@ class Level(
                     val player = Server.instance.getPlayer(key)
                     if (player != null) {
                         if (isRaining) {
-                            val pk = LevelEventPacket()
-                            pk.evid = LevelEventPacket.EVENT_START_RAINING
-                            pk.data = rainTime
-                            player.dataPacket(pk)
+                            val pk = LevelEventPacket(
+                                eventType = LevelEventPacket.START_RAINING,
+                                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                                eventData = rainTime,
+                            )
+                            player.sendPacket(pk)
                             playerWeatherShowMap.put(key, 1)
                             if (isThundering()) {
-                                val pk2 = LevelEventPacket()
-                                pk2.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-                                pk2.data = thunderTime
-                                player.dataPacket(pk)
+                                val pk2 = LevelEventPacket(
+                                    eventType = LevelEventPacket.START_THUNDERSTORM,
+                                    position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                                    eventData = thunderTime,
+                                )
+                                player.sendPacket(pk2)
                                 playerWeatherShowMap.put(key, 2)
                             }
                         }
@@ -980,13 +979,13 @@ class Level(
 
             this.addLevelSoundEvent(
                 vector,
-                LevelSoundEventPacket.SOUND_THUNDER,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Thunder,
                 -1,
                 Registries.ENTITY.getEntityNetworkId(EntityID.LIGHTNING_BOLT)
             )
             this.addLevelSoundEvent(
                 vector,
-                LevelSoundEventPacket.SOUND_EXPLODE,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Explode,
                 -1,
                 Registries.ENTITY.getEntityNetworkId(EntityID.LIGHTNING_BOLT)
             )
@@ -1063,27 +1062,30 @@ class Level(
     }
 
     fun sendBlockExtraData(x: Int, y: Int, z: Int, id: Int, data: Int, players: Array<Player>) {
-        val pk = LevelEventPacket()
-        pk.evid = LevelEventPacket.EVENT_SET_DATA
-        pk.x = x + 0.5f
-        pk.y = y + 0.5f
-        pk.z = z + 0.5f
-        pk.data = (data shl 8) or id
+        val pk = LevelEventPacket(
+            eventType = 4000,
+            position = org.chorus_oss.protocol.types.Vector3f(
+                x = x + 0.5f,
+                y = y + 0.5f,
+                z = z + 0.5f,
+            ),
+            eventData = (data shl 8) or id
+        )
 
-        Server.broadcastPacket(players, pk)
+        Server.broadcastPacket(players.toList(), pk)
     }
 
     fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3>) {
-        this.sendBlocks(target, blocks, 0, 0)
-        this.sendBlocks(target, blocks, 0, 1)
+        this.sendBlocks(target, blocks, 0u, 0)
+        this.sendBlocks(target, blocks, 0u, 1)
     }
 
-    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: Int) {
+    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: UInt) {
         this.sendBlocks(target, blocks, flags, 0)
         this.sendBlocks(target, blocks, flags, 1)
     }
 
-    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: Int, optimizeRebuilds: Boolean) {
+    fun sendBlocks(target: Array<Player>, blocks: Array<out IVector3?>, flags: UInt, optimizeRebuilds: Boolean) {
         this.sendBlocks(target, blocks, flags, 0, optimizeRebuilds)
         this.sendBlocks(target, blocks, flags, 1, optimizeRebuilds)
     }
@@ -1092,7 +1094,7 @@ class Level(
     fun sendBlocks(
         target: Array<Player>,
         blocks: Array<out IVector3?>,
-        flags: Int,
+        flags: UInt,
         dataLayer: Int,
         optimizeRebuilds: Boolean = false
     ) {
@@ -1120,25 +1122,27 @@ class Level(
                 }
             }
 
-            val bPos = pos.asBlockVector3()
+            val bPos = BlockPos(pos)
             val updateBlockPacket = org.chorus_oss.protocol.packets.UpdateBlockPacket(
-                position = BlockPos(pos),
-                newBlockRuntimeID = (if (b is Block) {
-                    b.runtimeId
-                } else if (b is Vector3WithRuntimeId) {
-                    if (dataLayer == 0) {
-                        b.runtimeIdLayer0
+                position = bPos,
+                newBlockRuntimeID = run {
+                    if (b is Block) {
+                        b.runtimeId.toUInt()
+                    } else if (b is Vector3WithRuntimeId) {
+                        if (dataLayer == 0) {
+                            b.runtimeIdLayer0.toUInt()
+                        } else {
+                            b.runtimeIdLayer1.toUInt()
+                        }
                     } else {
-                        b.runtimeIdLayer1
+                        val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
+                        if (hash == Int.MIN_VALUE) {
+                            continue
+                        }
+                        hash.toUInt()
                     }
-                } else {
-                    val hash = getBlockRuntimeId(bPos.x, bPos.y, bPos.z, dataLayer)
-                    if (hash == Integer.MIN_VALUE) {
-                        continue
-                    }
-                    hash
-                }).toUInt(),
-                flags = if (first) flags.toUInt() else 0u,
+                },
+                flags = if (first) flags else 0u,
                 layer = dataLayer.toUInt(),
             )
             packets.add(updateBlockPacket)
@@ -1154,12 +1158,11 @@ class Level(
             return
         }
 
-        val chunksPerLoader = Math.min(
-            200,
-            Math.max(1, (((this.chunksPerTicks - loaders.size).toDouble() / loaders.size + 0.5)).toInt())
+        val chunksPerLoader = 200.coerceAtMost(
+            1.coerceAtLeast((((this.chunksPerTicks - loaders.size).toDouble() / loaders.size + 0.5)).toInt())
         )
         var randRange = 3 + chunksPerLoader / 30
-        randRange = Math.min(randRange, this.chunkTickRadius)
+        randRange = randRange.coerceAtMost(this.chunkTickRadius)
 
         val random = ThreadLocalRandom.current()
         if (!loaders.isEmpty()) {
@@ -1168,7 +1171,7 @@ class Level(
                 val chunkZ = loader.locator.position.chunkZ
 
                 val index = chunkHash(chunkX, chunkZ)
-                val existingLoaders = Math.max(0, chunkTickList.getOrDefault(index, 0))
+                val existingLoaders = 0.coerceAtLeast(chunkTickList.getOrDefault(index, 0))
                 chunkTickList.put(index, existingLoaders + 1)
                 for (chunk in 0..<chunksPerLoader) {
                     val dx = random.nextInt(2 * randRange) - randRange
@@ -2202,13 +2205,13 @@ class Level(
                         block.position.add(0.0, 0.0, 1.0),
                         block.position.add(0.0, 0.0, -1.0)
                     ),
-                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
+                    org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY
                 )
             }
             this.sendBlocks(
                 getChunkPlayers(cx, cz).values.toTypedArray(),
                 arrayOf<Block?>(block),
-                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 block.layer
             )
         } else {
@@ -2695,7 +2698,7 @@ class Level(
                     player.level!!.sendBlocks(
                         arrayOf<Player>(player),
                         arrayOf<Block?>(Block.get(BlockID.AIR, target)),
-                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                        org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL_PRIORITY,
                         1
                     )
                 }
@@ -2851,7 +2854,11 @@ class Level(
         }
 
         if (playSound) {
-            this.addLevelSoundEvent(hand.position, LevelSoundEventPacket.SOUND_PLACE, hand.runtimeId)
+            this.addLevelSoundEvent(
+                hand.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Place,
+                hand.runtimeId
+            )
         }
 
         if (item1.getCount() <= 0) {
@@ -3249,7 +3256,7 @@ class Level(
             }
         }
         subTickGameLoop = GameLoop.builder()
-            .onTick(Consumer<GameLoop> { currentTick: GameLoop -> this.subTick(currentTick) })
+            .onTick({ currentTick: GameLoop -> this.subTick(currentTick) })
             .onStop(Runnable { log.debug("$levelName SubTick is closed!") })
             .loopCountPerSec(20)
             .build()
@@ -3417,13 +3424,13 @@ class Level(
         }
 
     fun requestChunk(x: Int, z: Int, player: Player) {
-        Preconditions.checkArgument(player.loaderId > 0, player.getEntityName() + " has no chunk loader")
+        check(player.loaderId > 0) { "${player.getEntityName()} has no chunk loader" }
         val index = chunkHash(x, z)
         val playerInt2ObjectMap = chunkSendQueue.computeIfAbsent(index) { ConcurrentHashMap<Int, Player>() }
         playerInt2ObjectMap[player.loaderId] = player
     }
 
-    private fun sendChunk(x: Int, z: Int, index: Long, packet: DataPacket) {
+    private fun sendChunk(x: Int, z: Int, index: Long, packet: Packet) {
         for (player in chunkSendQueue[index]?.values ?: return) {
             if (player.isConnected() && player.usedChunks.contains(index)) {
                 player.sendChunk(x, z, packet)
@@ -3548,16 +3555,14 @@ class Level(
     }
 
     fun scheduleBlockEntityUpdate(entity: BlockEntity) {
-        Preconditions.checkNotNull(entity, "entity")
-        Preconditions.checkArgument(entity.level === this, "BlockEntity is not in this level")
+        check(entity.level === this) { "BlockEntity is not in this level" }
         if (!updateBlockEntities.contains(entity)) {
             updateBlockEntities.add(entity)
         }
     }
 
     fun removeBlockEntity(entity: BlockEntity) {
-        Preconditions.checkNotNull(entity, "entity")
-        Preconditions.checkArgument(entity.level === this, "BlockEntity is not in this level")
+        check(entity.level === this) { "BlockEntity is not in this level" }
         blockEntities.remove(entity.id)
         updateBlockEntities.remove(entity)
     }
@@ -4055,20 +4060,25 @@ class Level(
 
         this.isRaining = raining
 
-        val pk = LevelEventPacket()
-        if (raining) {
-            pk.evid = LevelEventPacket.EVENT_START_RAINING
-            val time = ThreadLocalRandom.current().nextInt(12000) + 12000 // These numbers are from Minecraft
-            pk.data = time
-            rainTime = time
+        val pk = if (raining) {
+            rainTime = ThreadLocalRandom.current().nextInt(12000) + 12000 // These numbers are from Minecraft
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = rainTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_RAINING
             rainTime = ThreadLocalRandom.current().nextInt(168000) + 12000
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
 
         for (p in getPlayers().values) {
             playerWeatherShowMap.put(p.getEntityName(), if (raining) 1 else 0)
-            p.dataPacket(pk)
+            p.sendPacket(pk)
         }
 
         return true
@@ -4093,21 +4103,25 @@ class Level(
 
         this.thundering = thundering
 
-        val pk = LevelEventPacket()
-        // These numbers are from Minecraft
-        if (thundering) {
-            pk.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-            val time = ThreadLocalRandom.current().nextInt(12000) + 3600
-            pk.data = time
-            thunderTime = time
+        val pk = if (thundering) {
+            thunderTime = ThreadLocalRandom.current().nextInt(12000) + 3600
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = thunderTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_THUNDERSTORM
             thunderTime = ThreadLocalRandom.current().nextInt(168000) + 12000
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
 
         for (p in getPlayers().values) {
             playerWeatherShowMap.put(p.getEntityName(), if (isRaining) 2 else 0)
-            p.dataPacket(pk)
+            p.sendPacket(pk)
         }
 
         return true
@@ -4119,25 +4133,35 @@ class Level(
             players1 = getPlayers().values.toTypedArray()
         }
 
-        val pk = LevelEventPacket()
-
-        if (this.isRaining) {
-            pk.evid = LevelEventPacket.EVENT_START_RAINING
-            pk.data = this.rainTime
+        val pk = if (this.isRaining) {
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = rainTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_RAINING
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_RAINING,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
+        Server.broadcastPacket(players1.toList(), pk)
 
-        Server.broadcastPacket(players1, pk)
-
-        if (this.isThundering()) {
-            pk.evid = LevelEventPacket.EVENT_START_THUNDERSTORM
-            pk.data = this.thunderTime
+        val pk2 = if (this.isThundering()) {
+            LevelEventPacket(
+                eventType = LevelEventPacket.START_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = thunderTime,
+            )
         } else {
-            pk.evid = LevelEventPacket.EVENT_STOP_THUNDERSTORM
+            LevelEventPacket(
+                eventType = LevelEventPacket.STOP_THUNDERSTORM,
+                position = org.chorus_oss.protocol.types.Vector3f(0f, 0f, 0f),
+                eventData = 0,
+            )
         }
-
-        Server.broadcastPacket(players1, pk)
+        Server.broadcastPacket(players1.toList(), pk2)
     }
 
     fun sendWeather(player: Player?) {

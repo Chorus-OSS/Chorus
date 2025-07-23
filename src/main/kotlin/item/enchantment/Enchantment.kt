@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.item.enchantment
 
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
@@ -832,8 +831,7 @@ abstract class Enchantment : Cloneable {
                     )
                 }
 
-                val words =
-                    set.toArray(EmptyArrays.EMPTY_STRINGS)
+                val words = set.toTypedArray()
                 return java.lang.String.join(" ", *words)
             }
 

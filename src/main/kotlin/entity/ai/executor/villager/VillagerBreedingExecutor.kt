@@ -7,7 +7,7 @@ import org.chorus_oss.chorus.entity.ai.executor.EntityBreedingExecutor
 import org.chorus_oss.chorus.entity.ai.memory.CoreMemoryTypes
 import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.entity.mob.villagers.EntityVillagerV2
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 class VillagerBreedingExecutor(
     entityClass: Class<out EntityMob>,
@@ -87,16 +87,20 @@ class VillagerBreedingExecutor(
     }
 
     protected fun sendInLoveParticles(entity: EntityMob) {
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.LOVE_PARTICLES
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.LoveParticles,
+            eventData = 0,
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 
     protected fun sendAngryParticles(entity: EntityMob) {
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.VILLAGER_ANGRY
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.VillagerAngry,
+            eventData = 0,
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

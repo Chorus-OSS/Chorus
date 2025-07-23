@@ -3,13 +3,13 @@ package org.chorus_oss.chorus.form.window
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.response.CustomResponse
 import org.chorus_oss.chorus.form.response.ElementResponse
-import org.chorus_oss.chorus.utils.JSONUtils
-import java.lang.reflect.Type
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
@@ -25,8 +25,8 @@ class CustomForm(title: String) : Form<CustomResponse?>(title) {
         return super.onSubmit(submitted) as CustomForm
     }
 
-    override fun onClose(callback: Consumer<Player?>?): CustomForm {
-        return super.onClose(callback) as CustomForm
+    override fun onClose(closed: Consumer<Player?>?): CustomForm {
+        return super.onClose(closed) as CustomForm
     }
 
     override fun send(player: Player): CustomForm {
@@ -65,7 +65,7 @@ class CustomForm(title: String) : Form<CustomResponse?>(title) {
 
         val response = CustomResponse()
 
-        val elementResponses = JSONUtils.from<List<String>>(formData, LIST_STRING_TYPE)
+        val elementResponses = Json.parseToJsonElement(formData).jsonArray.map { it.jsonPrimitive.content }
 
         var i = 0
         val responseSize = elementResponses.size
@@ -108,9 +108,5 @@ class CustomForm(title: String) : Form<CustomResponse?>(title) {
 
     override fun <M : Any> putMeta(key: String, `object`: M): CustomForm {
         return super.putMeta(key, `object`) as CustomForm
-    }
-
-    companion object {
-        protected var LIST_STRING_TYPE: Type = object : TypeToken<List<String?>?>() {}.type
     }
 }

@@ -1,11 +1,12 @@
 package org.chorus_oss.chorus.tags
 
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.utils.JSONUtils
 import org.jetbrains.annotations.UnmodifiableView
 import java.io.IOException
-import java.io.InputStreamReader
 import java.util.*
 
 object BlockTags {
@@ -53,23 +54,18 @@ object BlockTags {
     const val PNX_SHULKERBOX: String = "pnx:shulkerbox"
 
 
-    private val TAG_2_BLOCKS = HashMap<String, MutableSet<String>>()
-    private val BLOCKS_2_TAGS = HashMap<String, MutableSet<String>>()
+    private val TAG_2_BLOCKS = mutableMapOf<String, MutableSet<String>>()
+    private val BLOCKS_2_TAGS = mutableMapOf<String, MutableSet<String>>()
 
     init {
         try {
             Server::class.java.classLoader.getResourceAsStream("block_tags.json").use { stream ->
-                val typeToken: TypeToken<HashMap<String, HashSet<String>>> =
-                    object : TypeToken<HashMap<String, HashSet<String>>>() {}
                 checkNotNull(stream)
-                val map = JSONUtils.from(InputStreamReader(stream), typeToken)
-                val map2 = HashMap<String, HashSet<String>>()
-                map.forEach { (key, value) ->
-                    val handle: HashSet<String> = HashSet(value.size)
-                    handle.addAll(value)
-                    map2[key] = handle
+
+                val map = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject.entries.associate {
+                    it.key to it.value.jsonArray.map { v -> v.jsonPrimitive.content }.toMutableSet()
                 }
-                TAG_2_BLOCKS.putAll(map2)
+                TAG_2_BLOCKS.putAll(map)
                 for ((key, value) in TAG_2_BLOCKS) {
                     for (block in value) {
                         val tags = BLOCKS_2_TAGS.computeIfAbsent(

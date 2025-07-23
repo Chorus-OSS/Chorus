@@ -5,6 +5,8 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.mob.villagers.EntityVillagerV2
 import org.chorus_oss.chorus.event.inventory.CraftItemEvent
 import org.chorus_oss.chorus.event.inventory.EnchantItemEvent
+import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_ID_START
+import org.chorus_oss.chorus.experimental.network.protocol.utils.ENCHANT_RECIPE_MAP
 import org.chorus_oss.chorus.inventory.EnchantInventory
 import org.chorus_oss.chorus.inventory.InputInventory
 import org.chorus_oss.chorus.inventory.SmithingInventory
@@ -12,7 +14,6 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.PlayerEnchantOptionsPacket
 import org.chorus_oss.chorus.network.protocol.types.TrimData
 import org.chorus_oss.chorus.network.protocol.types.TrimMaterial
 import org.chorus_oss.chorus.network.protocol.types.TrimPattern
@@ -65,8 +66,8 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeRe
         context: ItemStackRequestContext
     ): ActionResponse? {
         val inventory = player.topWindow.orElseGet { player.craftingGrid }
-        if (action.recipeNetworkId.toInt() >= PlayerEnchantOptionsPacket.ENCH_RECIPEID) {  //handle ench recipe
-            val enchantOptionData = PlayerEnchantOptionsPacket.RECIPE_MAP[action.recipeNetworkId.toInt()]
+        if (action.recipeNetworkId.toInt() >= ENCHANT_RECIPE_ID_START) {  //handle ench recipe
+            val enchantOptionData = ENCHANT_RECIPE_MAP[action.recipeNetworkId]
             if (enchantOptionData == null) {
                 log.error("Can't find enchant recipe from netId " + action.recipeNetworkId)
                 return context.error()
@@ -84,16 +85,16 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeRe
                 inventory as EnchantInventory,
                 first.clone().autoAssignStackNetworkId(),
                 item,
-                enchantOptionData.minLevel,
+                enchantOptionData.data.cost.toInt(),
                 player
             )
             Server.instance.pluginManager.callEvent(event)
             if (!event.cancelled) {
                 if ((player.gamemode and 0x01) == 0) {
-                    player.setExperience(player.experience, player.experienceLevel - (enchantOptionData.entry + 1))
+                    player.setExperience(player.experience, player.experienceLevel - (enchantOptionData.index + 1))
                 }
                 player.creativeOutputInventory.setItem(item)
-                PlayerEnchantOptionsPacket.RECIPE_MAP.remove(action.recipeNetworkId.toInt())
+                ENCHANT_RECIPE_MAP.remove(action.recipeNetworkId)
                 player.regenerateEnchantmentSeed()
                 context.put(ENCH_RECIPE_KEY, true)
             }

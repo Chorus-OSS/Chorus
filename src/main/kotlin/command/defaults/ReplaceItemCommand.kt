@@ -147,7 +147,7 @@ class ReplaceItemCommand(name: String) : VanillaCommand(name, "commands.replacei
                     item.damage = data
                 }
                 if (list.hasResult(if (notOldItemHandling) 7 else 8)) {
-                    val components = list.getResult<String>(if (notOldItemHandling) 7 else 8)
+                    val components = list.getResult<String>(if (notOldItemHandling) 7 else 8)!!
                     item.readItemJsonComponents(Item.ItemJsonComponents.fromJson(components))
                 }
                 if (holder.inventory.setItem(slotId, item)) {
@@ -198,7 +198,7 @@ class ReplaceItemCommand(name: String) : VanillaCommand(name, "commands.replacei
             item.damage = data
         }
         if (list.hasResult(if (notOldItemHandling) 7 else 8)) {
-            val components = list.getResult<String>(if (notOldItemHandling) 7 else 8)
+            val components = list.getResult<String>(if (notOldItemHandling) 7 else 8)!!
             item.readItemJsonComponents(Item.ItemJsonComponents.fromJson(components))
         }
         var successCount = 0

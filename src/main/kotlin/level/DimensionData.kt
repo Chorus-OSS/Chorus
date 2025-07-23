@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.level
 
-import java.util.*
-
 class DimensionData @JvmOverloads constructor(
     val dimensionName: String,
     val dimensionId: Int,
@@ -28,9 +26,7 @@ class DimensionData @JvmOverloads constructor(
         }
         this.height = height
 
-        this.chunkSectionCount = Objects.requireNonNullElseGet(
-            chunkSectionCount
-        ) { this.height shr 4 + (if ((this.height and 15) == 0) 0 else 1) }
+        this.chunkSectionCount = chunkSectionCount ?: (this.height shr 4 + (if ((this.height and 15) == 0) 0 else 1))
     }
 
     val minSectionY: Int

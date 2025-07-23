@@ -15,11 +15,9 @@ interface Recipe {
 
     fun fastCheck(vararg items: Item): Boolean {
         if (ingredients.size != items.size) return false
-        for (item in items) {
-            val b = ingredients.stream().anyMatch { i: ItemDescriptor -> i.match(item) }
-            if (!b) return false
+        return items.all {
+            ingredients.any { i -> i.match(it) }
         }
-        return true
     }
 
     val type: RecipeType

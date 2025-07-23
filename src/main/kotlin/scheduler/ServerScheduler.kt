@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.scheduler
 import org.chorus_oss.chorus.plugin.Plugin
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.PluginException
-import org.chorus_oss.chorus.utils.Utils
 import org.jetbrains.annotations.ApiStatus
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -437,10 +436,7 @@ class ServerScheduler {
         while (true) {
             val task = pending.poll() ?: break
             val tick = max(currentTick.toDouble(), task.nextRunTick.toDouble()).toInt() // Do not schedule in the past
-            val queue = Utils.getOrCreate(
-                queueMap,
-                ArrayDeque<TaskHandler>()::class.java, tick
-            )
+            val queue = queueMap.getOrPut(tick) { ArrayDeque() }
             queue.add(task)
         }
         if (currentTick - this.currentTick > queueMap.size) { // A large number of ticks have passed since the last execution

@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.item
 
 import com.google.gson.Gson
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.registry.CreativeItemRegistry
 import org.chorus_oss.chorus.registry.Registries
@@ -32,7 +31,7 @@ class CreativeItemTest {
                         val tag = items[i]
                         val damage = (tag.getOrDefault("damage", 0) as Number).toInt()
                         val nbt = if (tag.containsKey("nbt_b64")) Base64.getDecoder()
-                            .decode(tag["nbt_b64"].toString()) else EmptyArrays.EMPTY_BYTES
+                            .decode(tag["nbt_b64"].toString()) else byteArrayOf()
                         val name = tag["id"].toString()
                         val item = Item.get(name, damage, 1, nbt, false)
                         require(

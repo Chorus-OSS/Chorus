@@ -4,7 +4,8 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemTool
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.*
 
 class BlockSponge @JvmOverloads constructor(state: BlockState = properties.defaultState) :
@@ -36,12 +37,15 @@ class BlockSponge @JvmOverloads constructor(state: BlockState = properties.defau
         ) {
             level.setBlock(block.position, BlockWetSponge(), true, true)
 
-            val packet = LevelEventPacket()
-            packet.evid = LevelEventPacket.EVENT_PARTICLE_DESTROY_BLOCK
-            packet.x = block.x.toFloat() + 0.5f
-            packet.y = block.y.toFloat() + 1f
-            packet.z = block.z.toFloat() + 0.5f
-            packet.data = get(BlockID.FLOWING_WATER).blockState.blockStateHash()
+            val packet = LevelEventPacket(
+                eventType = LevelEventPacket.PARTICLE_DESTROY_BLOCK,
+                position = Vector3f(
+                    x = block.x.toFloat() + 0.5f,
+                    y = block.y.toFloat() + 1f,
+                    z = block.z.toFloat() + 0.5f,
+                ),
+                eventData = BlockFlowingWater.properties.defaultState.blockStateHash()
+            )
 
             for (i in 0..3) {
                 level.addChunkPacket(position.chunkX, position.chunkZ, packet)

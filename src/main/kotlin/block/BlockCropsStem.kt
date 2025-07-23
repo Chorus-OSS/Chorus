@@ -77,7 +77,7 @@ abstract class BlockCropsStem(blockstate: BlockState) : BlockCrops(blockstate), 
             }
         }
 
-        val sideFace = BlockFace.Plane.HORIZONTAL.random()
+        val sideFace = BlockFace.Plane.HORIZONTAL_FACES.random()
         val side = this.getSide(sideFace)
         val d = side.down()
         if (side.isAir && (d.id == BlockID.FARMLAND || d.id == BlockID.GRASS_BLOCK || d.id == BlockID.DIRT)) {

@@ -14,8 +14,8 @@ class Node(
     private val finalCost = cost + heuristicCost
 
     override fun compareTo(other: Node?): Int {
-        Objects.requireNonNull(other)
-        if (this.finalCost != other!!.finalCost) {
+        requireNotNull(other)
+        if (this.finalCost != other.finalCost) {
             return this.finalCost - other.finalCost
         }
         var breaking: Double

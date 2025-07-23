@@ -1,13 +1,12 @@
 package org.chorus_oss.chorus.entity.ai.executor
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.entity.ai.memory.CoreMemoryTypes
 import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.entity.mob.animal.EntityHorse
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 /**
  * 代表玩家驯服马时，马的行为
@@ -50,7 +49,7 @@ class TameHorseExecutor @JvmOverloads constructor(
      * @param tameProbability          马被驯服的概率(取值范围1-100)<br></br>Probability of a horse being tamed (value range 1-100)
      */
     init {
-        Preconditions.checkArgument(tameProbability > 0 && tameProbability <= 100)
+        check(tameProbability > 0 && tameProbability <= 100)
         this.tameProbability = tameProbability
         this.tick1 = 0
     }
@@ -102,18 +101,22 @@ class TameHorseExecutor @JvmOverloads constructor(
             if (Utils.rand(0, 100) <= tameProbability) {
                 val horse = entity as EntityHorse
                 horse.setOwnerName(horse.memoryStorage[CoreMemoryTypes.RIDER_NAME]!!)
-                val packet = EntityEventPacket()
-                packet.eid = horse.getRuntimeID()
-                packet.event = EntityEventPacket.TAME_SUCCESS
+                val packet = ActorEventPacket(
+                    actorRuntimeID = horse.getRuntimeID().toULong(),
+                    eventType = ActorEventPacket.Companion.Type.TameSuccess,
+                    eventData = 0
+                )
                 val player = horse.getRider() as Player? ?: return false
-                player.dataPacket(packet)
+                player.sendPacket(packet)
             } else {
                 val horse = entity as EntityHorse
-                val packet = EntityEventPacket()
-                packet.eid = horse.getRuntimeID()
-                packet.event = EntityEventPacket.TAME_FAIL
+                val packet = ActorEventPacket(
+                    actorRuntimeID = horse.getRuntimeID().toULong(),
+                    eventType = ActorEventPacket.Companion.Type.TameFail,
+                    eventData = 0
+                )
                 val player = horse.getRider() as Player? ?: return false
-                player.dataPacket(packet)
+                player.sendPacket(packet)
                 horse.playTameFailAnimation()
                 horse.dismountEntity(horse.getRider()!!)
                 tick1++

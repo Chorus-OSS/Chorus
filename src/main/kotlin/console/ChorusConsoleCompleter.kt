@@ -1,8 +1,6 @@
 package org.chorus_oss.chorus.console
 
-import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
-
 import org.jline.reader.Candidate
 import org.jline.reader.Completer
 import org.jline.reader.LineReader
@@ -29,7 +27,7 @@ class ChorusConsoleCompleter(private val server: Server) : Completer {
         } else if (parsedLine.wordIndex() > 0 && parsedLine.word().isNotEmpty()) {
             val word = parsedLine.word()
             val names: SortedSet<String> = TreeSet()
-            server.onlinePlayers.values.forEach(Consumer<Player> { p: Player -> names.add(p.getEntityName()) })
+            server.onlinePlayers.values.forEach { p -> names.add(p.getEntityName()) }
             for (match in names) {
                 if (!match.lowercase().startsWith(word.lowercase())) {
                     continue

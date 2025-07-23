@@ -15,8 +15,8 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.types.Vector3f
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.item.ItemStack
@@ -144,10 +144,11 @@ class EntityItem(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt) {
                         }
                         entity.close()
                         item.setCount(newAmount)
-                        val packet: EntityEventPacket = EntityEventPacket()
-                        packet.eid = getRuntimeID()
-                        packet.data = newAmount
-                        packet.event = EntityEventPacket.MERGE_ITEMS
+                        val packet = ActorEventPacket(
+                            actorRuntimeID = getRuntimeID().toULong(),
+                            eventType = ActorEventPacket.Companion.Type.MergeItems,
+                            eventData = newAmount
+                        )
                         Server.broadcastPacket(viewers.values, packet)
                     }
                 }
@@ -156,7 +157,7 @@ class EntityItem(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt) {
 
         var hasUpdate: Boolean = this.entityBaseTick(tickDiff)
 
-        val lavaResistant: Boolean = fireProof || item != null && item.isLavaResistant
+        val lavaResistant: Boolean = fireProof || item.isLavaResistant
 
         if (!lavaResistant && (isInsideOfFire() || isInsideOfLava())) {
             this.kill()

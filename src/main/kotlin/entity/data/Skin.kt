@@ -1,14 +1,15 @@
 package org.chorus_oss.chorus.entity.data
 
 
-import com.google.common.base.Preconditions
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.PersonaPiece
+import org.chorus_oss.chorus.utils.PersonaPieceTint
+import org.chorus_oss.chorus.utils.SerializedImage
+import org.chorus_oss.chorus.utils.SkinAnimation
 import org.jose4j.json.internal.json_simple.JSONObject
 import org.jose4j.json.internal.json_simple.JSONValue
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets
 import java.util.*
 
 class Skin {
@@ -82,7 +83,6 @@ class Skin {
     }
 
     fun setSkinData(skinData: SerializedImage) {
-        Objects.requireNonNull(skinData, "skinData")
         this.skinData = skinData
     }
 
@@ -101,11 +101,7 @@ class Skin {
     }
 
     fun generateSkinId(name: String) {
-        val data: ByteArray = Binary.appendBytes(
-            getSkinData().data, getSkinResourcePatch().toByteArray(
-                StandardCharsets.UTF_8
-            )
-        )
+        val data: ByteArray = getSkinData().data + getSkinResourcePatch().toByteArray()
         this.skinId = UUID.nameUUIDFromBytes(data).toString() + "." + name
     }
 
@@ -119,7 +115,7 @@ class Skin {
     }
 
     fun getSkinResourcePatch(): String {
-        return Objects.requireNonNullElse(this.skinResourcePatch, "")
+        return this.skinResourcePatch
     }
 
     fun setSkinResourcePatch(skinResourcePatch: String?) {
@@ -135,8 +131,7 @@ class Skin {
     }
 
     fun setCapeData(capeData: ByteArray) {
-        Objects.requireNonNull(capeData, "capeData")
-        Preconditions.checkArgument(capeData.size == SINGLE_SKIN_SIZE || capeData.isEmpty(), "Invalid legacy cape")
+        check(capeData.size == SINGLE_SKIN_SIZE || capeData.isEmpty()) { "Invalid legacy cape" }
         setCapeData(SerializedImage(64, 32, capeData))
     }
 
@@ -145,7 +140,6 @@ class Skin {
     }
 
     fun setCapeData(capeData: SerializedImage) {
-        Objects.requireNonNull(capeData, "capeData")
         this.capeData = capeData
     }
 
@@ -166,7 +160,6 @@ class Skin {
     }
 
     fun setGeometryData(geometryData: String) {
-        Preconditions.checkNotNull(geometryData, "geometryData")
         if (geometryData != this.geometryData) {
             this.geometryData = geometryData
         }
@@ -177,7 +170,6 @@ class Skin {
     }
 
     fun setAnimationData(animationData: String) {
-        Preconditions.checkNotNull(animationData, "animationData")
         if (animationData != this.animationData) {
             this.animationData = animationData
         }

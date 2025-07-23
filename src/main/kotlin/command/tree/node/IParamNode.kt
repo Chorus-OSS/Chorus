@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.command.tree.node
 import org.chorus_oss.chorus.command.data.CommandEnum
 import org.chorus_oss.chorus.command.data.CommandParamType
 import org.chorus_oss.chorus.command.tree.ParamList
-import org.chorus_oss.chorus.lang.CommandOutputContainer
 import org.chorus_oss.chorus.network.protocol.types.CommandOutputMessage
 import kotlin.math.max
 
@@ -61,7 +60,7 @@ interface IParamNode<T> {
      * @param key 添加的错误信息
      */
     fun error(key: String) {
-        this.error(key, *CommandOutputContainer.EMPTY_STRING)
+        this.error(key, *emptyArray<String>())
     }
 
     /**

@@ -182,7 +182,7 @@ class AntiXraySystem(private val level: Level) {
         level.sendBlocks(
             playerArray,
             vRidList.toTypedArray(),
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL
         )
     }
 
@@ -211,7 +211,7 @@ class AntiXraySystem(private val level: Level) {
         level.sendBlocks(
             arrayOf(player),
             vecList.toTypedArray(),
-            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL.toInt()
+            org.chorus_oss.protocol.packets.UpdateBlockPacket.FLAG_ALL
         )
     }
 

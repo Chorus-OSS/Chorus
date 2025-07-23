@@ -5,8 +5,6 @@ import org.chorus_oss.chorus.utils.PluginException
 
 
 class PermissionAttachment(plugin: Plugin, permissible: Permissible?) {
-    var removalCallback: PermissionRemovedExecutor? = null
-
     private val permissions: MutableMap<String?, Boolean> = HashMap()
 
     private val permissible: Permissible?

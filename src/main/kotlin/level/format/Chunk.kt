@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.level.format
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockAir
@@ -753,7 +752,7 @@ class Chunk : IChunk {
         }
 
         override fun build(): Chunk {
-            Preconditions.checkNotNull(levelProvider)
+            checkNotNull(levelProvider)
             return Chunk(
                 state,
                 chunkX,
@@ -767,7 +766,7 @@ class Chunk : IChunk {
         }
 
         override fun emptyChunk(chunkX: Int, chunkZ: Int): Chunk {
-            Preconditions.checkNotNull(levelProvider)
+            checkNotNull(levelProvider)
             return Chunk(chunkX, chunkZ, levelProvider!!)
         }
     }

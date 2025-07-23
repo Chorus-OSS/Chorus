@@ -6,14 +6,13 @@ import org.chorus_oss.chorus.resourcepacks.JarPluginResourcePack
 import org.chorus_oss.chorus.resourcepacks.ResourcePack
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.File
-import java.util.*
 
 
 class JarPluginResourcePackLoader(protected val jarPath: File) : ResourcePackLoader {
     override fun loadPacks(): List<ResourcePack> {
         val baseLang = Server.instance.lang
         val loadedResourcePacks: MutableList<ResourcePack> = ArrayList()
-        for (jar in Objects.requireNonNull<Array<File>>(jarPath.listFiles())) {
+        for (jar in requireNotNull(jarPath.listFiles())) {
             try {
                 var resourcePack: ResourcePack? = null
                 val fileExt = Files.getFileExtension(jar.name)

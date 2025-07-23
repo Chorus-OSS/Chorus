@@ -12,7 +12,6 @@ import org.chorus_oss.chorus.item.ItemTool
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.particle.BoneMealParticle
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
@@ -107,9 +106,9 @@ class BlockBamboo @JvmOverloads constructor(blockState: BlockState = properties.
 
         if (downId == BlockID.BAMBOO_SAPLING) {
             if (player != null) {
-                val animatePacket = AnimatePacket(
-                    targetRuntimeID = player.getRuntimeID(),
-                    action = AnimatePacket.Action.SWING_ARM
+                val animatePacket = org.chorus_oss.protocol.packets.AnimatePacket(
+                    targetRuntimeID = player.getRuntimeID().toULong(),
+                    action = org.chorus_oss.protocol.packets.AnimatePacket.Action.SwingArm
                 )
                 level.addChunkPacket(player.position.chunkX, player.position.chunkZ, animatePacket)
             }

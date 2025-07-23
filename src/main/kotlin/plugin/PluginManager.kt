@@ -17,7 +17,6 @@ import java.lang.reflect.Method
 import java.util.*
 import java.util.function.Consumer
 import java.util.regex.Pattern
-import kotlin.Array
 import kotlin.Boolean
 import kotlin.Exception
 import kotlin.IllegalArgumentException
@@ -34,6 +33,7 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmName
 import kotlin.require
+import kotlin.requireNotNull
 
 open class PluginManager(private val server: Server, private val commandMap: SimpleCommandMap) {
     val plugins: MutableMap<String, Plugin> = LinkedHashMap()
@@ -165,7 +165,7 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
             }
 
             for (loader in loaders.values) {
-                for (file in Objects.requireNonNull<Array<File>>(dictionary.listFiles { _, name ->
+                for (file in requireNotNull(dictionary.listFiles { _, name ->
                     for (pattern in loader.pluginFilters) {
                         if (pattern.matcher(name).matches()) {
                             return@listFiles true

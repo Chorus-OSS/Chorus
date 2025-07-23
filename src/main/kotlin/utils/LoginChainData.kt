@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import java.util.*
 
 interface LoginChainData {
@@ -45,7 +45,6 @@ interface LoginChainData {
     val maxViewDistance: Int
 
     val memoryTier: Int
-
 
     val rawData: JsonObject?
 }

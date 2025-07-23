@@ -481,8 +481,7 @@ class Config {
             when (this.type) {
                 PROPERTIES -> this.parseProperties(content)
                 JSON -> this.rootSection =
-                    ConfigSection(JSONUtils.from(content, object : TypeToken<LinkedHashMap<String?, Any?>?>() {
-                    }.type))
+                    ConfigSection(JSONUtils.from(content, object : TypeToken<LinkedHashMap<String?, Any?>?>() {}.type))
 
                 YAML -> {
                     val dumperOptions = DumperOptions()

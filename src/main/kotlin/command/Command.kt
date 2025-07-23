@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.command
 
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.blockentity.ICommandBlock
@@ -8,7 +7,6 @@ import org.chorus_oss.chorus.command.data.*
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.tree.ParamTree
 import org.chorus_oss.chorus.command.utils.CommandLogger
-import org.chorus_oss.chorus.lang.CommandOutputContainer
 import org.chorus_oss.chorus.lang.PluginI18nManager
 import org.chorus_oss.chorus.lang.TextContainer
 import org.chorus_oss.chorus.lang.TranslationContainer
@@ -25,7 +23,7 @@ abstract class Command @JvmOverloads constructor(
     name: String,
     description: String = "",
     usageMessage: String? = null,
-    aliases: Array<String> = EmptyArrays.EMPTY_STRINGS
+    aliases: Array<String> = emptyArray()
 ) {
     @JvmField
     val name: String
@@ -129,7 +127,7 @@ abstract class Command @JvmOverloads constructor(
 
         if (plugin === InternalPlugin.INSTANCE) {
             customData.description =
-                Server.instance.lang.tr(this.description, CommandOutputContainer.EMPTY_STRING, "commands.", false)
+                Server.instance.lang.tr(this.description, emptyArray<String>(), "commands.", false)
         } else if (plugin is PluginBase) {
             val i18n = PluginI18nManager.getI18n(plugin)
             if (i18n != null) {

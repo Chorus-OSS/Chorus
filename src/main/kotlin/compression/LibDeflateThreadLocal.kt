@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.compression
 
 import cn.powernukkitx.libdeflate.CompressionType
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.utils.CleanerHandle
 import org.chorus_oss.chorus.utils.LibDeflator
 import org.chorus_oss.chorus.utils.LibInflator
 import java.io.IOException
@@ -13,7 +12,7 @@ import java.util.zip.DataFormatException
 class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : ZlibProvider {
     @Throws(IOException::class)
     override fun deflate(data: ByteArray, level: Int, raw: Boolean): ByteArray {
-        val deflator = DEFLATOR.get().resource
+        val deflator = DEFLATOR.get()
         val type = if (raw) CompressionType.DEFLATE else CompressionType.ZLIB
         val buffer =
             if (deflator.getCompressBound(data.size.toLong(), type) < 8192) BUFFER.get() else ByteArray(data.size)
@@ -30,7 +29,7 @@ class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : Zli
     @Throws(IOException::class)
     override fun inflate(data: ByteArray, maxSize: Int, raw: Boolean): ByteArray {
         val type = if (raw) CompressionType.DEFLATE else CompressionType.ZLIB
-        val inflator = INFLATOR.get().resource
+        val inflator = INFLATOR.get()
         try {
             if (maxSize < 8192) {
                 val buffer = BUFFER.get()
@@ -53,7 +52,7 @@ class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : Zli
 
     @Throws(IOException::class)
     fun inflateD(data: ByteArray, maxSize: Int, type: CompressionType): ByteArray {
-        val inflator = INFLATOR.get().resource
+        val inflator = INFLATOR.get()
         var directBuffer: ByteBuffer? = null
         try {
             directBuffer = DIRECT_BUFFER.get()
@@ -88,15 +87,11 @@ class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : Zli
     }
 
     companion object {
-        private val INFLATOR: ThreadLocal<CleanerHandle<LibInflator>> = ThreadLocal.withInitial {
-            CleanerHandle(
-                LibInflator()
-            )
+        private val INFLATOR: ThreadLocal<LibInflator> = ThreadLocal.withInitial {
+            LibInflator()
         }
-        private val DEFLATOR: ThreadLocal<CleanerHandle<LibDeflator>> = ThreadLocal.withInitial {
-            CleanerHandle(
-                LibDeflator()
-            )
+        private val DEFLATOR: ThreadLocal<LibDeflator> = ThreadLocal.withInitial {
+            LibDeflator()
         }
         private val BUFFER: ThreadLocal<ByteArray> = ThreadLocal.withInitial {
             ByteArray(

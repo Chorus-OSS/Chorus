@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.floor
 
@@ -86,7 +86,7 @@ class EntityEnderPearl @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTa
 
         level!!.addLevelEvent(
             player.position.add(0.5, 0.5, 0.5),
-            LevelEventPacket.EVENT_SOUND_TELEPORT_ENDERPEARL
+            LevelEventPacket.SOUND_TELEPORT_ENDERPEARL
         )
         val destination = Vector3(
             floor(position.x) + 0.5,
@@ -96,10 +96,10 @@ class EntityEnderPearl @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundTa
         if ((player.gamemode and 0x01) == 0) {
             player.attack(EntityDamageByEntityEvent(this, player, DamageCause.PROJECTILE, 5f, 0f))
         }
-        level!!.addLevelEvent(this.position, LevelEventPacket.EVENT_PARTICLE_TELEPORT)
+        level!!.addLevelEvent(this.position, LevelEventPacket.PARTICLE_TELEPORT)
         level!!.addLevelEvent(
             player.position.add(0.5, 0.5, 0.5),
-            LevelEventPacket.EVENT_SOUND_TELEPORT_ENDERPEARL
+            LevelEventPacket.SOUND_TELEPORT_ENDERPEARL
         )
         if (level!!.gameRules.getBoolean(GameRule.DO_MOB_SPAWNING)) {
             if (ThreadLocalRandom.current().nextInt(1, 20) == 1) {

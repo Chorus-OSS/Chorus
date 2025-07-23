@@ -15,8 +15,8 @@ import org.chorus_oss.chorus.event.entity.ProjectileLaunchEvent
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.cos
 import kotlin.math.min
@@ -169,7 +169,7 @@ class BlazeShootExecutor(
             projectile.kill()
         } else {
             projectile.spawnToAll()
-            entity.level!!.addLevelEvent(entity.position, LevelEventPacket.EVENT_SOUND_BLAZE_FIREBALL)
+            entity.level!!.addLevelEvent(entity.position, LevelEventPacket.SOUND_BLAZE_FIREBALL)
         }
     }
 

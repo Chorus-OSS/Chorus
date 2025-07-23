@@ -13,7 +13,6 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemShield
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
 import org.chorus_oss.protocol.packets.SetActorLinkPacket
 import org.chorus_oss.protocol.types.*
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
@@ -25,7 +24,6 @@ import kotlin.uuid.Uuid
 
 open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk, nbt) {
     lateinit var uuid: UUID
-    protected lateinit var rawUUID: ByteArray
     override lateinit var skin: Skin
 
     override fun getWidth(): Float {
@@ -63,14 +61,6 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
 
     override fun setUUID(uuid: UUID) {
         this.uuid = uuid
-    }
-
-    fun setRawUniqueId(rawUUID: ByteArray) {
-        this.rawUUID = rawUUID
-    }
-
-    fun getRawUniqueId(): ByteArray {
-        return rawUUID
     }
 
     override fun initEntity() {
@@ -123,19 +113,27 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
     }
 
     override fun moveDelta() {
-        val pk: MovePlayerPacket = MovePlayerPacket()
-        pk.eid = this.getRuntimeID()
-        pk.x = position.x.toFloat()
-        pk.y = position.y.toFloat()
-        pk.z = position.z.toFloat()
-        pk.yaw = rotation.yaw.toFloat()
-        pk.headYaw = headYaw.toFloat()
-        pk.pitch = rotation.pitch.toFloat()
-        if (this.riding != null) {
-            pk.ridingEid = riding!!.getRuntimeID()
-            pk.mode = MovePlayerPacket.MODE_PITCH
-        }
-
+        val pk = org.chorus_oss.protocol.packets.MovePlayerPacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = Vector3f(position),
+            pitch = rotation.pitch.toFloat(),
+            yaw = rotation.yaw.toFloat(),
+            headYaw = headYaw.toFloat(),
+            mode = when (this.riding) {
+                null -> org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal
+                else -> org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Rotation
+            },
+            onGround = false,
+            riddenEntityRuntimeID = this.riding.let {
+                when (it) {
+                    null -> 0u
+                    else -> it.getRuntimeID().toULong()
+                }
+            },
+            teleportCause = org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.TeleportCause.Unknown,
+            teleportSourceEntityType = 0,
+            tick = 0u,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 
@@ -208,7 +206,7 @@ open class EntityHuman(chunk: IChunk?, nbt: CompoundTag) : EntityHumanType(chunk
                             vehicleAngularVelocity = 0f,
                         )
                     },
-                    actorProperties = ActorProperties(this.propertySyncData()),
+                    actorProperties = this.properties(),
                     buildPlatform = Platform.Unknown, // TODO: buildPlatform
                     deviceID = "" // TODO: DeviceID
                 )

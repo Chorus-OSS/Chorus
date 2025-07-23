@@ -44,13 +44,11 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.plugin.InternalPlugin
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
-import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.*
@@ -128,7 +126,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
                 this.attributes.values.map(AttributeValue::invoke)
             },
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,
@@ -168,7 +166,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         if (currentTick % 2 == 0) {
             if (currentTick % (if (position.toHorizontal().distance(Vector2.ZERO) < 1) 10 else 20) == 0) {
                 level!!.addLevelSoundEvent(
-                    this.position, LevelSoundEventPacket.SOUND_FLAP, -1,
+                    this.position, org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Flap, -1,
                     this.getEntityIdentifier(), false, false
                 )
             }
@@ -193,15 +191,17 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
             deathTicks = 190
             level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_DEATH,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Death,
                 -1,
                 getEntityIdentifier(),
                 false,
                 false
             )
-            val packet = EntityEventPacket()
-            packet.event = EntityEventPacket.ENDER_DRAGON_DEATH
-            packet.eid = getRuntimeID()
+            val packet = ActorEventPacket(
+                actorRuntimeID = getRuntimeID().toULong(),
+                eventType = ActorEventPacket.Companion.Type.EnderDragonDeath,
+                eventData = 0
+            )
             Server.broadcastPacket(viewers.values, packet)
             setImmobile(true)
         } else {

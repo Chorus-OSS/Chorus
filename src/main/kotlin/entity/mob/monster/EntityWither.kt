@@ -40,12 +40,10 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
 import org.chorus_oss.protocol.types.ActorLink
-import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.function.Function
@@ -175,15 +173,17 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
             deathTicks = 190
             level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_DEATH,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Death,
                 -1,
                 EntityID.WITHER,
                 false,
                 false
             )
-            val packet = EntityEventPacket()
-            packet.event = EntityEventPacket.DEATH_ANIMATION
-            packet.eid = getRuntimeID()
+            val packet = ActorEventPacket(
+                actorRuntimeID = getRuntimeID().toULong(),
+                eventType = ActorEventPacket.Companion.Type.DeathAnimation,
+                eventData = 0
+            )
             Server.broadcastPacket(viewers.values, packet)
             setImmobile(true)
         } else {
@@ -249,7 +249,7 @@ class EntityWither(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nbt), E
                 this.attributes.values.map(AttributeValue::invoke)
             },
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,

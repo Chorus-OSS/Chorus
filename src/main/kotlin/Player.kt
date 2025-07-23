@@ -2,12 +2,10 @@ package org.chorus_oss.chorus
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.google.common.base.Preconditions
 import com.google.common.base.Strings
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.Sets
-import io.netty.util.internal.EmptyArrays
 import io.netty.util.internal.PlatformDependent
 import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.block.*
@@ -44,8 +42,7 @@ import org.chorus_oss.chorus.event.inventory.InventoryPickupItemEvent
 import org.chorus_oss.chorus.event.inventory.InventoryPickupTridentEvent
 import org.chorus_oss.chorus.event.player.*
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent.TeleportCause
-import org.chorus_oss.chorus.event.server.DataPacketSendEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.event.server.PacketSendEvent
 import org.chorus_oss.chorus.experimental.network.protocol.utils.FLAG_ALL_PRIORITY
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.form.window.Form
@@ -70,19 +67,9 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.*
 import org.chorus_oss.chorus.nbt.tag.*
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.connection.BedrockDisconnectReasons
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.AnimatePacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
-import org.chorus_oss.chorus.network.protocol.PlayerSkinPacket
-import org.chorus_oss.chorus.network.protocol.SetScorePacket
-import org.chorus_oss.chorus.network.protocol.SetTitlePacket
-import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
 import org.chorus_oss.chorus.network.protocol.types.GameType
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.SpawnPointType
@@ -100,7 +87,6 @@ import org.chorus_oss.chorus.scoreboard.data.DisplaySlot
 import org.chorus_oss.chorus.scoreboard.displayer.IScoreboardViewer
 import org.chorus_oss.chorus.scoreboard.scorer.PlayerScorer
 import org.chorus_oss.chorus.utils.*
-import org.chorus_oss.chorus.utils.Binary.writeUUID
 import org.chorus_oss.chorus.utils.PortalHelper.moveToTheEnd
 import org.chorus_oss.chorus.utils.TextFormat.Companion.clean
 import org.chorus_oss.protocol.core.Packet
@@ -108,6 +94,7 @@ import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.*
 import org.chorus_oss.protocol.types.Vector3f
 import org.chorus_oss.protocol.types.camera.preset.CameraPreset
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardRemoveEntry
 import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlot
 import org.chorus_oss.protocol.types.scoreboard.ScoreboardSlotOrder
 import org.jetbrains.annotations.ApiStatus
@@ -556,17 +543,20 @@ open class Player(
      * Get the player info.
      */
 
+    @OptIn(ExperimentalUuidApi::class)
     override var skin: Skin
         get() = super.skin
         set(value) {
             super.skin = value
             if (this.spawned) {
 //            this.Server.instance.updatePlayerListData(this.getUniqueId(), this.getId(), this.getDisplayName(), skin, this.getLoginChainData().getXUID());
-                val skinPacket = PlayerSkinPacket()
-                skinPacket.uuid = this.getUUID()
-                skinPacket.skin = this.skin
-                skinPacket.newSkinName = skin.getSkinId()
-                skinPacket.oldSkinName = ""
+                val skinPacket = PlayerSkinPacket(
+                    uuid = Uuid(this.getUUID()),
+                    skin = org.chorus_oss.protocol.types.skin.Skin(this.skin),
+                    newSkinName = skin.getSkinId(),
+                    oldSkinName = "",
+                    isTrusted = skin.isTrusted() || Server.instance.settings.playerSettings.forceSkinTrusted,
+                )
                 Server.broadcastPacket(Server.instance.onlinePlayers.values, skinPacket)
             }
         }
@@ -590,7 +580,6 @@ open class Player(
         this.displayName = playerInfo.username
         this.loginChainData = playerInfo.data
         this.uuid = playerInfo.uuid
-        this.rawUUID = writeUUID(playerInfo.uuid)
         this.skin = (playerInfo.skin)
     }
 
@@ -608,12 +597,11 @@ open class Player(
 
             if (miningTimeRequired > 0) {
                 val breakTick = ceil(miningTimeRequired * 20).toInt()
-                val pk = LevelEventPacket()
-                pk.evid = LevelEventPacket.EVENT_BLOCK_UPDATE_BREAK
-                pk.x = breakingBlock!!.position.x.toFloat()
-                pk.y = breakingBlock!!.position.y.toFloat()
-                pk.z = breakingBlock!!.position.z.toFloat()
-                pk.data = 65535 / breakTick
+                val pk = LevelEventPacket(
+                    eventType = LevelEventPacket.BLOCK_UPDATE_BREAK,
+                    position = Vector3f(breakingBlock!!.position),
+                    eventData = 65535 / breakTick,
+                )
                 level!!.addChunkPacket(
                     breakingBlock!!.position.floorX shr 4,
                     breakingBlock!!.position.floorZ shr 4, pk
@@ -652,14 +640,14 @@ open class Player(
             level!!.sendBlocks(
                 arrayOf(this),
                 arrayOf<Block?>(target),
-                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(),
+                UpdateBlockPacket.FLAG_ALL_PRIORITY,
                 false
             )
             if (target.getLevelBlockAtLayer(1) is BlockLiquid) {
                 level!!.sendBlocks(
                     arrayOf(this), arrayOf(
                         target.getLevelBlockAtLayer(1)
-                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 1
+                    ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 1
                 )
             }
             return
@@ -673,7 +661,10 @@ open class Player(
         val block = target.getSide(face)
         if (block.id == BlockID.FIRE || block.id == BlockID.SOUL_FIRE) {
             level!!.setBlock(block.position, Block.get(BlockID.AIR), true)
-            level!!.addLevelSoundEvent(block.position, LevelSoundEventPacket.SOUND_EXTINGUISH_FIRE)
+            level!!.addLevelSoundEvent(
+                block.position,
+                LevelSoundEventPacket.Companion.SoundType.ExtinguishFire
+            )
             return
         }
 
@@ -703,12 +694,11 @@ open class Player(
             } else target.calculateBreakTime(inventory.itemInHand, this)
             val breakTime = ceil(miningTimeRequired * 20).toInt()
             if (breakTime > 0) {
-                val pk = LevelEventPacket()
-                pk.evid = LevelEventPacket.EVENT_BLOCK_START_BREAK
-                pk.x = pos.x.toFloat()
-                pk.y = pos.y.toFloat()
-                pk.z = pos.z.toFloat()
-                pk.data = 65535 / breakTime
+                val pk = LevelEventPacket(
+                    eventType = LevelEventPacket.BLOCK_START_BREAK,
+                    position = Vector3f(pos),
+                    eventData = 65535 / breakTime,
+                )
                 level!!.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
 
                 if (level!!.isAntiXrayEnabled && level!!.antiXraySystem!!.isPreDeObfuscate) {
@@ -725,12 +715,11 @@ open class Player(
 
     fun onBlockBreakAbort(pos: Vector3) {
         if (pos.distanceSquared(this.position) < 1000) { // same as with ACTION_START_BREAK
-            val pk = LevelEventPacket()
-            pk.evid = LevelEventPacket.EVENT_BLOCK_STOP_BREAK
-            pk.x = pos.x.toFloat()
-            pk.y = pos.y.toFloat()
-            pk.z = pos.z.toFloat()
-            pk.data = 0
+            val pk = LevelEventPacket(
+                eventType = LevelEventPacket.BLOCK_STOP_BREAK,
+                position = Vector3f(pos),
+                eventData = 0,
+            )
             level!!.addChunkPacket(pos.floorX shr 4, pos.floorZ shr 4, pk)
         }
         this.blockBreakProgress = 0.0
@@ -765,7 +754,7 @@ open class Player(
             } else if (handItem == null) level!!.sendBlocks(
                 arrayOf(this), arrayOf(
                     level!!.getBlock(blockPos.asVector3())
-                ), UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt(), 0
+                ), UpdateBlockPacket.FLAG_ALL_PRIORITY, 0
             )
             return
         }
@@ -778,7 +767,7 @@ open class Player(
             level!!.sendBlocks(
                 arrayOf(this),
                 arrayOf<Block?>(target),
-                UpdateBlockPacket.FLAG_ALL_PRIORITY.toInt()
+                UpdateBlockPacket.FLAG_ALL_PRIORITY
             )
 
             val blockEntity = level!!.getBlockEntity(blockPos.asVector3())
@@ -789,10 +778,17 @@ open class Player(
     }
 
     private fun setTitle(text: String) {
-        val packet = SetTitlePacket()
-        packet.text = text
-        packet.type = SetTitlePacket.TYPE_TITLE
-        this.dataPacket(packet)
+        val packet = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetTitle,
+            text = text,
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(packet)
     }
 
     //todo a lot on dimension
@@ -1415,7 +1411,12 @@ open class Player(
         prevRotation.pitch = originalPos.pitch
 
         val syncPos = originalPos.position.add(0.0, 0.00001, 0.0)
-        this.sendPosition(syncPos, originalPos.yaw, originalPos.pitch, MovePlayerPacket.MODE_RESET)
+        this.sendPosition(
+            syncPos,
+            originalPos.yaw,
+            originalPos.pitch,
+            MovePlayerPacket.Companion.Mode.Reset
+        )
 
         if (this.speed == null) {
             this.speed = Vector3(0.0, 0.0, 0.0)
@@ -2344,8 +2345,6 @@ open class Player(
      * @param pos 出生点位置
      */
     fun setSpawn(pos: Locator, spawnPointType: SpawnPointType?) {
-        Preconditions.checkNotNull(pos)
-        Preconditions.checkNotNull(pos.level)
         this.spawnPoint = Locator(
             pos.position.x, pos.position.y, pos.position.z,
             level!!
@@ -2360,14 +2359,14 @@ open class Player(
         this.sendPacket(pk)
     }
 
-    fun sendChunk(x: Int, z: Int, packet: DataPacket) {
+    fun sendChunk(x: Int, z: Int, packet: Packet) {
         if (!this.isConnected()) {
             return
         }
 
         chunkLoadCount++
         playerChunkManager.usedChunks.add(chunkHash(x, z))
-        this.dataPacket(packet)
+        this.sendPacket(packet)
 
         if (this.spawned) {
             for (entity in level!!.getChunkEntities(x, z).values) {
@@ -2376,10 +2375,6 @@ open class Player(
                 }
             }
         }
-    }
-
-    fun sendChunk(x: Int, z: Int, packet: Packet) {
-        sendChunk(x, z, MigrationPacket(packet))
     }
 
 
@@ -2402,15 +2397,8 @@ open class Player(
     }
 
 
-    /**
-     * @param packet 发送的数据包<br></br>packet to send
-     */
-    fun dataPacket(packet: DataPacket) {
-        session.sendPacket(packet)
-    }
-
     fun sendPacket(packet: Packet) {
-        session.sendPacket(MigrationPacket(packet))
+        session.sendPacket(packet)
     }
 
     val ping: Int
@@ -2487,42 +2475,14 @@ open class Player(
 
             level!!.sleepTicks = 0
 
-            this.dataPacket(
+            this.sendPacket(
                 AnimatePacket(
-                    targetRuntimeID = this.getRuntimeID(),
-                    action = AnimatePacket.Action.WAKE_UP,
+                    action = AnimatePacket.Action.WakeUp,
+                    targetRuntimeID = this.getRuntimeID().toULong(),
                     actionData = null,
                 )
             )
         }
-    }
-
-    fun awardAchievement(achievementId: String): Boolean {
-        if (!Server.instance.settings.levelSettings.default.achievements) {
-            return false
-        }
-
-        val achievement = Achievement.achievements.get(achievementId)
-
-        if (achievement == null || hasAchievement(achievementId)) {
-            return false
-        }
-
-        for (id in achievement.requires) {
-            if (!this.hasAchievement(id)) {
-                return false
-            }
-        }
-        val event = PlayerAchievementAwardedEvent(this, achievementId)
-        Server.instance.pluginManager.callEvent(event)
-
-        if (event.cancelled) {
-            return false
-        }
-
-        achievements.add(achievementId)
-        achievement.broadcast(this)
-        return true
     }
 
     fun setGamemode(gamemode: Int): Boolean {
@@ -2712,7 +2672,10 @@ open class Player(
     override fun moveDelta() {
         this.sendPosition(
             this.position,
-            rotation.yaw, rotation.pitch, MovePlayerPacket.MODE_NORMAL, viewers.values.toTypedArray()
+            rotation.yaw,
+            rotation.pitch,
+            MovePlayerPacket.Companion.Mode.Normal,
+            viewers.values.toTypedArray()
         )
     }
 
@@ -2751,25 +2714,27 @@ open class Player(
      * Send attributes to client
      */
     fun sendAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entityId = this.getRuntimeID()
-        pk.entries = arrayOf(
-            getAttribute(Attribute.MAX_HEALTH)
-                .setMaxValue(getMaxHealth().toFloat())
-                .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f),
-            getAttribute(Attribute.MAX_HUNGER)
-                .setValue(foodData!!.getFood().toFloat()),
-            getAttribute(Attribute.MOVEMENT_SPEED).setValue(this.movementSpeed),
-            getAttribute(Attribute.EXPERIENCE_LEVEL).setValue(
-                experienceLevel.toFloat()
-            ),
-            getAttribute(Attribute.EXPERIENCE).setValue(
-                (experience.toFloat()) / calculateRequireExperience(
-                    experienceLevel
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(
+                getAttribute(Attribute.MAX_HEALTH)
+                    .setMaxValue(getMaxHealth().toFloat())
+                    .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f),
+                getAttribute(Attribute.MAX_HUNGER)
+                    .setValue(foodData!!.getFood().toFloat()),
+                getAttribute(Attribute.MOVEMENT_SPEED).setValue(this.movementSpeed),
+                getAttribute(Attribute.EXPERIENCE_LEVEL).setValue(
+                    experienceLevel.toFloat()
+                ),
+                getAttribute(Attribute.EXPERIENCE).setValue(
+                    (experience.toFloat()) / calculateRequireExperience(
+                        experienceLevel
+                    )
                 )
-            )
+            ).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
         )
-        this.dataPacket(pk)
+        this.sendPacket(pk)
     }
 
     /**
@@ -3330,7 +3295,7 @@ open class Player(
      * @see .sendTranslation
      */
     @JvmOverloads
-    fun sendTranslation(message: String, parameters: Array<String> = EmptyArrays.EMPTY_STRINGS) {
+    fun sendTranslation(message: String, parameters: Array<String> = emptyArray()) {
         val packet = TextPacket(
 
             textType = when (Server.instance.settings.baseSettings.forceServerTranslate) {
@@ -3449,9 +3414,17 @@ open class Player(
      * Clears away the title info being displayed on the player.
      */
     fun clearTitle() {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_CLEAR
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.Clear,
+            text = "",
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3461,9 +3434,17 @@ open class Player(
      * Resets both title animation times and subtitle for the next shown title.
      */
     fun resetTitleSettings() {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_RESET
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.Reset,
+            text = "",
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3475,10 +3456,17 @@ open class Player(
      * @param subtitle 副标题
      */
     fun setSubtitle(subtitle: String) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_SUBTITLE
-        pk.text = subtitle
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetSubtitle,
+            text = subtitle,
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3490,10 +3478,17 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextSubTitle(text: RawText) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_SUBTITLE_JSON
-        pk.text = text.toRawText()
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetSubtitleJSON,
+            text = text.toRawText(),
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3507,12 +3502,17 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setTitleAnimationTimes(fadein: Int, duration: Int, fadeout: Int) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ANIMATION_TIMES
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetDurations,
+            text = "",
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3524,10 +3524,17 @@ open class Player(
      * @param text JSON文本<br></br>JSON text
      */
     fun setRawTextTitle(text: RawText) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_TITLE_JSON
-        pk.text = text.toRawText()
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetTitleJSON,
+            text = text.toRawText(),
+            fadeInDuration = 0,
+            remainDuration = 0,
+            fadeOutDuration = 0,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
@@ -3581,13 +3588,17 @@ open class Player(
      */
     @JvmOverloads
     fun sendActionBar(title: String, fadein: Int = 1, duration: Int = 0, fadeout: Int = 1) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ACTION_BAR
-        pk.text = title
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetActionbar,
+            text = title,
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
     /**
@@ -3611,13 +3622,17 @@ open class Player(
      * @param fadeout  淡出时间
      */
     fun setRawTextActionBar(text: RawText, fadein: Int, duration: Int, fadeout: Int) {
-        val pk = SetTitlePacket()
-        pk.type = SetTitlePacket.TYPE_ACTIONBAR_JSON
-        pk.text = text.toRawText()
-        pk.fadeInTime = fadein
-        pk.stayTime = duration
-        pk.fadeOutTime = fadeout
-        this.dataPacket(pk)
+        val pk = SetTitlePacket(
+            actionType = SetTitlePacket.Companion.ActionType.SetActionbarJSON,
+            text = text.toRawText(),
+            fadeInDuration = fadein,
+            remainDuration = duration,
+            fadeOutDuration = fadeout,
+            xuid = "",
+            platformOnlineID = "",
+            filteredMessage = ""
+        )
+        this.sendPacket(pk)
     }
 
 
@@ -4073,10 +4088,12 @@ open class Player(
         attribute.setMaxValue((if (this.getAbsorption() % 2 != 0f) this.getMaxHealth() + 1 else this.getMaxHealth()).toFloat())
             .setValue(if (health1 > 0) (if (health1 < getMaxHealth()) health1 else getMaxHealth().toFloat()) else 0f)
         if (this.spawned) {
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attribute)
-            pk.entityId = this.getRuntimeID()
-            this.dataPacket(pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u
+            )
+            this.sendPacket(pk)
         }
     }
 
@@ -4088,10 +4105,12 @@ open class Player(
         attribute.setMaxValue((if (this.getAbsorption() % 2 != 0f) this.getMaxHealth() + 1 else this.getMaxHealth()).toFloat())
             .setValue(if (health > 0) (if (health < getMaxHealth()) health else getMaxHealth().toFloat()) else 0f)
         if (this.spawned) {
-            val pk = UpdateAttributesPacket()
-            pk.entries = arrayOf(attribute)
-            pk.entityId = this.getRuntimeID()
-            this.dataPacket(pk)
+            val pk = UpdateAttributesPacket(
+                actorRuntimeID = this.getRuntimeID().toULong(),
+                attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+                tick = 0u,
+            )
+            this.sendPacket(pk)
         }
     }
 
@@ -4190,7 +4209,7 @@ open class Player(
             this.lastPlayerdLevelUpSoundTime = this.age
             this.level!!.addLevelSoundEvent(
                 this.position,
-                LevelSoundEventPacket.SOUND_LEVELUP,
+                LevelSoundEventPacket.Companion.SoundType.Levelup,
                 min(7.0, (level / 5).toDouble()).toInt() shl 28,
                 "",
                 isBaby = false, isGlobal = false
@@ -4253,17 +4272,22 @@ open class Player(
      * @param attribute the attribute
      */
     override fun syncAttribute(attribute: Attribute) {
-        val pk = UpdateAttributesPacket()
-        pk.entries = arrayOf(attribute)
-        pk.entityId = this.getRuntimeID()
-        this.dataPacket(pk)
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        this.sendPacket(pk)
     }
 
     override fun syncAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entries = attributes.values.filter { it.isSyncable() }.toTypedArray()
-        pk.entityId = this.getRuntimeID()
-        this.dataPacket(pk)
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = attributes.values.filter(Attribute::isSyncable)
+                .map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        this.sendPacket(pk)
     }
 
     override fun setAbsorption(absorption: Float) {
@@ -4350,10 +4374,12 @@ open class Player(
                     //保存攻击玩家的实体在lastBeAttackEntity
                     this.lastBeAttackEntity = source.damager
                 }
-                val pk = EntityEventPacket()
-                pk.eid = this.getRuntimeID()
-                pk.event = EntityEventPacket.HURT_ANIMATION
-                this.dataPacket(pk)
+                val pk = ActorEventPacket(
+                    actorRuntimeID = this.getRuntimeID().toULong(),
+                    eventType = ActorEventPacket.Companion.Type.HurtAnimation,
+                    eventData = 0
+                )
+                this.sendPacket(pk)
             }
             return true
         } else {
@@ -4414,54 +4440,43 @@ open class Player(
         return level!!.dropAndGetItem(position.add(0.0, 1.3, 0.0), item, motion, 40)
     }
 
-    /**
-     * [Player.moveDelta]的实现,仅发送[MovePlayerPacket]数据包到客户端
-     *
-     * @param pos     the pos of MovePlayerPacket
-     * @param yaw     the yaw of MovePlayerPacket
-     * @param pitch   the pitch of MovePlayerPacket
-     * @param mode    the mode of MovePlayerPacket
-     * @param targets 接受数据包的玩家们<br></br>players of receive the packet
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
-    /**
-     * @see .sendPosition
-     */
     @JvmOverloads
     fun sendPosition(
         pos: Vector3,
         yaw: Double = rotation.yaw,
         pitch: Double = rotation.pitch,
-        mode: Int = MovePlayerPacket.MODE_NORMAL,
+        mode: MovePlayerPacket.Companion.Mode = MovePlayerPacket.Companion.Mode.Normal,
         targets: Array<Player>? = null
     ) {
-        val pk = MovePlayerPacket()
-        pk.eid = this.getRuntimeID()
-        pk.x = pos.x.toFloat()
-        pk.y = (pos.y + this.getEyeHeight()).toFloat()
-        pk.z = pos.z.toFloat()
-        pk.headYaw = yaw.toFloat()
-        pk.pitch = pitch.toFloat()
-        pk.yaw = yaw.toFloat()
-        pk.mode = mode
-        pk.onGround = this.onGround
-        if (this.riding != null) {
-            pk.ridingEid = riding!!.getRuntimeID()
-            pk.mode = MovePlayerPacket.MODE_PITCH
-        }
-
+        val pk = MovePlayerPacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = Vector3f(
+                pos.x.toFloat(),
+                (pos.y + this.getEyeHeight()).toFloat(),
+                pos.z.toFloat(),
+            ),
+            pitch = pitch.toFloat(),
+            yaw = yaw.toFloat(),
+            headYaw = yaw.toFloat(),
+            mode = when (this.riding) {
+                null -> mode
+                else -> MovePlayerPacket.Companion.Mode.Rotation
+            },
+            onGround = this.onGround,
+            riddenEntityRuntimeID = this.riding.let {
+                when (it) {
+                    null -> 0u
+                    else -> it.getRuntimeID().toULong()
+                }
+            },
+            teleportCause = MovePlayerPacket.Companion.TeleportCause.Unknown,
+            teleportSourceEntityType = 0,
+            tick = 0u,
+        )
         if (targets != null) {
-            Server.broadcastPacket(targets, pk)
+            Server.broadcastPacket(targets.toList(), pk)
         } else {
-            this.dataPacket(pk)
+            this.sendPacket(pk)
         }
     }
 
@@ -4519,10 +4534,20 @@ open class Player(
                 this.nextChunkOrderRun = 0
             }
             //send to client
-            this.sendPosition(to.position, to.rotation.yaw, to.rotation.pitch, MovePlayerPacket.MODE_TELEPORT)
+            this.sendPosition(
+                to.position,
+                to.rotation.yaw,
+                to.rotation.pitch,
+                MovePlayerPacket.Companion.Mode.Teleport
+            )
             this.newPosition = to.position
         } else {
-            this.sendPosition(this.position, to.rotation.yaw, to.rotation.pitch, MovePlayerPacket.MODE_TELEPORT)
+            this.sendPosition(
+                this.position,
+                to.rotation.yaw,
+                to.rotation.pitch,
+                MovePlayerPacket.Companion.Mode.Teleport
+            )
             this.newPosition = this.position
         }
         //state update
@@ -4792,7 +4817,6 @@ open class Player(
      * @return the window id
      */
     fun getWindowId(inventory: Inventory): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4819,7 +4843,6 @@ open class Player(
      * @return The unique identifier assigned to the window if successfully added and opened; -1 if the window fails to be added.
      */
     fun addWindow(inventory: Inventory): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4840,7 +4863,6 @@ open class Player(
     }
 
     fun addWindow(inventory: Inventory, forceId: Int?): Int {
-        Preconditions.checkNotNull(inventory)
         if (windows.containsKey(inventory)) {
             return windows[inventory]!!
         }
@@ -4887,7 +4909,6 @@ open class Player(
      * @param inventory the inventory
      */
     fun removeWindow(inventory: Inventory) {
-        Preconditions.checkNotNull(inventory)
         if (!permanentWindows.contains(windows[inventory])) {
             val windowId = this.getWindowId(inventory)
             this.closingWindowId = windowId
@@ -5183,12 +5204,6 @@ open class Player(
                         return false
                     }
 
-                    if (item.getSafeBlockState().toBlock() is BlockWood) {
-                        this.awardAchievement("mineWood")
-                    } else if (item.id == ItemID.DIAMOND) {
-                        this.awardAchievement("diamond")
-                    }
-
                     val pk = TakeItemEntityPacket(
                         itemEntityRuntimeID = entity.getRuntimeID().toULong(),
                         takerEntityRuntimeID = this.getRuntimeID().toULong(),
@@ -5208,7 +5223,7 @@ open class Player(
             if (entity.getPickupDelay() <= 0) {
                 var exp = entity.getExp()
                 entity.kill()
-                level!!.addLevelEvent(LevelEventPacket.EVENT_SOUND_EXPERIENCE_ORB_PICKUP, 0, this.position)
+                level!!.addLevelEvent(LevelEventPacket.SOUND_EXPERIENCE_ORB_PICKUP, 0, this.position)
                 pickedXPOrb = tick
 
                 //Mending
@@ -5495,22 +5510,17 @@ open class Player(
         this.hasSeenCredits = hasSeenCredits
     }
 
-
-    fun dataPacketImmediately(packet: DataPacket): Boolean {
+    fun sendPacketImmediately(packet: Packet): Boolean {
         if (!this.isConnected()) {
             return false
         }
-        val ev = DataPacketSendEvent(this, packet)
+        val ev = PacketSendEvent(this, packet)
         Server.instance.pluginManager.callEvent(ev)
         if (ev.cancelled) {
             return false
         }
         session.sendPacketImmediately(packet)
         return true
-    }
-
-    fun sendPacketImmediately(packet: Packet): Boolean {
-        return dataPacketImmediately(MigrationPacket(packet))
     }
 
     /**
@@ -5558,11 +5568,18 @@ open class Player(
     }
 
     override fun removeLine(line: IScoreboardLine) {
-        val packet = SetScorePacket()
-        packet.action = SetScorePacket.Action.REMOVE
-        val networkInfo = line.toNetworkInfo()
-        if (networkInfo != null) packet.infos.add(networkInfo)
-        this.dataPacket(packet)
+        val packet = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Remove,
+            removeEntries = listOfNotNull(line.toNetworkInfo()).map {
+                ScoreboardRemoveEntry(
+                    entryID = it.entryID,
+                    objectiveName = it.objectiveName,
+                    score = it.score,
+                )
+            },
+            modifyEntries = null
+        )
+        this.sendPacket(packet)
 
         val scorer = PlayerScorer(this)
         if (line.scorer == scorer && line.scoreboard.getViewers(DisplaySlot.BELOW_NAME).contains(this)) {
@@ -5571,11 +5588,12 @@ open class Player(
     }
 
     override fun updateScore(line: IScoreboardLine) {
-        val packet = SetScorePacket()
-        packet.action = SetScorePacket.Action.SET
-        val networkInfo = line.toNetworkInfo()
-        if (networkInfo != null) packet.infos.add(networkInfo)
-        this.dataPacket(packet)
+        val packet = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Modify,
+            removeEntries = null,
+            modifyEntries = listOfNotNull(line.toNetworkInfo())
+        )
+        this.sendPacket(packet)
 
         val scorer = PlayerScorer(this)
         if (line.scorer == scorer && line.scoreboard.getViewers(DisplaySlot.BELOW_NAME).contains(this)) {
@@ -5594,11 +5612,12 @@ open class Player(
         this.sendPacket(pk)
 
         //client won't storage the score of a scoreboard,so we should send the score to client
-        val pk2 = SetScorePacket()
-        pk2.infos =
-            scoreboard.lines.values.stream().map { obj -> obj.toNetworkInfo() }.toList().filterNotNull().toMutableList()
-        pk2.action = SetScorePacket.Action.SET
-        this.dataPacket(pk2)
+        val pk2 = SetScorePacket(
+            actionType = SetScorePacket.Companion.ActionType.Modify,
+            removeEntries = null,
+            modifyEntries = scoreboard.lines.values.mapNotNull { it.toNetworkInfo() }
+        )
+        this.sendPacket(pk2)
 
         val scorer = PlayerScorer(this)
         val line = scoreboard.getLine(scorer)

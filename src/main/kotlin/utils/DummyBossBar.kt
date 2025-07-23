@@ -7,10 +7,10 @@ import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.data.EntityDataMap
 import org.chorus_oss.chorus.entity.data.EntityDataTypes
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.network.protocol.MoveEntityAbsolutePacket
-import org.chorus_oss.chorus.network.protocol.UpdateAttributesPacket
 import org.chorus_oss.protocol.packets.BossEventPacket
+import org.chorus_oss.protocol.packets.MoveActorAbsolutePacket
 import org.chorus_oss.protocol.packets.SetActorDataPacket
+import org.chorus_oss.protocol.packets.UpdateAttributesPacket
 import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.actor_data.ActorDataType
@@ -124,13 +124,17 @@ class DummyBossBar private constructor(builder: Builder) {
     }
 
     private fun sendAttributes() {
-        val pkAttributes = UpdateAttributesPacket()
-        pkAttributes.entityId = bossBarId
-        val attr = getAttribute(Attribute.MAX_HEALTH)
-        attr.setMaxValue(100f) // Max value - We need to change the max value first, or else the "setValue" will return a IllegalArgumentException
-        attr.setValue(length) // Entity health
-        pkAttributes.entries = arrayOf(attr)
-        player.dataPacket(pkAttributes)
+        val pkAttributes = UpdateAttributesPacket(
+            actorRuntimeID = this.bossBarId.toULong(),
+            attributes = listOf(
+                getAttribute(Attribute.MAX_HEALTH).apply {
+                    setMaxValue(100f) // Max value - We need to change the max value first, or else the "setValue" will return a IllegalArgumentException
+                    setValue(length) // Entity health
+                }
+            ).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
+        player.sendPacket(pkAttributes)
     }
 
     private fun sendShowBossBar() {
@@ -203,15 +207,21 @@ class DummyBossBar private constructor(builder: Builder) {
      * Update boss entity's position when teleport and each 5s.
      */
     fun updateBossEntityPosition() {
-        val pk = MoveEntityAbsolutePacket()
-        pk.eid = this.bossBarId
-        pk.x = player.position.x
-        pk.y = -74.0
-        pk.z = player.position.z
-        pk.headYaw = 0.0
-        pk.yaw = 0.0
-        pk.pitch = 0.0
-        player.dataPacket(pk)
+        val pk = MoveActorAbsolutePacket(
+            entityRuntimeID = this.bossBarId.toULong(),
+            flags = 0,
+            position = org.chorus_oss.protocol.types.Vector3f(
+                player.position.x.toFloat(),
+                -74f,
+                player.position.z.toFloat(),
+            ),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                0f,
+                0f,
+                0f,
+            )
+        )
+        player.sendPacket(pk)
     }
 
     private fun updateBossEntityNameTag() {

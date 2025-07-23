@@ -7,7 +7,7 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.entity.mob.animal.EntitySheep
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.particle.DestroyBlockParticle
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 class EatGrassExecutor(protected var duration: Int) : IBehaviorExecutor {
     protected var currentTick: Int = 0
@@ -45,9 +45,11 @@ class EatGrassExecutor(protected var duration: Int) : IBehaviorExecutor {
     }
 
     protected fun playEatGrassAnimation(entity: EntityMob) {
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.EAT_GRASS_ANIMATION
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.EatGrassAnimation,
+            eventData = 0
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

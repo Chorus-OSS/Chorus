@@ -1,35 +1,36 @@
 package org.chorus_oss.chorus.experimental.network.connection
 
-import com.appstractive.jwt.UnsignedJWT
-import com.appstractive.jwt.jwt
-import com.appstractive.jwt.sign
-import com.appstractive.jwt.signatures.es384
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.*
 import dev.whyoleg.cryptography.random.CryptographyRandom
 import kotlinx.io.bytestring.decodeToByteString
+import kotlinx.io.bytestring.encode
+import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 object EncryptionUtils {
     @Suppress("SpellCheckingInspection")
-    val mojangPublicKey: ECDSA.PublicKey =
+    val mojangPublicKey: ECDSA.PublicKey by lazy {
         parseKey("MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp")
+    }
 
-    val ecdsa = CryptographyProvider.Default.get(ECDSA)
-    val aes = CryptographyProvider.Default.get(AES.CTR)
-    val digest = CryptographyProvider.Default.get(SHA256)
-    val ecdh = CryptographyProvider.Default.get(ECDH)
+    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA) }
+    val aes by lazy { CryptographyProvider.Default.get(AES.CTR) }
+    val digest by lazy { CryptographyProvider.Default.get(SHA256) }
+    val ecdh by lazy { CryptographyProvider.Default.get(ECDH) }
 
     val curve = EC.Curve.P384
     val publicFormat = EC.PublicKey.Format.DER
     val privateFormat = EC.PrivateKey.Format.DER
 
-    val keyGenerator = ecdsa.keyPairGenerator(curve)
-    val publicKeyDecoder = ecdsa.publicKeyDecoder(curve)
+    val keyGenerator by lazy { ecdsa.keyPairGenerator(curve) }
+    val publicKeyDecoder by lazy { ecdsa.publicKeyDecoder(curve) }
 
-    val ecdhPrivateKeyDecoder = ecdh.privateKeyDecoder(curve)
-    val ecdhPublicKeyDecoder = ecdh.publicKeyDecoder(curve)
+    val ecdhPrivateKeyDecoder by lazy { ecdh.privateKeyDecoder(curve) }
+    val ecdhPublicKeyDecoder by lazy { ecdh.publicKeyDecoder(curve) }
 
     @OptIn(ExperimentalEncodingApi::class)
     fun parseKey(b64: String): ECDSA.PublicKey {
@@ -67,18 +68,45 @@ object EncryptionUtils {
         return aes.keyDecoder().decodeFromByteArrayBlocking(AES.Key.Format.RAW, hash)
     }
 
+    @Serializable
+    data class JWTHeader(
+        val alg: String,
+        val x5u: String,
+    )
+
+    @Serializable
+    data class JWTClaims(
+        val salt: String,
+    )
+
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun createHandshakeJWT(serverKeyPair: ECDSA.KeyPair, token: ByteArray): String {
-        val jwt: UnsignedJWT = jwt {
-            claims {
-                claim("salt", Base64.encode(token))
-            }
-        }
+        val header = JWTHeader(
+            alg = "ES384",
+            x5u = Base64.encode(
+                serverKeyPair.publicKey.encodeToByteString(EC.PublicKey.Format.DER)
+            )
+        )
 
-        val signed = jwt.sign {
-            es384 { der(serverKeyPair.privateKey.encodeToByteArrayBlocking(privateFormat), curve) }
-        }
+        val claims = JWTClaims(
+            salt = Base64.encode(token)
+        )
 
-        return signed.signedData
+        val headerJSON = Json.encodeToString(header)
+        val claimsJSON = Json.encodeToString(claims)
+
+        val headerB64 = Base64.UrlSafe.encode(headerJSON.encodeToByteString())
+        val claimsB64 = Base64.UrlSafe.encode(claimsJSON.encodeToByteString())
+
+        val unsigned = "$headerB64.$claimsB64"
+
+        val signature = serverKeyPair.privateKey.signatureGenerator(
+            digest = SHA384,
+            format = ECDSA.SignatureFormat.DER
+        ).generateSignature(unsigned.encodeToByteString())
+
+        val signatureB64 = Base64.UrlSafe.encode(signature)
+
+        return "$unsigned.$signatureB64"
     }
 }

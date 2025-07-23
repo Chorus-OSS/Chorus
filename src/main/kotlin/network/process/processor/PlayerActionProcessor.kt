@@ -6,24 +6,20 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockFrame
 import org.chorus_oss.chorus.block.BlockLectern
 import org.chorus_oss.chorus.event.player.*
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.PlayerActionPacket
 import org.chorus_oss.protocol.types.PlayerActionType
 
 
-class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<PlayerActionPacket>) {
-        val packet = pk.packet
-
+class PlayerActionProcessor : PacketProcessor<PlayerActionPacket> {
+    override fun handle(player: Player, packet: PlayerActionPacket) {
         if (!player.spawned || (!player.isAlive() && packet.actionType != PlayerActionType.Respawn && packet.actionType != PlayerActionType.ChangeDimensionACK)) {
             return
         }
@@ -160,7 +156,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                     player.position,
                     player.rotation.yaw,
                     player.rotation.pitch,
-                    MovePlayerPacket.MODE_NORMAL
+                    org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Normal
                 )
 
                 PlayerActionType.StartGliding -> {
@@ -227,7 +223,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -239,7 +235,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -249,7 +245,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                         return@switch
                     }
@@ -262,7 +258,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
                             player.position,
                             player.rotation.yaw,
                             player.rotation.pitch,
-                            MovePlayerPacket.MODE_RESET
+                            org.chorus_oss.protocol.packets.MovePlayerPacket.Companion.Mode.Reset
                         )
                     } else {
                         player.setSpinAttacking(true)
@@ -334,7 +330,7 @@ class PlayerActionProcessor : DataPacketProcessor<MigrationPacket<PlayerActionPa
         }
     }
 
-    override val packetId: Int = PlayerActionPacket.id
+    override val packetID: Int = PlayerActionPacket.id
 
     companion object : Loggable
 }

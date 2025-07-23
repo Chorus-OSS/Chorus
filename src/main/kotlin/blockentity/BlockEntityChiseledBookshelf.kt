@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.blockentity
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.BlockChiseledBookshelf
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.format.IChunk
@@ -23,7 +22,7 @@ class BlockEntityChiseledBookshelf(chunk: IChunk, nbt: CompoundTag) : BlockEntit
     }
 
     fun removeBook(index: Int): Item {
-        Preconditions.checkArgument(index in 0..5)
+        check(index in 0..5)
         val remove = items[index]
         lastInteractedSlot = index
         setBook(Item.AIR, index)
@@ -31,7 +30,7 @@ class BlockEntityChiseledBookshelf(chunk: IChunk, nbt: CompoundTag) : BlockEntit
     }
 
     fun hasBook(index: Int): Boolean {
-        Preconditions.checkArgument(index in 0..5)
+        check(index in 0..5)
         return !items[index].isNothing
     }
 
@@ -47,7 +46,7 @@ class BlockEntityChiseledBookshelf(chunk: IChunk, nbt: CompoundTag) : BlockEntit
         }
 
     fun setBook(item: Item, index: Int) {
-        Preconditions.checkArgument(index in 0..5)
+        check(index in 0..5)
         items[index] = item
         setDirty()
     }

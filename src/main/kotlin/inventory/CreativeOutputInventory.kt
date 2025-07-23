@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.inventory
 
-import com.google.common.base.Preconditions
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import org.chorus_oss.chorus.Player
@@ -43,7 +42,6 @@ class CreativeOutputInventory(private val player: Player) : Inventory {
     }
 
     override fun addItem(vararg slots: Item): Array<Item> {
-        Preconditions.checkNotNull(slots[0])
         this.item = slots[0]
         return arrayOf(item)
     }

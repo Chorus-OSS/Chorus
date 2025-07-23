@@ -107,47 +107,57 @@ class BlockManager(val level: Level) {
         if (predicate != null) {
             blockList1 = blockList1.stream().filter(predicate).toList()
         }
-        val chunks: MutableMap<IChunk, ArrayList<Block>> = HashMap()
+        val chunks: MutableMap<IChunk, ArrayList<Block>> = mutableMapOf()
         val batches: MutableMap<SubChunkEntry, org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket> =
-            HashMap()
+            mutableMapOf()
+
         for (b in blockList1) {
             val chunk = chunks.computeIfAbsent(
                 level.getChunk(b.position.chunkX, b.position.chunkZ, true)
             ) { _: IChunk? -> ArrayList() }
+
             chunk.add(b)
-            batches.computeIfAbsent(
-                SubChunkEntry(b.position.chunkX shl 4, (b.position.floorY shr 4) shl 4, b.position.chunkZ shl 4)
-            ) { s: SubChunkEntry ->
+
+            val entry = SubChunkEntry(b.position.chunkX shl 4, (b.position.floorY shr 4) shl 4, b.position.chunkZ shl 4)
+
+            var batch = batches.computeIfAbsent(entry) { s: SubChunkEntry ->
                 val pk = org.chorus_oss.protocol.packets.UpdateSubChunkBlocksPacket(
                     position = BlockPos(s.x, s.y, s.z),
-                    blocks = when (b.layer) {
-                        0 -> listOf(
-                            org.chorus_oss.protocol.types.BlockChangeEntry(
-                                blockPos = BlockPos(b.position),
-                                blockRuntimeID = b.blockState.blockStateHash().toUInt(),
-                                flags = 21u,
-                                syncedUpdateEntityUniqueID = -1,
-                                syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
-                            )
-                        )
-
-                        else -> emptyList()
-                    },
-                    extra = when (b.layer) {
-                        0 -> emptyList()
-                        else -> listOf(
-                            org.chorus_oss.protocol.types.BlockChangeEntry(
-                                blockPos = BlockPos(b.position),
-                                blockRuntimeID = b.blockState.blockStateHash().toUInt(),
-                                flags = 21u,
-                                syncedUpdateEntityUniqueID = -1,
-                                syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
-                            )
-                        )
-                    }
+                    blocks = emptyList(),
+                    extra = emptyList()
                 )
                 pk
             }
+
+            batch = batch.copy(
+                blocks = batch.blocks + when (b.layer) {
+                    0 -> listOf(
+                        org.chorus_oss.protocol.types.BlockChangeEntry(
+                            blockPos = BlockPos(b.position),
+                            blockRuntimeID = b.blockState.blockStateHash().toUInt(),
+                            flags = 21u,
+                            syncedUpdateEntityUniqueID = -1,
+                            syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
+                        )
+                    )
+
+                    else -> emptyList()
+                },
+                extra = batch.extra + when (b.layer) {
+                    0 -> emptyList()
+                    else -> listOf(
+                        org.chorus_oss.protocol.types.BlockChangeEntry(
+                            blockPos = BlockPos(b.position),
+                            blockRuntimeID = b.blockState.blockStateHash().toUInt(),
+                            flags = 21u,
+                            syncedUpdateEntityUniqueID = -1,
+                            syncedUpdateType = org.chorus_oss.protocol.types.BlockChangeEntry.Companion.MessageType.None,
+                        )
+                    )
+                }
+            )
+
+            batches.put(entry, batch)
         }
         chunks.entries.parallelStream()
             .forEach { entry ->

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.form.element.custom
 
-import com.google.common.base.Preconditions
 import com.google.gson.JsonObject
 
 class ElementSlider(
@@ -20,11 +19,10 @@ class ElementSlider(
     )
 
     override fun toJson(): JsonObject {
-        Preconditions.checkArgument(this.min < this.max, "Maximum slider value must exceed the minimum value")
-        Preconditions.checkArgument(
-            this.defaultValue >= this.min && this.defaultValue <= this.max,
-            "Default value out of range"
-        )
+        check(this.min < this.max) { "Maximum slider value must exceed the minimum value" }
+        check(
+            this.defaultValue >= this.min && this.defaultValue <= this.max
+        ) { "Default value out of range" }
 
         `object`.addProperty("type", "slider")
         `object`.addProperty("text", this.text)

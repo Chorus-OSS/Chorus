@@ -1,10 +1,8 @@
 package org.chorus_oss.chorus.form.element.custom
 
-import com.google.common.base.Preconditions
+
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-
-
 import java.util.function.Consumer
 
 class ElementDropdown(var text: String, var options: MutableList<String>, var defaultOption: Int = 0) :
@@ -27,10 +25,9 @@ class ElementDropdown(var text: String, var options: MutableList<String>, var de
     }
 
     override fun toJson(): JsonObject {
-        Preconditions.checkArgument(
-            0 > this.defaultOption || this.defaultOption < options.size,
-            "Default option not an index"
-        )
+        check(
+            0 > this.defaultOption || this.defaultOption < options.size
+        ) { "Default option not an index" }
 
         `object`.addProperty("type", "dropdown")
         `object`.addProperty("text", this.text)

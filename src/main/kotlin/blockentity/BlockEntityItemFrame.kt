@@ -10,7 +10,7 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 open class BlockEntityItemFrame(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
@@ -144,7 +144,7 @@ open class BlockEntityItemFrame(chunk: IChunk, nbt: CompoundTag) : BlockEntitySp
         setItem(Item.get(BlockID.AIR, 0, 1), true)
         itemRotation = 0
         spawnToAll()
-        level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_ITEMFRAME_BREAK)
+        level.addLevelEvent(this.position, LevelEventPacket.SOUND_ITEMFRAME_BREAK)
 
         return itemEntity
     }

@@ -15,7 +15,6 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.utils.ChorusRandom
 import java.util.concurrent.ThreadLocalRandom
-import java.util.function.Predicate
 
 class BlockCherrySapling @JvmOverloads constructor(blockState: BlockState = properties.defaultState) :
     BlockSapling(blockState), FlowerPotBlock {
@@ -66,8 +65,8 @@ class BlockCherrySapling @JvmOverloads constructor(blockState: BlockState = prop
                 level.setBlock(vector3, get(BlockID.DIRT))
             }
             blockManager.applySubChunkUpdate(
-                ev.blockList,
-                Predicate { block: Block -> !block.isAir })
+                ev.blockList
+            ) { block: Block -> !block.isAir }
         }
     }
 

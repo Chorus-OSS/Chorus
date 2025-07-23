@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.plugin.PluginManager
 class TestPluginManager(server: Server, commandMap: SimpleCommandMap) :
     PluginManager(server, commandMap) {
     override fun callEvent(event: Event) {
-        Preconditions.checkNotNull(event)
         val i = counts.computeIfAbsent(event.javaClass) { 0 }
         counts[event.javaClass] = i + 1
         val testEventHandler = handlers[event.javaClass] as TestEventHandler<Event>? ?: return

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.nbt.tag.IntTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 
@@ -21,7 +20,7 @@ data class SemVersion(val major: Int, val minor: Int, val patch: Int, val revisi
             if (versions.size() == 0) {
                 return SemVersion(0, 0, 0, 0, 0)
             }
-            Preconditions.checkArgument(versions.size() == 5)
+            check(versions.size() == 5)
 
             return SemVersion(
                 versions[0].data,

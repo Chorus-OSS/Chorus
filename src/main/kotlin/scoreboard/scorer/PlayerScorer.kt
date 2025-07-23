@@ -2,10 +2,10 @@ package org.chorus_oss.chorus.scoreboard.scorer
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.network.protocol.SetScorePacket.ScoreInfo
 import org.chorus_oss.chorus.scoreboard.IScoreboard
 import org.chorus_oss.chorus.scoreboard.IScoreboardLine
 import org.chorus_oss.chorus.scoreboard.data.ScorerType
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardEntry
 
 import java.util.*
 
@@ -51,13 +51,14 @@ class PlayerScorer : IScorer {
         get() = if (Server.instance.onlinePlayers[uuid] == null) uuid.mostSignificantBits
             .toString() else Server.instance.onlinePlayers[uuid]!!.getEntityName()
 
-    override fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreInfo? {
-        return if (Server.instance.getPlayer(uuid).isPresent) ScoreInfo(
-            line.lineId,
-            scoreboard.objectiveName,
-            line.score,
-            ScorerType.PLAYER,
-            Server.instance.getPlayer(uuid).get().getRuntimeID()
+    override fun toNetworkInfo(scoreboard: IScoreboard, line: IScoreboardLine): ScoreboardEntry? {
+        return if (Server.instance.getPlayer(uuid).isPresent) ScoreboardEntry(
+            entryID = line.lineId,
+            objectiveName = scoreboard.objectiveName,
+            score = line.score,
+            identityType = ScoreboardEntry.Companion.IdentityType.Player,
+            entityUniqueID = Server.instance.getPlayer(uuid).get().getUniqueID(),
+            displayName = null,
         ) else null
     }
 }

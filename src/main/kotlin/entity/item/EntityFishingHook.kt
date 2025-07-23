@@ -25,10 +25,9 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import org.chorus_oss.protocol.types.ActorLink
-import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.util.concurrent.ThreadLocalRandom
@@ -176,19 +175,25 @@ class EntityFishingHook @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundT
     fun fishBites() {
         val viewers: Collection<Player> = viewers.values
 
-        val pk: EntityEventPacket = EntityEventPacket()
-        pk.eid = this.getRuntimeID()
-        pk.event = EntityEventPacket.FISH_HOOK_HOOK
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.FishHookHook,
+            eventData = 0
+        )
         Server.broadcastPacket(viewers, pk)
 
-        val bubblePk: EntityEventPacket = EntityEventPacket()
-        bubblePk.eid = this.getRuntimeID()
-        bubblePk.event = EntityEventPacket.FISH_HOOK_BUBBLE
+        val bubblePk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.FishHookBubble,
+            eventData = 0
+        )
         Server.broadcastPacket(viewers, bubblePk)
 
-        val teasePk: EntityEventPacket = EntityEventPacket()
-        teasePk.eid = this.getRuntimeID()
-        teasePk.event = EntityEventPacket.FISH_HOOK_TEASE
+        val teasePk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.FishHookTease,
+            eventData = 0
+        )
         Server.broadcastPacket(viewers, teasePk)
 
         val random: ThreadLocalRandom = ThreadLocalRandom.current()
@@ -296,7 +301,7 @@ class EntityFishingHook @JvmOverloads constructor(chunk: IChunk?, nbt: CompoundT
                 this.entityDataMap[EntityDataTypes.OWNER_EID] = shootingEntity?.getRuntimeID() ?: -1
                 ActorDataMap(this.entityDataMap)
             },
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,

@@ -1,14 +1,10 @@
 package org.chorus_oss.chorus.level.updater.block
 
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.level.updater.Updater
 import org.chorus_oss.chorus.level.updater.util.tagupdater.CompoundTagEditHelper
 import org.chorus_oss.chorus.level.updater.util.tagupdater.CompoundTagUpdaterContext
-import org.chorus_oss.chorus.utils.JSONUtils
 import java.io.IOException
 
 class BlockStateUpdaterBase : Updater {
@@ -42,17 +38,17 @@ class BlockStateUpdaterBase : Updater {
             try {
                 Updater::class.java.classLoader.getResourceAsStream("legacy_block_data_map.json").use { stream ->
                     checkNotNull(stream)
-                    node = JSONUtils.fromAsJsonTree(stream, MutableMap::class.java)
+                    node = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject
                 }
             } catch (e: IOException) {
                 throw AssertionError("Error loading legacy block data map", e)
             }
 
-            for (entry in node.entrySet()) {
+            for (entry in node.entries) {
                 val name: String = entry.key
-                val stateNodes: JsonArray = entry.value.getAsJsonArray()
+                val stateNodes = entry.value.jsonArray
 
-                val states = stateNodes.map { convertStateToCompound(it.asJsonObject) }.toTypedArray()
+                val states = stateNodes.map { convertStateToCompound(it.jsonObject) }.toTypedArray()
 
                 LEGACY_BLOCK_DATA_MAP[name] = states
             }
@@ -60,22 +56,16 @@ class BlockStateUpdaterBase : Updater {
 
         private fun convertStateToCompound(node: JsonObject): Map<String, Any?> {
             val tag: MutableMap<String, Any?> = LinkedHashMap()
-            val iterator: Iterator<Map.Entry<String, JsonElement>> = node.entrySet().iterator()
+            val iterator = node.entries.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
                 val name: String = entry.key
-                val value: JsonElement = entry.value
-                if (value.isJsonPrimitive) {
-                    val primitive: JsonPrimitive = entry.value.getAsJsonPrimitive()
-                    if (primitive.isBoolean) {
-                        tag[name] = primitive.asBoolean
-                    } else if (primitive.isNumber) {
-                        tag[name] = primitive.asInt
-                    } else if (primitive.isString) {
-                        tag[name] = primitive.asString
-                    } else {
-                        throw UnsupportedOperationException("Invalid state type")
-                    }
+                val value = entry.value
+                if (value is JsonPrimitive) {
+                    val primitive = entry.value.jsonPrimitive
+
+                    tag[name] = primitive.booleanOrNull ?: primitive.intOrNull ?: primitive.contentOrNull
+                            ?: throw UnsupportedOperationException("Invalid state type")
                 } else throw UnsupportedOperationException("Invalid state type")
             }
             return tag

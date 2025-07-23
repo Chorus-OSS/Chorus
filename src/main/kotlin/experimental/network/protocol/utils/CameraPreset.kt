@@ -18,28 +18,28 @@ operator fun CameraPreset.Companion.invoke(from: org.chorus_oss.chorus.camera.da
         rotX = from.yaw,
         rotY = from.pitch,
         rotSpeed = from.rotationSpeed,
-        snapToTarget = from.snapToTarget.get(),
+        snapToTarget = from.snapToTarget,
         horizontalRotationLimit = from.horizontalRotationLimit?.let(Vector2f::invoke),
         verticalRotationLimit = from.verticalRotationLimit?.let(Vector2f::invoke),
-        continueTargeting = from.continueTargeting.get(),
-        trackingRadius = from.blockListeningRadius.get(),
+        continueTargeting = from.continueTargeting,
+        trackingRadius = from.blockListeningRadius,
         viewOffset = from.viewOffset?.let(Vector2f::invoke),
         entityOffset = from.entityOffset?.let(Vector3f::invoke),
         radius = from.radius,
         minYawLimit = from.yawLimitMin,
         maxYawLimit = from.yawLimitMax,
         audioListener = from.listener?.let { CameraAudioListener.entries[it.ordinal] },
-        playerEffects = from.playEffect.get(),
-        aimAssist = from.aimAssist.get()?.let(CameraPresetAimAssist::invoke),
+        playerEffects = from.playEffect,
+        aimAssist = from.aimAssist?.let(CameraPresetAimAssist::invoke),
         controlScheme = from.controlScheme?.let { ControlScheme.entries[it.ordinal] },
     )
 }
 
 operator fun CameraPresetAimAssist.Companion.invoke(from: org.chorus_oss.chorus.network.protocol.types.camera.aimassist.CameraPresetAimAssist): CameraPresetAimAssist {
     return CameraPresetAimAssist(
-        presetId = from.presetId.get(),
-        targetMode = from.targetMode.get()?.let { CameraAimAssistTargetMode.entries[it.ordinal] },
-        angle = from.angle.get()?.let(Vector2f::invoke),
-        distance = from.distance.get(),
+        presetId = from.presetId,
+        targetMode = from.targetMode?.let { CameraAimAssistTargetMode.entries[it.ordinal] },
+        angle = from.angle?.let(Vector2f::invoke),
+        distance = from.distance,
     )
 }

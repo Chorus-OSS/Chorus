@@ -36,7 +36,6 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.registry.Registries
 
 class EntitySnowGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt) {
@@ -93,7 +92,10 @@ class EntitySnowGolem(chunk: IChunk?, nbt: CompoundTag) : EntityGolem(chunk, nbt
         if (item is ItemShears) {
             if (!sheared) {
                 this.sheared = (true)
-                level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.SOUND_SHEAR)
+                level!!.addLevelSoundEvent(
+                    this.position,
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Shear
+                )
                 if (player.gamemode != Player.CREATIVE) player.inventory.itemInHand
                     .damage = (item.damage + 1)
                 level!!.dropItem(

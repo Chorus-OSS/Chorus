@@ -5,8 +5,8 @@ import io.netty.util.AbstractReferenceCounted
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.ReferenceCounted
 import io.netty.util.internal.ObjectPool
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.protocol.types.CompressionAlgorithm
+import org.chorus_oss.protocol.core.Packet
 import java.util.function.Consumer
 
 class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Handle<BedrockBatchWrapper>) :
@@ -103,7 +103,7 @@ class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Han
             return batch
         }
 
-        fun create(subClientId: Int, vararg packets: DataPacket?): BedrockBatchWrapper {
+        fun create(subClientId: Int, vararg packets: Packet?): BedrockBatchWrapper {
             val batch = newInstance()
             for (packet in packets) {
                 batch.packets.add(BedrockPacketWrapper(0, subClientId, 0, packet, null))

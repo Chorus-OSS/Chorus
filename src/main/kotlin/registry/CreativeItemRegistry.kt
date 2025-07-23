@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.Gson
-import io.netty.util.internal.EmptyArrays
 import org.chorus_oss.chorus.block.BlockAir
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
@@ -54,7 +53,7 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
                     val damage = (tag.getOrDefault("damage", 0) as Number).toInt()
                     val groupIndex = (tag.getOrDefault("group_index", -1) as Number).toInt()
                     val nbt = if (tag.containsKey("nbt_b64")) Base64.getDecoder()
-                        .decode(tag["nbt_b64"].toString()) else EmptyArrays.EMPTY_BYTES
+                        .decode(tag["nbt_b64"].toString()) else byteArrayOf()
                     val name = tag["id"].toString()
                     var item = get(name, damage, 1, nbt, false)
                     item.setCompoundTag(nbt)

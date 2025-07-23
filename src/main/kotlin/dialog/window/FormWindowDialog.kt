@@ -10,7 +10,6 @@ import org.chorus_oss.chorus.utils.Loggable
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.*
 import java.util.stream.Collectors
 
 
@@ -36,7 +35,7 @@ class FormWindowDialog @JvmOverloads constructor(
 
     init {
         try {
-            BufferedReader(InputStreamReader(Objects.requireNonNull(javaClass.classLoader.getResourceAsStream("npc_data.json")))).use { reader ->
+            BufferedReader(InputStreamReader(requireNotNull(javaClass.classLoader.getResourceAsStream("npc_data.json")))).use { reader ->
                 this.skinData = reader.lines().collect(
                     Collectors.joining("\n")
                 )

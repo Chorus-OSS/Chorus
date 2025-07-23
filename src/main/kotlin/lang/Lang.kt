@@ -1,8 +1,8 @@
 package org.chorus_oss.chorus.lang
 
-import com.google.gson.reflect.TypeToken
-import io.netty.util.internal.EmptyArrays
-import org.chorus_oss.chorus.utils.JSONUtils
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -91,8 +91,9 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
 
     @Throws(IOException::class)
     private fun parseLang(reader: BufferedReader): Map<String, String> {
-        return JSONUtils.from(reader, object : TypeToken<Map<String, String>>() {
-        })
+        return Json.parseToJsonElement(reader.readText()).jsonObject.entries.associate {
+            it.key to it.value.jsonPrimitive.content
+        }
     }
 
     /**
@@ -102,7 +103,7 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
      * @return the string
      */
     fun tr(key: String): String {
-        return tr(key, *EmptyArrays.EMPTY_STRINGS)
+        return tr(key, *emptyArray())
     }
 
     /**

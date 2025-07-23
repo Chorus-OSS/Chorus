@@ -36,26 +36,23 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
-import org.chorus_oss.chorus.network.protocol.*
-import org.chorus_oss.chorus.network.protocol.types.PropertySyncData
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
 import org.chorus_oss.protocol.core.Packet
-import org.chorus_oss.protocol.packets.SetActorDataPacket
-import org.chorus_oss.protocol.packets.SetActorMotionPacket
+import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.ActorLink
 import org.chorus_oss.protocol.types.ActorProperties
 import org.chorus_oss.protocol.types.actor_data.ActorDataMap
 import org.chorus_oss.protocol.types.attribute.AttributeValue
 import java.awt.Color
 import java.util.*
-import java.util.Objects.requireNonNull
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.Volatile
+import kotlin.experimental.or
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -706,11 +703,16 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             }
 
             if (this is Player) {
-                val packet = MobEffectPacket()
-                packet.eid = player.getRuntimeID()
-                packet.effectId = effect.getId()
-                packet.eventId = MobEffectPacket.EVENT_REMOVE.toInt()
-                player.dataPacket(packet)
+                val packet = MobEffectPacket(
+                    entityRuntimeID = player.getRuntimeID().toULong(),
+                    operation = MobEffectPacket.Companion.Operation.Remove,
+                    effectType = effect.getId(),
+                    amplifier = 0,
+                    particles = true,
+                    duration = 0,
+                    tick = 0u,
+                )
+                player.sendPacket(packet)
             }
 
             effect.remove(this)
@@ -749,19 +751,19 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
 
         if (this is Player) {
-            val packet = MobEffectPacket()
-            packet.eid = player.getRuntimeID()
-            packet.effectId = effect.getId()
-            packet.amplifier = effect.getAmplifier()
-            packet.particles = effect.isVisible()
-            packet.duration = effect.getDuration()
-            if (oldEffect != null) {
-                packet.eventId = MobEffectPacket.EVENT_MODIFY.toInt()
-            } else {
-                packet.eventId = MobEffectPacket.EVENT_ADD.toInt()
-            }
-
-            player.dataPacket(packet)
+            val packet = MobEffectPacket(
+                entityRuntimeID = player.getRuntimeID().toULong(),
+                operation = when (oldEffect) {
+                    null -> MobEffectPacket.Companion.Operation.Add
+                    else -> MobEffectPacket.Companion.Operation.Modify
+                },
+                effectType = effect.getId(),
+                amplifier = effect.getAmplifier(),
+                particles = effect.isVisible(),
+                duration = effect.getDuration(),
+                tick = 0u,
+            )
+            player.sendPacket(packet)
         }
 
         effect.add(this)
@@ -933,7 +935,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         if (this.riding != null) {
             riding!!.spawnTo(player)
 
-            val packet = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+            val packet = SetActorLinkPacket(
                 actorLink = ActorLink(
                     riddenActorUniqueID = riding!!.getUniqueID(),
                     riderActorUniqueID = this.getUniqueID(),
@@ -948,7 +950,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     protected open fun createAddEntityPacket(): Packet {
-        return org.chorus_oss.protocol.packets.AddActorPacket(
+        return AddActorPacket(
             actorUniqueID = this.uniqueId,
             actorRuntimeID = this.runtimeId.toULong(),
             actorType = this.getEntityIdentifier(),
@@ -962,7 +964,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             bodyYaw = this.rotation.yaw.toFloat(),
             attributes = this.attributes.values.map(AttributeValue::invoke),
             actorData = ActorDataMap(this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             actorLinks = List(passengers.size) { i ->
                 ActorLink(
                     riddenActorUniqueID = this.uniqueId,
@@ -981,14 +983,16 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     fun sendPotionEffects(player: Player) {
         for (effect: Effect in effects.values) {
-            val packet = MobEffectPacket()
-            packet.eid = this.getRuntimeID()
-            packet.effectId = effect.getId()
-            packet.amplifier = effect.getAmplifier()
-            packet.particles = effect.isVisible()
-            packet.duration = effect.getDuration()
-            packet.eventId = MobEffectPacket.EVENT_ADD.toInt()
-            player.dataPacket(packet)
+            val packet = MobEffectPacket(
+                entityRuntimeID = player.getRuntimeID().toULong(),
+                operation = MobEffectPacket.Companion.Operation.Add,
+                effectType = effect.getId(),
+                amplifier = effect.getAmplifier(),
+                particles = effect.isVisible(),
+                duration = effect.getDuration(),
+                tick = 0u,
+            )
+            player.sendPacket(packet)
         }
     }
 
@@ -997,7 +1001,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         val pk = SetActorDataPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
             actorDataMap = ActorDataMap(data ?: this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             tick = 0uL
         )
         player.sendPacket(pk)
@@ -1008,7 +1012,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         val pk = SetActorDataPacket(
             actorRuntimeID = this.getRuntimeID().toULong(),
             actorDataMap = ActorDataMap(data ?: this.entityDataMap),
-            actorProperties = ActorProperties(this.propertySyncData()),
+            actorProperties = this.properties(),
             tick = 0uL
         )
         for (player: Player in players) {
@@ -1024,7 +1028,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     open fun despawnFrom(player: Player) {
         if (hasSpawned.containsKey(player.loaderId)) {
-            val pk = org.chorus_oss.protocol.packets.RemoveActorPacket(
+            val pk = RemoveActorPacket(
                 actorUniqueID = this.getUniqueID()
             )
             player.sendPacket(pk)
@@ -1100,7 +1104,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 }
                 //复活图腾实现
                 if (totem) {
-                    level!!.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_TOTEM_USED)
+                    level!!.addLevelEvent(this.position, LevelEventPacket.SOUND_TOTEM_USED)
                     level!!.addParticleEffect(this.position, ParticleEffect.TOTEM)
 
                     this.extinguish()
@@ -1115,10 +1119,12 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                         Effect.get(EffectType.ABSORPTION).setDuration(100).setAmplifier(1)
                     )
 
-                    val pk = EntityEventPacket()
-                    pk.eid = this.getRuntimeID()
-                    pk.event = EntityEventPacket.CONSUME_TOTEM
-                    player.dataPacket(pk)
+                    val pk = ActorEventPacket(
+                        actorRuntimeID = this.getRuntimeID().toULong(),
+                        eventType = ActorEventPacket.Companion.Type.ConsumeTotem,
+                        eventData = 0
+                    )
+                    player.sendPacket(pk)
 
                     if (isOffhand) {
                         player.offhandInventory.clear(0, true)
@@ -1539,31 +1545,37 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      *
      */
     open fun moveDelta() {
-        val pk = MoveEntityDeltaPacket()
-        pk.runtimeEntityId = this.getRuntimeID()
+        var flags: UShort = 0xFE00u // Unused fields must be true
         if (prevPosition.x != position.x) {
-            pk.x = position.x.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_X.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_X
         }
         if (prevPosition.y != position.y) {
-            pk.y = position.y.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Y.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Y
         }
         if (prevPosition.z != position.z) {
-            pk.z = position.z.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Z.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Z
         }
         if (prevRotation.pitch != rotation.pitch) {
-            pk.pitch = rotation.pitch.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_PITCH.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_X
         }
         if (prevRotation.yaw != rotation.yaw) {
-            pk.yaw = rotation.yaw.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_YAW.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_Y
         }
         if (this.onGround) {
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_ON_GROUND.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_ON_GROUND
         }
+
+        val pk = MoveActorDeltaPacket(
+            flags = flags,
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = org.chorus_oss.protocol.types.Vector3f(position),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                rotation.pitch.toFloat(),
+                rotation.yaw.toFloat(),
+                rotation.yaw.toFloat(),
+            ),
+        )
+
         Server.broadcastPacket(viewers.values, pk)
     }
 
@@ -1590,16 +1602,28 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
 
     protected fun broadcastMovement(tp: Boolean) {
-        val pk = MoveEntityAbsolutePacket()
-        pk.eid = this.getRuntimeID()
-        pk.x = position.x
-        pk.y = position.y + this.getBaseOffset()
-        pk.z = position.z
-        pk.headYaw = rotation.yaw
-        pk.pitch = rotation.pitch
-        pk.yaw = rotation.yaw
-        pk.teleport = tp
-        pk.onGround = this.onGround
+        var flags: Byte = 0
+        if (tp) {
+            flags = flags or MoveActorAbsolutePacket.FLAG_TELEPORT
+        }
+        if (this.onGround) {
+            flags = flags or MoveActorAbsolutePacket.FLAG_ON_GROUND
+        }
+
+        val pk = MoveActorAbsolutePacket(
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            flags = flags,
+            position = org.chorus_oss.protocol.types.Vector3f(
+                position.x.toFloat(),
+                (position.y + this.getBaseOffset()).toFloat(),
+                position.z.toFloat()
+            ),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                rotation.pitch.toFloat(),
+                rotation.yaw.toFloat(),
+                rotation.yaw.toFloat(),
+            )
+        )
         Server.broadcastPacket(hasSpawned.values, pk)
     }
 
@@ -1657,8 +1681,6 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @return `true` if the mounting successful
      */
     open fun mountEntity(entity: Entity, mode: ActorLink.Companion.Type): Boolean {
-        requireNonNull(entity, "The target of the mounting entity can't be null")
-
         if (isPassenger(entity) || entity.riding != null && !entity.riding!!.dismountEntity(entity, false)) {
             return false
         }
@@ -1719,7 +1741,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     protected fun broadcastLinkPacket(rider: Entity, type: ActorLink.Companion.Type) {
-        val pk = org.chorus_oss.protocol.packets.SetActorLinkPacket(
+        val pk = SetActorLinkPacket(
             actorLink = ActorLink(
                 riddenActorUniqueID = this.getUniqueID(),
                 riderActorUniqueID = rider.getUniqueID(),
@@ -1789,17 +1811,21 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     open fun syncAttribute(attribute: Attribute) {
-        val pk = UpdateAttributesPacket()
-        pk.entries = arrayOf(attribute)
-        pk.entityId = this.getRuntimeID()
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = listOf(attribute).map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 
     open fun syncAttributes() {
-        val pk = UpdateAttributesPacket()
-        pk.entries =
-            attributes.values.stream().filter { obj: Attribute -> obj.isSyncable() }.toList().toTypedArray()
-        pk.entityId = this.getRuntimeID()
+        val pk = UpdateAttributesPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            attributes = attributes.values.filter(Attribute::isSyncable)
+                .map(org.chorus_oss.protocol.types.attribute.Attribute::invoke),
+            tick = 0u,
+        )
         Server.broadcastPacket(viewers.values, pk)
     }
 
@@ -3022,11 +3048,15 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
      * @param rowingTime the rowing time
      * @param players    可视玩家 Visible Player
      */
-    fun playActionAnimation(action: AnimatePacket.Action, rowingTime: Float, players: Collection<Player>) {
+    fun playActionAnimation(
+        action: AnimatePacket.Action,
+        rowingTime: Float,
+        players: Collection<Player>
+    ) {
         Server.broadcastPacket(
             players, AnimatePacket(
                 action = action,
-                targetRuntimeID = this.getRuntimeID(),
+                targetRuntimeID = this.getRuntimeID().toULong(),
                 actionData = AnimatePacket.Action.RowingData(
                     rowingTime = rowingTime
                 )
@@ -3144,11 +3174,13 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
     }
 
-    fun propertySyncData(): PropertySyncData {
-        val intArray = intProperties.values.toIntArray()
-        val floatArray = floatProperties.values.toFloatArray()
+    fun properties(): ActorProperties {
+        val intArray =
+            intProperties.values.mapIndexed { index, i -> ActorProperties.Companion.IntProperty(index.toUInt(), i) }
+        val floatArray =
+            floatProperties.values.mapIndexed { index, i -> ActorProperties.Companion.FloatProperty(index.toUInt(), i) }
 
-        return PropertySyncData(intArray, floatArray)
+        return ActorProperties(intArray, floatArray)
     }
 
     fun getAttributes(): MutableMap<Int, Attribute> {
@@ -3254,7 +3286,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         fun createEntity(identifier: Identifier, pos: Locator, vararg args: Any?): Entity? {
             return createEntity(
                 identifier.toString(),
-                requireNonNull(pos.chunk)!!,
+                pos.chunk,
                 getDefaultNBT(pos.position),
                 *args
             )
@@ -3273,7 +3305,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
          */
         @JvmStatic
         fun createEntity(name: String, pos: Locator, vararg args: Any?): Entity? {
-            return createEntity(name, requireNonNull(pos.chunk)!!, getDefaultNBT(pos.position), *args)
+            return createEntity(name, pos.chunk, getDefaultNBT(pos.position), *args)
         }
 
         /**
@@ -3382,7 +3414,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         }
 
         fun playAnimationOnEntities(
-            animation: org.chorus_oss.protocol.packets.AnimateEntityPacket,
+            animation: AnimateEntityPacket,
             entities: List<Entity>
         ) {
             val viewers =

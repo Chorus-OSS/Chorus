@@ -57,7 +57,7 @@ class ParamList(@get:ApiStatus.Internal val paramTree: ParamTree) : ArrayList<IP
     }
 
     fun addMessage(key: String) {
-        messageContainer.messages.add(CommandOutputMessage(key, *CommandOutputContainer.EMPTY_STRING))
+        messageContainer.messages.add(CommandOutputMessage(key, *emptyArray<String>()))
     }
 
     fun addMessage(key: String, vararg params: String) {

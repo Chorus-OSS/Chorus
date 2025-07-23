@@ -2,8 +2,9 @@ package org.chorus_oss.chorus.level.particle
 
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.DataPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LevelEventPacket
+import org.chorus_oss.protocol.types.Vector3f
 
 class DestroyBlockParticle(pos: Vector3, block: Block) : Particle(pos.x, pos.y, pos.z) {
     private val data: Int
@@ -12,14 +13,16 @@ class DestroyBlockParticle(pos: Vector3, block: Block) : Particle(pos.x, pos.y, 
         this.data = block.runtimeId
     }
 
-    override fun encode(): Array<DataPacket> {
-        val pk = LevelEventPacket()
-        pk.evid = LevelEventPacket.EVENT_PARTICLE_DESTROY_BLOCK
-        pk.x = x.toFloat()
-        pk.y = y.toFloat()
-        pk.z = z.toFloat()
-        pk.data = this.data
-
-        return arrayOf(pk)
+    override fun encode(): List<Packet> {
+        val pk = LevelEventPacket(
+            eventType = LevelEventPacket.PARTICLE_DESTROY_BLOCK,
+            position = Vector3f(
+                x = x.toFloat(),
+                y = y.toFloat(),
+                z = z.toFloat()
+            ),
+            eventData = data
+        )
+        return listOf(pk)
     }
 }

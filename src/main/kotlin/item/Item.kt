@@ -1,7 +1,8 @@
 package org.chorus_oss.chorus.item
 
-import com.google.gson.annotations.SerializedName
-import io.netty.util.internal.EmptyArrays
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockAir
@@ -17,7 +18,9 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.*
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.tags.ItemTags
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.Identifier
+import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.chorus.utils.TextFormat
 import org.jetbrains.annotations.ApiStatus
 import java.io.IOException
 import java.io.UncheckedIOException
@@ -46,7 +49,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     var blockState: BlockState? = null
 
     protected var hasMeta: Boolean = true
-    var compoundTag: ByteArray = EmptyArrays.EMPTY_BYTES
+    var compoundTag: ByteArray = byteArrayOf()
         private set
     private var cachedNBT: CompoundTag? = null
     private fun idConvertToName(): String {
@@ -120,15 +123,15 @@ abstract class Item : Cloneable, ItemID, Loggable {
 
     fun readItemJsonComponents(components: ItemJsonComponents) {
         if (components.canPlaceOn != null) this.setCanPlaceOn(
-            Arrays.stream(
-                components.canPlaceOn!!.blocks
-            ).map { str: String -> Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str") }
-                .toList().toTypedArray())
+            components.canPlaceOn!!.blocks.map { str ->
+                Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str")
+            }.toTypedArray()
+        )
         if (components.canDestroy != null) this.setCanDestroy(
-            Arrays.stream(
-                components.canDestroy!!.blocks
-            ).map { str: String -> Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str") }
-                .toList().toTypedArray())
+            components.canDestroy!!.blocks.map { str ->
+                Block.get(if (str.startsWith("minecraft:")) str else "minecraft:$str")
+            }.toTypedArray()
+        )
         if (components.itemLock != null) itemLockMode = when (components.itemLock!!.mode) {
             ItemLock.LOCK_IN_SLOT -> ItemLockMode.LOCK_IN_SLOT
             ItemLock.LOCK_IN_INVENTORY -> ItemLockMode.LOCK_IN_INVENTORY
@@ -621,7 +624,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
                 }
             }
 
-            return lines.toArray(EmptyArrays.EMPTY_STRINGS)
+            return lines.toTypedArray()
         }
 
     /**
@@ -709,14 +712,14 @@ abstract class Item : Cloneable, ItemID, Loggable {
     }
 
     fun clearNamedTag(): Item {
-        this.compoundTag = EmptyArrays.EMPTY_BYTES
+        this.compoundTag = byteArrayOf()
         this.cachedNBT = null
         return this
     }
 
     fun writeCompoundTag(tag: CompoundTag?): ByteArray {
         if (tag == null) {
-            return EmptyArrays.EMPTY_BYTES
+            return byteArrayOf()
         }
         try {
             return NBTIO.write(tag, ByteOrder.LITTLE_ENDIAN)
@@ -1098,9 +1101,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     override fun toString(): String {
         return "Item(name=\"${idConvertToName()}\", id=\"${this.id}\", meta=${this.meta}, count=${this.count}${
             if (this.hasCompoundTag()) ", tags=0x${
-                Binary.bytesToHexString(
-                    compoundTag
-                )
+                compoundTag.toHexString()
             }" else ")"
         }"
     }
@@ -1250,7 +1251,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
     }
 
     public override fun clone(): Item {
-        var tags = EmptyArrays.EMPTY_BYTES
+        var tags = byteArrayOf()
         if (this.hasCompoundTag()) {
             tags = compoundTag.clone()
         }
@@ -1394,41 +1395,43 @@ abstract class Item : Cloneable, ItemID, Loggable {
         return tag.contains("minecraft:keep_on_death")
     }
 
-    class ItemJsonComponents private constructor() {
-        class CanPlaceOn {
-            lateinit var blocks: Array<String>
-        }
+    @Serializable
+    data class ItemJsonComponents(
+        @SerialName("can_place_on")
+        var canPlaceOn: CanPlaceOn? = null,
+        @SerialName("can_destroy")
+        var canDestroy: CanDestroy? = null,
+        @SerialName("item_lock")
+        var itemLock: ItemLock? = null,
+        @SerialName("keep_on_death")
+        var keepOnDeath: KeepOnDeath? = null
+    ) {
+        @Serializable
+        data class CanPlaceOn(
+            var blocks: List<String> = emptyList(),
+        )
 
-        class CanDestory {
-            lateinit var blocks: Array<String>
-        }
+        @Serializable
+        data class CanDestroy(
+            var blocks: List<String> = emptyList(),
+        )
 
-        class ItemLock {
+        @Serializable
+        data class ItemLock(
             var mode: String? = null
-
+        ) {
             companion object {
                 const val LOCK_IN_INVENTORY: String = "lock_in_inventory"
                 const val LOCK_IN_SLOT: String = "lock_in_slot"
             }
         }
 
+        @Serializable
         class KeepOnDeath
 
-        @SerializedName(value = "minecraft:can_place_on", alternate = ["can_place_on"])
-        var canPlaceOn: CanPlaceOn? = null
-
-        @SerializedName(value = "minecraft:can_destroy", alternate = ["can_destroy"])
-        var canDestroy: CanDestory? = null
-
-        @SerializedName(value = "minecraft:item_lock", alternate = ["item_lock"])
-        var itemLock: ItemLock? = null
-
-        @SerializedName(value = "minecraft:keep_on_death", alternate = ["keep_on_death"])
-        var keepOnDeath: KeepOnDeath? = null
-
         companion object {
-            fun fromJson(json: String?): ItemJsonComponents {
-                return JSONUtils.from(json, ItemJsonComponents::class.java)
+            fun fromJson(json: String): ItemJsonComponents {
+                return Json.decodeFromString(json)
             }
         }
     }

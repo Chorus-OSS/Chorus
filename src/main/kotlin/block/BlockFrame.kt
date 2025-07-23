@@ -20,8 +20,8 @@ import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.utils.Faceable
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 open class BlockFrame @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
@@ -122,7 +122,7 @@ open class BlockFrame @JvmOverloads constructor(blockstate: BlockState = propert
                 isStoringMap = true
                 level.setBlock(this.position, this, true)
             }
-            level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_ITEMFRAME_ITEM_ADD)
+            level.addLevelEvent(this.position, LevelEventPacket.SOUND_ITEMFRAME_ITEM_ADD)
         } else {
             val event = ItemFrameUseEvent(player, this, itemFrame, null, ItemFrameUseEvent.Action.ROTATION)
             Server.instance.pluginManager.callEvent(event)
@@ -132,7 +132,7 @@ open class BlockFrame @JvmOverloads constructor(blockstate: BlockState = propert
                 isStoringMap = false
                 level.setBlock(this.position, this, true)
             }
-            level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_ITEMFRAME_ITEM_ROTATE)
+            level.addLevelEvent(this.position, LevelEventPacket.SOUND_ITEMFRAME_ITEM_ROTATE)
         }
         return true
     }
@@ -184,7 +184,7 @@ open class BlockFrame @JvmOverloads constructor(blockstate: BlockState = propert
 
     override fun onBreak(item: Item?): Boolean {
         level.setBlock(this.position, layer, get(BlockID.AIR), true, true)
-        level.addLevelEvent(this.position, LevelEventPacket.EVENT_SOUND_ITEMFRAME_BREAK)
+        level.addLevelEvent(this.position, LevelEventPacket.SOUND_ITEMFRAME_BREAK)
         return true
     }
 

@@ -7,24 +7,21 @@ import org.chorus_oss.chorus.entity.item.EntityBoat
 import org.chorus_oss.chorus.entity.item.EntityMinecartAbstract
 import org.chorus_oss.chorus.entity.mob.animal.EntityHorse
 import org.chorus_oss.chorus.event.player.*
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Transform
 import org.chorus_oss.chorus.level.Transform.Companion.fromObject
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.types.AuthInputAction
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.PlayerAuthInputPacket
+import org.chorus_oss.protocol.types.InputFlag
 import org.chorus_oss.protocol.types.PlayerActionType
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthInputPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<PlayerAuthInputPacket>) {
-        val packet = pk.packet
+class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
+    override fun handle(player: Player, packet: PlayerAuthInputPacket) {
 
-        val player = player.player
         if (!packet.blockActions.isNullOrEmpty()) {
             for (action in packet.blockActions) {
                 //hack 自从1.19.70开始，创造模式剑客户端不会发送PREDICT_DESTROY_BLOCK，但仍然发送START_DESTROY_BLOCK，过滤掉
@@ -65,16 +62,16 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
         // As of 1.18 this is now used for sending item stack requests such as when mining a block.
         val itemStackRequest = packet.itemStackRequest
         if (itemStackRequest != null) {
-            val dataPacketManager = player.session.dataPacketManager
+            val dataPacketManager = player.session.packetManager
             if (dataPacketManager != null) {
                 val itemStackRequestPacket = org.chorus_oss.protocol.packets.ItemStackRequestPacket(
                     requests = listOf(itemStackRequest)
                 )
-                dataPacketManager.processPacket(player, MigrationPacket(itemStackRequestPacket))
+                dataPacketManager.processPacket(player, itemStackRequestPacket)
             }
         }
 
-        if (packet.inputData[AuthInputAction.START_SPRINTING.ordinal]) {
+        if (packet.inputData[InputFlag.StartSprinting.ordinal]) {
             val event = PlayerToggleSprintEvent(player, true)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -83,7 +80,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setSprinting(true)
             }
         }
-        if (packet.inputData[AuthInputAction.STOP_SPRINTING.ordinal]) {
+        if (packet.inputData[InputFlag.StopSprinting.ordinal]) {
             val event = PlayerToggleSprintEvent(player, false)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -92,7 +89,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setSprinting(false)
             }
         }
-        if (packet.inputData[AuthInputAction.START_SNEAKING.ordinal]) {
+        if (packet.inputData[InputFlag.StartSneaking.ordinal]) {
             val event = PlayerToggleSneakEvent(player, true)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -101,7 +98,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setSneaking(true)
             }
         }
-        if (packet.inputData[AuthInputAction.STOP_SNEAKING.ordinal]) {
+        if (packet.inputData[InputFlag.StopSneaking.ordinal]) {
             val event = PlayerToggleSneakEvent(player, false)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -111,13 +108,13 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
             }
         }
         if (player.adventureSettings[AdventureSettings.Type.FLYING]) {
-            player.isFlySneaking = packet.inputData[AuthInputAction.SNEAKING.ordinal]
+            player.isFlySneaking = packet.inputData[InputFlag.Sneaking.ordinal]
         }
-        if (packet.inputData[AuthInputAction.START_JUMPING.ordinal]) {
+        if (packet.inputData[InputFlag.StartJumping.ordinal]) {
             val playerJumpEvent = PlayerJumpEvent(player)
             Server.instance.pluginManager.callEvent(playerJumpEvent)
         }
-        if (packet.inputData[AuthInputAction.START_SWIMMING.ordinal]) {
+        if (packet.inputData[InputFlag.StartSwimming.ordinal]) {
             val playerSwimmingEvent = PlayerToggleSwimEvent(player, true)
             Server.instance.pluginManager.callEvent(playerSwimmingEvent)
             if (playerSwimmingEvent.cancelled) {
@@ -126,7 +123,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setSwimming(true)
             }
         }
-        if (packet.inputData[AuthInputAction.STOP_SWIMMING.ordinal]) {
+        if (packet.inputData[InputFlag.StopSwimming.ordinal]) {
             val playerSwimmingEvent = PlayerToggleSwimEvent(player, false)
             Server.instance.pluginManager.callEvent(playerSwimmingEvent)
             if (playerSwimmingEvent.cancelled) {
@@ -135,7 +132,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setSwimming(false)
             }
         }
-        if (packet.inputData[AuthInputAction.START_GLIDING.ordinal]) {
+        if (packet.inputData[InputFlag.StartGliding.ordinal]) {
             val playerToggleGlideEvent = PlayerToggleGlideEvent(player, true)
             Server.instance.pluginManager.callEvent(playerToggleGlideEvent)
             if (playerToggleGlideEvent.cancelled) {
@@ -144,7 +141,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setGliding(true)
             }
         }
-        if (packet.inputData[AuthInputAction.STOP_GLIDING.ordinal]) {
+        if (packet.inputData[InputFlag.StopGliding.ordinal]) {
             val playerToggleGlideEvent = PlayerToggleGlideEvent(player, false)
             Server.instance.pluginManager.callEvent(playerToggleGlideEvent)
             if (playerToggleGlideEvent.cancelled) {
@@ -153,7 +150,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.setGliding(false)
             }
         }
-        if (packet.inputData[AuthInputAction.START_FLYING.ordinal]) {
+        if (packet.inputData[InputFlag.StartFlying.ordinal]) {
             if (!Server.instance.allowFlight && !player.adventureSettings[AdventureSettings.Type.ALLOW_FLIGHT]
             ) {
                 player.kick(PlayerKickEvent.Reason.FLYING_DISABLED, "Flying is not enabled on this server")
@@ -167,7 +164,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
                 player.adventureSettings[AdventureSettings.Type.FLYING] = playerToggleFlightEvent.isFlying
             }
         }
-        if (packet.inputData[AuthInputAction.STOP_FLYING.ordinal]) {
+        if (packet.inputData[InputFlag.StopFlying.ordinal]) {
             val playerToggleFlightEvent = PlayerToggleFlightEvent(player, false)
             Server.instance.pluginManager.callEvent(playerToggleFlightEvent)
             if (playerToggleFlightEvent.cancelled) {
@@ -197,7 +194,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
             if (inputY >= -1.001 && inputY <= 1.001) {
                 riding.setCurrentSpeed(inputY.toDouble())
             }
-        } else if (riding is EntityBoat && packet.inputData[AuthInputAction.IN_CLIENT_PREDICTED_IN_VEHICLE.ordinal]) {
+        } else if (riding is EntityBoat && packet.inputData[InputFlag.ClientPredictedVehicle.ordinal]) {
             if (riding.getRuntimeID() == packet.clientPredictedVehicle && riding.isControlling(player)) {
                 if (check(clientLoc, player)) {
                     val offsetLoc = clientLoc.add(0.0, player.player.getBaseOffset().toDouble(), 0.0)
@@ -222,7 +219,7 @@ class PlayerAuthInputProcessor : DataPacketProcessor<MigrationPacket<PlayerAuthI
         player.player.offerMovementTask(clientLoc)
     }
 
-    override val packetId: Int = PlayerAuthInputPacket.id
+    override val packetID: Int = PlayerAuthInputPacket.id
 
     companion object {
         private fun check(clientLoc: Transform, player: Player): Boolean {

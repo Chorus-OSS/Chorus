@@ -35,13 +35,15 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.LevelEventPacket
+import org.chorus_oss.protocol.types.Vector3f
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Function
 
@@ -194,12 +196,12 @@ class EntityElderGuardian(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chun
                     p.addEffect(
                         Effect.get(EffectType.MINING_FATIGUE).setAmplifier(2).setDuration(6000)
                     )
-                    val pk = LevelEventPacket()
-                    pk.evid = LevelEventPacket.EVENT_PARTICLE_SOUND_GUARDIAN_GHOST
-                    pk.x = position.x.toFloat()
-                    pk.y = position.y.toFloat()
-                    pk.z = position.z.toFloat()
-                    p.dataPacket(pk)
+                    val pk = LevelEventPacket(
+                        eventType = LevelEventPacket.PARTICLE_SOUND_GUARDIAN_GHOST,
+                        position = Vector3f(position),
+                        eventData = 0,
+                    )
+                    p.sendPacket(pk)
                 }
             }
         }

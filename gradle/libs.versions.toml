@@ -36,11 +36,10 @@ com-github-stateless4j = "2.6.0"
 disruptor = "4.0.0"
 caffeine-ver = "3.2.0"
 
-protocol = "v819.4"
+protocol = "v819.7"
 kotlinx-io = "0.8.0"
 kotlinx-coroutines = "1.10.2"
-cryptography = "0.4.0"
-jwt = "1.1.0"
+cryptography = "0.5.0"
 ktoml = "0.7.0"
 json = "1.9.0"
 kotlin = "2.2.0"
@@ -92,9 +91,7 @@ kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "cryptography" }
 cryptography-random = { module = "dev.whyoleg.cryptography:cryptography-random", version.ref = "cryptography" }
-cryptography-provider-jdk = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "cryptography" }
-jwt = { module = "com.appstractive:jwt-kt", version.ref = "jwt" }
-jwt-ecdsa = { module = "com.appstractive:jwt-ecdsa-kt", version.ref = "jwt" }
+cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal", version.ref = "cryptography" }
 ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
 json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "json" }

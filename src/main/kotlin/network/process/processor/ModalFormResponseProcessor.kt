@@ -9,37 +9,38 @@ import org.chorus_oss.chorus.form.element.custom.*
 import org.chorus_oss.chorus.form.response.CustomResponse
 import org.chorus_oss.chorus.form.response.ElementResponse
 import org.chorus_oss.chorus.form.window.CustomForm
-import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.ModalFormResponsePacket
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.packets.ModalFormResponsePacket
 
-class ModalFormResponseProcessor : DataPacketProcessor<ModalFormResponsePacket>() {
-    override fun handle(player: Player, pk: ModalFormResponsePacket) {
-        val player = player.player
+class ModalFormResponseProcessor : PacketProcessor<ModalFormResponsePacket> {
+    override fun handle(player: Player, packet: ModalFormResponsePacket) {
+        val data = packet.responseData ?: "null"
+
+
         if (!player.spawned || !player.isAlive()) {
             return
         }
 
-        if (pk.data.length > 1024) {
+        if (data.length > 1024) {
             player.close("§cPacket handling error")
             return
         }
 
-        if (player.player.formWindows.containsKey(pk.formId)) {
-            val window = player.player.formWindows.remove(pk.formId)!!
+        if (player.player.formWindows.containsKey(packet.formID.toInt())) {
+            val window = player.player.formWindows.remove(packet.formID.toInt())!!
 
-            val response = window.respond(player, pk.data.trim { it <= ' ' })
+            val response = window.respond(player, data.trim { it <= ' ' })
 
-            val event = PlayerFormRespondedEvent(player, pk.formId, window, response!!)
+            val event = PlayerFormRespondedEvent(player, packet.formID.toInt(), window, response!!)
             Server.instance.pluginManager.callEvent(event)
-        } else if (player.player.serverSettings.containsKey(pk.formId)) {
-            val window = player.player.serverSettings[pk.formId]!!
+        } else if (player.player.serverSettings.containsKey(packet.formID.toInt())) {
+            val window = player.player.serverSettings[packet.formID.toInt()]!!
 
-            val response = window.respond(player, pk.data.trim { it <= ' ' })
+            val response = window.respond(player, data.trim { it <= ' ' })
 
             val event = PlayerSettingsRespondedEvent(
-                player, pk.formId, window,
+                player, packet.formID.toInt(), window,
                 response!!
             )
             Server.instance.pluginManager.callEvent(event)
@@ -57,11 +58,10 @@ class ModalFormResponseProcessor : DataPacketProcessor<ModalFormResponsePacket>(
                     }
                 }
             }
-        } else log.warn("{} sent unknown form id {}", player.getEntityName(), pk.formId)
+        } else log.warn("{} sent unknown form id {}", player.getEntityName(), packet.formID.toInt())
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.MODAL_FORM_RESPONSE_PACKET
+    override val packetID: Int = ModalFormResponsePacket.id
 
     companion object : Loggable
 }

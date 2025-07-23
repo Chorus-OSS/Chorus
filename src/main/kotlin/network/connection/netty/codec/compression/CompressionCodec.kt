@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.network.connection.netty.codec.compression
 
-import com.google.common.base.Preconditions
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageCodec
@@ -48,11 +47,9 @@ class CompressionCodec(val strategy: CompressionStrategy, private val prefixed: 
     @Throws(Exception::class)
     override fun decode(ctx: ChannelHandlerContext, msg: BedrockBatchWrapper, out: MutableList<Any>) {
         val compressed = msg.compressed!!.slice()
-        Preconditions.checkArgument(
-            compressed.capacity() <= Server.instance.settings.networkSettings.maxDecompressSize,
-            "Compressed data size is too big: %s",
-            compressed.capacity()
-        )
+        check(
+            compressed.capacity() <= Server.instance.settings.networkSettings.maxDecompressSize
+        ) { "Compressed data size is too big: ${compressed.capacity()}" }
 
         val compression: BatchCompression?
         if (this.prefixed) {

@@ -26,7 +26,6 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.MinecartType
 import org.chorus_oss.chorus.utils.Rail
-import java.util.*
 import kotlin.math.*
 
 abstract class EntityMinecartAbstract(chunk: IChunk?, nbt: CompoundTag) : EntityVehicle(chunk, nbt) {
@@ -848,7 +847,6 @@ abstract class EntityMinecartAbstract(chunk: IChunk?, nbt: CompoundTag) : Entity
     }
 
     fun setFlyingVelocityMod(flying: Vector3) {
-        Objects.requireNonNull(flying, "Flying velocity modifiers cannot be null")
         flyingX = flying.x
         flyingY = flying.y
         flyingZ = flying.z
@@ -859,7 +857,6 @@ abstract class EntityMinecartAbstract(chunk: IChunk?, nbt: CompoundTag) : Entity
     }
 
     fun setDerailedVelocityMod(derailed: Vector3) {
-        Objects.requireNonNull(derailed, "Derailed velocity modifiers cannot be null")
         derailedX = derailed.x
         derailedY = derailed.y
         derailedZ = derailed.z

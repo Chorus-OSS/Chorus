@@ -44,7 +44,7 @@ class ObjectPaleOakTree : TreeGenerator() {
                 this.setDirtAt(level, blockpos.east())
                 this.setDirtAt(level, blockpos.south())
                 this.setDirtAt(level, blockpos.south().east())
-                val enumfacing: BlockFace = BlockFace.Plane.HORIZONTAL.random(rand)
+                val enumfacing: BlockFace = BlockFace.Plane.HORIZONTAL_FACES.random()
                 val i1: Int = i - rand.nextInt(4)
                 var j1: Int = 2 - rand.nextInt(3)
                 var k1 = j

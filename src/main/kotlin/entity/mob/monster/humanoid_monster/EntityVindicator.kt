@@ -32,7 +32,6 @@ import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Function
 
@@ -155,7 +154,7 @@ class EntityVindicator(chunk: IChunk?, nbt: CompoundTag?) : EntityIllager(chunk,
             entity.setDataFlag(EntityFlag.ANGRY)
             entity.level!!.addLevelSoundEvent(
                 entity.position,
-                LevelSoundEventPacket.SOUND_ANGRY,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Angry,
                 -1,
                 EntityID.VINDICATOR,
                 false,

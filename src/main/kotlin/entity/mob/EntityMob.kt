@@ -20,6 +20,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.form.window.SimpleForm
 import org.chorus_oss.chorus.inventory.EntityInventoryHolder
 import org.chorus_oss.chorus.inventory.Inventory
@@ -34,8 +35,8 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.protocol.MoveEntityDeltaPacket
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.protocol.packets.MoveActorDeltaPacket
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
 import java.util.stream.Stream
@@ -322,35 +323,40 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
     }
 
     override fun moveDelta() {
-        val pk = MoveEntityDeltaPacket()
-        pk.runtimeEntityId = this.getRuntimeID()
+        var flags: UShort = 0xFE00u // Unused fields must be true
         if (prevPosition.x != position.x) {
-            pk.x = position.x.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_X.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_X
         }
         if (prevPosition.y != position.y) {
-            pk.y = position.y.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Y.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Y
         }
         if (prevPosition.z != position.z) {
-            pk.z = position.z.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_Z.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_Z
         }
         if (prevRotation.pitch != rotation.pitch) {
-            pk.pitch = rotation.pitch.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_PITCH.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_X
         }
         if (prevRotation.yaw != rotation.yaw) {
-            pk.yaw = rotation.yaw.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_YAW.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_Y
         }
-        if (!prevHeadYaw.equals(this.headYaw)) {
-            pk.headYaw = headYaw.toFloat()
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_HAS_HEAD_YAW.toInt()).toShort()
+        if (prevHeadYaw != headYaw) {
+            flags = flags or MoveActorDeltaPacket.FLAG_HAS_ROT_Z
         }
         if (this.onGround) {
-            pk.flags = (pk.flags.toInt() or MoveEntityDeltaPacket.FLAG_ON_GROUND.toInt()).toShort()
+            flags = flags or MoveActorDeltaPacket.FLAG_ON_GROUND
         }
+
+        val pk = MoveActorDeltaPacket(
+            flags = flags,
+            entityRuntimeID = this.getRuntimeID().toULong(),
+            position = org.chorus_oss.protocol.types.Vector3f(position),
+            rotation = org.chorus_oss.protocol.types.Vector3f(
+                rotation.pitch.toFloat(),
+                rotation.yaw.toFloat(),
+                headYaw.toFloat(),
+            ),
+        )
+
         Server.broadcastPacket(this.viewers.values, pk)
     }
 

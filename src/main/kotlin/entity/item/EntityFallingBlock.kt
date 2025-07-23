@@ -20,7 +20,7 @@ import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -251,9 +251,9 @@ class EntityFallingBlock(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt)
                                     level!!.setBlock(eventTo.position, anvil, true)
                                 }
                             }
-                            level!!.addLevelEvent(eventTo.position, LevelEventPacket.EVENT_SOUND_ANVIL_LAND)
+                            level!!.addLevelEvent(eventTo.position, LevelEventPacket.SOUND_ANVIL_LAND)
                         } else if (eventTo.id == BlockID.POINTED_DRIPSTONE) {
-                            level!!.addLevelEvent(block.position, LevelEventPacket.EVENT_SOUND_POINTED_DRIPSTONE_LAND)
+                            level!!.addLevelEvent(block.position, LevelEventPacket.SOUND_POINTED_DRIPSTONE_LAND)
 
                             val e = level!!.getCollidingEntities(SimpleAxisAlignedBB(pos, pos.add(1.0, 1.0, 1.0)))
                             for (entity in e) {

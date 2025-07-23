@@ -1,21 +1,20 @@
 package org.chorus_oss.chorus.network.process.handler
 
 
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
+import org.chorus_oss.chorus.experimental.network.protocol.utils.decode
 import org.chorus_oss.chorus.network.connection.BedrockSession
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createHandshakeJwt
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.createKeyPair
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.generateRandomToken
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.getSecretKey
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.parseKey
 import org.chorus_oss.chorus.network.process.SessionState
-import org.chorus_oss.chorus.network.protocol.LoginPacket
-import org.chorus_oss.chorus.network.protocol.types.InputMode
-import org.chorus_oss.chorus.network.protocol.types.Platform
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.utils.ClientChainData
 import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.LoginPacket
+import org.chorus_oss.protocol.types.InputMode
+import org.chorus_oss.protocol.types.Platform
 import java.net.InetSocketAddress
 import java.util.function.Consumer
 import java.util.regex.Pattern
@@ -23,11 +22,15 @@ import java.util.regex.Pattern
 class LoginHandler(session: BedrockSession, private val consumer: Consumer<PlayerInfo>) :
     BedrockSessionPacketHandler(session) {
 
-    override fun handle(pk: LoginPacket) {
+    override fun handle(packet: Packet) {
+        if (packet !is LoginPacket) return
+
         val server = session.server
 
+        val packetData = packet.decode()
+
         //check the player login time
-        if (pk.issueUnixTime != -1L && Server.instance.checkLoginTime && System.currentTimeMillis() - pk.issueUnixTime > 20000) {
+        if (packetData.chainData.issueUnixTime != -1L && Server.instance.checkLoginTime && System.currentTimeMillis() - packetData.chainData.issueUnixTime > 20000) {
             val message = "disconnectionScreen.noReason"
             log.debug("disconnection due to noReason")
             session.sendPlayStatus(
@@ -38,7 +41,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        val chainData = ClientChainData.read(pk)
+        val chainData = ClientChainData.read(packet)
 
         //verify the player if enable the xbox-auth
         if (!chainData.isXboxAuthed && server.settings.serverSettings.xboxAuth) {
@@ -86,8 +89,8 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
 
         // Verify if the CurrentInputMode is valid
         val currentInputMode = chainData.currentInputMode
-        if (currentInputMode <= InputMode.UNDEFINED.ordinal ||
-            currentInputMode >= InputMode.COUNT.ordinal
+        if (currentInputMode <= InputMode.Undefined.ordinal ||
+            currentInputMode >= InputMode.entries.size
         ) {
             log.debug("disconnection due to invalid input mode")
             session.close("§cPacket handling error")
@@ -96,16 +99,16 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
 
         // Verify if the DefaultInputMode is valid
         val defaultInputMode = chainData.defaultInputMode
-        if (defaultInputMode <= InputMode.UNDEFINED.ordinal ||
-            defaultInputMode >= InputMode.COUNT.ordinal
+        if (defaultInputMode <= InputMode.Undefined.ordinal ||
+            defaultInputMode >= InputMode.entries.size
         ) {
             log.debug("disconnection due to invalid input mode")
             session.close("§cPacket handling error")
             return
         }
 
-        val uniqueId = pk.clientUUID!!
-        val username = pk.username!!
+        val uniqueId = packetData.chainData.clientUUID
+        val username = packetData.chainData.username
         val usernameMatcher = playerNamePattern.matcher(username)
 
         if (!usernameMatcher.matches() ||
@@ -117,13 +120,13 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        if (!pk.skin!!.isValid()) {
+        if (!packetData.skinData.skin.isValid()) {
             log.debug("disconnection due to invalidSkin")
             session.close("disconnectionScreen.invalidSkin")
             return
         }
 
-        val skin = pk.skin!!
+        val skin = packetData.skinData.skin
         if (server.settings.playerSettings.forceSkinTrusted) {
             skin.setTrusted(true)
         }
@@ -172,11 +175,11 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
     private fun getPredictedDeviceOS(chainData: ClientChainData): Int {
         val titleId = chainData.titleId
         return when (titleId) {
-            "896928775" -> Platform.WINDOWS_10.id
-            "2047319603" -> Platform.SWITCH.id
-            "1739947436" -> Platform.ANDROID.id
-            "2044456598" -> Platform.PLAYSTATION.id
-            "1828326430" -> Platform.XBOX_ONE.id
+            "896928775" -> Platform.Windows10.id
+            "2047319603" -> Platform.Switch.id
+            "1739947436" -> Platform.Android.id
+            "2044456598" -> Platform.PlayStation.id
+            "1828326430" -> Platform.XboxOne.id
             "1810924247" -> Platform.IOS.id
             else -> 0
         }
@@ -199,24 +202,21 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
     }
 
     private fun enableEncryption(data: ClientChainData) {
+        val encryptionToken = EncryptionUtils.generateRandomToken()
         try {
-            val clientKey = parseKey(data.identityPublicKey)
-            val encryptionKeyPair = createKeyPair()
-            val encryptionToken = generateRandomToken()
-            val encryptionKey = getSecretKey(
-                encryptionKeyPair.private, clientKey,
-                encryptionToken
-            )
-            val handshakeJwt = createHandshakeJwt(encryptionKeyPair, encryptionToken)
+            val clientKey = EncryptionUtils.parseKey(data.identityPublicKey!!)
+            val pair = EncryptionUtils.generateKeyPair()
+            val key = EncryptionUtils.getSecretKey(pair.privateKey, clientKey, encryptionToken)
+            val handshakeJWT = runBlocking { EncryptionUtils.createHandshakeJWT(pair, encryptionToken) }
             // WTF
             if (session.isDisconnected) {
                 return
             }
             val pk = org.chorus_oss.protocol.packets.ServerToClientHandshakePacket(
-                jwt = handshakeJwt
+                jwt = handshakeJWT
             )
             session.sendPacketImmediately(pk)
-            session.enableEncryption(encryptionKey)
+            session.enableEncryption(key)
 
             session.machine.fire(SessionState.Encryption)
         } catch (e: Exception) {

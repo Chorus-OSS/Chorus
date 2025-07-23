@@ -4,7 +4,6 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.BlockLiquid
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.ChorusRandom
 
 class ItemChorusFruit @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
@@ -51,12 +50,18 @@ class ItemChorusFruit @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
             }
 
             // Sounds are broadcast at both source and destination
-            level.addLevelSoundEvent(player.position, LevelSoundEventPacket.SOUND_TELEPORT)
+            level.addLevelSoundEvent(
+                player.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport
+            )
             player.teleport(
                 Vector3(x + 0.5, (y + 1).toDouble(), z + 0.5),
                 PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT
             )
-            level.addLevelSoundEvent(player.position, LevelSoundEventPacket.SOUND_TELEPORT)
+            level.addLevelSoundEvent(
+                player.position,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport
+            )
 
             break
         }

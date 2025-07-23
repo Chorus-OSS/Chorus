@@ -4,35 +4,37 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.level.Transform.Companion.fromObject
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
-import org.chorus_oss.chorus.network.protocol.MovePlayerPacket
+import org.chorus_oss.chorus.network.process.PacketProcessor
+import org.chorus_oss.protocol.packets.MovePlayerPacket
 
-class MovePlayerProcessor : DataPacketProcessor<MovePlayerPacket>() {
-    override fun handle(player: Player, pk: MovePlayerPacket) {
-        val player = player.player
+class MovePlayerProcessor : PacketProcessor<MovePlayerPacket> {
+    override fun handle(player: Player, packet: MovePlayerPacket) {
+
         if (Server.instance.getServerAuthoritativeMovement() > 0) {
             return
         }
-        val newPos = Vector3(pk.x.toDouble(), (pk.y - player.player.getBaseOffset()).toDouble(), pk.z.toDouble())
+        val newPos = Vector3(
+            packet.position.x.toDouble(),
+            (packet.position.y - player.player.getBaseOffset()).toDouble(),
+            packet.position.z.toDouble()
+        )
 
-        pk.yaw %= 360f
-        pk.headYaw %= 360f
-        pk.pitch %= 360f
-        if (pk.yaw < 0) {
-            pk.yaw += 360f
+        var yaw = packet.yaw % 360f
+        var headYaw = packet.headYaw % 360f
+        val pitch = packet.pitch % 360f
+        if (yaw < 0) {
+            yaw += 360f
         }
-        if (pk.headYaw < 0) {
-            pk.headYaw += 360f
+        if (headYaw < 0) {
+            headYaw += 360f
         }
         player.player.offerMovementTask(
             fromObject(
                 newPos,
-                player.level!!, pk.yaw.toDouble(), pk.pitch.toDouble(), pk.headYaw.toDouble()
+                player.level!!, yaw.toDouble(), pitch.toDouble(), headYaw.toDouble()
             )
         )
     }
 
-    override val packetId: Int
-        get() = ProtocolInfo.MOVE_PLAYER_PACKET
+    override val packetID: Int = MovePlayerPacket.id
 }

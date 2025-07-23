@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemDurable
 import org.chorus_oss.chorus.nbt.NBTIO.read
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.connection.util.HandleByteBuf
+import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.nbt.TagSerialization
 import org.chorus_oss.protocol.types.item.ItemInstance
@@ -43,9 +43,15 @@ operator fun ItemInstance.Companion.invoke(value: Item): ItemInstance {
 
             else -> org.chorus_oss.nbt.tags.CompoundTag()
         },
-        canBePlacedOn = HandleByteBuf.extractStringList(value, "CanPlaceOn"),
-        canBreak = HandleByteBuf.extractStringList(value, "CanDestroy"),
+        canBePlacedOn = extractStringList(value, "CanPlaceOn"),
+        canBreak = extractStringList(value, "CanDestroy"),
     )
+}
+
+private fun extractStringList(item: Item, tagName: String): List<String> {
+    val namedTag = item.namedTag ?: return emptyList()
+    val listTag = namedTag.getList(tagName, StringTag::class.java)
+    return listTag.all.map { it.data }
 }
 
 operator fun Item.Companion.invoke(from: ItemInstance): Item {

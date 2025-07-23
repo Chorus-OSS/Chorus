@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.scoreboard
 
-import org.chorus_oss.chorus.network.protocol.SetScorePacket.ScoreInfo
 import org.chorus_oss.chorus.scoreboard.scorer.IScorer
+import org.chorus_oss.protocol.types.scoreboard.ScoreboardEntry
 
 /**
  * 计分板上的单个行 <br></br>
@@ -63,7 +63,7 @@ interface IScoreboardLine {
      * Convert to network information
      * @return network information
      */
-    fun toNetworkInfo(): ScoreInfo? {
+    fun toNetworkInfo(): ScoreboardEntry? {
         return scorer.toNetworkInfo(scoreboard, this)
     }
 

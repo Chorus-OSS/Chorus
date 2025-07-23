@@ -11,7 +11,6 @@ import org.chorus_oss.chorus.entity.ai.behavior.IBehavior
 import org.chorus_oss.chorus.entity.ai.behaviorgroup.BehaviorGroup
 import org.chorus_oss.chorus.entity.ai.behaviorgroup.IBehaviorGroup
 import org.chorus_oss.chorus.entity.ai.controller.FluctuateController
-import org.chorus_oss.chorus.entity.ai.controller.IController
 import org.chorus_oss.chorus.entity.ai.controller.LookController
 import org.chorus_oss.chorus.entity.ai.controller.WalkController
 import org.chorus_oss.chorus.entity.ai.evaluator.IBehaviorEvaluator
@@ -37,8 +36,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationListener
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import kotlin.math.abs
 
 class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), EntityWalkable, VibrationListener {
@@ -58,7 +56,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                     if (this.memoryStorage.notEmpty(CoreMemoryTypes.ATTACK_TARGET)) setAmbientSoundEvent(
                         Sound.MOB_WARDEN_ANGRY
                     )
-                    else if (this.memoryStorage.notEmpty(CoreMemoryTypes.WARDEN_ANGER_VALUE)) setAmbientSoundEvent(
+                    else if (this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE].isNotEmpty()) setAmbientSoundEvent(
                         Sound.MOB_WARDEN_AGITATED
                     )
                     else setAmbientSoundEvent(Sound.MOB_WARDEN_IDLE)
@@ -66,7 +64,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                 }, { true }, 1, 1, 20),
                 Behavior({ entity: EntityMob ->
                     //刷新anger数值
-                    val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]!!
+                    val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]
                     val iterator = angerValueMap.entries.iterator()
                     while (iterator.hasNext()) {
                         val next =
@@ -117,7 +115,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
             setOf<IBehavior>(
                 Behavior(
                     WardenViolentAnimationExecutor((4.2 * 20).toInt()), all(
-                        IBehaviorEvaluator { entity: EntityMob ->
+                        { entity: EntityMob ->
                             entity.memoryStorage[CoreMemoryTypes.IS_ATTACK_TARGET_CHANGED]
                         },
                         MemoryCheckNotEmptyEvaluator(CoreMemoryTypes.ATTACK_TARGET)
@@ -164,7 +162,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
                 )
             ),
             setOf<ISensor>(RouteUnreachableTimeSensor(CoreMemoryTypes.ROUTE_UNREACHABLE_TIME)),
-            setOf<IController>(WalkController(), LookController(true, true), FluctuateController()),
+            setOf(WalkController(), LookController(true, true), FluctuateController()),
             SimpleFlatAStarRouteFinder(WalkingPosEvaluator(), this),
             this
         )
@@ -187,7 +185,10 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
         this.maxHealth = 500
         super.initEntity()
         this.setDataProperty(EntityDataTypes.HEARTBEAT_INTERVAL_TICKS, 40)
-        this.setDataProperty(EntityDataTypes.HEARTBEAT_SOUND_EVENT, LevelSoundEventPacket.SOUND_HEARTBEAT)
+        this.setDataProperty(
+            EntityDataTypes.HEARTBEAT_SOUND_EVENT,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Heartbeat.id
+        )
         //空闲声音
         this.setAmbientSoundEvent(Sound.MOB_WARDEN_IDLE)
         this.setAmbientSoundInterval(8.0f)
@@ -215,9 +216,11 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
     override fun onVibrationArrive(event: VibrationEvent) {
         this.waitForVibration = false
         this.lastDetectTime = level!!.tick
-        val pk = EntityEventPacket()
-        pk.eid = this.getRuntimeID()
-        pk.event = EntityEventPacket.VIBRATION_DETECTED
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.VibrationDetected,
+            eventData = 0
+        )
         Server.broadcastPacket(this.viewers.values, pk)
 
         //handle anger value
@@ -270,7 +273,7 @@ class EntityWarden(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt)
     }
 
     fun addEntityAngerValue(entity: Entity, addition: Int) {
-        val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]!!
+        val angerValueMap = this.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]
         val attackTarget = this.memoryStorage[CoreMemoryTypes.ATTACK_TARGET]
         val origin = angerValueMap.getOrDefault(entity, 0)
         var added = (origin + addition).coerceIn(0, 150)

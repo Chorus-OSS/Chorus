@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.network.protocol.types.ControlScheme
 import org.chorus_oss.chorus.network.protocol.types.camera.CameraAudioListener
 import org.chorus_oss.chorus.network.protocol.types.camera.aimassist.CameraPresetAimAssist
-import org.chorus_oss.chorus.utils.OptionalValue
 
 
 import java.util.*
@@ -16,77 +15,29 @@ import java.util.function.Consumer
 
 class CameraPreset @JvmOverloads constructor(
     val identifier: String,
-    inheritFrom: String? = null,
+    val inheritFrom: String = "",
     val pos: Vector3f? = null,
     val yaw: Float? = null,
     val pitch: Float? = null,
     val rotationSpeed: Float? = null,
-    snapToTarget: Boolean? = null,
-    blockListeningRadius: Float? = null,
+    val snapToTarget: Boolean? = null,
+    val blockListeningRadius: Float? = null,
     val viewOffset: Vector2f? = null,
     val entityOffset: Vector3f? = null,
     val radius: Float? = null,
     val yawLimitMin: Float? = null,
     val yawLimitMax: Float? = null,
     val listener: CameraAudioListener? = null,
-    playEffect: Boolean? = null,
+    val playEffect: Boolean? = null,
     val horizontalRotationLimit: Vector2f? = null,
     val verticalRotationLimit: Vector2f? = null,
-    continueTargeting: Boolean? = null,
-    alignTargetAndCameraForward: Boolean? = null,
-    aimAssist: CameraPresetAimAssist? = null,
+    val continueTargeting: Boolean? = null,
+    val aimAssist: CameraPresetAimAssist? = null,
     val controlScheme: ControlScheme? = null,
 ) {
-    val inheritFrom = inheritFrom ?: ""
-    val snapToTarget: OptionalValue<Boolean> = OptionalValue.ofNullable(snapToTarget)
-    val continueTargeting: OptionalValue<Boolean> =
-        OptionalValue.ofNullable(continueTargeting)
-
-    val blockListeningRadius: OptionalValue<Float> =
-        OptionalValue.ofNullable(blockListeningRadius)
-    val playEffect: OptionalValue<Boolean> = OptionalValue.ofNullable(playEffect)
-    val aimAssist: OptionalValue<CameraPresetAimAssist> =
-        OptionalValue.ofNullable(aimAssist)
-
-
     private var id = 0
 
     fun getId() = id
-
-    /**
-     * Remember to call the registerCameraPresets() method to register!
-     */
-
-    constructor(
-        identifier: String,
-        inheritFrom: String?,
-        pos: Vector3f?,
-        yaw: Float?,
-        pitch: Float?,
-        listener: CameraAudioListener?,
-        playEffect: OptionalValue<Boolean?>?
-    ) : this(
-        identifier,
-        inheritFrom,
-        pos,
-        yaw,
-        pitch,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        listener,
-        playEffect?.get(),
-        null,
-        null,
-        null,
-        null,
-        null
-    )
 
     companion object {
         private val PRESETS: MutableMap<String, CameraPreset> = TreeMap()

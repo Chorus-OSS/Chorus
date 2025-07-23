@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus
 
 import com.akuleshov7.ktoml.Toml
-import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableMap
 import kotlinx.coroutines.*
 import kotlinx.serialization.encodeToString
@@ -29,7 +28,7 @@ import org.chorus_oss.chorus.event.level.LevelLoadEvent
 import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.experimental.generator.BlockDefinitionGenerator
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
@@ -55,10 +54,8 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.DataPacket
 import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.ProtocolInfo
-import org.chorus_oss.chorus.network.protocol.PlayerListPacket
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
 import org.chorus_oss.chorus.permission.BanList
@@ -81,12 +78,12 @@ import org.chorus_oss.chorus.tags.BiomeTags
 import org.chorus_oss.chorus.tags.BlockTags
 import org.chorus_oss.chorus.tags.ItemTags
 import org.chorus_oss.chorus.utils.*
-import org.chorus_oss.chorus.utils.JSONUtils.from
-import org.chorus_oss.chorus.utils.JSONUtils.toPretty
 import org.chorus_oss.chorus.utils.Utils.allThreadDumps
 import org.chorus_oss.chorus.utils.Utils.getExceptionMessage
 import org.chorus_oss.chorus.utils.Utils.readFile
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.packets.CraftingDataPacket
+import org.chorus_oss.protocol.types.Color
 import org.iq80.leveldb.CompressionType
 import org.iq80.leveldb.DB
 import org.iq80.leveldb.Options
@@ -110,6 +107,8 @@ import kotlin.math.min
 import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Represents a server object, global singleton.
@@ -425,7 +424,6 @@ class Server internal constructor(
 
         run {
             Registries.POTION.init()
-            Registries.PACKET_DECODER.init()
             Registries.ENTITY.init()
             Registries.BLOCKENTITY.init()
             Registries.BLOCKSTATE_ITEMMETA.init()
@@ -520,7 +518,7 @@ class Server internal constructor(
         val file = File(this.dataPath + "/worlds")
         if (!file.isDirectory) throw RuntimeException("worlds isn't directory")
         //load all world from `worlds` folder
-        for (f in Objects.requireNonNull(file.listFiles { obj: File -> obj.isDirectory })) {
+        for (f in requireNotNull(file.listFiles { obj: File -> obj.isDirectory })) {
             val levelConfig = getLevelConfig(f.name)
             if (levelConfig != null && !levelConfig.enable) {
                 continue
@@ -617,7 +615,6 @@ class Server internal constructor(
         log.info("Reloading Registries...")
         run {
             Registries.POTION.reload()
-            Registries.PACKET_DECODER.reload()
             Registries.ENTITY.reload()
             Registries.BLOCKENTITY.reload()
             Registries.BLOCKSTATE_ITEMMETA.reload()
@@ -1266,20 +1263,22 @@ class Server internal constructor(
         network.pong.update()
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     @ApiStatus.Internal
     fun removeOnlinePlayer(player: Player) {
         if (playerList.containsKey(player.getUUID())) {
             playerList.remove(player.getUUID())
 
-            val pk = PlayerListPacket()
-            pk.type = PlayerListPacket.TYPE_REMOVE
-            pk.entries = arrayOf(
-                PlayerListPacket.Entry(
-                    player.getUUID()
+            val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+                actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+                addPlayerList = null,
+                trustedSkinList = null,
+                removePlayerList = listOf(
+                    Uuid(player.getUUID())
                 )
             )
-
             broadcastPacket(playerList.values, pk)
+
             network.pong.playerCount = playerList.size
             network.pong.update()
         }
@@ -1293,10 +1292,7 @@ class Server internal constructor(
     }
 
     /**
-     * 更新指定玩家们(players)的[PlayerListPacket]数据包(即玩家列表数据)
-     *
-     *
-     * Update [PlayerListPacket] data packets (i.e. player list data) for specified players
+     * Update PlayerListPacket data packets (i.e. player list data) for specified players
      *
      * @param uuid       uuid
      * @param entityId   实体id
@@ -1305,6 +1301,7 @@ class Server internal constructor(
      * @param xboxUserId xbox用户id
      * @param players    指定接受数据包的玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun updatePlayerListData(
         uuid: UUID,
         entityId: Long,
@@ -1317,10 +1314,32 @@ class Server internal constructor(
         // so under no circumstances should it be sent to all players on the server.
         skin.setSkinId("")
 
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_ADD
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid, entityId, name, skin, xboxUserId))
-        broadcastPacket(players, pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Add,
+            addPlayerList = listOf(
+                org.chorus_oss.protocol.packets.PlayerListPacket.Companion.AddPlayerEntry(
+                    uuid = Uuid(uuid),
+                    actorUniqueID = entityId,
+                    playerName = name,
+                    xuid = xboxUserId ?: "",
+                    platformChatID = "",
+                    buildPlatform = org.chorus_oss.protocol.types.Platform.Unknown,
+                    skin = org.chorus_oss.protocol.types.skin.Skin(skin),
+                    isTeacher = false,
+                    isHost = false,
+                    isSubClient = false,
+                    playerColor = Color(
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte()
+                    )
+                )
+            ),
+            trustedSkinList = listOf(skin.isTrusted() || settings.playerSettings.forceSkinTrusted),
+            removePlayerList = null,
+        )
+        broadcastPacket(players.toList(), pk)
     }
 
     /**
@@ -1362,11 +1381,17 @@ class Server internal constructor(
      *
      * @param players 玩家数组
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun removePlayerListData(uuid: UUID, players: Array<Player>) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_REMOVE
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid))
-        broadcastPacket(players, pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+            addPlayerList = null,
+            trustedSkinList = null,
+            removePlayerList = listOf(
+                Uuid(uuid)
+            )
+        )
+        broadcastPacket(players.toList(), pk)
     }
 
     /**
@@ -1377,11 +1402,17 @@ class Server internal constructor(
      *
      * @param player 玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun removePlayerListData(uuid: UUID, player: Player) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_REMOVE
-        pk.entries = arrayOf(PlayerListPacket.Entry(uuid))
-        player.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Remove,
+            addPlayerList = null,
+            trustedSkinList = null,
+            removePlayerList = listOf(
+                Uuid(uuid)
+            )
+        )
+        player.sendPacket(pk)
     }
 
     @JvmOverloads
@@ -1397,22 +1428,39 @@ class Server internal constructor(
      *
      * @param player 玩家
      */
+    @OptIn(ExperimentalUuidApi::class)
     fun sendFullPlayerListData(player: Player) {
-        val pk = PlayerListPacket()
-        pk.type = PlayerListPacket.TYPE_ADD
-        pk.entries = playerList.values
-            .map { p: Player ->
-                PlayerListPacket.Entry(
-                    p.getUUID(),
-                    p.getRuntimeID(),
-                    p.displayName,
-                    p.skin,
-                    p.loginChainData.xuid
-                )
-            }
-            .toTypedArray()
+        val players = playerList.values
 
-        player.dataPacket(pk)
+        val pk = org.chorus_oss.protocol.packets.PlayerListPacket(
+            actionType = org.chorus_oss.protocol.packets.PlayerListPacket.Companion.ActionType.Add,
+            addPlayerList = players.map {
+                org.chorus_oss.protocol.packets.PlayerListPacket.Companion.AddPlayerEntry(
+                    uuid = Uuid(it.getUUID()),
+                    actorUniqueID = it.getUniqueID(),
+                    playerName = it.displayName,
+                    xuid = it.loginChainData.xuid ?: "",
+                    platformChatID = "",
+                    buildPlatform = org.chorus_oss.protocol.types.Platform.Unknown,
+                    skin = org.chorus_oss.protocol.types.skin.Skin(it.skin),
+                    isTeacher = false,
+                    isHost = false,
+                    isSubClient = false,
+                    playerColor = Color(
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte(),
+                        255.toByte()
+                    )
+                )
+            },
+            trustedSkinList = players.map {
+                it.skin.isTrusted() || settings.playerSettings.forceSkinTrusted
+            },
+            removePlayerList = null,
+        )
+
+        player.sendPacket(pk)
     }
 
     /**
@@ -1425,7 +1473,6 @@ class Server internal constructor(
      * @return 玩家实例，可为空<br></br>Player example, can be empty
      */
     fun getPlayer(uuid: UUID): Optional<Player> {
-        Preconditions.checkNotNull(uuid, "uuid")
         return Optional.ofNullable(playerList[uuid])
     }
 
@@ -1499,7 +1546,6 @@ class Server internal constructor(
      * @return 玩家<br></br>player
      */
     fun getOfflinePlayer(uuid: UUID): IPlayer {
-        Preconditions.checkNotNull(uuid, "uuid")
         val onlinePlayer = getPlayer(uuid)
         if (onlinePlayer.isPresent) {
             return onlinePlayer.get()
@@ -1803,7 +1849,7 @@ class Server internal constructor(
         get() = Chorus.CODENAME
 
     val version: String
-        get() = ProtocolInfo.GAME_VERSION_STR
+        get() = "v${ProtocolInfo.VERSION}"
 
     val apiVersion: String
         get() = Chorus.API_VERSION
@@ -1822,7 +1868,7 @@ class Server internal constructor(
      * @param player 玩家
      */
     fun sendRecipeList(player: Player) {
-        player.session.sendRawPacket(ProtocolInfo.CRAFTING_DATA_PACKET, Registries.RECIPE.craftingPacket)
+        player.session.sendRawPacket(CraftingDataPacket.id, Registries.RECIPE.craftingPacket)
     }
 
     /**
@@ -1950,8 +1996,8 @@ class Server internal constructor(
         val levelConfig: LevelConfig
         if (config.exists()) {
             try {
-                levelConfig = from(config, LevelConfig::class.java)
-                FileUtils.write(config, toPretty(levelConfig), StandardCharsets.UTF_8)
+                levelConfig = JSONUtils.from(config, LevelConfig::class.java)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -1976,7 +2022,7 @@ class Server internal constructor(
             levelConfig = LevelConfig(getProviderName(provider), true, map)
             try {
                 config.createNewFile()
-                FileUtils.write(config, toPretty(levelConfig), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig), StandardCharsets.UTF_8)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
@@ -2043,8 +2089,8 @@ class Server internal constructor(
         val config = jpath.resolve("config.json").toFile()
         if (config.exists()) {
             try {
-                levelConfig1 = from(FileReader(config), LevelConfig::class.java)
-                FileUtils.write(config, toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
+                levelConfig1 = JSONUtils.from(FileReader(config), LevelConfig::class.java)
+                FileUtils.write(config, JSONUtils.toPretty(levelConfig1), StandardCharsets.UTF_8)
             } catch (e: Exception) {
                 log.error("The levelConfig is not exists under the {} path", path)
                 return false
@@ -2053,7 +2099,7 @@ class Server internal constructor(
             try {
                 jpath.toFile().mkdirs()
                 config.createNewFile()
-                FileUtils.write(config, toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
+                FileUtils.write(config, JSONUtils.toPretty<LevelConfig?>(levelConfig1), StandardCharsets.UTF_8)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
@@ -2322,17 +2368,11 @@ class Server internal constructor(
         }
     }
 
-    fun isIgnoredPacket(packet: DataPacket): Boolean {
-        if (packet is MigrationPacket<*>) {
-            return settings.debugSettings.ignoredPackets.contains(packet.packet::class.java.simpleName)
-        }
+    fun isIgnoredPacket(packet: Packet): Boolean {
         return settings.debugSettings.ignoredPackets.contains(packet::class.java.simpleName)
     }
 
-    fun isLoggedPacket(packet: DataPacket): Boolean {
-        if (packet is MigrationPacket<*>) {
-            return settings.debugSettings.loggedPackets.contains(packet.packet::class.java.simpleName)
-        }
+    fun isLoggedPacket(packet: Packet): Boolean {
         return settings.debugSettings.loggedPackets.contains(packet::class.java.simpleName)
     }
 
@@ -2374,9 +2414,9 @@ class Server internal constructor(
         /**
          * @see .broadcastPacket
          */
-        fun broadcastPacket(players: Collection<Player>, packet: DataPacket) {
+        fun broadcastPacket(players: Collection<Player>, packet: Packet) {
             for (player in players) {
-                player.dataPacket(packet)
+                player.sendPacket(packet)
             }
         }
 
@@ -2388,14 +2428,16 @@ class Server internal constructor(
          * @param players 接受数据包的所有玩家<br></br>All players receiving the data package
          * @param packet  数据包
          */
-        fun broadcastPacket(players: Array<Player>, packet: DataPacket) {
+        fun broadcastPacket(players: Array<Player>, packet: Packet) {
             for (player in players) {
-                player.dataPacket(packet)
+                player.sendPacket(packet)
             }
         }
 
         fun broadcastPacket(players: Iterable<Player>, packet: Packet) {
-            broadcastPacket(players.toList(), MigrationPacket(packet))
+            for (player in players) {
+                player.sendPacket(packet)
+            }
         }
 
         /**`

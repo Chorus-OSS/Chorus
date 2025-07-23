@@ -1,22 +1,12 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.reflect.TypeToken
+import dev.whyoleg.cryptography.algorithms.ECDSA
+import kotlinx.io.*
+import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.mojangPublicKey
-import org.chorus_oss.chorus.network.connection.util.EncryptionUtils.oldMojangPublicKey
-import org.chorus_oss.chorus.network.protocol.LoginPacket
-import org.jose4j.jws.JsonWebSignature
-import org.jose4j.lang.JoseException
-import java.nio.charset.StandardCharsets
-import java.security.KeyFactory
-import java.security.NoSuchAlgorithmException
-import java.security.interfaces.ECPublicKey
-import java.security.spec.InvalidKeySpecException
-import java.security.spec.X509EncodedKeySpec
-import java.time.Instant
+import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
 import java.util.*
+import kotlin.io.encoding.Base64
 
 /**
  * ClientChainData is a container of chain data sent from clients.
@@ -28,7 +18,7 @@ import java.util.*
  *
  * To get chain data, you can use player.getLoginChainData() or read(loginPacket)
  */
-class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData {
+class ClientChainData private constructor(private val stream: Source) : LoginChainData {
     override var xuid: String? = null
         get() {
             return if (this.isWaterdog) {
@@ -50,14 +40,6 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
 
             return Server.instance.settings.baseSettings.waterdogpe
         }
-
-    override fun equals(other: Any?): Boolean {
-        return other is ClientChainData && bs == other.bs
-    }
-
-    override fun hashCode(): Int {
-        return bs.hashCode()
-    }
 
     override var username: String? = null
         private set
@@ -122,33 +104,36 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
     override var rawData: JsonObject? = null
         private set
 
-    private val bs: BinaryStream
-
     init {
-        buffer.offset = 0
-        bs = buffer
         decodeChainData()
         decodeSkinData()
     }
 
     private fun decodeSkinData() {
-        val skinToken = decodeToken(String(bs[bs.lInt])) ?: return
-        if (skinToken.has("ClientRandomId")) this.clientId = skinToken["ClientRandomId"].asLong
-        if (skinToken.has("ServerAddress")) this.serverAddress = skinToken["ServerAddress"].asString
-        if (skinToken.has("DeviceModel")) this.deviceModel = skinToken["DeviceModel"].asString
-        if (skinToken.has("DeviceOS")) this.deviceOS = skinToken["DeviceOS"].asInt
-        if (skinToken.has("DeviceId")) this.deviceId = skinToken["DeviceId"].asString
-        if (skinToken.has("GameVersion")) this.gameVersion = skinToken["GameVersion"].asString
-        if (skinToken.has("GuiScale")) this.guiScale = skinToken["GuiScale"].asInt
-        if (skinToken.has("LanguageCode")) this.languageCode = skinToken["LanguageCode"].asString
-        if (skinToken.has("CurrentInputMode")) this.currentInputMode = skinToken["CurrentInputMode"].asInt
-        if (skinToken.has("DefaultInputMode")) this.defaultInputMode = skinToken["DefaultInputMode"].asInt
-        if (skinToken.has("UIProfile")) this.uIProfile = skinToken["UIProfile"].asInt
-        if (skinToken.has("CapeData")) this.capeData = skinToken["CapeData"].asString
-        if (skinToken.has("Waterdog_IP")) this.waterdogIP = skinToken["Waterdog_IP"].asString
-        if (skinToken.has("Waterdog_XUID")) this.waterdogXUID = skinToken["Waterdog_XUID"].asString
-        if (skinToken.has("MaxViewDistance")) this.maxViewDistance = skinToken["MaxViewDistance"].asInt
-        if (skinToken.has("MemoryTier")) this.memoryTier = skinToken["MemoryTier"].asInt
+        val skinToken = decodeToken(
+            Buffer().apply {
+                stream.readAtMostTo(this, stream.readIntLe().toLong())
+            }.readString()
+        ) ?: return
+        if (skinToken.contains("ClientRandomId")) this.clientId = skinToken["ClientRandomId"]!!.jsonPrimitive.long
+        if (skinToken.contains("ServerAddress")) this.serverAddress = skinToken["ServerAddress"]!!.jsonPrimitive.content
+        if (skinToken.contains("DeviceModel")) this.deviceModel = skinToken["DeviceModel"]!!.jsonPrimitive.content
+        if (skinToken.contains("DeviceOS")) this.deviceOS = skinToken["DeviceOS"]!!.jsonPrimitive.int
+        if (skinToken.contains("DeviceId")) this.deviceId = skinToken["DeviceId"]!!.jsonPrimitive.content
+        if (skinToken.contains("GameVersion")) this.gameVersion = skinToken["GameVersion"]!!.jsonPrimitive.content
+        if (skinToken.contains("GuiScale")) this.guiScale = skinToken["GuiScale"]!!.jsonPrimitive.int
+        if (skinToken.contains("LanguageCode")) this.languageCode = skinToken["LanguageCode"]!!.jsonPrimitive.content
+        if (skinToken.contains("CurrentInputMode")) this.currentInputMode =
+            skinToken["CurrentInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("DefaultInputMode")) this.defaultInputMode =
+            skinToken["DefaultInputMode"]!!.jsonPrimitive.int
+        if (skinToken.contains("UIProfile")) this.uIProfile = skinToken["UIProfile"]!!.jsonPrimitive.int
+        if (skinToken.contains("CapeData")) this.capeData = skinToken["CapeData"]!!.jsonPrimitive.content
+        if (skinToken.contains("Waterdog_IP")) this.waterdogIP = skinToken["Waterdog_IP"]!!.jsonPrimitive.content
+        if (skinToken.contains("Waterdog_XUID")) this.waterdogXUID = skinToken["Waterdog_XUID"]!!.jsonPrimitive.content
+        if (skinToken.contains("MaxViewDistance")) this.maxViewDistance =
+            skinToken["MaxViewDistance"]!!.jsonPrimitive.int
+        if (skinToken.contains("MemoryTier")) this.memoryTier = skinToken["MemoryTier"]!!.jsonPrimitive.int
 
         if (this.isWaterdog) {
             isXboxAuthed = true
@@ -158,22 +143,20 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
     }
 
     private fun decodeToken(token: String): JsonObject? {
-        val base = token.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        if (base.size < 2) return null
-        val json = String(Base64.getDecoder().decode(base[1]), StandardCharsets.UTF_8)
-        //Server.instance.getLogger().debug(json);
-        return JSONUtils.from(json, JsonObject::class.java)
+        val base = token.split(".", limit = 3)
+        val json = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(base[1]).decodeToString()
+        return Json.parseToJsonElement(json).jsonObject
     }
 
     private fun decodeChainData() {
-        val chainString = String(
-            bs[bs.lInt], StandardCharsets.UTF_8
-        )
+        val chainString = Buffer().apply {
+            stream.readAtMostTo(this, stream.readIntLe().toLong())
+        }.readString()
 
-        val jwt = JsonParser.parseString(chainString).asJsonObject
-        val certificateString = jwt["Certificate"].asString
-        val certificate = JsonParser.parseString(certificateString).asJsonObject
-        val chain = certificate["chain"].asJsonArray.map { it.asString }
+        val jwt = Json.parseToJsonElement(chainString).jsonObject
+        val certificateString = jwt["Certificate"]!!.jsonPrimitive.content
+        val certificate = Json.parseToJsonElement(certificateString).jsonObject
+        val chain = certificate["chain"]!!.jsonArray.map { it.jsonPrimitive.content }
 
         this.isXboxAuthed = try {
             verifyChain(chain)
@@ -183,14 +166,16 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
 
         for (c in chain) {
             val chainMap = decodeToken(c) ?: continue
-            if (chainMap.has("extraData")) {
-                val extra = chainMap["extraData"].asJsonObject
-                if (extra.has("displayName")) this.username = extra["displayName"].asString
-                if (extra.has("identity")) this.clientUUID = UUID.fromString(extra["identity"].asString)
-                if (extra.has("XUID")) this.xuid = extra["XUID"].asString
-                if (extra.has("titleId")) this.titleId = extra["titleId"].asString
+            if (chainMap.contains("extraData")) {
+                val extra = chainMap["extraData"]!!.jsonObject
+                if (extra.contains("displayName")) this.username = extra["displayName"]!!.jsonPrimitive.content
+                if (extra.contains("identity")) this.clientUUID =
+                    UUID.fromString(extra["identity"]!!.jsonPrimitive.content)
+                if (extra.contains("XUID")) this.xuid = extra["XUID"]!!.jsonPrimitive.content
+                if (extra.contains("titleId")) this.titleId = extra["titleId"]!!.jsonPrimitive.content
             }
-            if (chainMap.has("identityPublicKey")) this.identityPublicKey = chainMap["identityPublicKey"].asString
+            if (chainMap.contains("identityPublicKey")) this.identityPublicKey =
+                chainMap["identityPublicKey"]!!.jsonPrimitive.content
         }
 
         if (!isXboxAuthed) {
@@ -200,14 +185,23 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
 
     @Throws(Exception::class)
     private fun verifyChain(chains: List<String>): Boolean {
-        var lastKey: ECPublicKey? = null
+        var lastKey: ECDSA.PublicKey? = null
         var mojangKeyVerified = false
         val iterator = chains.iterator()
-        val epoch = Instant.now().epochSecond
+        val epoch = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
         while (iterator.hasNext()) {
-            val jws = JsonWebSignature.fromCompactSerialization(iterator.next()) as JsonWebSignature
-            val x5us = jws.getHeader("x5u") ?: return false
-            val expectedKey = generateKey(x5us)
+            val jwt = iterator.next()
+
+            val parts = jwt.split(".", limit = 3)
+            val header = Json.parseToJsonElement(
+                Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[0]).decodeToString()
+            ).jsonObject
+            val payload = Json.parseToJsonElement(
+                Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(parts[1]).decodeToString()
+            ).jsonObject
+
+            val x5us = header["x5u"]?.jsonPrimitive?.content ?: return false
+            val expectedKey = EncryptionUtils.parseKey(x5us)
             // First key is self-signed
             if (lastKey == null) {
                 lastKey = expectedKey
@@ -215,68 +209,37 @@ class ClientChainData private constructor(buffer: BinaryStream) : LoginChainData
                 return false
             }
 
-            if (!verify(lastKey, jws)) {
-                return false
-            }
-
             if (mojangKeyVerified) {
                 return !iterator.hasNext()
             }
 
-            if (lastKey == mojangPublicKey || lastKey == oldMojangPublicKey) {
+            if (lastKey == EncryptionUtils.mojangPublicKey) {
                 mojangKeyVerified = true
             }
 
-            val payload = JSONUtils.from(jws.payload, object : TypeToken<Map<String, Any>>() {})
-
             // chain expiry check
-            val chainExpiresObj = payload["exp"]
-            val chainExpires: Long
-            if (chainExpiresObj is Number) {
-                chainExpires = chainExpiresObj.toLong()
-            } else {
-                throw RuntimeException("Unsupported expiry time format")
-            }
+            val chainExpires: Long = payload["exp"]!!.jsonPrimitive.long
             if (chainExpires < epoch) {
                 // chain has already expires
                 return false
             }
 
-            val base64key =
-                payload["identityPublicKey"] as? String ?: throw RuntimeException("No key found")
-            lastKey = generateKey(base64key)
+            val base64key = payload["identityPublicKey"]!!.jsonPrimitive.content
+            lastKey = EncryptionUtils.parseKey(base64key)
         }
         return mojangKeyVerified
     }
 
-    private fun verify(key: ECPublicKey?, jws: JsonWebSignature?): Boolean {
-        try {
-            if (key == null || jws == null) {
-                return false
-            }
-            jws.key = key
-            return jws.verifySignature()
-        } catch (e: JoseException) {
-            throw RuntimeException(e)
-        }
-    }
-
     companion object {
-        fun of(buffer: BinaryStream): ClientChainData {
-            return ClientChainData(buffer)
-        }
-
-        fun read(pk: LoginPacket): ClientChainData {
-            return of(pk.buffer!!)
+        fun read(pk: org.chorus_oss.protocol.packets.LoginPacket): ClientChainData {
+            return ClientChainData(
+                Buffer().apply {
+                    write(pk.connectionRequest)
+                }
+            )
         }
 
         const val UI_PROFILE_CLASSIC: Int = 0
         const val UI_PROFILE_POCKET: Int = 1
-
-        @Throws(NoSuchAlgorithmException::class, InvalidKeySpecException::class)
-        private fun generateKey(base64: String): ECPublicKey {
-            return KeyFactory.getInstance("EC")
-                .generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(base64))) as ECPublicKey
-        }
     }
 }

@@ -31,7 +31,6 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import java.util.function.Function
 
 class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
@@ -119,11 +118,14 @@ class EntityHusk(chunk: IChunk?, nbt: CompoundTag?) : EntityZombie(chunk, nbt) {
         super.initEntity()
         this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_INTERVAL, 8)
         this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_INTERVAL_RANGE, 16)
-        this.setDataProperty(EntityDataTypes.AMBIENT_SOUND_EVENT_NAME, LevelSoundEventPacket.SOUND_AMBIENT)
+        this.setDataProperty(
+            EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Ambient.id
+        )
         if (this.isBaby()) {
             this.setDataProperty(
                 EntityDataTypes.AMBIENT_SOUND_EVENT_NAME,
-                LevelSoundEventPacket.SOUND_AMBIENT_BABY
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.AmbientBaby.id
             )
         }
     }

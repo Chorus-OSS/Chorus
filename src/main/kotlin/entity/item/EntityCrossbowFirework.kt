@@ -3,7 +3,8 @@ package org.chorus_oss.chorus.entity.item
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
+import org.chorus_oss.protocol.packets.LevelSoundEventPacket
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -36,17 +37,23 @@ class EntityCrossbowFirework(chunk: IChunk?, nbt: CompoundTag) : EntityFireworks
                     rotation.yaw = (atan2(motion.x, motion.z) * 57.29577951308232).toFloat().toDouble()
                     rotation.pitch = (atan2(motion.y, f.toDouble()) * 57.29577951308232).toFloat().toDouble()
                     if (this.fireworkAge == 0) {
-                        level!!.addLevelSoundEvent(this.position, 56)
+                        level!!.addLevelSoundEvent(this.position, LevelSoundEventPacket.Companion.SoundType.Launch)
                     }
 
                     ++this.fireworkAge
                     hasUpdate = true
                     if (this.fireworkAge >= this.lifetime) {
-                        val pk: EntityEventPacket = EntityEventPacket()
-                        pk.data = 0
-                        pk.event = 25
-                        pk.eid = this.getRuntimeID()
-                        level!!.addLevelSoundEvent(this.position, 58, -1, 72)
+                        val pk = ActorEventPacket(
+                            actorRuntimeID = this.getRuntimeID().toULong(),
+                            eventType = ActorEventPacket.Companion.Type.FireworkExplosion,
+                            eventData = 0
+                        )
+                        level!!.addLevelSoundEvent(
+                            this.position,
+                            LevelSoundEventPacket.Companion.SoundType.LargeBlast,
+                            -1,
+                            72
+                        )
                         Server.broadcastPacket(viewers.values, pk)
                         this.kill()
                     }

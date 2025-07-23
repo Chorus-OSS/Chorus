@@ -15,7 +15,6 @@ import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.RedstoneComponent
 import org.chorus_oss.chorus.utils.RedstoneComponent.Companion.updateAroundRedstone
 
@@ -207,7 +206,7 @@ abstract class BlockPressurePlateBase(blockState: BlockState) : BlockFlowable(bl
     protected fun playOnSound() {
         level.addLevelSoundEvent(
             position.add(0.5, 0.1, 0.5),
-            LevelSoundEventPacket.SOUND_POWER_ON,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn,
             blockState.blockStateHash()
         )
     }
@@ -215,7 +214,7 @@ abstract class BlockPressurePlateBase(blockState: BlockState) : BlockFlowable(bl
     protected fun playOffSound() {
         level.addLevelSoundEvent(
             position.add(0.5, 0.1, 0.5),
-            LevelSoundEventPacket.SOUND_POWER_OFF,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff,
             blockState.blockStateHash()
         )
     }

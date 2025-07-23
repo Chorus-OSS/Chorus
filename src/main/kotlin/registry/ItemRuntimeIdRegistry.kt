@@ -2,34 +2,12 @@ package org.chorus_oss.chorus.registry
 
 import com.google.gson.JsonParser
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.utils.BinaryStream
 import org.chorus_oss.protocol.types.item.ItemInstance
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ItemRuntimeIdRegistry : IRegistry<String, Int, Int> {
-    private fun generatePalette() {
-        val paletteBuffer = BinaryStream()
-        val verify = HashMap<Int, Boolean?>()
-        paletteBuffer.putUnsignedVarInt((REGISTRY.size + CUSTOM_REGISTRY.size).toLong())
-        for (entry in REGISTRY.entries) {
-            paletteBuffer.putString(entry.key)
-            val rid = entry.value
-            paletteBuffer.putLShort(rid)
-            require(verify.putIfAbsent(rid, true) == null) { "Runtime ID is already registered: $rid" }
-            paletteBuffer.putBoolean(false) //Vanilla Item doesnt component item
-        }
-        for ((key, value) in CUSTOM_REGISTRY.entries) {
-            paletteBuffer.putString(key)
-            val rid = value.runtimeId
-            paletteBuffer.putLShort(rid)
-            require(verify.putIfAbsent(rid, true) == null) { "Runtime ID is already registered: $rid" }
-            paletteBuffer.putBoolean(value.isComponent)
-        }
-        itemPalette = paletteBuffer.getBufferCopy()
-    }
-
     override fun init() {
         if (isLoad.getAndSet(true)) return
 
@@ -52,7 +30,6 @@ class ItemRuntimeIdRegistry : IRegistry<String, Int, Int> {
                         )
                     )
                 }
-                generatePalette()
             }
         } catch (e: IOException) {
             throw RuntimeException(e)
@@ -138,7 +115,5 @@ class ItemRuntimeIdRegistry : IRegistry<String, Int, Int> {
 
 
         val ITEM_DATA = HashSet<ItemData>()
-
-        private lateinit var itemPalette: ByteArray
     }
 }

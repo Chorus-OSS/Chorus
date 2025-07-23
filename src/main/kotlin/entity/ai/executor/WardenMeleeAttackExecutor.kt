@@ -11,7 +11,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 import java.util.*
 
 class WardenMeleeAttackExecutor(
@@ -67,7 +67,7 @@ class WardenMeleeAttackExecutor(
 
     protected fun calCoolDown(entity: EntityMob, target: Entity?): Int {
         if (entity is EntityWarden) {
-            val anger = entity.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE]!!.getOrDefault(target, 0)
+            val anger = entity.memoryStorage[CoreMemoryTypes.WARDEN_ANGER_VALUE].getOrDefault(target, 0)
             return if (anger >= 145) 18 else 36
         } else {
             return 20
@@ -95,9 +95,11 @@ class WardenMeleeAttackExecutor(
     }
 
     protected fun playAttackAnimation(entity: EntityMob) {
-        val pk = EntityEventPacket()
-        pk.eid = entity.getRuntimeID()
-        pk.event = EntityEventPacket.ARM_SWING
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.ArmSwing,
+            eventData = 0
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

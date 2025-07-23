@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.CompoundTagView
@@ -149,7 +148,7 @@ class BlockStateImpl(
                             .putString("name", BlockID.UNKNOWN)
                             .putCompound("states", CompoundTag())
                             .putCompound("Block", blockTag)
-                            .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+                            .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION)
                     )
                 )
             }
@@ -182,7 +181,7 @@ class BlockStateImpl(
                 LinkedCompoundTag()
                     .putString("name", identifier)
                     .putCompound("states", states)
-                    .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+                    .putInt("version", ProtocolInfo.BLOCK_STATE_VERSION)
             )
         }
     }

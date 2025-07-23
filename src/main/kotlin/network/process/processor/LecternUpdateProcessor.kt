@@ -5,16 +5,13 @@ import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockLectern
 import org.chorus_oss.chorus.blockentity.BlockEntityLectern
 import org.chorus_oss.chorus.event.block.LecternPageChangeEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.protocol.packets.LecternUpdatePacket
 
-class LecternUpdateProcessor : DataPacketProcessor<MigrationPacket<LecternUpdatePacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<LecternUpdatePacket>) {
-        val packet = pk.packet
-
+class LecternUpdateProcessor : PacketProcessor<LecternUpdatePacket> {
+    override fun handle(player: Player, packet: LecternUpdatePacket) {
         val blockPosition = Vector3(packet.blockPosition)
         val blockEntityLectern = player.player.level!!.getBlockEntity(blockPosition)
         if (blockEntityLectern is BlockEntityLectern) {
@@ -31,5 +28,5 @@ class LecternUpdateProcessor : DataPacketProcessor<MigrationPacket<LecternUpdate
         }
     }
 
-    override val packetId: Int = LecternUpdatePacket.id
+    override val packetID: Int = LecternUpdatePacket.id
 }

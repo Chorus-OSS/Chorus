@@ -67,9 +67,7 @@ class PositionTracking(override var levelName: String, x: Double, y: Double, z: 
 
     override fun round(): PositionTracking {
         return PositionTracking(
-            levelName, Math.round(this.x).toDouble(), Math.round(this.y).toDouble(), Math.round(
-                this.z
-            ).toDouble()
+            levelName, kotlin.math.round(this.x), kotlin.math.round(this.y), kotlin.math.round(this.z)
         )
     }
 

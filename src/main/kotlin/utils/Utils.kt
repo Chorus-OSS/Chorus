@@ -9,10 +9,7 @@ import java.io.*
 import java.lang.management.ManagementFactory
 import java.nio.charset.StandardCharsets
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 object Utils : Loggable {
     val random: SplittableRandom = SplittableRandom()
@@ -106,50 +103,16 @@ object Utils : Loggable {
         return stringWriter.toString()
     }
 
-    fun dataToUUID(vararg params: String?): UUID {
-        val builder = StringBuilder()
-        for (param in params) {
-            builder.append(param)
-        }
-        return UUID.nameUUIDFromBytes(builder.toString().toByteArray(StandardCharsets.UTF_8))
-    }
-
     fun dataToUUID(vararg params: ByteArray): UUID {
         val stream = ByteArrayOutputStream()
         for (param in params) {
             try {
                 stream.write(param)
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 break
             }
         }
         return UUID.nameUUIDFromBytes(stream.toByteArray())
-    }
-
-    fun toABGR(argb: Int): Long {
-        var result = argb.toLong() and 0xFF00FF00L
-        result = result or ((argb shl 16).toLong() and 0x00FF0000L) // B to R
-        result = result or ((argb ushr 16).toLong() and 0xFFL) // R to B
-        return result and 0xFFFFFFFFL
-    }
-
-    fun <T, U, V : U> getOrCreate(map: MutableMap<T, U>, clazz: Class<V>, key: T): U {
-        var existing = map[key]
-        if (existing != null) {
-            return existing
-        }
-        try {
-            val toPut: U = clazz.getDeclaredConstructor().newInstance()
-            existing = map.putIfAbsent(key, toPut)
-            if (existing == null) {
-                return toPut
-            }
-            return existing
-        } catch (e: InstantiationException) {
-            throw RuntimeException(e)
-        } catch (e: IllegalAccessException) {
-            throw RuntimeException(e)
-        }
     }
 
     fun toInt(number: Any): Int {
@@ -157,7 +120,7 @@ object Utils : Loggable {
             return number
         }
 
-        return Math.round(number as Double).toInt()
+        return (number as Double).roundToInt()
     }
 
     /**
@@ -255,7 +218,7 @@ object Utils : Loggable {
                 for (y in minY..maxY) {
                     val block = level.getTickCachedBlock(x, y, z, false)
                     //判断是否和非空气方块有碰撞
-                    if (block != null && block.collidesWithBB(bb) && !block.canPassThrough()) {
+                    if (block.collidesWithBB(bb) && !block.canPassThrough()) {
                         return true
                     }
                 }
@@ -294,7 +257,7 @@ object Utils : Loggable {
                 for (y in minY..maxY) {
                     val block = level.getTickCachedBlock(x, y, z, false)
                     //判断是否和非空气方块有碰撞
-                    if (block != null && block.collidesWithBB(bb) && !block.canPassThrough()) {
+                    if (block.collidesWithBB(bb) && !block.canPassThrough()) {
                         if (x < centerX) {
                             returnValue = (returnValue.toInt() or 16).toByte()
                         } else if (x > centerX) {

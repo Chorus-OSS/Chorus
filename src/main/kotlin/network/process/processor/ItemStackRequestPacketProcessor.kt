@@ -4,27 +4,27 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.event.inventory.ItemStackRequestActionEvent
 import org.chorus_oss.chorus.event.player.PlayerTransferItemEvent
-import org.chorus_oss.chorus.experimental.network.MigrationPacket
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.inventory.request.*
-import org.chorus_oss.chorus.network.process.DataPacketProcessor
+import org.chorus_oss.chorus.network.process.PacketProcessor
 import org.chorus_oss.chorus.network.protocol.types.itemstack.response.ItemStackResponseContainer
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.packets.ItemStackRequestPacket
+import org.chorus_oss.protocol.packets.ItemStackResponsePacket
+import org.chorus_oss.protocol.types.itemstack.ContainerSlotType
 import org.chorus_oss.protocol.types.itemstack.request.action.*
+import org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse
+import org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseStatus
 
 
-class ItemStackRequestPacketProcessor : DataPacketProcessor<MigrationPacket<ItemStackRequestPacket>>() {
-    override fun handle(player: Player, pk: MigrationPacket<ItemStackRequestPacket>) {
-        val packet = pk.packet
-
-        val player = player.player
-        val responses: MutableList<org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse> = mutableListOf()
+class ItemStackRequestPacketProcessor : PacketProcessor<ItemStackRequestPacket> {
+    override fun handle(player: Player, packet: ItemStackRequestPacket) {
+        val responses: MutableList<ItemStackResponse> = mutableListOf()
         for (request in packet.requests) {
             val actions = request.actions
             val context = ItemStackRequestContext(request)
-            val responseContainerMap: MutableMap<org.chorus_oss.protocol.types.itemstack.ContainerSlotType, ItemStackResponseContainer> =
+            val responseContainerMap: MutableMap<ContainerSlotType, ItemStackResponseContainer> =
                 LinkedHashMap()
             for (index in actions.indices) {
                 val action = actions[index]
@@ -50,8 +50,8 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<MigrationPacket<Item
                 }
                 if (response != null) {
                     if (!response.ok) {
-                        val itemStackResponse = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse(
-                            org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseStatus.Error,
+                        val itemStackResponse = ItemStackResponse(
+                            ItemStackResponseStatus.Error,
                             request.requestId,
                             listOf()
                         )
@@ -73,21 +73,21 @@ class ItemStackRequestPacketProcessor : DataPacketProcessor<MigrationPacket<Item
                     }
                 }
             }
-            val itemStackResponse = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponse(
-                result = org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseStatus.OK,
+            val itemStackResponse = ItemStackResponse(
+                result = ItemStackResponseStatus.OK,
                 requestID = request.requestId,
                 containers = responseContainerMap.values.map(org.chorus_oss.protocol.types.itemstack.response.ItemStackResponseContainer::invoke)
             )
             responses.add(itemStackResponse)
         }
 
-        val itemStackResponsePacket = org.chorus_oss.protocol.packets.ItemStackResponsePacket(
+        val itemStackResponsePacket = ItemStackResponsePacket(
             responses = responses
         )
         player.sendPacket(itemStackResponsePacket)
     }
 
-    override val packetId: Int = ItemStackRequestPacket.id
+    override val packetID: Int = ItemStackRequestPacket.id
 
     private object TransferItemEventCaller {
         fun call(event: ItemStackRequestActionEvent) {

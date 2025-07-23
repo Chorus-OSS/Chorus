@@ -39,7 +39,6 @@ import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.concurrent.ThreadLocalRandom
 import java.util.function.Consumer
@@ -417,7 +416,7 @@ open class EntityPiglin(chunk: IChunk?, nbt: CompoundTag?) : EntityHumanoidMonst
             entity.setDataFlag(EntityFlag.ANGRY)
             entity.level!!.addLevelSoundEvent(
                 entity.position,
-                LevelSoundEventPacket.SOUND_ANGRY,
+                org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Angry,
                 -1,
                 EntityID.PIGLIN,
                 false,

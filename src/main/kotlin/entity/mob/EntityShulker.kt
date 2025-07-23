@@ -32,7 +32,6 @@ import org.chorus_oss.chorus.level.Transform
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Utils
 import java.util.*
 import java.util.function.Consumer
@@ -165,7 +164,7 @@ class EntityShulker(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), E
                     val locator: Locator = block.up().locator
                     level!!.addLevelSoundEvent(
                         this.position,
-                        LevelSoundEventPacket.SOUND_TELEPORT,
+                        org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Teleport,
                         -1,
                         getEntityIdentifier(),
                         false,
@@ -174,7 +173,7 @@ class EntityShulker(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt), E
                     teleport(locator, TeleportCause.SHULKER)
                     level!!.addLevelSoundEvent(
                         locator.position,
-                        LevelSoundEventPacket.SOUND_SPAWN,
+                        org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Spawn,
                         -1,
                         getEntityIdentifier(),
                         false,

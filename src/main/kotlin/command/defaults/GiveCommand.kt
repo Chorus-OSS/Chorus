@@ -66,7 +66,7 @@ class GiveCommand(name: String) : VanillaCommand(name, "commands.give.descriptio
             item.damage = damage
         }
         if (list.hasResult(4)) {
-            val json = list.getResult<String>(4)
+            val json = list.getResult<String>(4)!!
             val components = Item.ItemJsonComponents.fromJson(json)
             item.readItemJsonComponents(components)
         }

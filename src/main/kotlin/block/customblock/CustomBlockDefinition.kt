@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.block.customblock
 
-import com.google.common.base.Preconditions
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.customblock.data.*
 import org.chorus_oss.chorus.block.customblock.data.Materials.RenderMethod
@@ -112,7 +111,7 @@ data class CustomBlockDefinition(val identifier: String, val nbt: CompoundTag) {
         }
 
         fun name(name: String): Builder {
-            Preconditions.checkArgument(name.isNotBlank(), "name is blank")
+            check(name.isNotBlank()) { "name is blank" }
             nbt.getCompound("components").putCompound(
                 "minecraft:display_name", CompoundTag()
                     .putString("value", name)
@@ -352,8 +351,7 @@ data class CustomBlockDefinition(val identifier: String, val nbt: CompoundTag) {
         }
 
         fun blockTags(vararg tag: String): Builder {
-            Preconditions.checkNotNull(tag)
-            Preconditions.checkArgument(tag.isNotEmpty())
+            check(tag.isNotEmpty())
             val stringTagListTag = ListTag<StringTag>()
             for (s in tag) {
                 stringTagListTag.add(StringTag(s))

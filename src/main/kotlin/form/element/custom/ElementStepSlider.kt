@@ -1,10 +1,8 @@
 package org.chorus_oss.chorus.form.element.custom
 
-import com.google.common.base.Preconditions
+
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-
-
 import java.util.function.Consumer
 
 class ElementStepSlider(
@@ -30,10 +28,9 @@ class ElementStepSlider(
     }
 
     override fun toJson(): JsonObject {
-        Preconditions.checkArgument(
-            this.defaultStep > -1 && this.defaultStep < steps.size,
-            "Default option not within range"
-        )
+        check(
+            this.defaultStep > -1 && this.defaultStep < steps.size
+        ) { "Default option not within range" }
 
         `object`.addProperty("type", "step_slider")
         `object`.addProperty("text", this.text)

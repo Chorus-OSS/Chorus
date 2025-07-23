@@ -12,7 +12,6 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockFace.Companion.fromIndex
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
 import org.chorus_oss.chorus.utils.Faceable
 import org.chorus_oss.chorus.utils.RedstoneComponent
 import org.chorus_oss.chorus.utils.RedstoneComponent.Companion.updateAroundRedstone
@@ -76,7 +75,8 @@ abstract class BlockButton(meta: BlockState) : BlockFlowable(meta), RedstoneComp
         setActivated(true, player)
         level.setBlock(this.position, this, direct = true, update = false)
         level.addLevelSoundEvent(
-            position.add(0.5, 0.5, 0.5), LevelSoundEventPacket.SOUND_POWER_ON,
+            position.add(0.5, 0.5, 0.5),
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOn,
             blockState.blockStateHash()
         )
         if (Server.instance.settings.levelSettings.enableRedstone) {
@@ -103,7 +103,8 @@ abstract class BlockButton(meta: BlockState) : BlockFlowable(meta), RedstoneComp
                 isActivated = false
                 level.setBlock(this.position, this, direct = true, update = false)
                 level.addLevelSoundEvent(
-                    position.add(0.5, 0.5, 0.5), LevelSoundEventPacket.SOUND_POWER_OFF,
+                    position.add(0.5, 0.5, 0.5),
+                    org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.PowerOff,
                     blockState.blockStateHash()
                 )
 

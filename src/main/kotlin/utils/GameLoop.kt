@@ -1,24 +1,21 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.common.base.Preconditions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import java.util.*
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration.Companion.nanoseconds
 
 class GameLoop private constructor(
     onStart: Runnable,
-    onTick: Consumer<GameLoop>,
+    onTick: (GameLoop) -> Unit,
     onStop: Runnable,
     loopCountPerSec: Int
 ) {
     private val isRunning = AtomicBoolean(false)
     private val onStart: Runnable
-    private val onTick: Consumer<GameLoop>
+    private val onTick: (GameLoop) -> Unit
     private val onStop: Runnable
 
 
@@ -37,8 +34,8 @@ class GameLoop private constructor(
         this.onTick = onTick
         this.onStop = onStop
         this.loopCountPerSec = loopCountPerSec
-        Arrays.fill(tickSummary, 20f)
-        Arrays.fill(msPtSummary, 0f)
+        tickSummary.fill(20f)
+        msPtSummary.fill(0f)
     }
 
     val tickUsage: Float
@@ -72,7 +69,7 @@ class GameLoop private constructor(
         while (isRunning.get()) {
             // Figure out how long it took to tick
             val startTickTime = System.nanoTime()
-            onTick.accept(this)
+            onTick(this)
             tick++
             val timeTakenToTick = System.nanoTime() - startTickTime
             updateMSTP(timeTakenToTick.toFloat(), msPtSummary)
@@ -85,7 +82,7 @@ class GameLoop private constructor(
             try {
                 if (nanoSleepTime > 0) {
                     // noinspection BusyWait
-                    runBlocking { delay(TimeUnit.NANOSECONDS.toMillis(nanoSleepTime)) }
+                    runBlocking { delay(nanoSleepTime.nanoseconds) }
                 }
             } catch (exception: InterruptedException) {
                 log.error("GameLoop interrupted", exception)
@@ -125,7 +122,7 @@ class GameLoop private constructor(
 
     class GameLoopBuilder {
         private var onStart = Runnable {}
-        private var onTick = Consumer<GameLoop> {}
+        private var onTick = { _: GameLoop -> }
         private var onStop = Runnable {}
         private var loopCountPerSec = 20
 
@@ -134,7 +131,7 @@ class GameLoop private constructor(
             return this
         }
 
-        fun onTick(onTick: Consumer<GameLoop>): GameLoopBuilder {
+        fun onTick(onTick: (GameLoop) -> Unit): GameLoopBuilder {
             this.onTick = onTick
             return this
         }
@@ -145,7 +142,7 @@ class GameLoop private constructor(
         }
 
         fun loopCountPerSec(loopCountPerSec: Int): GameLoopBuilder {
-            Preconditions.checkArgument(loopCountPerSec in 1..1024)
+            check(loopCountPerSec in 1..1024)
             this.loopCountPerSec = loopCountPerSec
             return this
         }

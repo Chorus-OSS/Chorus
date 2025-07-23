@@ -1,5 +1,7 @@
 package org.chorus_oss.chorus.entity.ai.executor
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.EntityCanAttack
 import org.chorus_oss.chorus.entity.ai.memory.CoreMemoryTypes
@@ -8,12 +10,12 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
+import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.LevelEventGenericPacket
-import org.chorus_oss.chorus.network.protocol.LevelEventPacket
+import org.chorus_oss.nbt.TagSerialization
 import java.util.*
 
 class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var totalRunningTime: Int) :
@@ -111,9 +113,17 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
         val relativeVector = Vector3(to.x - from.x, to.y - from.y, to.z - from.z)
         var i = 1
         while (i <= (length + 4)) {
-            val pk = LevelEventGenericPacket()
-            pk.eventId = LevelEventPacket.EVENT_SONIC_EXPLOSION
-            pk.tag = createVec3fTag(from.add(relativeVector.multiply(i / length)).asVector3f())
+            val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
+                eventID = org.chorus_oss.protocol.packets.LevelEventPacket.SONIC_EXPLOSION,
+                serializedEventData = Buffer().apply {
+                    val tag = org.chorus_oss.nbt.tags.CompoundTag(
+                        createVec3fTag(
+                            from.add(relativeVector.multiply(i / length)).asVector3f()
+                        )
+                    )
+                    org.chorus_oss.nbt.Tag.serialize(tag, this, TagSerialization.NetLE, false)
+                }.readByteString()
+            )
             Server.broadcastPacket(entity.viewers.values, pk)
             i++
         }

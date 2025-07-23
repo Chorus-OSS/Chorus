@@ -10,8 +10,7 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.entity.mob.monster.EntityMonster
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 class GuardianAttackExecutor(
     protected var memory: NullableMemoryType<out Entity>,
@@ -119,7 +118,7 @@ class GuardianAttackExecutor(
         entity.setDataProperty(EntityDataTypes.TARGET_EID, target!!.getRuntimeID())
         entity.level!!.addLevelSoundEvent(
             entity.position,
-            LevelSoundEventPacket.SOUND_MOB_WARNING,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.MobWarning,
             -1,
             entity.getEntityIdentifier(),
             false,
@@ -129,10 +128,11 @@ class GuardianAttackExecutor(
 
     private fun endSequence(entity: Entity) {
         entity.setDataProperty(EntityDataTypes.TARGET_EID, 0L)
-        val pk = EntityEventPacket()
-        pk.event = EntityEventPacket.GUARDIAN_ATTACK_ANIMATION
-        pk.eid = entity.getRuntimeID()
-        pk.data = 0
+        val pk = ActorEventPacket(
+            actorRuntimeID = entity.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.GuardianAttackAnimation,
+            eventData = 0
+        )
         Server.broadcastPacket(entity.viewers.values, pk)
     }
 }

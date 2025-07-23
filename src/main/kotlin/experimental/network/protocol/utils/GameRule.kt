@@ -7,6 +7,11 @@ operator fun GameRule.Companion.invoke(from: Pair<org.chorus_oss.chorus.level.Ga
     return GameRule(
         name = from.first.gameRuleName,
         canBeModifiedByPlayer = from.second.isCanBeChanged,
-        value = from.second.value
+        value = from.second.value.let {
+            when (it) {
+                is Int -> it.toUInt()
+                else -> it
+            }
+        }
     )
 }

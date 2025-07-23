@@ -12,8 +12,7 @@ import org.chorus_oss.chorus.event.entity.EntityDamageEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.network.protocol.EntityEventPacket
-import org.chorus_oss.chorus.network.protocol.LevelSoundEventPacket
+import org.chorus_oss.protocol.packets.ActorEventPacket
 
 class EntityEvocationFang(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chunk, nbt), EntityWalkable {
     var evocationIllager: EntityEvocationIllager? = null
@@ -27,7 +26,7 @@ class EntityEvocationFang(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chun
         super.initEntity()
         level!!.addLevelSoundEvent(
             this.position,
-            LevelSoundEventPacket.SOUND_FANG,
+            org.chorus_oss.protocol.packets.LevelSoundEventPacket.Companion.SoundType.Fang,
             -1,
             EntityID.EVOCATION_FANG,
             false,
@@ -43,11 +42,12 @@ class EntityEvocationFang(chunk: IChunk?, nbt: CompoundTag) : EntityMonster(chun
 
     override fun spawnTo(player: Player) {
         super.spawnTo(player)
-        val pk = EntityEventPacket()
-        pk.eid = this.getRuntimeID()
-        pk.data = 0
-        pk.event = EntityEventPacket.ARM_SWING
-        player.dataPacket(pk)
+        val pk = ActorEventPacket(
+            actorRuntimeID = this.getRuntimeID().toULong(),
+            eventType = ActorEventPacket.Companion.Type.ArmSwing,
+            eventData = 0
+        )
+        player.sendPacket(pk)
     }
 
     override fun onUpdate(currentTick: Int): Boolean {
