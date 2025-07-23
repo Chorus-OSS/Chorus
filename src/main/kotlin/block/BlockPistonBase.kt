@@ -91,7 +91,7 @@ abstract class BlockPistonBase(blockstate: BlockState) : BlockTransparent(blocks
             .putBoolean("powered", isGettingPower)
         val piston = BlockEntity.createBlockEntity(
             BlockEntityID.PISTON_ARM,
-            level.getChunk(position.chunkX, position.chunkZ), nbt
+            level, nbt
         ) as BlockEntityPistonArm?
         piston!!.powered = isGettingPower
         this.checkState(piston.powered)

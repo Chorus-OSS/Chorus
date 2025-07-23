@@ -69,9 +69,7 @@ class BlockBrewingStand @JvmOverloads constructor(blockstate: BlockState = prope
         }
 
         val brewing = BlockEntity.createBlockEntity(
-            BlockEntityID.BREWING_STAND, level.getChunk(
-                position.x.toInt() shr 4, position.z.toInt() shr 4
-            ), nbt
+            BlockEntityID.BREWING_STAND, level, nbt
         ) as BlockEntityBrewingStand?
         return brewing != null
     }
@@ -101,8 +99,7 @@ class BlockBrewingStand @JvmOverloads constructor(blockstate: BlockState = prope
                     .putInt("y", position.y.toInt())
                     .putInt("z", position.z.toInt())
                 brewing = BlockEntity.createBlockEntity(
-                    BlockEntityID.BREWING_STAND,
-                    level.getChunk(position.x.toInt() shr 4, position.z.toInt() shr 4), nbt
+                    BlockEntityID.BREWING_STAND, level, nbt
                 ) as BlockEntityBrewingStand?
                 if (brewing == null) {
                     return false

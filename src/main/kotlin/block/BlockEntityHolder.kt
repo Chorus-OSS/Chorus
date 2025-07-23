@@ -4,12 +4,10 @@ import org.chorus_oss.chorus.blockentity.BlockEntity
 import org.chorus_oss.chorus.blockentity.BlockEntity.Companion.createBlockEntity
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Locator
-import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.IVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
-import org.chorus_oss.chorus.utils.LevelException
 
 interface BlockEntityHolder<E : BlockEntity> {
     val blockEntity: E?
@@ -35,10 +33,9 @@ interface BlockEntityHolder<E : BlockEntity> {
     fun createBlockEntity(initialData: CompoundTag?, vararg args: Any?): E {
         var initialData1 = initialData
         val typeName = getBlockEntityType()
-        val chunk = chunk ?: throw LevelException("Undefined Level or chunk reference")
         initialData1 = initialData1?.copy() ?: CompoundTag()
         val created = createBlockEntity(
-            typeName, chunk,
+            typeName, level,
             initialData1
                 .putString("id", typeName)
                 .putInt("x", floorX)
@@ -70,8 +67,6 @@ interface BlockEntityHolder<E : BlockEntity> {
     fun getBlockEntityClass(): Class<out E>
 
     fun getBlockEntityType(): String
-
-    val chunk: IChunk?
 
     val floorX: Int
 

@@ -242,8 +242,6 @@ class BlockBell @JvmOverloads constructor(blockState: BlockState = properties.de
                     return true
                 }
             }
-
-            else -> Unit
         }
         return false
     }

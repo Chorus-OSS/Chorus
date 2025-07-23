@@ -512,7 +512,7 @@ class Chunk : IChunk {
                     }
                     val blockEntity = createBlockEntity(
                         nbt.getString("id"),
-                        this, nbt
+                        this.provider.level, nbt
                     )
                     if (blockEntity == null) {
                         changed = true

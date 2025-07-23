@@ -160,7 +160,7 @@ class BlockEntityPistonArm(level: Level, nbt: CompoundTag) : BlockEntitySpawnabl
                         movedBlockEntity.putInt("z", movingBlock.position.floorZ)
                         createBlockEntity(
                             movedBlockEntity.getString("id"),
-                            level.getChunk(movingBlock.position.chunkX, movingBlock.position.chunkZ), movedBlockEntity
+                            level, movedBlockEntity
                         )
                     }
                     //活塞更新

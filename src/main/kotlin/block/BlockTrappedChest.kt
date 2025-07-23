@@ -71,10 +71,7 @@ class BlockTrappedChest @JvmOverloads constructor(blockstate: BlockState = prope
 
         val blockEntity = BlockEntity.createBlockEntity(
             BlockEntityID.CHEST,
-            level.getChunk(
-                position.x.toInt() shr 4,
-                position.z.toInt() shr 4
-            ),
+            level,
             nbt
         ) as BlockEntityChest?
             ?: return false

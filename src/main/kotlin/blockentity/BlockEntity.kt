@@ -148,14 +148,14 @@ abstract class BlockEntity(level: Level, nbt: CompoundTag) : Locator(level),
         fun createBlockEntity(type: String, pos: Locator, nbt: CompoundTag?, vararg args: Any?): BlockEntity? {
             return createBlockEntity(
                 type,
-                pos.level.getChunk(pos.position.floorX shr 4, pos.position.floorZ shr 4),
+                pos.level,
                 nbt,
                 *args
             )
         }
 
         @JvmStatic
-        fun createBlockEntity(type: String, chunk: IChunk?, nbt: CompoundTag?, vararg args: Any?): BlockEntity? {
+        fun createBlockEntity(type: String, level: Level, nbt: CompoundTag?, vararg args: Any?): BlockEntity? {
             var blockEntity: BlockEntity? = null
 
             val clazz = Registries.BLOCKENTITY[type]
@@ -173,14 +173,10 @@ abstract class BlockEntity(level: Level, nbt: CompoundTag) : Locator(level),
 
                     try {
                         if (args.isEmpty()) {
-                            blockEntity = constructor.newInstance(chunk!!.provider.level, nbt) as BlockEntity
+                            blockEntity = constructor.newInstance(level, nbt) as BlockEntity
                         } else {
-                            val objects = arrayOfNulls<Any>(args.size + 2)
-
-                            objects[0] = chunk
-                            objects[1] = nbt
-                            System.arraycopy(args, 0, objects, 2, args.size)
-                            blockEntity = constructor.newInstance(*objects) as BlockEntity
+                            val objects = listOf(level, nbt) + args
+                            blockEntity = constructor.newInstance(*objects.toTypedArray()) as BlockEntity
                         }
                     } catch (e: Exception) {
                         if (exceptions == null) {
