@@ -10,13 +10,12 @@ import org.chorus_oss.chorus.event.entity.CreatureSpawnEvent
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.Utils
 
 
-class BlockEntityCreakingHeart(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityCreakingHeart(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
 
     var linkedCreaking: EntityCreaking? = null
         set(value) {

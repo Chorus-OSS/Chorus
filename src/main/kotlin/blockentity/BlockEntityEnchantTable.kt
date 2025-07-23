@@ -3,11 +3,11 @@ package org.chorus_oss.chorus.blockentity
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.EnchantInventory
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 
-class BlockEntityEnchantTable(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+class BlockEntityEnchantTable(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
     override val isBlockEntityValid: Boolean
         get() = block.id == BlockID.ENCHANTING_TABLE

@@ -1,10 +1,10 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityMusic(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
+class BlockEntityMusic(level: Level, nbt: CompoundTag) : BlockEntity(level, nbt) {
     override fun loadNBT() {
         super.loadNBT()
         if (!namedTag.contains("note")) {

@@ -1,10 +1,10 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityEnderChest(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), BlockEntityNameable {
+class BlockEntityEnderChest(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt), BlockEntityNameable {
     init {
         isMovable = true
     }

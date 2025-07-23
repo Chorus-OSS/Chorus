@@ -5,13 +5,13 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.ChestInventory
 import org.chorus_oss.chorus.inventory.DoubleChestInventory
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import java.util.function.Consumer
 
 
-class BlockEntityChest(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnableContainer(chunk, nbt) {
+class BlockEntityChest(level: Level, nbt: CompoundTag) : BlockEntitySpawnableContainer(level, nbt) {
     protected var doubleInventory: DoubleChestInventory? = null
 
     override fun close() {

@@ -10,7 +10,7 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.mob.animal.EntityBee
 import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
@@ -22,7 +22,7 @@ import java.util.*
 import kotlin.math.atan
 
 
-class BlockEntityBeehive(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
+class BlockEntityBeehive(level: Level, nbt: CompoundTag) : BlockEntity(level, nbt) {
     private var occupants: MutableList<Occupant> = mutableListOf()
 
     var interactingEntity: Entity? = null

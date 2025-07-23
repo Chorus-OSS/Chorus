@@ -8,10 +8,10 @@ import org.chorus_oss.chorus.inventory.BeaconInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityBeacon(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+class BlockEntityBeacon(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
     override var inventory: Inventory = BeaconInventory(this)
 

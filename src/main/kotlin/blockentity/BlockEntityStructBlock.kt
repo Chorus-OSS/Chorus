@@ -4,14 +4,14 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.inventory.StructBlockInventory
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.packets.StructureBlockUpdatePacket
 import org.chorus_oss.protocol.types.structure.*
 
-class BlockEntityStructBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), IStructBlock,
+class BlockEntityStructBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt), IStructBlock,
     BlockEntityInventoryHolder {
     private var animationMode: StructureAnimationMode? = null
     private var animationSeconds = 0f

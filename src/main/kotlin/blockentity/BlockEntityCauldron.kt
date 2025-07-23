@@ -2,13 +2,13 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockCauldron
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
 import org.chorus_oss.chorus.utils.BlockColor
 
-class BlockEntityCauldron(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityCauldron(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     override fun loadNBT() {
         super.loadNBT()
         if (!namedTag.contains("PotionId")) {

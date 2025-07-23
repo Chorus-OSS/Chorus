@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockStandingSign
 import org.chorus_oss.chorus.event.block.SignChangeEvent
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.DyeColor
@@ -12,7 +12,7 @@ import org.chorus_oss.chorus.utils.TextFormat
 import kotlin.math.min
 
 
-open class BlockEntitySign(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+open class BlockEntitySign(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     private lateinit var frontText: Array<String?>
     private lateinit var backText: Array<String?>
 

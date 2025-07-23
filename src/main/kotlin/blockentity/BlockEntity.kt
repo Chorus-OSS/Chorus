@@ -2,6 +2,7 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.level.Locator
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
@@ -9,7 +10,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.utils.Loggable
 
-abstract class BlockEntity(chunk: IChunk, nbt: CompoundTag) : Locator(chunk.provider.level),
+abstract class BlockEntity(level: Level, nbt: CompoundTag) : Locator(level),
     BlockEntityID {
 
     open var name: String = ""
@@ -25,7 +26,6 @@ abstract class BlockEntity(chunk: IChunk, nbt: CompoundTag) : Locator(chunk.prov
     var namedTag: CompoundTag
 
     init {
-        this.setLevel(chunk.provider.level)
         this.namedTag = nbt
         this.id = count++
         position.x = namedTag.getInt("x").toDouble()
@@ -173,7 +173,7 @@ abstract class BlockEntity(chunk: IChunk, nbt: CompoundTag) : Locator(chunk.prov
 
                     try {
                         if (args.isEmpty()) {
-                            blockEntity = constructor.newInstance(chunk, nbt) as BlockEntity
+                            blockEntity = constructor.newInstance(chunk!!.provider.level, nbt) as BlockEntity
                         } else {
                             val objects = arrayOfNulls<Any>(args.size + 2)
 

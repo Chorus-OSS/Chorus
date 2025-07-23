@@ -4,13 +4,13 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemMusicDisc
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.types.Vector3f
 
 
-class BlockEntityJukebox(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityJukebox(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     private var recordItem: Item = Item.AIR
 
     override fun loadNBT() {

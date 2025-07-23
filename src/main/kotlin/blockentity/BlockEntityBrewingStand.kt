@@ -12,7 +12,7 @@ import org.chorus_oss.chorus.inventory.RecipeInventoryHolder
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
@@ -21,7 +21,7 @@ import org.chorus_oss.chorus.recipe.ContainerRecipe
 import org.chorus_oss.chorus.recipe.MixRecipe
 import org.chorus_oss.chorus.registry.Registries
 
-class BlockEntityBrewingStand(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+class BlockEntityBrewingStand(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     RecipeInventoryHolder,
     BlockEntityInventoryHolder {
     override lateinit var inventory: BrewingInventory

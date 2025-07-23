@@ -2,10 +2,10 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.DispenserInventory
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityDispenser(chunk: IChunk, nbt: CompoundTag) : BlockEntityEjectable(chunk, nbt) {
+class BlockEntityDispenser(level: Level, nbt: CompoundTag) : BlockEntityEjectable(level, nbt) {
     override fun createInventory(): DispenserInventory {
         inventory = DispenserInventory(this)
         return getInventory()

@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
@@ -10,7 +10,7 @@ import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.HashUtils
 import org.chorus_oss.chorus.utils.Loggable
 
-class BlockEntityMovingBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityMovingBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     var movingBlock: Block? = null
         protected set
     protected var piston: BlockVector3? = null

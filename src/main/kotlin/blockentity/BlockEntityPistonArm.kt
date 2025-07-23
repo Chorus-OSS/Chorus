@@ -9,7 +9,6 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.event.entity.EntityMoveByPistonEvent
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Locator
-import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
@@ -25,7 +24,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-class BlockEntityPistonArm(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityPistonArm(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     lateinit var facing: BlockFace
     var extending: Boolean = false
     var sticky: Boolean = false

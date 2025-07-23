@@ -1,11 +1,11 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockRedstoneComparator
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 
-class BlockEntityComparator(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
+class BlockEntityComparator(level: Level, nbt: CompoundTag) : BlockEntity(level, nbt) {
     @JvmField
     var outputSignal: Int = 0
 

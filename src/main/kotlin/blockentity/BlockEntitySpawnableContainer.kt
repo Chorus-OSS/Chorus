@@ -4,13 +4,13 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.inventory.ContainerInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import java.util.function.Consumer
 
-abstract class BlockEntitySpawnableContainer(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+abstract class BlockEntitySpawnableContainer(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
 
     abstract override var inventory: Inventory

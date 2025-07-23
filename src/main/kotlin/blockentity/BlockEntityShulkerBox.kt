@@ -4,12 +4,12 @@ import org.chorus_oss.chorus.block.BlockUndyedShulkerBox
 import org.chorus_oss.chorus.inventory.BaseInventory
 import org.chorus_oss.chorus.inventory.ShulkerBoxInventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 
-class BlockEntityShulkerBox(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+class BlockEntityShulkerBox(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
     var realInventory: ShulkerBoxInventory? = null
         protected set

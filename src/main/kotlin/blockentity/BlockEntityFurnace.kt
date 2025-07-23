@@ -9,7 +9,7 @@ import org.chorus_oss.chorus.inventory.*
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemLavaBucket
 import org.chorus_oss.chorus.level.Sound
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
 import kotlin.math.floor
 
-open class BlockEntityFurnace(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+open class BlockEntityFurnace(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     RecipeInventoryHolder,
     BlockEntityInventoryHolder {
     override lateinit var inventory: SmeltingInventory

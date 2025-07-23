@@ -3,14 +3,14 @@ package org.chorus_oss.chorus.blockentity
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag
 import org.chorus_oss.chorus.utils.RedstoneComponent
 import kotlin.math.min
 
-class BlockEntityLectern(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityLectern(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     var totalPages: Int = 0
         private set
 

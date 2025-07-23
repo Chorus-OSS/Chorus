@@ -76,7 +76,7 @@ object BlockStates {
         return LinkedCompoundTag().apply {
             putString("name", identifier)
             putCompound("states", states)
-            putInt("version", ProtocolInfo.BLOCK_STATE_VERSION_NO_REVISION)
+            putInt("version", ProtocolInfo.BLOCK_STATE_VERSION)
         }
     }
 }

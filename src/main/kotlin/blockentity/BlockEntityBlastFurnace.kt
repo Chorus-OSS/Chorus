@@ -5,11 +5,11 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.BlastFurnaceInventory
 import org.chorus_oss.chorus.inventory.SmeltingInventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.recipe.SmeltingRecipe
 
-class BlockEntityBlastFurnace(chunk: IChunk, nbt: CompoundTag) : BlockEntityFurnace(chunk, nbt) {
+class BlockEntityBlastFurnace(level: Level, nbt: CompoundTag) : BlockEntityFurnace(level, nbt) {
     override val furnaceName: String
         get() = "Blast Furnace"
 

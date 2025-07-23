@@ -16,7 +16,6 @@ import org.chorus_oss.chorus.lang.TranslationContainer
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.Transform
-import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.StringTag
@@ -29,7 +28,7 @@ import org.chorus_oss.chorus.utils.TextFormat
 import java.util.function.Consumer
 
 
-class BlockEntityCommandBlock(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), ICommandBlock,
+class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt), ICommandBlock,
     BlockEntityInventoryHolder {
     protected var conditionalMode: Boolean = false
     override var isAuto: Boolean = false

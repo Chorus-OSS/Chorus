@@ -15,7 +15,6 @@ import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.NumberTag
 import org.chorus_oss.chorus.utils.Loggable
-import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -129,43 +128,8 @@ class Chunk : IChunk {
         this.lightLock = StampedLock()
     }
 
-    override fun isSectionEmpty(fY: Int): Boolean {
-        val section = this.getSection(fY - dimensionData.minSectionY)
-        return section == null || section.isEmpty
-    }
-
-    override fun getSection(fY: Int): SubChunk? {
-        var stamp = blockLock.tryOptimisticRead()
-        try {
-            while (true) {
-                if (stamp == 0L) {
-                    stamp = blockLock.readLock()
-                    continue
-                }
-                val section = sections[fY - dimensionData.minSectionY]
-                if (!blockLock.validate(stamp)) {
-                    stamp = blockLock.readLock()
-                    continue
-                }
-                return section.also { stamp = blockLock.readLock() }
-            }
-        } finally {
-            if (StampedLock.isReadLockStamp(stamp)) blockLock.unlockRead(stamp)
-        }
-    }
-
     private fun getSectionInternal(fY: Int): SubChunk? {
         return sections[fY - dimensionData.minSectionY]
-    }
-
-    override fun setSection(fY: Int, section: SubChunk?) {
-        val stamp = blockLock.writeLock()
-        try {
-            sections[fY - dimensionData.minSectionY] = section
-            setChanged()
-        } finally {
-            blockLock.unlockWrite(stamp)
-        }
     }
 
     override fun getBlockState(x: Int, y: Int, z: Int, layer: Int): BlockState {
@@ -486,24 +450,6 @@ class Chunk : IChunk {
 
     override val isLoaded: Boolean
         get() = provider.isChunkLoaded(this.x, this.z)
-
-    @Throws(IOException::class)
-    override fun load(): Boolean {
-        return this.load(true)
-    }
-
-    @Throws(IOException::class)
-    override fun load(generate: Boolean): Boolean {
-        return provider.getChunk(this.x, this.z, true) != null
-    }
-
-    override fun unload(): Boolean {
-        return this.unload(save = true, safe = true)
-    }
-
-    override fun unload(save: Boolean): Boolean {
-        return this.unload(save, true)
-    }
 
     override fun unload(save: Boolean, safe: Boolean): Boolean {
         val provider = this.provider

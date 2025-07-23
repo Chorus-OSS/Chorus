@@ -8,35 +8,11 @@ import org.chorus_oss.chorus.level.DimensionData
 import org.chorus_oss.chorus.math.BlockVector3
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.annotations.Range
-import java.io.IOException
 import java.util.function.BiPredicate
 import java.util.function.Consumer
 import java.util.stream.Stream
 
 interface IChunk {
-    /**
-     * Is section empty.
-     *
-     * @param fY range -4 ~ 19 for Overworld
-     * @return the boolean
-     */
-    fun isSectionEmpty(fY: Int): Boolean
-
-    /**
-     * Gets section.
-     *
-     * @param fY range -4 ~ 19 for Overworld
-     * @return the section
-     */
-    fun getSection(fY: Int): SubChunk?
-
-    /**
-     * Sets section.
-     *
-     * @param fY      range -4 ~ 19 for Overworld
-     * @param section the section
-     */
-    fun setSection(fY: Int, section: SubChunk?)
 
     fun getSectionsSafe(): Array<SubChunk?>
 
@@ -72,10 +48,6 @@ interface IChunk {
     fun getBlockState(x: Int, y: Int, z: Int, layer: Int): BlockState
 
     fun getAndSetBlockState(x: Int, y: Int, z: Int, blockstate: BlockState, layer: Int): BlockState?
-
-    fun getAndSetBlockState(x: Int, y: Int, z: Int, blockstate: BlockState): BlockState? {
-        return getAndSetBlockState(x, y, z, blockstate, 0)
-    }
 
     fun setBlockState(x: Int, y: Int, z: Int, blockstate: BlockState, layer: Int)
 
@@ -173,16 +145,6 @@ interface IChunk {
 
     val isLoaded: Boolean
 
-    @Throws(IOException::class)
-    fun load(): Boolean
-
-    @Throws(IOException::class)
-    fun load(generate: Boolean): Boolean
-
-    fun unload(): Boolean
-
-    fun unload(save: Boolean): Boolean
-
     fun unload(save: Boolean, safe: Boolean): Boolean
 
     /**
@@ -223,17 +185,6 @@ interface IChunk {
 
     val isPopulated: Boolean
         get() = chunkState.ordinal >= ChunkState.POPULATED.ordinal
-
-    val isFinished: Boolean
-        get() = chunkState.ordinal == ChunkState.FINISHED.ordinal
-
-    fun setGenerated() {
-        chunkState = ChunkState.GENERATED
-    }
-
-    fun setPopulated() {
-        chunkState = ChunkState.POPULATED
-    }
 
     companion object {
         /**

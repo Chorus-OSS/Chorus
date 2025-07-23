@@ -66,11 +66,8 @@ class BlockMobSpawner @JvmOverloads constructor(blockState: BlockState = propert
                 .putInt(BlockEntity.TAG_Y, position.floorY)
                 .putInt(BlockEntity.TAG_Z, position.floorZ)
 
-            val entitySpawner: BlockEntityMobSpawner = BlockEntityMobSpawner(
-                level.getChunk(
-                    position.chunkX,
-                    position.chunkZ
-                ), nbt
+            val entitySpawner = BlockEntityMobSpawner(
+                level, nbt
             )
             entitySpawner.spawnToAll()
         }

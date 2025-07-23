@@ -2,12 +2,12 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.inventory.EjectableInventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 
-abstract class BlockEntityEjectable(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+abstract class BlockEntityEjectable(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
     override lateinit var inventory: EjectableInventory
 

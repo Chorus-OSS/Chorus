@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.blockentity
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.BlockSculkSensor
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationListener
 import org.chorus_oss.chorus.math.Vector3
@@ -11,7 +11,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import kotlin.math.floor
 import kotlin.math.max
 
-class BlockEntitySculkSensor(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt),
+class BlockEntitySculkSensor(level: Level, nbt: CompoundTag) : BlockEntity(level, nbt),
     VibrationListener {
     var lastActiveTime: Int = level.tick
         protected set

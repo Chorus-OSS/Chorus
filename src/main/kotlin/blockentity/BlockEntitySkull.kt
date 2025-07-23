@@ -1,10 +1,10 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockHead
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntitySkull(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntitySkull(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     private var mouthMoving = false
 
     private var mouthTickCount = 0

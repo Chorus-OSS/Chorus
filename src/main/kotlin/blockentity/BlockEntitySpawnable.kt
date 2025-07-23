@@ -2,13 +2,13 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.types.BlockPos
 
 
-abstract class BlockEntitySpawnable(chunk: IChunk, nbt: CompoundTag) : BlockEntity(chunk, nbt) {
+abstract class BlockEntitySpawnable(level: Level, nbt: CompoundTag) : BlockEntity(level, nbt) {
     override fun initBlockEntity() {
         super.initBlockEntity()
         this.spawnToAll()

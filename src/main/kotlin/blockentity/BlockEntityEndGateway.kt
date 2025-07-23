@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.projectile.throwable.EntityEnderPearl
 import org.chorus_oss.chorus.event.player.PlayerTeleportEvent.TeleportCause
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.BlockVector3
 import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.math.Vector3
@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.protocol.types.BlockPos
 import kotlin.math.max
 
-class BlockEntityEndGateway(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityEndGateway(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     // NBT data
     var age: Int = 0
     var exitPortal: BlockVector3? = null

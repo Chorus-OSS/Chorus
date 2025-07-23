@@ -3,10 +3,10 @@ package org.chorus_oss.chorus.blockentity
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.inventory.BarrelInventory
 import org.chorus_oss.chorus.inventory.Inventory
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityBarrel(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnableContainer(chunk, nbt) {
+class BlockEntityBarrel(level: Level, nbt: CompoundTag) : BlockEntitySpawnableContainer(level, nbt) {
     override var inventory: Inventory = BarrelInventory(this)
 
     override val spawnCompound: CompoundTag

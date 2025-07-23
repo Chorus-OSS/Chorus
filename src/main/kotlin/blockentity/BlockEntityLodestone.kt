@@ -2,13 +2,13 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.IOException
 import java.util.*
 
-class BlockEntityLodestone(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityLodestone(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     override fun loadNBT() {
         super.loadNBT()
         if (namedTag.containsInt("trackingHandler")) {

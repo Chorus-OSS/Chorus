@@ -17,7 +17,7 @@ import org.chorus_oss.chorus.inventory.RecipeInventoryHolder
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemPotion
 import org.chorus_oss.chorus.item.ItemSplashPotion
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.math.AxisAlignedBB
 import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockVector3
@@ -27,7 +27,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.registry.Registries
 
-class BlockEntityHopper(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt), BlockEntityInventoryHolder,
+class BlockEntityHopper(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt), BlockEntityInventoryHolder,
     IHopper {
     override var inventory: Inventory = HopperInventory(this)
 

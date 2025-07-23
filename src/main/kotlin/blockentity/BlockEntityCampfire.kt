@@ -7,13 +7,13 @@ import org.chorus_oss.chorus.event.inventory.CampfireSmeltEvent
 import org.chorus_oss.chorus.inventory.CampfireInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.recipe.CampfireRecipe
 import java.util.concurrent.ThreadLocalRandom
 
-class BlockEntityCampfire(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt),
+class BlockEntityCampfire(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),
     BlockEntityInventoryHolder {
     override lateinit var inventory: Inventory
     private lateinit var burnTime: IntArray

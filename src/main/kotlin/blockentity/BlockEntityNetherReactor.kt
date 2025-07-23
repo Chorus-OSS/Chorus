@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.property.enums.NetherReactorState
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 /**
@@ -13,7 +13,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
  * system and did not create a block property for the old nether reactor core block, making it
  * impossible for the server to tell the client to render the red and dark versions of the block.
  */
-class BlockEntityNetherReactor(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityNetherReactor(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     var reactorState: NetherReactorState? = null
     private var progress = 0
 

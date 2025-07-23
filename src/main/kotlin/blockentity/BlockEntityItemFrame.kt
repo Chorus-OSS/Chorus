@@ -7,13 +7,13 @@ import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.entity.item.EntityItem
 import org.chorus_oss.chorus.event.block.ItemFrameUseEvent
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
-open class BlockEntityItemFrame(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+open class BlockEntityItemFrame(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     override fun loadNBT() {
         super.loadNBT()
         if (!namedTag.contains("Item")) {

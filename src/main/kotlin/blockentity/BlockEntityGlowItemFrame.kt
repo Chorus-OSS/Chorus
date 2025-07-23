@@ -1,11 +1,11 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
-class BlockEntityGlowItemFrame(chunk: IChunk, nbt: CompoundTag) : BlockEntityItemFrame(chunk, nbt) {
+class BlockEntityGlowItemFrame(level: Level, nbt: CompoundTag) : BlockEntityItemFrame(level, nbt) {
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "Glow Item Frame"
         set(name) {

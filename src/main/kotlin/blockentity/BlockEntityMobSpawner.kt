@@ -10,12 +10,12 @@ import org.chorus_oss.chorus.entity.mob.monster.EntityMonster
 import org.chorus_oss.chorus.event.entity.CreatureSpawnEvent
 import org.chorus_oss.chorus.level.GameRule
 import org.chorus_oss.chorus.level.Locator
-import org.chorus_oss.chorus.level.format.IChunk
+import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.utils.Utils
 
-class BlockEntityMobSpawner(chunk: IChunk, nbt: CompoundTag) : BlockEntitySpawnable(chunk, nbt) {
+class BlockEntityMobSpawner(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt) {
     private var delay: Short = 0
     private var displayEntityHeight = 0f
     private var displayEntityScale = 0f
