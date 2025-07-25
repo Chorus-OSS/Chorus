@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.ktoml.file)
     implementation(libs.json)
     implementation(libs.kotlin.reflect)
+    implementation(libs.kflate)
 }
 
 java {

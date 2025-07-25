@@ -43,6 +43,7 @@ cryptography = "0.5.0"
 ktoml = "0.7.0"
 json = "1.9.0"
 kotlin = "2.2.0"
+kflate = "0.0.1"
 
 [libraries]
 libdeflate = { module = "cn.powernukkitx:libdeflate-java", version.ref = "cn-powernukkitx-libdeflate-java" }
@@ -93,6 +94,7 @@ ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
 json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "json" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kflate = { module = "org.chorus-oss:kflate", version.ref = "kflate" }
 
 [bundles]
 netty = ["netty-raknet", "netty-epoll", "netty-kqueue"]
