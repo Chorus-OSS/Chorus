@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `java-library`
@@ -7,7 +8,7 @@ plugins {
     id("com.gradleup.shadow") version "8.3.7"
     id("com.gorylenko.gradle-git-properties") version "2.4.1"
 
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -25,51 +26,70 @@ repositories {
     maven("https://repo.opencollab.dev/maven-snapshots/")
 }
 
-dependencies {
-    api(libs.bundles.netty)
-    api(libs.bundles.logging)
-    api(libs.annotations)
-    api(libs.jsr305)
-    api(libs.gson)
-    api(libs.guava)
-    api(libs.commonsio)
-    api(libs.snakeyaml)
-    api(libs.stateless4j)
+kotlin {
+    jvm {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget = JvmTarget.JVM_21
+                }
+            }
+        }
+    }
 
-    implementation(libs.bundles.leveldb)
-    implementation(libs.rng.simple)
-    implementation(libs.rng.sampling)
-    implementation(libs.asm)
-    implementation(libs.jose4j)
-    implementation(libs.joptsimple)
-    implementation(libs.sentry)
-    implementation(libs.sentry.log4j2)
-    implementation(libs.disruptor)
-    implementation(libs.oshi)
-    implementation(libs.bundles.compress)
-    implementation(libs.bundles.terminal)
-    implementation(libs.caffeine)
+    sourceSets {
+        val commonMain by getting {}
 
-    testImplementation(libs.bundles.test)
-    testImplementation(libs.commonsio)
-    testImplementation(libs.commonslang3)
+        val commonTest by getting {}
 
-    implementation(libs.chorus.protocol)
-    implementation(libs.kotlinx.io)
-    implementation(libs.kotlinx.coroutines)
-    implementation(libs.cryptography.core)
-    implementation(libs.cryptography.random)
-    implementation(libs.cryptography.provider.optimal)
-    implementation(libs.ktoml.core)
-    implementation(libs.ktoml.file)
-    implementation(libs.json)
-    implementation(libs.kotlin.reflect)
-    implementation(libs.kflate)
-}
+        val jvmMain by getting {
+            dependencies {
+                api(libs.bundles.netty)
+                api(libs.bundles.logging)
+                api(libs.annotations)
+                api(libs.jsr305)
+                api(libs.gson)
+                api(libs.guava)
+                api(libs.commonsio)
+                api(libs.snakeyaml)
+                api(libs.stateless4j)
 
-java {
-    withSourcesJar()
-    withJavadocJar()
+                implementation(libs.bundles.leveldb)
+                implementation(libs.rng.simple)
+                implementation(libs.rng.sampling)
+                implementation(libs.asm)
+                implementation(libs.jose4j)
+                implementation(libs.joptsimple)
+                implementation(libs.sentry)
+                implementation(libs.sentry.log4j2)
+                implementation(libs.disruptor)
+                implementation(libs.oshi)
+                implementation(libs.bundles.compress)
+                implementation(libs.bundles.terminal)
+                implementation(libs.caffeine)
+
+                implementation(libs.chorus.protocol)
+                implementation(libs.kotlinx.io)
+                implementation(libs.kotlinx.coroutines)
+                implementation(libs.cryptography.core)
+                implementation(libs.cryptography.random)
+                implementation(libs.cryptography.provider.optimal)
+                implementation(libs.ktoml.core)
+                implementation(libs.ktoml.file)
+                implementation(libs.json)
+                implementation(libs.kotlin.reflect)
+                implementation(libs.kflate)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.bundles.test)
+                implementation(libs.commonsio)
+                implementation(libs.commonslang3)
+            }
+        }
+    }
 }
 
 tasks {
