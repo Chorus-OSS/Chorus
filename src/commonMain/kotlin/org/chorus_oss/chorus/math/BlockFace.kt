@@ -1,9 +1,8 @@
 package org.chorus_oss.chorus.math
 
-import java.util.*
-import java.util.function.Predicate
 import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.random.Random
 
 enum class BlockFace(
     /**
@@ -154,12 +153,12 @@ enum class BlockFace(
 
     val edges: Set<BlockFace>
         get() {
-            val blockFaces = EnumSet.noneOf(BlockFace::class.java)
+            val blockFaces = mutableSetOf<BlockFace>()
             if (axis.isVertical) {
-                Collections.addAll(blockFaces, *Plane.HORIZONTAL_FACES.toTypedArray())
+                blockFaces.addAll(Plane.HORIZONTAL_FACES)
                 return blockFaces
             }
-            Collections.addAll(blockFaces, *Plane.VERTICAL_FACES.toTypedArray())
+            blockFaces.addAll(Plane.VERTICAL_FACES)
             val edgeAxis =
                 if (axis == Axis.X) Axis.Z else Axis.X
             blockFaces.add(fromAxis(AxisDirection.NEGATIVE, edgeAxis))
@@ -171,7 +170,7 @@ enum class BlockFace(
         return faceName
     }
 
-    enum class Axis(val axisName: String) : Predicate<BlockFace?> {
+    enum class Axis(val axisName: String) {
         Y("y"),
         X("x"),
         Z("z");
@@ -184,10 +183,6 @@ enum class BlockFace(
 
         val isHorizontal: Boolean
             get() = plane == Plane.HORIZONTAL
-
-        override fun test(face: BlockFace?): Boolean {
-            return face != null && face.axis == this
-        }
 
         override fun toString(): String {
             return axisName
@@ -212,13 +207,9 @@ enum class BlockFace(
         }
     }
 
-    enum class Plane : Predicate<BlockFace?> {
+    enum class Plane {
         HORIZONTAL,
         VERTICAL;
-
-        override fun test(face: BlockFace?): Boolean {
-            return face != null && face.axis.plane == this
-        }
 
         companion object {
             val HORIZONTAL_FACES

@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.block
 
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType.BlockPropertyValue
-import org.chorus_oss.chorus.experimental.utils.BlockStates
 import org.chorus_oss.chorus.tags.BlockTags.register
 import org.chorus_oss.chorus.utils.Identifier.Companion.assertValid
 
@@ -31,7 +30,7 @@ class BlockProperties(identifier: String, blockTags: Set<String>, vararg propert
 
         val propertyList = propertyTypeSet.toList()
 
-        this.allStates = BlockStates.getAllStates(identifier, propertyList)
+        this.allStates = getAllStates(identifier, propertyList)
 
         this.defaultState = this.allStates.first()
         this.specialValueMap = this.allStates.associateBy { it.specialValue() }
@@ -73,5 +72,19 @@ class BlockProperties(identifier: String, blockTags: Set<String>, vararg propert
 
     fun getPropertyTypeSet(): Set<BlockPropertyType<*>> {
         return propertyTypeSet
+    }
+
+    companion object {
+        fun getAllStates(identifier: String, propertyTypeList: List<BlockPropertyType<*>>): List<BlockStateImpl> {
+            return propertyTypeList
+                .fold(listOf(listOf<BlockPropertyValue<*, *, *>>())) { acc, property ->
+                    acc.flatMap { list ->
+                        property.validValues.map {
+                            list + (property.tryCreateValue(it)!!)
+                        }
+                    }
+                }
+                .map { BlockStateImpl(identifier, it) }
+        }
     }
 }

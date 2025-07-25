@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.math
 
-
 import kotlin.math.pow
 import kotlin.math.sqrt
 

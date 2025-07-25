@@ -5,4 +5,3 @@ class InvalidIdentifierException : RuntimeException {
 
     constructor(message: String?, throwable: Throwable?) : super(message, throwable)
 }
-

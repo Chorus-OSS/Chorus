@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.experimental.block.state
 
-import kotlin.reflect.KClass
-
 data class BlockState<T : Any>(
     val identifier: String, val values: List<T>
 ) : Iterable<T> by values {
@@ -47,14 +45,6 @@ data class BlockState<T : Any>(
 
         fun from(identifier: String, default: Boolean = false): BlockState<Boolean> {
             return BlockState(identifier, listOf(default, !default))
-        }
-
-        fun <T : Enum<T>> from(identifier: String, enumClass: Class<T>): BlockState<String> {
-            return from(identifier, enumClass.enumConstants.toList())
-        }
-
-        fun <T : Enum<T>> from(identifier: String, enumClass: KClass<T>): BlockState<String> {
-            return from(identifier, enumClass.java)
         }
 
         fun <T : Enum<T>> from(identifier: String, enumValues: List<T>): BlockState<String> {

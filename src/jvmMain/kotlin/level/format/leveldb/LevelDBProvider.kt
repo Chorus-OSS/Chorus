@@ -20,6 +20,8 @@ import org.chorus_oss.chorus.utils.ChunkException
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.SemVersion
 import org.chorus_oss.chorus.utils.Utils
+import org.chorus_oss.chorus.utils.from
+import org.chorus_oss.chorus.utils.toTag
 import org.iq80.leveldb.CompressionType
 import org.iq80.leveldb.Options
 import java.io.*

@@ -35,7 +35,6 @@ import org.chorus_oss.chorus.registry.BlockRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.ServerScheduler
 import org.chorus_oss.chorus.utils.ClientChainData
-import org.chorus_oss.protocol.core.Packet
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolutionException

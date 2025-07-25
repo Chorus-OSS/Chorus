@@ -8,7 +8,6 @@ import org.chorus_oss.chorus.blockentity.BlockEntityID
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemTool
 import org.chorus_oss.chorus.math.BlockFace
-import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.utils.RedstoneComponent
 
 class BlockCreakingHeart @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :

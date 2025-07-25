@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.math
 
-
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.pow

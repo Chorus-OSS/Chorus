@@ -1,9 +1,7 @@
 package org.chorus_oss.chorus.math
 
-
 import kotlin.math.max
 import kotlin.math.sqrt
-
 
 open class Vector3 @JvmOverloads constructor(var x: Double = 0.0, var y: Double = 0.0, var z: Double = 0.0) :
     Cloneable, IVector3 {

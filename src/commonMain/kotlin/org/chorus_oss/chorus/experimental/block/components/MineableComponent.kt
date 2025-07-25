@@ -1,9 +1,8 @@
 package org.chorus_oss.chorus.experimental.block.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import org.chorus_oss.chorus.experimental.block.BlockComponent
-import org.chorus_oss.chorus.recipe.descriptor.ItemDescriptor
+import org.chorus_oss.protocol.types.item.desciptor.ItemDescriptor
 
 data class MineableComponent(
     val hardness: Float,

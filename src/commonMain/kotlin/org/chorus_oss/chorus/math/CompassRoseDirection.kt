@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.math
 
-
 /**
  * Represents a 16 direction compass rose.
  *
@@ -46,7 +45,7 @@ enum class CompassRoseDirection {
     val closestBlockFace: BlockFace
 
     /**
-     * Gets the [org.chorus_oss.chorus.entity.Entity] yaw that represents this direction.
+     * Gets the yaw that represents this direction.
      *
      * @return The yaw value that can be used by entities to look at this direction.
      * @since 1.4.0.0-PN
@@ -125,7 +124,7 @@ enum class CompassRoseDirection {
         )
 
         /**
-         * Gets the closes direction based on the given [org.chorus_oss.chorus.entity.Entity] yaw.
+         * Gets the closes direction based on the given yaw.
          *
          * @param yaw An entity yaw
          * @return The closest direction
@@ -139,7 +138,7 @@ enum class CompassRoseDirection {
         }
 
         /**
-         * Gets the closes direction based on the given [org.chorus_oss.chorus.entity.Entity] yaw.
+         * Gets the closes direction based on the given yaw.
          *
          * @param yaw An entity yaw
          * @return The closest direction

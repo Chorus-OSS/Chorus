@@ -16,7 +16,6 @@ import org.chorus_oss.chorus.math.BlockFace
 import org.chorus_oss.chorus.math.BlockFace.Companion.random
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.max
 import kotlin.math.min
 
@@ -175,7 +174,7 @@ class BlockVine @JvmOverloads constructor(blockstate: BlockState = properties.de
                 return Level.BLOCK_UPDATE_NORMAL
             }
         } else if (type == Level.BLOCK_UPDATE_RANDOM) {
-            val random: Random = ThreadLocalRandom.current()
+            val random = kotlin.random.Random
             if (random.nextInt(4) == 0) {
                 val face = random(random)
                 val block = this.getSide(face)
