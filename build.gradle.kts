@@ -38,7 +38,21 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {}
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.chorus.protocol)
+                implementation(libs.kotlinx.io)
+                implementation(libs.kotlinx.coroutines)
+                implementation(libs.cryptography.core)
+                implementation(libs.cryptography.random)
+                implementation(libs.cryptography.provider.optimal)
+                implementation(libs.ktoml.core)
+                implementation(libs.ktoml.file)
+                implementation(libs.json)
+                implementation(libs.kotlin.reflect)
+                implementation(libs.kflate)
+            }
+        }
 
         val commonTest by getting {}
 
@@ -67,18 +81,6 @@ kotlin {
                 implementation(libs.bundles.compress)
                 implementation(libs.bundles.terminal)
                 implementation(libs.caffeine)
-
-                implementation(libs.chorus.protocol)
-                implementation(libs.kotlinx.io)
-                implementation(libs.kotlinx.coroutines)
-                implementation(libs.cryptography.core)
-                implementation(libs.cryptography.random)
-                implementation(libs.cryptography.provider.optimal)
-                implementation(libs.ktoml.core)
-                implementation(libs.ktoml.file)
-                implementation(libs.json)
-                implementation(libs.kotlin.reflect)
-                implementation(libs.kflate)
             }
         }
 
@@ -144,7 +146,6 @@ tasks.register<DefaultTask>("buildSkipChores") {
     tasks["test"].enabled = false
     tasks["check"].enabled = false
     tasks["javadoc"].enabled = false
-    tasks["javadocJar"].enabled = false
     tasks["sourcesJar"].enabled = false
     tasks["compileTestJava"].enabled = false
     tasks["processTestResources"].enabled = false
