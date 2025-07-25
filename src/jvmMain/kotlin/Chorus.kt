@@ -11,11 +11,7 @@ import org.apache.logging.log4j.core.LoggerContext
 import org.chorus_oss.chorus.nbt.stream.PGZIPOutputStream
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils.dynamic
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.util.*
 
 /**
  *   _____  _
@@ -29,10 +25,7 @@ import java.util.*
  * The launcher class of Chorus, including the `main` function.
  */
 object Chorus : Loggable {
-    val GIT_INFO: Properties? = gitInfo
-    val VERSION: String = version
-    val CODENAME: String = dynamic("Chorus")
-    val GIT_COMMIT: String = gitCommit
+    const val VERSION: String = "1.0-SNAPSHOT"
     val API_VERSION: String = dynamic("0.0.1")
     val PATH: String = System.getProperty("user.dir") + "/"
     val DATA_PATH: String = System.getProperty("user.dir") + "/"
@@ -155,69 +148,6 @@ object Chorus : Loggable {
         val osName = System.getProperty("os.name").lowercase()
         return osName.contains("windows") && (osName.contains("windows 8") || osName.contains("2012"))
     }
-
-    private val gitInfo: Properties?
-        get() {
-            val gitFileStream: InputStream?
-            try {
-                gitFileStream = Chorus::class.java.module.getResourceAsStream("git.properties")
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
-            if (gitFileStream == null) {
-                return null
-            }
-            val properties = Properties()
-            try {
-                properties.load(gitFileStream)
-            } catch (_: IOException) {
-                return null
-            }
-            return properties
-        }
-
-    private val version: String
-        get() {
-            val resourceAsStream: InputStream? = try {
-                Chorus::class.java.module.getResourceAsStream("git.properties")
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
-
-            if (resourceAsStream == null) {
-                return "Unknown-Chorus-SNAPSHOT"
-            }
-
-            val properties = Properties()
-            try {
-                resourceAsStream.use { `is` ->
-                    InputStreamReader(`is`).use { reader ->
-                        BufferedReader(reader).use { buffered ->
-                            properties.load(buffered)
-                            val line = properties.getProperty("git.build.version")
-                            return if ("\${project.version}".equals(line, ignoreCase = true)) {
-                                "Unknown-Chorus-SNAPSHOT"
-                            } else {
-                                line
-                            }
-                        }
-                    }
-                }
-            } catch (_: IOException) {
-                return "Unknown-Chorus-SNAPSHOT"
-            }
-        }
-
-    private val gitCommit: String
-        get() {
-            val version = StringBuilder()
-            version.append("git-")
-            if (GIT_INFO == null) {
-                return version.append("null").toString()
-            }
-            val commitId = GIT_INFO.getProperty("git.commit.id.abbrev")
-            return version.append(commitId).toString()
-        }
 
     var logLevel: Level?
         get() {

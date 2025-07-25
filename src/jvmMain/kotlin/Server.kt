@@ -29,7 +29,6 @@ import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
-import org.chorus_oss.chorus.experimental.generator.BlockDefinitionGenerator
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
 import org.chorus_oss.chorus.lang.LangCode
@@ -63,7 +62,6 @@ import org.chorus_oss.chorus.permission.DefaultPermissions.registerCorePermissio
 import org.chorus_oss.chorus.plugin.*
 import org.chorus_oss.chorus.positiontracking.PositionTrackingService
 import org.chorus_oss.chorus.recipe.Recipe
-import org.chorus_oss.chorus.registry.BlockRegistry
 import org.chorus_oss.chorus.registry.RecipeRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.resourcepacks.ResourcePackManager
@@ -416,7 +414,7 @@ class Server internal constructor(
             this.lang.tr(
                 "chorus.server.info",
                 name,
-                TextFormat.YELLOW.toString() + this.chorusVersion + TextFormat.RESET + " (" + TextFormat.YELLOW + this.gitCommit + TextFormat.RESET + ")" + TextFormat.RESET,
+                TextFormat.YELLOW.toString() + this.chorusVersion + TextFormat.RESET,
                 apiVersion
             )
         )
@@ -804,10 +802,6 @@ class Server internal constructor(
                 try {
                     val levelTime = System.currentTimeMillis()
                     //Ensures that the server won't try to tick a level without providers.
-                    if (level.getProvider().level == null) {
-                        log.warn("Tried to tick Level " + level.getLevelName() + " without a provider!")
-                        continue
-                    }
                     level.doTick(currentTick)
                     val tickMs = (System.currentTimeMillis() - levelTime).toInt()
                     level.tickRateTime = tickMs
@@ -956,7 +950,6 @@ class Server internal constructor(
         val usage = (used / max * 100).roundToInt().toString() + "%"
         var title = (0x1b.toChar().toString() + "]0;" + this.name + " "
                 + this.chorusVersion
-                + " | " + this.gitCommit
                 + " | Online " + players.size + "/" + this.maxPlayers
                 + " | Memory " + usage)
         if (!Chorus.shortTitle) {
@@ -1841,12 +1834,6 @@ class Server internal constructor(
 
     val chorusVersion
         get() = Chorus.VERSION
-
-    val gitCommit: String
-        get() = Chorus.GIT_COMMIT
-
-    val codename: String
-        get() = Chorus.CODENAME
 
     val version: String
         get() = "v${ProtocolInfo.VERSION}"

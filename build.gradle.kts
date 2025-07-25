@@ -6,7 +6,6 @@ plugins {
     `maven-publish`
     jacoco
     id("com.gradleup.shadow") version "8.3.7"
-    id("com.gorylenko.gradle-git-properties") version "2.4.1"
 
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
