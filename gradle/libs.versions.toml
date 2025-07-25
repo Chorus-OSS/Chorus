@@ -46,6 +46,7 @@ kotlin = "2.2.0"
 fleks = "2.11"
 kotlin-poet = "2.2.0"
 rwmutex = "1.0.0"
+kflate = "0.0.1"
 
 [libraries]
 libdeflate = { module = "cn.powernukkitx:libdeflate-java", version.ref = "cn-powernukkitx-libdeflate-java" }
@@ -99,6 +100,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 fleks = { module = "io.github.quillraven.fleks:Fleks", version.ref = "fleks" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet"}
 rwmutex = { module = "com.mayakapps.rwmutex:rwmutex", version.ref = "rwmutex" }
+kflate = { module = "org.chorus-oss:kflate", version.ref = "kflate" }
 
 [bundles]
 netty = ["netty-raknet", "netty-epoll", "netty-kqueue"]
@@ -109,5 +111,5 @@ compress = ["snappy", "lz4", "libdeflate"]
 leveldb = ["leveldb", "leveldb-api"]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

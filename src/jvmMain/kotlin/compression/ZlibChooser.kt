@@ -21,7 +21,7 @@ object ZlibChooser : Loggable {
         var providerIndex1 = providerIndex
         val lang = Server.instance.lang
         when (providerIndex1) {
-            0 -> if (providers[providerIndex1] == null) providers[providerIndex1] = ZlibOriginal()
+            0 -> if (providers[providerIndex1] == null) providers[providerIndex1] = ZlibKFlate()
             1 -> if (providers[providerIndex1] == null) providers[providerIndex1] = ZlibSingleThreadLowMem()
             2 -> {
                 if (providers[providerIndex1] == null) providers[providerIndex1] = ZlibThreadLocal()

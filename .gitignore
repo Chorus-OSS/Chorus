@@ -232,12 +232,10 @@ resource_packs
 resource_packs/*
 creativeitems.json
 recipes.json
-/src/main/resources/rebel.xml
+/src/**/resources/rebel.xml
 /run
-!/src/main/resources/*
-!/src/main/resources/**/*
-!/src/test/resources/*
-!/src/test/resources/**/*
+!/src/**/resources/*
+!/src/**/resources/**/*
 
 ### Add the codestyle to the repo
 !/.idea/codeStyles
