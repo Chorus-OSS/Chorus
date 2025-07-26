@@ -146,6 +146,15 @@ kotlin {
     }
 }
 
+compose.resources {
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = provider {
+            layout.projectDirectory.dir("src/commonMain/resources")
+        }
+    )
+}
+
 tasks {
     named<ShadowJar>("shadowJar") {
         archiveVersion = ""
