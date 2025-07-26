@@ -47,6 +47,9 @@ fleks = "2.11"
 kotlin-poet = "2.2.0"
 rwmutex = "1.0.0"
 kflate = "0.0.1"
+compose = "1.8.2"
+maven-publish = "0.34.0"
+shadow = "9.0.0-rc2"
 
 [libraries]
 libdeflate = { module = "cn.powernukkitx:libdeflate-java", version.ref = "cn-powernukkitx-libdeflate-java" }
@@ -113,3 +116,7 @@ leveldb = ["leveldb", "leveldb-api"]
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

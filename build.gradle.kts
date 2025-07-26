@@ -1,17 +1,18 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    `java-library`
-    `maven-publish`
-    jacoco
-    id("com.gradleup.shadow") version "8.3.7"
-
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.shadow)
 }
-
-kotlin.jvmToolchain(21)
 
 group = "org.chorus_oss"
 version = "1.0-SNAPSHOT"
@@ -20,6 +21,7 @@ description = "Chorus"
 repositories {
     mavenLocal()
     mavenCentral()
+    google()
     maven("https://jitpack.io")
     maven("https://repo.opencollab.dev/maven-releases/")
     maven("https://repo.opencollab.dev/maven-snapshots/")
@@ -53,6 +55,9 @@ kotlin {
                 implementation(libs.rwmutex)
                 implementation(libs.kotlin.reflect)
                 implementation(libs.kflate)
+
+                implementation(compose.runtime)
+                implementation(compose.components.resources)
             }
         }
 
@@ -94,75 +99,66 @@ kotlin {
             }
         }
     }
+
+    mavenPublishing {
+        signAllPublications()
+
+        coordinates(
+            group.toString(),
+            "chorus",
+            version.toString()
+        )
+
+        pom {
+            name = "Chorus"
+            description = project.description
+            inceptionYear = "2025"
+            url = "https://github.com/Chorus-OSS/Chorus"
+            licenses {
+                license {
+                    name = "The Apache License, Version 2.0"
+                    url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    distribution = "repo"
+                }
+            }
+            developers {
+                developer {
+                    id = "omniacdev"
+                    name = "OmniacDev"
+                    url = "https://github.com/OmniacDev"
+                    email = "omniacdev@chorus-oss.org"
+                }
+            }
+            scm {
+                url = "https://github.com/Chorus-OSS/Chorus"
+                connection = "scm:git:git://github.com/Chorus-OSS/Chorus.git"
+                developerConnection = "scm:git:ssh://github.com/Chorus-OSS/Chorus.git"
+            }
+            issueManagement {
+                system = "GitHub Issues"
+                url = "https://github.com/Chorus-OSS/Chorus/issues"
+            }
+        }
+
+        configure(
+            KotlinMultiplatform()
+        )
+    }
 }
 
 tasks {
-    withType<JavaCompile> {
-        options.encoding = "UTF-8"
-        options.compilerArgs.add("-Xpkginfo:always")
-    }
-
-    withType<Javadoc> {
-        options.encoding = "UTF-8"
-        (options as CoreJavadocOptions).apply {
-            addStringOption("source", java.sourceCompatibility.toString())
-            addStringOption("Xdoclint:none", "-quiet")
-        }
-    }
-
-    test {
-        enabled = false // TODO: Fix tests. Use MockK
-
-        useJUnitPlatform()
-        jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
-        finalizedBy(jacocoTestReport)
-    }
-
-    jacocoTestReport {
-        dependsOn(test)
-        reports {
-            csv.required = false
-            xml.required = true
-            html.required = false
-        }
-    }
-
-    shadowJar {
-        archiveVersion.set("")
-
+    named<ShadowJar>("shadowJar") {
+        archiveVersion = ""
         manifest {
-            attributes("Main-Class" to "org.chorus_oss.chorus.Chorus")
+            attributes["Main-Class"] = "org.chorus_oss.chorus.Chorus"
         }
-        transform(Log4j2PluginsCacheFileTransformer::class.java) // required to fix shadowJar log4j2 issue
+
         destinationDirectory = layout.buildDirectory
+
+        transform(Log4j2PluginsCacheFileTransformer::class.java)
     }
 
     build {
-        dependsOn(shadowJar)
-    }
-}
-
-tasks.register<DefaultTask>("buildSkipChores") {
-    dependsOn(tasks.build)
-
-    tasks["test"].enabled = false
-    tasks["check"].enabled = false
-    tasks["javadoc"].enabled = false
-    tasks["sourcesJar"].enabled = false
-    tasks["compileTestJava"].enabled = false
-    tasks["processTestResources"].enabled = false
-    tasks["testClasses"].enabled = false
-}
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-        pom {
-            repositories {
-                maven("https://jitpack.io")
-                maven("https://repo.opencollab.dev/maven-releases/")
-                maven("https://repo.opencollab.dev/maven-snapshots/")
-            }
-        }
+        dependsOn("shadowJar")
     }
 }
