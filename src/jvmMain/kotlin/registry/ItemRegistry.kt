@@ -1,6 +1,8 @@
 package org.chorus_oss.chorus.registry
 
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.block.BlockID
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.*
 import org.chorus_oss.chorus.item.customitem.CustomItem
 import org.chorus_oss.chorus.item.customitem.CustomItemDefinition
@@ -564,10 +566,7 @@ class ItemRegistry : ItemID, IRegistry<String, Item?, KClass<out Item>> {
 
     private fun loadItemComponents() {
         try {
-            ItemRegistry::class.java.classLoader.getResourceAsStream("item_components.nbt").use { stream ->
-                if (stream == null) {
-                    throw RuntimeException("Couldn't load item_components.nbt")
-                }
+            runBlocking { Res.readBytes("files/item_components.nbt").inputStream() }.use { stream ->
                 itemComponents = readCompressed(stream)
             }
         } catch (e: IOException) {

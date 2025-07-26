@@ -1,7 +1,9 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.experimental.network.protocol.utils.biome.invoke
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
@@ -17,9 +19,7 @@ class BiomeRegistry : IRegistry<Int, BiomeDefinition?, BiomeDefinition> {
     override fun init() {
         if (isLoad.getAndSet(true)) return
         try {
-            BiomeRegistry::class.java.classLoader.getResourceAsStream("gamedata/kaooot/biomes.json").use { stream ->
-                requireNotNull(stream) { "Couldn't load \"gamedata/kaooot/biomes.json\"" }
-
+            runBlocking { Res.readBytes("files/gamedata/kaooot/biomes.json").inputStream() }.use { stream ->
                 val gson = GsonBuilder().setObjectToNumberStrategy { it.nextInt() }.create()
                 val map: Map<String, *> = gson.fromJson<Map<String, *>>(
                     InputStreamReader(stream),
@@ -34,10 +34,8 @@ class BiomeRegistry : IRegistry<Int, BiomeDefinition?, BiomeDefinition> {
         }
 
         try {
-            BiomeRegistry::class.java.classLoader.getResourceAsStream("gamedata/kaooot/biome_definitions.nbt")
+            runBlocking { Res.readBytes("files/gamedata/kaooot/biome_definitions.nbt").inputStream() }
                 .use { stream ->
-                    requireNotNull(stream) { "Couldn't load \"gamedata/kaooot/biome_definitions.nbt\"" }
-
                     val root = NBTIO.readCompressed(stream)
                     BIOME_STRINGS.addAll(root.getList("biomeStringList", StringTag::class.java).all.map { it.data })
 

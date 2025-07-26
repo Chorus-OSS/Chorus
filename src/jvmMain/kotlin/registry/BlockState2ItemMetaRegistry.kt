@@ -1,20 +1,18 @@
 package org.chorus_oss.chorus.registry
 
+import kotlinx.coroutines.runBlocking
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.nbt.NBTIO.readCompressed
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag
-import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
 class BlockState2ItemMetaRegistry : IRegistry<String, Int?, Int> {
     override fun init() {
         if (isLoad.getAndSet(true)) return
         try {
-            BlockState2ItemMetaRegistry::class.java.classLoader.getResourceAsStream("item_meta_block_state_bimap.nbt")
+            runBlocking { Res.readBytes("files/item_meta_block_state_bimap.nbt").inputStream() }
                 .use { input ->
-                    if (input == null) {
-                        throw RuntimeException("Failed to load item_meta_block_state_bimap.nbt")
-                    }
                     val compoundTag = readCompressed(input)
                     for ((key, value) in compoundTag.tags) {
                         for ((key1, value1) in (value as CompoundTag).tags) {
@@ -22,7 +20,7 @@ class BlockState2ItemMetaRegistry : IRegistry<String, Int?, Int> {
                         }
                     }
                 }
-        } catch (e: IOException) {
+        } catch (e: Throwable) {
             throw RuntimeException(e)
         }
     }

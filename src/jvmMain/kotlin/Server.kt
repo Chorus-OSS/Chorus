@@ -29,6 +29,7 @@ import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.lang.Lang
 import org.chorus_oss.chorus.lang.LangCode
@@ -309,8 +310,7 @@ class Server internal constructor(
         if (!config.exists()) {
             log.info("{}Welcome! Please choose a language first!", TextFormat.GREEN)
             try {
-                val languageList = javaClass.module.getResourceAsStream("language/language.list")
-                checkNotNull(languageList) { "language/language.list is missing. If you are running a development version, make sure you have run 'git submodule update --init'." }
+                val languageList = runBlocking { Res.readBytes("files/language/language.list").inputStream() }
                 val lines = readFile(languageList).split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 for (line in lines) {
                     log.info(line)
@@ -329,7 +329,13 @@ class Server internal constructor(
                 }
 
                 try {
-                    javaClass.classLoader.getResourceAsStream("language/$lang/lang.json").use { conf ->
+                    runBlocking {
+                        try {
+                            Res.readBytes("files/language/$lang/lang.json").inputStream()
+                        } catch (_: Throwable) {
+                            null
+                        }
+                    }.use { conf ->
                         if (conf != null) {
                             chooseLanguage = lang
                         } else if (predefinedLanguage1 != null) {

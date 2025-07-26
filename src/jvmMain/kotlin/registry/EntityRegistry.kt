@@ -1,6 +1,7 @@
 package org.chorus_oss.chorus.registry
 
 
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.Chorus
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityID
@@ -23,6 +24,7 @@ import org.chorus_oss.chorus.entity.projectile.abstract_arrow.EntityArrow
 import org.chorus_oss.chorus.entity.projectile.abstract_arrow.EntityThrownTrident
 import org.chorus_oss.chorus.entity.projectile.throwable.*
 import org.chorus_oss.chorus.entity.weather.EntityLightningBolt
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.level.format.IChunk
 import org.chorus_oss.chorus.nbt.NBTIO.read
 import org.chorus_oss.chorus.nbt.NBTIO.write
@@ -736,10 +738,7 @@ class EntityRegistry : IRegistry<EntityDefinition, KClass<out Entity>?, KClass<o
 
     fun rebuildTag() {
         try {
-            Chorus::class.java.module.getResourceAsStream("entity_identifiers.nbt").use { inputStream ->
-                if (inputStream == null) {
-                    throw AssertionError("Could not find entity_identifiers.nbt")
-                }
+            runBlocking { Res.readBytes("files/entity_identifiers.nbt").inputStream() }.use { inputStream ->
                 val bis = BufferedInputStream(inputStream)
                 val nbt = read(bis, ByteOrder.BIG_ENDIAN, true)
                 val list = nbt.getList("idlist", CompoundTag::class.java)

@@ -1,6 +1,8 @@
 package org.chorus_oss.chorus.entity.data.property
 
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
@@ -26,7 +28,7 @@ abstract class EntityProperty(private val identifier: String) {
         @JvmStatic
         fun init() {
             try {
-                EntityProperty::class.java.getClassLoader().getResourceAsStream("entity_properties.nbt").use { stream ->
+                runBlocking { Res.readBytes("files/entity_properties.nbt").inputStream() }.use { stream ->
                     val root: CompoundTag = NBTIO.readCompressed(stream)
                     root.tags.values.forEach({ uncast ->
                         if (uncast is CompoundTag) {

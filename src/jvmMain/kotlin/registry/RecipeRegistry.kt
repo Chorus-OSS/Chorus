@@ -4,11 +4,13 @@ package org.chorus_oss.chorus.registry
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.util.collection.CharObjectHashMap
+import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemID
@@ -410,7 +412,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
     private fun loadRecipes() {
         val furnaceXPJSON = try {
-            Server::class.java.classLoader.getResourceAsStream("furnace_xp.json")!!.use {
+            runBlocking { Res.readBytes("files/furnace_xp.json").inputStream() }.use {
                 Json.parseToJsonElement(it.bufferedReader().use(Reader::readText))
             }
         } catch (_: IOException) {
@@ -424,7 +426,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         // https://github.com/Kaooot/bedrock-network-data
         // We can use the original reader again, once endstone generates data again
         val recipesJSON = try {
-            Server::class.java.classLoader.getResourceAsStream("recipes.json")!!.use {
+            runBlocking { Res.readBytes("files/recipes.json").inputStream() }.use {
                 Json.parseToJsonElement(it.bufferedReader().use(Reader::readText))
             }
         } catch (_: IOException) {

@@ -1,8 +1,10 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.JsonParser
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.block.Block
 import org.chorus_oss.chorus.block.BlockState
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.utils.BlockColor
 import org.chorus_oss.chorus.utils.Loggable
 import org.jetbrains.annotations.ApiStatus
@@ -13,8 +15,8 @@ import java.io.InputStreamReader
 class BlockStateRegistry : IRegistry<Int, BlockState?, BlockState> {
     override fun init() {
         try {
-            javaClass.classLoader.getResourceAsStream("gamedata/endstone/block_states.json").use { stream ->
-                val reader = BufferedReader(InputStreamReader(stream!!))
+            runBlocking { Res.readBytes("files/gamedata/endstone/block_states.json").inputStream() }.use { stream ->
+                val reader = BufferedReader(InputStreamReader(stream))
                 val blockStateData = JsonParser.parseReader(reader).asJsonArray
                 for (i in 0..<blockStateData.size()) {
                     val entry = blockStateData[i].asJsonObject

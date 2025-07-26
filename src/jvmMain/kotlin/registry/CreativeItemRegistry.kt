@@ -1,8 +1,10 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.Gson
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.block.BlockAir
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.Item.Companion.get
 import org.chorus_oss.chorus.item.ItemID
@@ -23,10 +25,7 @@ class CreativeItemRegistry : ItemID, IRegistry<Int, Item?, Item> {
         if (isLoad.getAndSet(true)) return
 
         try {
-            CreativeItemRegistry::class.java.classLoader.getResourceAsStream("creative_items.json").use { input ->
-                if (input == null) {
-                    throw RuntimeException("Could not load creative_items.json")
-                }
+            runBlocking { Res.readBytes("files/creative_items.json").inputStream() }.use { input ->
                 val data = Gson().fromJson<Map<String, Any>>(
                     InputStreamReader(input),
                     MutableMap::class.java

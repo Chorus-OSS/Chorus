@@ -1,6 +1,8 @@
 package org.chorus_oss.chorus.registry
 
 import com.google.gson.JsonParser
+import kotlinx.coroutines.runBlocking
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.ItemID
 import org.chorus_oss.protocol.types.item.ItemInstance
 import java.io.IOException
@@ -13,10 +15,7 @@ class ItemRuntimeIdRegistry : IRegistry<String, Int, Int> {
 
         // We use ProxyPass data since protocol 776 since we need item version and componentBased now.
         try {
-            ItemRegistry::class.java.classLoader.getResourceAsStream("runtime_item_states.json").use { stream ->
-                if (stream == null) {
-                    throw RuntimeException("Failed to load runtime_item_states.json")
-                }
+            runBlocking { Res.readBytes("files/runtime_item_states.json").inputStream() }.use { stream ->
                 val items = JsonParser.parseReader(InputStreamReader(stream)).asJsonArray
 
                 for (element in items) {

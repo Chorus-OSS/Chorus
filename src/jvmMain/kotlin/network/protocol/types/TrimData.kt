@@ -1,9 +1,11 @@
 package org.chorus_oss.chorus.network.protocol.types
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.chorus_oss.chorus.generated.resources.Res
 
 object TrimData {
     var trimPatterns: List<TrimPattern> = emptyList()
@@ -11,9 +13,7 @@ object TrimData {
 
     init {
         try {
-            TrimData::class.java.classLoader.getResourceAsStream("trim_data.json").use { stream ->
-                stream ?: throw Exception("trim_data.json could not be loaded")
-
+            runBlocking { Res.readBytes("files/trim_data.json").inputStream() }.use { stream ->
                 val obj = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject
                 val l1 = mutableListOf<TrimPattern>()
                 val l2 = mutableListOf<TrimMaterial>()

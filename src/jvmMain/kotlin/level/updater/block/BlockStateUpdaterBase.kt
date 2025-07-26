@@ -1,7 +1,9 @@
 package org.chorus_oss.chorus.level.updater.block
 
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.level.updater.Updater
 import org.chorus_oss.chorus.level.updater.util.tagupdater.CompoundTagEditHelper
 import org.chorus_oss.chorus.level.updater.util.tagupdater.CompoundTagUpdaterContext
@@ -36,8 +38,7 @@ class BlockStateUpdaterBase : Updater {
         init {
             val node: JsonObject
             try {
-                Updater::class.java.classLoader.getResourceAsStream("legacy_block_data_map.json").use { stream ->
-                    checkNotNull(stream)
+                runBlocking { Res.readBytes("files/legacy_block_data_map.json").inputStream() }.use { stream ->
                     node = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject
                 }
             } catch (e: IOException) {

@@ -1,10 +1,12 @@
 package org.chorus_oss.chorus.tags
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.Server
+import org.chorus_oss.chorus.generated.resources.Res
 import org.jetbrains.annotations.UnmodifiableView
 import java.io.IOException
 import java.util.*
@@ -59,9 +61,7 @@ object BlockTags {
 
     init {
         try {
-            Server::class.java.classLoader.getResourceAsStream("block_tags.json").use { stream ->
-                checkNotNull(stream)
-
+            runBlocking { Res.readBytes("files/block_tags.json").inputStream() }.use { stream ->
                 val map = Json.parseToJsonElement(stream.reader().use { it.readText() }).jsonObject.entries.associate {
                     it.key to it.value.jsonArray.map { v -> v.jsonPrimitive.content }.toMutableSet()
                 }

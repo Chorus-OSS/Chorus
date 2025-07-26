@@ -1,8 +1,10 @@
 package org.chorus_oss.chorus.lang
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.*
 import java.nio.charset.StandardCharsets
@@ -40,13 +42,17 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
         val useFallback = lang != fallback
 
         if (path == null) {
-            path = "language/"
+            path = "files/language/"
             try {
-                this.langMap = this.loadLang(javaClass.module.getResourceAsStream(path + this.langName + "/lang.json"))
+                this.langMap = this.loadLang(
+                    runBlocking {
+                        Res.readBytes("$path$langName/lang.json").inputStream()
+                    }
+                )
                 if (useFallback) this.fallbackLangMap = this.loadLang(
-                    javaClass.module.getResourceAsStream(
-                        "$path$fallback/lang.json"
-                    )
+                    runBlocking {
+                        Res.readBytes("$path$fallback/lang.json").inputStream()
+                    }
                 )
             } catch (e: IOException) {
                 throw RuntimeException(e)

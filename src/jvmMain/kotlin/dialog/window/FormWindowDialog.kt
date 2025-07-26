@@ -1,10 +1,12 @@
 package org.chorus_oss.chorus.dialog.window
 
 import com.google.common.reflect.TypeToken
+import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.dialog.element.ElementDialogButton
 import org.chorus_oss.chorus.dialog.handler.FormDialogHandler
 import org.chorus_oss.chorus.entity.Entity
+import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.utils.JSONUtils
 import org.chorus_oss.chorus.utils.Loggable
 import java.io.BufferedReader
@@ -35,11 +37,7 @@ class FormWindowDialog @JvmOverloads constructor(
 
     init {
         try {
-            BufferedReader(InputStreamReader(requireNotNull(javaClass.classLoader.getResourceAsStream("npc_data.json")))).use { reader ->
-                this.skinData = reader.lines().collect(
-                    Collectors.joining("\n")
-                )
-            }
+            this.skinData = runBlocking { Res.readBytes("files/npc_data.json").decodeToString() }
         } catch (e: IOException) {
             log.error("Failed to load npc_data.json: ", e)
         }
