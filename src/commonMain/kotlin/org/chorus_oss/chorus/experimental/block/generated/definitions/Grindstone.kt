@@ -20,14 +20,14 @@ object Grindstone : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["attachment"] == "multiple" },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.125f, y = 0.125f, z = 0.0f),
-                size = Vector3f(x = 0.75f, y = 0.75f, z = 0.875f)
+            { it["attachment"] == "multiple" },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.125f, y = 0.125f, z = 0.0f),
+                    size = Vector3f(x = 0.75f, y = 0.75f, z = 0.875f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["attachment"] == "multiple" && it["direction"] == 1 },
             listOf(

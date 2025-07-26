@@ -8,10 +8,10 @@ data class CollisionBoxComponent(
     val origin: Vector3f,
     val size: Vector3f,
     val enabled: Boolean,
-): BlockComponent<CollisionBoxComponent> {
-    constructor(enabled: Boolean): this(Vector3f(0f, 0f, 0f), Vector3f(1f, 1f, 1f), enabled)
+) : BlockComponent<CollisionBoxComponent> {
+    constructor(enabled: Boolean) : this(Vector3f(0f, 0f, 0f), Vector3f(1f, 1f, 1f), enabled)
 
-    constructor(origin: Vector3f, size: Vector3f): this(origin, size, true)
+    constructor(origin: Vector3f, size: Vector3f) : this(origin, size, true)
 
     override fun type(): ComponentType<CollisionBoxComponent> = CollisionBoxComponent
 

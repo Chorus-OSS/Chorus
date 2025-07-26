@@ -1,7 +1,5 @@
 package org.chorus_oss.chorus.utils
 
-import kotlin.text.iterator
-
 class Identifier private constructor(id: Array<String>) {
     val namespace: String = id[0].ifEmpty { DEFAULT_NAMESPACE }
     val path: String = id[1]

@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.experimental.block.BlockComponent
 data class FlammableComponent(
     val catchChance: Int,
     val destroyChance: Int,
-): BlockComponent<FlammableComponent> {
+) : BlockComponent<FlammableComponent> {
     override fun type(): ComponentType<FlammableComponent> = FlammableComponent
 
     companion object : ComponentType<FlammableComponent>() {

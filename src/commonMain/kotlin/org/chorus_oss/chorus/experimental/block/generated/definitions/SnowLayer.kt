@@ -24,15 +24,15 @@ object SnowLayer : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["height"] == 1 },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                size = Vector3f(x = 1.0f, y = 0.25f, z = 1.0f),
-                enabled = false
+            { it["height"] == 1 },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
+                    size = Vector3f(x = 1.0f, y = 0.25f, z = 1.0f),
+                    enabled = false
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["height"] == 2 },
             listOf(

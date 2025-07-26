@@ -21,9 +21,9 @@ object TrappedChest : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["minecraft:cardinal_direction"] == "west" },
-        listOf(TODO("MoveableComponent"))
-    ),
+            { it["minecraft:cardinal_direction"] == "west" },
+            listOf(TODO("MoveableComponent"))
+        ),
         Permutation({ it["minecraft:cardinal_direction"] == "north" }, listOf(TODO("MoveableComponent"))),
         Permutation({ it["minecraft:cardinal_direction"] == "east" }, listOf(TODO("MoveableComponent")))
     )

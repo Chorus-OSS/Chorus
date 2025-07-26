@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.experimental.block.BlockComponent
 
 data class LightEmissionComponent(
     val emission: Int,
-): BlockComponent<LightEmissionComponent> {
+) : BlockComponent<LightEmissionComponent> {
     override fun type(): ComponentType<LightEmissionComponent> = LightEmissionComponent
 
     companion object : ComponentType<LightEmissionComponent>()

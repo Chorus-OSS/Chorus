@@ -7,4 +7,6 @@ data class SemVersion(
     val patch: Int,
     val revision: Int,
     val build: Int
-) { companion object }
+) {
+    companion object
+}

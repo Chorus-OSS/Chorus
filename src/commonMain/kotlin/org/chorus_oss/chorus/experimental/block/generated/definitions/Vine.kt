@@ -24,15 +24,15 @@ object Vine : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["vine_direction_bits"] == 1 },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.9375f),
-                size = Vector3f(x = 1.0f, y = 1.0f, z = 0.0625f),
-                enabled = false
+            { it["vine_direction_bits"] == 1 },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.9375f),
+                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.0625f),
+                    enabled = false
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["vine_direction_bits"] == 2 },
             listOf(

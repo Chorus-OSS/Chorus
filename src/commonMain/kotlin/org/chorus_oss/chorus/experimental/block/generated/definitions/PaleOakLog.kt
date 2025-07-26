@@ -16,8 +16,8 @@ object PaleOakLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["pillar_axis"] == "x" },
-        listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255))
-    ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255)))
+            { it["pillar_axis"] == "x" },
+            listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255))
+        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255)))
     )
 )

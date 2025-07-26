@@ -22,15 +22,15 @@ object Frame : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["facing_direction"] == 1 },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.125f, z = 0.125f),
-                size = Vector3f(x = 0.0625f, y = 0.75f, z = 0.75f),
-                enabled = false
+            { it["facing_direction"] == 1 },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.125f, z = 0.125f),
+                    size = Vector3f(x = 0.0625f, y = 0.75f, z = 0.75f),
+                    enabled = false
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["facing_direction"] == 1 && it["item_frame_photo_bit"] == false },
             listOf(

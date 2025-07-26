@@ -18,14 +18,14 @@ object EndPortalFrame : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["end_portal_eye_bit"] == false },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                size = Vector3f(x = 1.0f, y = 0.8125f, z = 1.0f)
+            { it["end_portal_eye_bit"] == false },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
+                    size = Vector3f(x = 1.0f, y = 0.8125f, z = 1.0f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["minecraft:cardinal_direction"] == "west" && it["end_portal_eye_bit"] == false },
             listOf(

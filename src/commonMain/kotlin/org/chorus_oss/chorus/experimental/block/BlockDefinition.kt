@@ -25,10 +25,19 @@ abstract class BlockDefinition(
         val condition: (Map<String, Any>) -> Boolean,
         val components: List<BlockComponent<*>>,
     ) {
-        constructor(condition: (Map<String, Any>) -> Boolean, vararg components: BlockComponent<*>) : this(condition, components.toList())
+        constructor(condition: (Map<String, Any>) -> Boolean, vararg components: BlockComponent<*>) : this(
+            condition,
+            components.toList()
+        )
 
-        constructor(components: List<BlockComponent<*>>, condition: (Map<String, Any>) -> Boolean) : this(condition, components)
+        constructor(components: List<BlockComponent<*>>, condition: (Map<String, Any>) -> Boolean) : this(
+            condition,
+            components
+        )
 
-        constructor(vararg components: BlockComponent<*>, condition: (Map<String, Any>) -> Boolean) : this(condition, components.toList())
+        constructor(vararg components: BlockComponent<*>, condition: (Map<String, Any>) -> Boolean) : this(
+            condition,
+            components.toList()
+        )
     }
 }

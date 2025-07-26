@@ -20,14 +20,14 @@ object Bell : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["attachment"] == "multiple" },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.249999f, y = 0.249999f, z = -1.0E-6f),
-                size = Vector3f(x = 0.5000020000000001f, y = 0.5000020000000001f, z = 1.0000019999999998f)
+            { it["attachment"] == "multiple" },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.249999f, y = 0.249999f, z = -1.0E-6f),
+                    size = Vector3f(x = 0.5000020000000001f, y = 0.5000020000000001f, z = 1.0000019999999998f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["attachment"] == "multiple" && it["toggle_bit"] == false },
             listOf(

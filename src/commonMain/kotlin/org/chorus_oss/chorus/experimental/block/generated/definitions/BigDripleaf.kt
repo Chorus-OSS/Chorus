@@ -29,9 +29,9 @@ object BigDripleaf : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["big_dripleaf_tilt"] == "none" },
-        listOf(InternalFrictionComponent(internalFriction = 1.0f))
-    ),
+            { it["big_dripleaf_tilt"] == "none" },
+            listOf(InternalFrictionComponent(internalFriction = 1.0f))
+        ),
         Permutation(
             { it["big_dripleaf_tilt"] == "none" && it["minecraft:cardinal_direction"] == "west" },
             listOf(InternalFrictionComponent(internalFriction = 1.0f))

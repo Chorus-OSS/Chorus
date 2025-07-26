@@ -20,9 +20,9 @@ object Cauldron : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["cauldron_liquid"] == "lava" },
-        listOf(LightEmissionComponent(emission = 15))
-    ),
+            { it["cauldron_liquid"] == "lava" },
+            listOf(LightEmissionComponent(emission = 15))
+        ),
         Permutation(
             { it["cauldron_liquid"] == "lava" && it["fill_level"] == 1 },
             listOf(LightEmissionComponent(emission = 15))

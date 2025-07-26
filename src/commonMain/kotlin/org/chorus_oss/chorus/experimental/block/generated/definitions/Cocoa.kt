@@ -21,14 +21,14 @@ object Cocoa : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["direction"] == 1 },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0625f, y = 0.4375f, z = 0.375f),
-                size = Vector3f(x = 0.25f, y = 0.3125f, z = 0.25f)
+            { it["direction"] == 1 },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0625f, y = 0.4375f, z = 0.375f),
+                    size = Vector3f(x = 0.25f, y = 0.3125f, z = 0.25f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["direction"] == 2 },
             listOf(

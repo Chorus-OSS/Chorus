@@ -15,9 +15,9 @@ object CreakingHeart : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["creaking_heart_state"] == "dormant" },
-        listOf(LightEmissionComponent(emission = 15))
-    ),
+            { it["creaking_heart_state"] == "dormant" },
+            listOf(LightEmissionComponent(emission = 15))
+        ),
         Permutation(
             { it["creaking_heart_state"] == "dormant" && it["pillar_axis"] == "x" },
             listOf(LightEmissionComponent(emission = 15))

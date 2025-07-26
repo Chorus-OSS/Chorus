@@ -27,14 +27,14 @@ object WoodenDoor : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["door_hinge_bit"] == false },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
+            { it["door_hinge_bit"] == false },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
+                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["upper_block_bit"] == false && it["door_hinge_bit"] == false },
             listOf(

@@ -6,7 +6,6 @@ import com.github.quillraven.fleks.Entity
 import org.chorus_oss.chorus.experimental.block.state.BlockState
 import org.chorus_oss.chorus.experimental.utils.BlockStates
 import org.chorus_oss.nbt.tags.CompoundTag
-import kotlin.collections.plus
 
 class BlockPermutation internal constructor(
     val identifier: String,

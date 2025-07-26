@@ -16,8 +16,8 @@ object BirchLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["pillar_axis"] == "x" },
-        listOf(MapColorComponent(r = 255, g = 252, b = 245, a = 255))
-    ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 255, g = 252, b = 245, a = 255)))
+            { it["pillar_axis"] == "x" },
+            listOf(MapColorComponent(r = 255, g = 252, b = 245, a = 255))
+        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 255, g = 252, b = 245, a = 255)))
     )
 )

@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.experimental.block.BlockComponent
 
 data class SolidComponent(
     val solid: Boolean,
-): BlockComponent<SolidComponent> {
+) : BlockComponent<SolidComponent> {
     override fun type(): ComponentType<SolidComponent> = SolidComponent
 
     companion object : ComponentType<SolidComponent>()

@@ -21,14 +21,14 @@ object PaleOakFenceGate : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["minecraft:cardinal_direction"] == "west" },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.375f, y = 0.0f, z = 0.0f),
-                size = Vector3f(x = 0.25f, y = 1.0f, z = 1.0f)
+            { it["minecraft:cardinal_direction"] == "west" },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.375f, y = 0.0f, z = 0.0f),
+                    size = Vector3f(x = 0.25f, y = 1.0f, z = 1.0f)
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["minecraft:cardinal_direction"] == "west" && it["open_bit"] == false },
             listOf(

@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.experimental.block.generated.definitions
 
 object BlockRegistry {
     @PublishedApi
-    internal val ECS = configureWorld {  }
+    internal val ECS = configureWorld { }
 
     /** Identifier -> Definition */
     private val defaults = mutableMapOf<String, BlockPermutation>()
@@ -38,7 +38,7 @@ object BlockRegistry {
                     .filter { it.condition(state) }
                     .flatMap { it.components }
             }
-            
+
             BlockPermutation(
                 definition.identifier,
                 state,

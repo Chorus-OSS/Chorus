@@ -17,9 +17,9 @@ object RespawnAnchor : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["respawn_anchor_charge"] == 1 },
-        listOf(LightEmissionComponent(emission = 3))
-    ),
+            { it["respawn_anchor_charge"] == 1 },
+            listOf(LightEmissionComponent(emission = 3))
+        ),
         Permutation({ it["respawn_anchor_charge"] == 2 }, listOf(LightEmissionComponent(emission = 7))),
         Permutation({ it["respawn_anchor_charge"] == 3 }, listOf(LightEmissionComponent(emission = 15))),
         Permutation({ it["respawn_anchor_charge"] == 4 }, listOf(LightEmissionComponent(emission = 15)))

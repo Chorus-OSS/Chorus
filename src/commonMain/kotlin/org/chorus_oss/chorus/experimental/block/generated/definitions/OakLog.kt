@@ -16,8 +16,8 @@ object OakLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["pillar_axis"] == "x" },
-        listOf(MapColorComponent(r = 129, g = 86, b = 49, a = 255))
-    ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 129, g = 86, b = 49, a = 255)))
+            { it["pillar_axis"] == "x" },
+            listOf(MapColorComponent(r = 129, g = 86, b = 49, a = 255))
+        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 129, g = 86, b = 49, a = 255)))
     )
 )

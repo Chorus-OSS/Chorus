@@ -24,15 +24,15 @@ object FlowingWater : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["liquid_depth"] == 1 },
-        listOf(
-            CollisionBoxComponent(
-                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                size = Vector3f(x = 1.0f, y = 0.7777777761220932f, z = 1.0f),
-                enabled = false
+            { it["liquid_depth"] == 1 },
+            listOf(
+                CollisionBoxComponent(
+                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
+                    size = Vector3f(x = 1.0f, y = 0.7777777761220932f, z = 1.0f),
+                    enabled = false
+                )
             )
-        )
-    ),
+        ),
         Permutation(
             { it["liquid_depth"] == 2 },
             listOf(

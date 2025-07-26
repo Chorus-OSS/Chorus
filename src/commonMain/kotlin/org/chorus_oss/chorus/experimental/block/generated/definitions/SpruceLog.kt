@@ -16,8 +16,8 @@ object SpruceLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-        { it["pillar_axis"] == "x" },
-        listOf(MapColorComponent(r = 102, g = 76, b = 51, a = 255))
-    ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 102, g = 76, b = 51, a = 255)))
+            { it["pillar_axis"] == "x" },
+            listOf(MapColorComponent(r = 102, g = 76, b = 51, a = 255))
+        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 102, g = 76, b = 51, a = 255)))
     )
 )

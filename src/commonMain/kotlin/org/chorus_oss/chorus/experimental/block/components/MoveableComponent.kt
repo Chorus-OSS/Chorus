@@ -7,7 +7,7 @@ import org.chorus_oss.chorus.experimental.block.BlockComponent
 data class MoveableComponent(
     val movement: Movement = Movement.Both,
     val sticky: Boolean = false,
-): BlockComponent<MoveableComponent> {
+) : BlockComponent<MoveableComponent> {
     enum class Movement {
         Both,
         Push,
