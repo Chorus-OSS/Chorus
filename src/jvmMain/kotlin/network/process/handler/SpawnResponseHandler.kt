@@ -109,8 +109,8 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
 
         log.debug("Sending trim data")
         val trimDataPacket = TrimDataPacket(
-            patterns = TrimData.trimPatterns.map(TrimPattern::invoke),
-            materials = TrimData.trimMaterials.map(TrimMaterial::invoke),
+            patterns = TrimData.patterns.map(TrimPattern::invoke),
+            materials = TrimData.materials.map(TrimMaterial::invoke),
         )
         this.session.sendPacket(trimDataPacket)
 

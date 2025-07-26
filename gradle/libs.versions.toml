@@ -2,6 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
+# Java Libraries
 cn-powernukkitx-libdeflate-java = "0.0.2-PNX"
 com-github-oshi-oshi-core = "6.4.10"
 com-google-code-findbugs-jsr305 = "3.0.2"
@@ -23,7 +24,6 @@ org-jline-jline-reader = "3.25.0"
 org-jline-jline-terminal = "3.25.0"
 org-jline-jline-terminal-jna = "3.25.0"
 org-junit-jupiter-junit-jupiter = "5.10.1"
-org-lz4-lz4-java = "1.8.0"
 org-mockito-mockito-junit-jupiter = "5.8.0"
 org-openjdk-jmh-jmh-core = "1.37"
 org-openjdk-jmh-jmh-generator-annprocess = "1.37"
@@ -36,6 +36,7 @@ com-github-stateless4j = "2.6.0"
 disruptor = "4.0.0"
 caffeine-ver = "3.2.0"
 
+# Kotlin Multiplatform Libraries
 protocol = "v819.7"
 kotlinx-io = "0.8.0"
 kotlinx-coroutines = "1.10.2"
@@ -52,6 +53,7 @@ maven-publish = "0.34.0"
 shadow = "9.0.0-rc2"
 
 [libraries]
+# Java Libraries
 libdeflate = { module = "cn.powernukkitx:libdeflate-java", version.ref = "cn-powernukkitx-libdeflate-java" }
 oshi = { module = "com.github.oshi:oshi-core", version.ref = "com-github-oshi-oshi-core" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "com-google-code-findbugs-jsr305" }
@@ -68,7 +70,6 @@ annotations = { module = "org.jetbrains:annotations", version.ref = "org-jetbrai
 asm = { module = "org.ow2.asm:asm", version.ref = "org-ow2-asm-asm" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "org-yaml-snakeyaml" }
 stateless4j = { module = "com.github.stateless4j:stateless4j", version.ref = "com-github-stateless4j" }
-# Command-line parser
 joptsimple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "net-sf-jopt-simple-jopt-simple" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
@@ -81,7 +82,6 @@ jline-reader = { module = "org.jline:jline-reader", version.ref = "org-jline-jli
 jline-terminal = { module = "org.jline:jline-terminal", version.ref = "org-jline-jline-terminal" }
 jline-terminaljna = { module = "org.jline:jline-terminal-jna", version.ref = "org-jline-jline-terminal-jna" }
 junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "org-junit-jupiter-junit-jupiter" }
-lz4 = { module = "org.lz4:lz4-java", version.ref = "org-lz4-lz4-java" }
 mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "org-mockito-mockito-junit-jupiter" }
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh-jmh-core" }
 jmh-generator = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "org-openjdk-jmh-jmh-generator-annprocess" }
@@ -90,6 +90,7 @@ rng-simple = { module = "org.apache.commons:commons-rng-simple", version.ref = "
 rng-sampling = { module = "org.apache.commons:commons-rng-sampling", version.ref = "commons-rng" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine-ver"}
 
+# Kotlin Multiplatform Libraries
 chorus-protocol = { module = "org.chorus-oss:protocol", version.ref = "protocol" }
 kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -110,8 +111,11 @@ netty = ["netty-raknet", "netty-epoll", "netty-kqueue"]
 terminal = ["jline-reader", "jline-terminal", "jline-terminaljna", "terminalconsoleappender"]
 logging = ["log4j-slf4j2-impl", "log4j-core"]
 test = ["junit", "mockito", "jmh-core", "jmh-generator"]
-compress = ["snappy", "lz4", "libdeflate"]
+compress = ["snappy", "libdeflate"]
 leveldb = ["leveldb", "leveldb-api"]
+
+cryptography = ["cryptography-core", "cryptography-random", "cryptography-provider-optimal"]
+ktoml = ["ktoml-core", "ktoml-file"]
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

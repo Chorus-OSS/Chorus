@@ -281,9 +281,9 @@ class CraftRecipeActionProcessor : ItemStackRequestActionProcessor<CraftRecipeRe
         val template: Item = smithingInventory.template
 
         if (!ingredient.isNothing && !template.isNothing) {
-            val find1 = TrimData.trimPatterns.stream()
+            val find1 = TrimData.patterns.stream()
                 .filter { trimPattern: TrimPattern -> template.id == trimPattern.itemName }.findFirst()
-            val find2 = TrimData.trimMaterials.stream()
+            val find2 = TrimData.materials.stream()
                 .filter { trimMaterial: TrimMaterial -> ingredient.id == trimMaterial.itemName }.findFirst()
             if (equipment.isNothing || find1.isEmpty || find2.isEmpty) {
                 return context.error()

@@ -1,16 +1,14 @@
 package org.chorus_oss.chorus.lang
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.buffered
+import kotlinx.io.files.FileNotFoundException
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.utils.Loggable
-import java.io.*
-import java.nio.charset.StandardCharsets
-import java.nio.file.Path
-import java.util.regex.MatchResult
-import java.util.regex.Pattern
 
 
 class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallback: String = FALLBACK_LANGUAGE) :
@@ -18,22 +16,22 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
     /**
      * The Lang name.
      */
-    protected val langName: String
+    val langName: String
 
     /**
      * 本地语言，从nukkit.yml中指定
      */
-    var langMap: Map<String, String>? = null
-        protected set
+    var langMap: Map<String, String> = mapOf()
+        private set
 
     /**
      * 备选语言映射，当从本地语言映射中无法翻译时调用备选语言映射，默认为英文
      */
-    var fallbackLangMap: Map<String, String>? = HashMap()
-        protected set
+    var fallbackLangMap: Map<String, String> = mapOf()
+        private set
 
     //用于提取字符串中%后带有[a-zA-Z0-9_.-]这些字符的字符串的模式
-    private val split: Pattern = Pattern.compile("%[A-Za-z0-9_.-]+")
+    private val split: Regex = Regex("%[A-Za-z0-9_.-]+")
 
 
     init {
@@ -43,63 +41,57 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
 
         if (path == null) {
             path = "files/language/"
-            try {
-                this.langMap = this.loadLang(
-                    runBlocking {
-                        Res.readBytes("$path$langName/lang.json").inputStream()
-                    }
-                )
-                if (useFallback) this.fallbackLangMap = this.loadLang(
-                    runBlocking {
-                        Res.readBytes("$path$fallback/lang.json").inputStream()
-                    }
-                )
-            } catch (e: IOException) {
-                throw RuntimeException(e)
+            runBlocking {
+                langMap = loadLang(
+                    Res.readBytes("$path$langName/lang.json").decodeToString()
+                ) ?: mapOf()
+                if (useFallback) fallbackLangMap = loadLang(
+                    Res.readBytes("$path$fallback/lang.json").decodeToString()
+                ) ?: mapOf()
             }
         } else {
-            this.langMap = this.loadLang(Path.of(path).resolve(this.langName + "/lang.json").toString())
-            if (useFallback) this.fallbackLangMap = this.loadLang("$path$fallback/lang.json")
+            this.langMap = this.loadLangFile(
+                Path(path, this.langName + "/lang.json")
+            ) ?: mapOf()
+
+            if (useFallback) {
+                this.fallbackLangMap = this.loadLangFile(
+                    Path("$path$fallback/lang.json")
+                ) ?: mapOf()
+            }
         }
-        if (this.fallbackLangMap == null) this.fallbackLangMap = this.langMap
+        if (this.fallbackLangMap.isEmpty()) this.fallbackLangMap = this.langMap
     }
 
     val name: String
-        get() = this.get("language.name")
+        get() = this["language.name"]
 
-    fun getLang(): String {
-        return langName
-    }
-
-    protected fun loadLang(path: String): Map<String, String>? {
+    private fun loadLangFile(path: Path): Map<String, String>? {
         try {
-            val file = File(path)
-            if (!file.exists() || file.isDirectory) {
+            if (!SystemFileSystem.exists(path) || SystemFileSystem.metadataOrNull(path)!!.isDirectory) {
                 throw FileNotFoundException()
             }
-            FileInputStream(file).use { stream ->
-                return parseLang(BufferedReader(InputStreamReader(stream, StandardCharsets.UTF_8)))
-            }
-        } catch (e: IOException) {
+
+            val str = SystemFileSystem.source(path).buffered().readString()
+
+            return parseLang(str)
+        } catch (e: Throwable) {
             log.error("Failed to load language at {}", path, e)
             return null
         }
     }
 
-    protected fun loadLang(stream: InputStream): Map<String, String>? {
+    private fun loadLang(str: String): Map<String, String>? {
         try {
-            return parseLang(BufferedReader(InputStreamReader(stream, StandardCharsets.UTF_8)))
-        } catch (e: IOException) {
+            return parseLang(str)
+        } catch (e: Throwable) {
             log.error("Failed to parse the language input stream", e)
             return null
         }
     }
 
-    @Throws(IOException::class)
-    private fun parseLang(reader: BufferedReader): Map<String, String> {
-        return Json.parseToJsonElement(reader.readText()).jsonObject.entries.associate {
-            it.key to it.value.jsonPrimitive.content
-        }
+    private fun parseLang(str: String): Map<String, String> {
+        return Json.decodeFromString(str)
     }
 
     /**
@@ -182,12 +174,7 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
      * @return the string
      */
     fun internalGet(id: String): String? {
-        if (langMap!!.containsKey(id)) {
-            return langMap!![id]
-        } else if (fallbackLangMap!!.containsKey(id)) {
-            return fallbackLangMap!![id]
-        }
-        return null
+        return langMap[id] ?: fallbackLangMap[id]
     }
 
     /**
@@ -197,89 +184,48 @@ class Lang @JvmOverloads constructor(lang: String, path: String? = null, fallbac
      * @return the string
      */
     operator fun get(id: String): String {
-        if (langMap!!.containsKey(id)) {
-            return langMap!![id]!!
-        } else if (fallbackLangMap!!.containsKey(id)) {
-            return fallbackLangMap!![id]!!
-        }
-        return id
+        return internalGet(id) ?: id
     }
 
-    protected fun parseArg(arg: Any): String {
-        return when (arg.javaClass.simpleName) {
-            "int[]" -> {
-                (arg as IntArray).contentToString()
-            }
-
-            "double[]" -> {
-                (arg as DoubleArray).contentToString()
-            }
-
-            "float[]" -> {
-                (arg as FloatArray).contentToString()
-            }
-
-            "short[]" -> {
-                (arg as ShortArray).contentToString()
-            }
-
-            "byte[]" -> {
-                (arg as ByteArray).contentToString()
-            }
-
-            "long[]" -> {
-                (arg as LongArray).contentToString()
-            }
-
-            "boolean[]" -> {
-                (arg as BooleanArray).contentToString()
-            }
-
-            else -> {
-                arg.toString()
-            }
+    private fun parseArg(arg: Any): String {
+        return when (arg) {
+            is IntArray -> arg.contentToString()
+            is DoubleArray -> arg.contentToString()
+            is FloatArray -> arg.contentToString()
+            is ShortArray -> arg.contentToString()
+            is ByteArray -> arg.contentToString()
+            is LongArray -> arg.contentToString()
+            is BooleanArray -> arg.contentToString()
+            else -> arg.toString()
         }
     }
 
-    protected fun parseLanguageText(str: String): String {
-        val result = internalGet(str)
-        if (result != null) {
-            return result
-        } else {
-            val matcher = split.matcher(str)
-            return matcher.replaceAll { m: MatchResult ->
-                this.get(
-                    m.group().substring(1)
-                )
-            }
+    private fun parseLanguageText(str: String): String {
+        return internalGet(str) ?: split.replace(str) {
+            this[it.value.substring(1)]
         }
     }
 
-    protected fun parseLanguageText(str: String, prefix: String, mode: Boolean): String {
+    private fun parseLanguageText(str: String, prefix: String, mode: Boolean): String {
         if (mode && !str.startsWith(prefix)) {
             return str
         }
         if (!mode && str.startsWith(prefix)) {
             return str
         }
-        val result = internalGet(str)
-        if (result != null) {
-            return result
-        } else {
-            val matcher = split.matcher(str)
-            return matcher.replaceAll { m: MatchResult ->
-                val s = m.group().substring(1)
+        return internalGet(str)
+            ?: split.replace(str) {
+                val s = it.value.substring(1)
                 if (mode) {
                     if (s.startsWith(prefix)) {
-                        return@replaceAll this.get(s)
-                    } else return@replaceAll s
+                        this[s]
+                    } else s
                 } else {
                     if (!s.startsWith(prefix)) {
-                        return@replaceAll this.get(s)
-                    } else return@replaceAll s
+                        this[s]
+                    } else s
                 }
             }
-        }
     }
 
     companion object {

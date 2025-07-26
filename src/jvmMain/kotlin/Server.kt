@@ -375,7 +375,7 @@ class Server internal constructor(
 
         this.checkLoginTime = settings.serverSettings.checkLoginTime
 
-        log.info(this.lang.tr("language.selected", lang.name, lang.getLang()))
+        log.info(this.lang.tr("language.selected", lang.name, lang.langName))
         log.info(
             this.lang.tr(
                 "chorus.server.start",
