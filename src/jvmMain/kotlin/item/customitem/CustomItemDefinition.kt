@@ -25,7 +25,7 @@ import java.util.function.Consumer
  */
 
 @JvmRecord
-data class CustomItemDefinition(@JvmField val identifier: String, @JvmField val nbt: CompoundTag) : BlockID {
+data class CustomItemDefinition(@JvmField val identifier: String, @JvmField val nbt: CompoundTag) {
     val displayName: String?
         get() {
             if (!nbt.getCompound("components").contains("minecraft:display_name")) return null

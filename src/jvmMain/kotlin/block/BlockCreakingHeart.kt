@@ -53,7 +53,7 @@ class BlockCreakingHeart @JvmOverloads constructor(blockstate: BlockState = prop
         if (blockEntity?.linkedCreaking == null) {
             var state: CreakingHeartState = CreakingHeartState.DORMANT
             for (face in BlockFace.entries) {
-                if (pillarAxis.test(face)) {
+                if (pillarAxis == face.axis) {
                     val block = getSide(face)
                     if (block is BlockPaleOakLog) {
                         if (block.pillarAxis != pillarAxis) state = CreakingHeartState.UPROOTED

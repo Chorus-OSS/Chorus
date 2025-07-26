@@ -13,7 +13,7 @@ import org.chorus_oss.chorus.math.*
 import java.util.function.BiPredicate
 
 
-object PortalHelper : BlockID {
+object PortalHelper {
     fun spawnPortal(pos: Locator) {
         val lvl = pos.level //TODO: This will generate part of the time, seems to be only when the chunk is populated
         val x = pos.position.floorX
