@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.scheduler
 
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.utils.Loggable
-import org.chorus_oss.chorus.utils.ThreadStore
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -21,20 +20,6 @@ abstract class AsyncTask : Runnable {
 
     fun hasResult(): Boolean {
         return this.result != null
-    }
-
-    fun getFromThreadStore(identifier: String): Any? {
-        return if (this.isFinished) null else ThreadStore.store[identifier]
-    }
-
-    fun saveToThreadStore(identifier: String, value: Any?) {
-        if (!this.isFinished) {
-            if (value == null) {
-                ThreadStore.store.remove(identifier)
-            } else {
-                ThreadStore.store[identifier] = value
-            }
-        }
     }
 
     abstract fun onRun()

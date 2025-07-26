@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.utils
 
-import com.google.common.collect.Maps
 import java.util.regex.Pattern
 
 /**
@@ -181,8 +180,8 @@ enum class TextFormat(
 
     companion object {
         private val CLEAN_PATTERN: Pattern = Pattern.compile("(?i)$ESCAPE[0-9A-V]")
-        private val BY_ID: MutableMap<Int, TextFormat> = Maps.newTreeMap()
-        private val BY_CHAR: MutableMap<Char, TextFormat> = HashMap()
+        private val BY_ID: MutableMap<Int, TextFormat> = mutableMapOf()
+        private val BY_CHAR: MutableMap<Char, TextFormat> = mutableMapOf()
 
         init {
             for (color in entries) {

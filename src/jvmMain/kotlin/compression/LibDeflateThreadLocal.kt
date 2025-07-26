@@ -1,9 +1,9 @@
 package org.chorus_oss.chorus.compression
 
 import cn.powernukkitx.libdeflate.CompressionType
+import cn.powernukkitx.libdeflate.LibdeflateCompressor
+import cn.powernukkitx.libdeflate.LibdeflateDecompressor
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.utils.LibDeflator
-import org.chorus_oss.chorus.utils.LibInflator
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -67,7 +67,7 @@ class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : Zli
                 } else if (maxSize in 1..<result) {
                     throw IOException("Inflated data exceeds maximum size")
                 }
-            } catch (ignore: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 return inflate0(data, maxSize, type)
             }
             val output = ByteArray(result.toInt())
@@ -87,11 +87,11 @@ class LibDeflateThreadLocal(private val zlibThreadLocal: ZlibThreadLocal?) : Zli
     }
 
     companion object {
-        private val INFLATOR: ThreadLocal<LibInflator> = ThreadLocal.withInitial {
-            LibInflator()
+        private val INFLATOR: ThreadLocal<LibdeflateDecompressor> = ThreadLocal.withInitial {
+            LibdeflateDecompressor()
         }
-        private val DEFLATOR: ThreadLocal<LibDeflator> = ThreadLocal.withInitial {
-            LibDeflator()
+        private val DEFLATOR: ThreadLocal<LibdeflateCompressor> = ThreadLocal.withInitial {
+            LibdeflateCompressor(Server.instance.settings.networkSettings.compressionLevel)
         }
         private val BUFFER: ThreadLocal<ByteArray> = ThreadLocal.withInitial {
             ByteArray(
