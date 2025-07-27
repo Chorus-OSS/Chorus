@@ -14,19 +14,5 @@ object Campfire : BlockDefinition(
         MineableComponent(hardness = 5.0f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false)
     ),
-    permutations = listOf(
-        Permutation({ it["extinguished"] == false }, listOf(LightEmissionComponent(emission = 15))),
-        Permutation(
-            { it["extinguished"] == false && it["minecraft:cardinal_direction"] == "west" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["extinguished"] == false && it["minecraft:cardinal_direction"] == "north" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["extinguished"] == false && it["minecraft:cardinal_direction"] == "east" },
-            listOf(LightEmissionComponent(emission = 15))
-        )
-    )
+    permutations = listOf(Permutation({ (it["extinguished"] == false) }, listOf(LightEmissionComponent(emission = 15))))
 )

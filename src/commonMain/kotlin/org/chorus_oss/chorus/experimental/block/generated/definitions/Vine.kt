@@ -24,17 +24,17 @@ object Vine : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["vine_direction_bits"] == 1 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.9375f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.0625f),
-                    enabled = false
-                )
+        { (it["vine_direction_bits"] == 1) || (it["vine_direction_bits"] == 5) },
+        listOf(
+            CollisionBoxComponent(
+                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.9375f),
+                size = Vector3f(x = 1.0f, y = 1.0f, z = 0.0625f),
+                enabled = false
             )
-        ),
+        )
+    ),
         Permutation(
-            { it["vine_direction_bits"] == 2 },
+            { (it["vine_direction_bits"] == 2) || (it["vine_direction_bits"] == 6) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
@@ -44,7 +44,7 @@ object Vine : BlockDefinition(
             )
         ),
         Permutation(
-            { it["vine_direction_bits"] == 3 },
+            { (it["vine_direction_bits"] == 3) || (it["vine_direction_bits"] == 7) || (it["vine_direction_bits"] == 9) || (it["vine_direction_bits"] == 10) || (it["vine_direction_bits"] == 11) || (it["vine_direction_bits"] == 13) || (it["vine_direction_bits"] == 14) || (it["vine_direction_bits"] == 15) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
@@ -54,7 +54,7 @@ object Vine : BlockDefinition(
             )
         ),
         Permutation(
-            { it["vine_direction_bits"] == 4 },
+            { (it["vine_direction_bits"] == 4) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
@@ -64,111 +64,11 @@ object Vine : BlockDefinition(
             )
         ),
         Permutation(
-            { it["vine_direction_bits"] == 5 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.9375f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.0625f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 6 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 0.0625f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 7 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 8 },
+            { (it["vine_direction_bits"] == 8) || (it["vine_direction_bits"] == 12) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.9375f, y = 0.0f, z = 0.0f),
                     size = Vector3f(x = 0.0625f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 9 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 10 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 11 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 12 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.9375f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 0.0625f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 13 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 14 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
-                    enabled = false
-                )
-            )
-        ),
-        Permutation(
-            { it["vine_direction_bits"] == 15 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 1.0f),
                     enabled = false
                 )
             )

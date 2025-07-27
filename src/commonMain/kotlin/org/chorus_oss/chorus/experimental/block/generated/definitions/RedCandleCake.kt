@@ -20,7 +20,7 @@ object RedCandleCake : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["lit"] == false },
+            { (it["lit"] == false) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0625f, y = 0.0f, z = 0.0625f),

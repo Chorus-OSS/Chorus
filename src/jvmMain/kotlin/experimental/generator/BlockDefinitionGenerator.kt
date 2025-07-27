@@ -21,14 +21,13 @@ import java.io.File
 import kotlin.reflect.KClass
 
 internal data class PermutationMappings(
-    val componentToConditions: MutableMap<String, MutableList<List<Pair<String, Any>>>> = mutableMapOf(),
-    val conditionToComponents: MutableMap<List<Pair<String, Any>>, MutableList<String>> = mutableMapOf(),
+    val componentToConditions: MutableMap<Pair<String, String>, MutableList<List<Pair<String, Any>>>> = mutableMapOf(),
+    val conditionToComponents: MutableMap<List<Pair<String, Any>>, MutableList<Pair<String, String>>> = mutableMapOf(),
 )
 
 internal object BlockDefinitionGenerator : Loggable {
     val properties = mutableMapOf<String, BlockProperties>()
     val components = mutableMapOf<String, MutableList<Pair<String, String>>>()
-    val permutations = mutableMapOf<String, MutableList<Pair<String, MutableList<Pair<String, String>>>>>()
     val extraImports = mutableMapOf<String, MutableList<Pair<String, String>>>()
 
     val mappings = mutableMapOf<String, PermutationMappings>()
@@ -37,7 +36,7 @@ internal object BlockDefinitionGenerator : Loggable {
         val identifier: String,
         val properties: BlockProperties,
         val components: MutableList<Pair<String, String>>,
-        val permutations: MutableList<Pair<String, MutableList<Pair<String, String>>>>,
+        val mappings: PermutationMappings,
         val extraImports: MutableList<Pair<String, String>>
     )
 
@@ -46,25 +45,6 @@ internal object BlockDefinitionGenerator : Loggable {
         populateFromProperties(PROPERTIES)
         populateFromConstructors(CACHE_CONSTRUCTORS)
         buildDefinitions()
-
-//        val minimized = mappings[BlockID.SNOW_LAYER]!!.componentToConditions.entries.associate { (k, c) ->
-//            k to minimize(c)
-//        }
-//
-//        val minConditions = minimized.entries.associate { (d, m) ->
-//            d to m.joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
-//                o.joinToString(separator = " && ", prefix = "(", postfix = ")") {
-//                    "it[\"${it.first}\"] == ${
-//                        when (it.second) {
-//                            is String -> "\"${it.second}\""
-//                            else -> "${it.second}"
-//                        }
-//                    }"
-//                }
-//            }
-//        }
-//
-//        log.info(minConditions.toString())
 
         log.info("Finished BlockDefinitionGenerator")
     }
@@ -107,7 +87,6 @@ internal object BlockDefinitionGenerator : Loggable {
         val mapping = mappings.computeIfAbsent(it.properties.identifier) { PermutationMappings() }
 
         val components = this.components.computeIfAbsent(it.properties.identifier) { mutableListOf() }
-        val permutations = this.permutations.computeIfAbsent(it.properties.identifier) { mutableListOf() }
         val extraImports = this.extraImports.computeIfAbsent(it.properties.identifier) { mutableListOf() }
 
         val isPermutation = default != null
@@ -246,34 +225,11 @@ internal object BlockDefinitionGenerator : Loggable {
                 }
             }
 
-            val condition = conditions.entries.joinToString(prefix = "{ ", separator = " && ", postfix = " }") {
-                "it[\"${it.key}\"] == ${it.value}"
-            }
-
-            componentPairs.map { it.first + it.second }.also {
+            componentPairs.also {
                 mapping.conditionToComponents.computeIfAbsent(states) { mutableListOf() }.addAll(it)
             }.forEach {
                 mapping.componentToConditions.computeIfAbsent(it) { mutableListOf() }.add(states)
             }
-
-//            permutations.addAll(
-//                componentPairs.mapNotNull {
-//                    mapping.componentToConditions[it.first + it.second]?.let { c ->
-//                        minimize(c).joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
-//                            o.joinToString(separator = " && ", prefix = "(", postfix = ")") { v ->
-//                                "it[\"${v.first}\"] == ${
-//                                    when (v.second) {
-//                                        is String -> "\"${v.second}\""
-//                                        else -> "${v.second}"
-//                                    }
-//                                }"
-//                            }
-//                        } to mutableListOf(it)
-//                    }
-//                }
-//            )
-
-            permutations.add(condition to componentPairs)
         } else {
             components.addAll(componentPairs)
         }
@@ -288,10 +244,10 @@ internal object BlockDefinitionGenerator : Loggable {
 
         this.properties.forEach {
             val components = this.components[it.key] ?: mutableListOf()
-            val permutations = this.permutations[it.key] ?: mutableListOf()
+            val mappings = this.mappings[it.key] ?: PermutationMappings()
             val extraImports = this.extraImports[it.key] ?: mutableListOf()
 
-            autogenData += AutogenData(it.key, it.value, components, permutations, extraImports)
+            autogenData += AutogenData(it.key, it.value, components, mappings, extraImports)
         }
 
         val objects = autogenData.map { generateDefinition(it) }
@@ -321,7 +277,7 @@ internal object BlockDefinitionGenerator : Loggable {
     fun generateDefinition(genData: AutogenData): String {
         val properties = genData.properties
         val components = genData.components
-        val permutations = genData.permutations
+        val mappings = genData.mappings
         val extraImports = genData.extraImports
 
         val identifier = properties.identifier
@@ -347,7 +303,7 @@ internal object BlockDefinitionGenerator : Loggable {
 
         val hasStates = states.isNotEmpty()
         val hasComponents = components.isNotEmpty()
-        val hasPermutations = permutations.isNotEmpty()
+        val hasPermutations = mappings.componentToConditions.isNotEmpty()
 
         val imports = mutableMapOf<String, String>()
 
@@ -355,11 +311,20 @@ internal object BlockDefinitionGenerator : Loggable {
         val formattedComponents = components.joinToString(", ") {
             "${it.first}${it.second}"
         }
-        val formattedPermutations = permutations.joinToString(", ") {
-            val formattedSubComponents = it.second.joinToString(", ") { comp ->
+        val formattedPermutations = mappings.componentToConditions.toList().joinToString(", ") {
+            val formattedSubComponents = it.first.let { comp ->
                 "${comp.first}${comp.second}"
             }
-            "Permutation(${it.first}, listOf($formattedSubComponents)) "
+            "Permutation(${minimize(it.second).joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
+                o.joinToString(separator = " && ", prefix = "(", postfix = ")") { v ->
+                    "it[\"${v.first}\"] == ${
+                        when (v.second) {
+                            is String -> "\"${v.second}\""
+                            else -> "${v.second}"
+                        }
+                    }"
+                }
+            }}, listOf($formattedSubComponents)) "
         }
 
         if (hasStates) imports.putIfAbsent("CommonStates", "org.chorus_oss.chorus.experimental.block.state")
@@ -374,8 +339,8 @@ internal object BlockDefinitionGenerator : Loggable {
         }
 
         if (hasPermutations) {
-            permutations.forEach {
-                it.second.forEach { comp ->
+            mappings.componentToConditions.toList().forEach {
+                it.first.let { comp ->
                     if (comp.first != "TODO") imports.putIfAbsent(
                         comp.first,
                         "org.chorus_oss.chorus.experimental.block.components"

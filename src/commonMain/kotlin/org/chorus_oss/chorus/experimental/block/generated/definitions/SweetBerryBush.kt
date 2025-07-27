@@ -19,12 +19,9 @@ object SweetBerryBush : BlockDefinition(
         CollisionBoxComponent(enabled = false)
     ),
     permutations = listOf(
-        Permutation({ it["growth"] == 1 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 2 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 3 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 4 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 5 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 6 }, listOf(MineableComponent(hardness = 0.25f))),
-        Permutation({ it["growth"] == 7 }, listOf(MineableComponent(hardness = 0.25f)))
+        Permutation(
+            { (it["growth"] == 1) || (it["growth"] == 2) || (it["growth"] == 3) || (it["growth"] == 4) || (it["growth"] == 5) || (it["growth"] == 6) || (it["growth"] == 7) },
+            listOf(MineableComponent(hardness = 0.25f))
+        )
     )
 )

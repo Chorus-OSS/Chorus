@@ -21,16 +21,16 @@ object SkeletonSkull : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["facing_direction"] == 2 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.25f, y = 0.25f, z = 0.5f),
-                    size = Vector3f(x = 0.5f, y = 0.5f, z = 0.5f)
-                )
+        { (it["facing_direction"] == 2) },
+        listOf(
+            CollisionBoxComponent(
+                origin = Vector3f(x = 0.25f, y = 0.25f, z = 0.5f),
+                size = Vector3f(x = 0.5f, y = 0.5f, z = 0.5f)
             )
-        ),
+        )
+    ),
         Permutation(
-            { it["facing_direction"] == 3 },
+            { (it["facing_direction"] == 3) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.25f, y = 0.25f, z = 0.0f),
@@ -39,7 +39,7 @@ object SkeletonSkull : BlockDefinition(
             )
         ),
         Permutation(
-            { it["facing_direction"] == 4 },
+            { (it["facing_direction"] == 4) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.5f, y = 0.25f, z = 0.25f),
@@ -48,7 +48,7 @@ object SkeletonSkull : BlockDefinition(
             )
         ),
         Permutation(
-            { it["facing_direction"] == 5 },
+            { (it["facing_direction"] == 5) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.25f, z = 0.25f),

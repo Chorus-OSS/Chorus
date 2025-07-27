@@ -21,16 +21,16 @@ object Ladder : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["facing_direction"] == 2 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.8125f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
-                )
+        { (it["facing_direction"] == 2) },
+        listOf(
+            CollisionBoxComponent(
+                origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.8125f),
+                size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
             )
-        ),
+        )
+    ),
         Permutation(
-            { it["facing_direction"] == 3 },
+            { (it["facing_direction"] == 3) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
@@ -39,7 +39,7 @@ object Ladder : BlockDefinition(
             )
         ),
         Permutation(
-            { it["facing_direction"] == 4 },
+            { (it["facing_direction"] == 4) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.8125f, y = 0.0f, z = 0.0f),
@@ -48,7 +48,7 @@ object Ladder : BlockDefinition(
             )
         ),
         Permutation(
-            { it["facing_direction"] == 5 },
+            { (it["facing_direction"] == 5) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),

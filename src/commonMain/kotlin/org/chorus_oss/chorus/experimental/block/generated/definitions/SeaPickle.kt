@@ -18,17 +18,17 @@ object SeaPickle : BlockDefinition(
         CollisionBoxComponent(enabled = false)
     ),
     permutations = listOf(
-        Permutation({ it["dead_bit"] == false }, listOf(LightEmissionComponent(emission = 6))),
+        Permutation({ (it["dead_bit"] == false) }, listOf(LightEmissionComponent(emission = 6))),
         Permutation(
-            { it["cluster_count"] == 1 && it["dead_bit"] == false },
+            { (it["cluster_count"] == 1 && it["dead_bit"] == false) },
             listOf(LightEmissionComponent(emission = 9))
         ),
         Permutation(
-            { it["cluster_count"] == 2 && it["dead_bit"] == false },
+            { (it["cluster_count"] == 2 && it["dead_bit"] == false) },
             listOf(LightEmissionComponent(emission = 12))
         ),
         Permutation(
-            { it["cluster_count"] == 3 && it["dead_bit"] == false },
+            { (it["cluster_count"] == 3 && it["dead_bit"] == false) },
             listOf(LightEmissionComponent(emission = 15))
         )
     )

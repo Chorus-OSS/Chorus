@@ -724,7 +724,7 @@ class Server internal constructor(
     }
 
     fun start() {
-        BlockDefinitionGenerator.run()
+//        BlockDefinitionGenerator.run()
 
         for (entry in bannedIPs.entries.values) {
             try {

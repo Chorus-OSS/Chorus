@@ -21,34 +21,7 @@ object DarkOakStairs : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.5f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["upside_down_bit"] == false && it["weirdo_direction"] == 1 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.5f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["upside_down_bit"] == false && it["weirdo_direction"] == 2 },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.5f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["upside_down_bit"] == false && it["weirdo_direction"] == 3 },
+            { (it["upside_down_bit"] == false) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),

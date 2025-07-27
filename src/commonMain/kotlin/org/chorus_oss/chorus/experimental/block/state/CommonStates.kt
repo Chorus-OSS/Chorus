@@ -253,6 +253,8 @@ object CommonStates {
 
     val redstoneSignal: BlockState<Int> = BlockState.from("redstone_signal", 15)
 
+    val rehydrationLevel: BlockState<Int> = BlockState.from("rehydration_level", 3)
+
     val repeaterDelay: BlockState<Int> = BlockState.from("repeater_delay", 3)
 
     val respawnAnchorCharge: BlockState<Int> = BlockState.from("respawn_anchor_charge", 4)

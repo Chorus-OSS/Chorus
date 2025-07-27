@@ -15,48 +15,7 @@ object CreakingHeart : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["creaking_heart_state"] == "dormant" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["creaking_heart_state"] == "dormant" && it["pillar_axis"] == "x" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["creaking_heart_state"] == "dormant" && it["pillar_axis"] == "z" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation({ it["creaking_heart_state"] == "awake" }, listOf(LightEmissionComponent(emission = 15))),
-        Permutation(
-            { it["creaking_heart_state"] == "awake" && it["pillar_axis"] == "x" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["creaking_heart_state"] == "awake" && it["pillar_axis"] == "z" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "dormant" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "dormant" && it["pillar_axis"] == "x" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "dormant" && it["pillar_axis"] == "z" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "awake" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "awake" && it["pillar_axis"] == "x" },
-            listOf(LightEmissionComponent(emission = 15))
-        ),
-        Permutation(
-            { it["natural"] == false && it["creaking_heart_state"] == "awake" && it["pillar_axis"] == "z" },
+            { (it["creaking_heart_state"] == "dormant") || (it["creaking_heart_state"] == "awake") },
             listOf(LightEmissionComponent(emission = 15))
         )
     )

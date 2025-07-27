@@ -18,8 +18,8 @@ object RedCandle : BlockDefinition(
         CollisionBoxComponent(enabled = false)
     ),
     permutations = listOf(
-        Permutation({ it["candles"] == 1 }, listOf(LightEmissionComponent(emission = 3))),
-        Permutation({ it["candles"] == 2 }, listOf(LightEmissionComponent(emission = 6))),
-        Permutation({ it["candles"] == 3 }, listOf(LightEmissionComponent(emission = 9)))
+        Permutation({ (it["candles"] == 1) }, listOf(LightEmissionComponent(emission = 3))),
+        Permutation({ (it["candles"] == 2) }, listOf(LightEmissionComponent(emission = 6))),
+        Permutation({ (it["candles"] == 3) }, listOf(LightEmissionComponent(emission = 9)))
     )
 )

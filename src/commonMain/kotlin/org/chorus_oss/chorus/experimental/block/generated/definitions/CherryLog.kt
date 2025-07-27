@@ -16,8 +16,8 @@ object CherryLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["pillar_axis"] == "x" },
+            { (it["pillar_axis"] == "x") || (it["pillar_axis"] == "z") },
             listOf(MapColorComponent(r = 57, g = 41, b = 35, a = 255))
-        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 57, g = 41, b = 35, a = 255)))
+        )
     )
 )

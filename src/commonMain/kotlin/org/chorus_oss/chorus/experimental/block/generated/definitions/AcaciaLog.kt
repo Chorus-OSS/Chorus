@@ -16,8 +16,8 @@ object AcaciaLog : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["pillar_axis"] == "x" },
+            { (it["pillar_axis"] == "x") || (it["pillar_axis"] == "z") },
             listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255))
-        ), Permutation({ it["pillar_axis"] == "z" }, listOf(MapColorComponent(r = 112, g = 112, b = 112, a = 255)))
+        )
     )
 )

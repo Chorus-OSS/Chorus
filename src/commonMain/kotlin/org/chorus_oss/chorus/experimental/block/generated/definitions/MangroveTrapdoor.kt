@@ -20,16 +20,16 @@ object MangroveTrapdoor : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["open_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.8125f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
+        { (it["open_bit"] == false) },
+        listOf(
+            CollisionBoxComponent(
+                origin = Vector3f(x = 0.0f, y = 0.8125f, z = 0.0f),
+                size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
             )
-        ),
+        )
+    ),
         Permutation(
-            { it["open_bit"] == false && it["upside_down_bit"] == false },
+            { (it["open_bit"] == false && it["upside_down_bit"] == false) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
@@ -38,7 +38,7 @@ object MangroveTrapdoor : BlockDefinition(
             )
         ),
         Permutation(
-            { it["direction"] == 1 },
+            { (it["direction"] == 1) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.8125f, y = 0.0f, z = 0.0f),
@@ -47,34 +47,7 @@ object MangroveTrapdoor : BlockDefinition(
             )
         ),
         Permutation(
-            { it["direction"] == 1 && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.8125f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 0.1875f, y = 1.0f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 1 && it["open_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.8125f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 1 && it["open_bit"] == false && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 2 },
+            { (it["direction"] == 2) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
@@ -83,65 +56,11 @@ object MangroveTrapdoor : BlockDefinition(
             )
         ),
         Permutation(
-            { it["direction"] == 2 && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 2 && it["open_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.8125f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 2 && it["open_bit"] == false && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 3 },
+            { (it["direction"] == 3) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.8125f),
                     size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 3 && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.8125f),
-                    size = Vector3f(x = 1.0f, y = 1.0f, z = 0.1875f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 3 && it["open_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.8125f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
-                )
-            )
-        ),
-        Permutation(
-            { it["direction"] == 3 && it["open_bit"] == false && it["upside_down_bit"] == false },
-            listOf(
-                CollisionBoxComponent(
-                    origin = Vector3f(x = 0.0f, y = 0.0f, z = 0.0f),
-                    size = Vector3f(x = 1.0f, y = 0.1875f, z = 1.0f)
                 )
             )
         )

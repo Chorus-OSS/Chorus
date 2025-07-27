@@ -23,7 +23,7 @@ object Lantern : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["hanging"] == false },
+            { (it["hanging"] == false) },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.3125f, y = 0.0f, z = 0.3125f),

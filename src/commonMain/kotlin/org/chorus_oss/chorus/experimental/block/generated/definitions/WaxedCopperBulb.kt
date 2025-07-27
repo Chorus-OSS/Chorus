@@ -14,8 +14,5 @@ object WaxedCopperBulb : BlockDefinition(
         LightEmissionComponent(emission = 15),
         MineableComponent(hardness = 3.0f)
     ),
-    permutations = listOf(
-        Permutation({ it["lit"] == false }, listOf(LightEmissionComponent(emission = 0))),
-        Permutation({ it["lit"] == false && it["powered_bit"] == false }, listOf(LightEmissionComponent(emission = 0)))
-    )
+    permutations = listOf(Permutation({ (it["lit"] == false) }, listOf(LightEmissionComponent(emission = 0))))
 )

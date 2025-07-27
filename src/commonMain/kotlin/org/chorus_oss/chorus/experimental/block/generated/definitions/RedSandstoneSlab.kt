@@ -20,7 +20,7 @@ object RedSandstoneSlab : BlockDefinition(
     ),
     permutations = listOf(
         Permutation(
-            { it["minecraft:vertical_half"] == "top" },
+            { (it["minecraft:vertical_half"] == "top") },
             listOf(
                 CollisionBoxComponent(
                     origin = Vector3f(x = 0.0f, y = 0.5f, z = 0.0f),
