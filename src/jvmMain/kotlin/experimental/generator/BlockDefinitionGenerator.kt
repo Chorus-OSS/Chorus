@@ -52,24 +52,24 @@ internal object BlockDefinitionGenerator : Loggable {
         populateFromConstructors(CACHE_CONSTRUCTORS)
 //        buildDefinitions()
 
-        val minimized = mappings[BlockID.ACACIA_DOOR]!!.componentToConditions.entries.associate { (k, c) ->
-            k to minimize(c)
-        }
-
-        val minConditions = minimized.entries.associate { (d, m) ->
-            d to m.joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
-                o.joinToString(separator = " && ", prefix = "(", postfix = ")") {
-                    "it[\"${it.first}\"] == ${
-                        when (it.second) { 
-                            is String -> "\"${it.second}\""
-                            else -> "${it.second}"
-                        }
-                    }"
-                }
-            }
-        }
-
-        log.info(minConditions.toString())
+//        val minimized = mappings[BlockID.SNOW_LAYER]!!.componentToConditions.entries.associate { (k, c) ->
+//            k to minimize(c)
+//        }
+//
+//        val minConditions = minimized.entries.associate { (d, m) ->
+//            d to m.joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
+//                o.joinToString(separator = " && ", prefix = "(", postfix = ")") {
+//                    "it[\"${it.first}\"] == ${
+//                        when (it.second) {
+//                            is String -> "\"${it.second}\""
+//                            else -> "${it.second}"
+//                        }
+//                    }"
+//                }
+//            }
+//        }
+//
+//        log.info(minConditions.toString())
 
         log.info("Finished BlockDefinitionGenerator")
     }
@@ -142,6 +142,7 @@ internal object BlockDefinitionGenerator : Loggable {
                 } else null
             },
             Pair("ReplaceableComponent") {
+                // TODO: Use a bool value for if it can be replaced. See SnowLayer.
                 if (it.canBeReplaced() != (default?.canBeReplaced() ?: false)) "" else null
             },
             Pair("FlammableComponent") {
