@@ -956,7 +956,7 @@ abstract class Block(blockState: BlockState) : Locator(0.0, 0.0, 0.0, Server.ins
     }
 
     val isDefaultState: Boolean
-        get() = this.blockState === properties.defaultState
+        get() = this.blockState == properties.defaultState
 
     open fun toItem(): Item {
         return ItemBlock(properties.defaultState, name)

@@ -5,12 +5,19 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.Block
+import org.chorus_oss.chorus.block.BlockAcaciaDoor
+import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.BlockProperties
 import org.chorus_oss.chorus.block.BlockState
+import org.chorus_oss.chorus.block.property.type.BlockPropertyType
 import org.chorus_oss.chorus.block.property.type.EnumPropertyType
 import org.chorus_oss.chorus.experimental.block.BlockDefinition
+import org.chorus_oss.chorus.experimental.generator.BlockDefinitionGeneratorUtils.minimize
 import org.chorus_oss.chorus.registry.BlockRegistry.Companion.CACHE_CONSTRUCTORS
 import org.chorus_oss.chorus.registry.BlockRegistry.Companion.PROPERTIES
 import org.chorus_oss.chorus.utils.BlockColor
@@ -18,11 +25,18 @@ import org.chorus_oss.chorus.utils.Loggable
 import java.io.File
 import kotlin.reflect.KClass
 
-object BlockDefinitionGenerator : Loggable {
+internal data class PermutationMappings(
+    val componentToConditions: MutableMap<String, MutableList<List<Pair<String, Any>>>> = mutableMapOf(),
+    val conditionToComponents: MutableMap<List<Pair<String, Any>>, MutableList<String>> = mutableMapOf(),
+)
+
+internal object BlockDefinitionGenerator : Loggable {
     val properties = mutableMapOf<String, BlockProperties>()
     val components = mutableMapOf<String, MutableList<Pair<String, String>>>()
     val permutations = mutableMapOf<String, MutableList<Pair<String, MutableList<Pair<String, String>>>>>()
     val extraImports = mutableMapOf<String, MutableList<Pair<String, String>>>()
+
+    val mappings = mutableMapOf<String, PermutationMappings>()
 
     data class AutogenData(
         val identifier: String,
@@ -36,7 +50,27 @@ object BlockDefinitionGenerator : Loggable {
         log.info("Starting BlockDefinitionGenerator")
         populateFromProperties(PROPERTIES)
         populateFromConstructors(CACHE_CONSTRUCTORS)
-        buildDefinitions()
+//        buildDefinitions()
+
+        val minimized = mappings[BlockID.ACACIA_FENCE_GATE]!!.componentToConditions.entries.associate { (k, c) ->
+            k to minimize(c)
+        }
+
+        val minConditions = minimized.entries.associate { (d, m) ->
+            d to m.joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
+                o.joinToString(separator = " && ", prefix = "(", postfix = ")") {
+                    "it[\"${it.first}\"] == ${
+                        when (it.second) { 
+                            is String -> "\"${it.second}\""
+                            else -> "${it.second}"
+                        }
+                    }"
+                }
+            }
+        }
+
+        log.info(minConditions.toString())
+
         log.info("Finished BlockDefinitionGenerator")
     }
 
@@ -65,8 +99,17 @@ object BlockDefinitionGenerator : Loggable {
         }
     }
 
+    fun propertyValueToState(it: BlockPropertyType.BlockPropertyValue<*, *, *>): Pair<String, Any> {
+        return it.propertyType.name to when(it) {
+            is EnumPropertyType.EnumPropertyValue -> it.getSerializedValue()
+            else -> it.value as Any
+        }
+    }
+
     fun populateFromInstance(instance: Block, default: Block?) {
         val it = instance
+
+        val mapping = mappings.computeIfAbsent(it.properties.identifier) { PermutationMappings() }
 
         val components = this.components.computeIfAbsent(it.properties.identifier) { mutableListOf() }
         val permutations = this.permutations.computeIfAbsent(it.properties.identifier) { mutableListOf() }
@@ -182,20 +225,12 @@ object BlockDefinitionGenerator : Loggable {
         }
 
         if (isPermutation && componentPairs.isNotEmpty()) {
-            val permutationStates = instance.blockState.blockPropertyValues.associate {
-                it.propertyType.name to when(it) {
-                    is EnumPropertyType.EnumPropertyValue -> it.getSerializedValue()
-                    else -> it.value
-                }
-            }
-            val defaultStates = default.blockState.blockPropertyValues.associate {
-                it.propertyType.name to when(it) {
-                    is EnumPropertyType.EnumPropertyValue -> it.getSerializedValue()
-                    else -> it.value
-                }
-            }
+            val permutationStates = instance.blockState.blockPropertyValues.associate(::propertyValueToState)
+            val defaultStates = default.blockState.blockPropertyValues.associate(::propertyValueToState)
 
             val conditions = mutableMapOf<String, String>()
+
+            val states = mutableListOf<Pair<String, Any>>()
 
             permutationStates.forEach {
                 val default = defaultStates[it.key]
@@ -204,11 +239,19 @@ object BlockDefinitionGenerator : Loggable {
                         is String -> "\"${it.value}\""
                         else -> "${it.value}"
                     }
+
+                    states.add(it.key to it.value)
                 }
             }
 
             val condition = conditions.entries.joinToString(prefix = "{ ", separator = " && ", postfix = " }") {
                 "it[\"${it.key}\"] == ${it.value}"
+            }
+
+            componentPairs.map { it.first + it.second }.also {
+                mapping.conditionToComponents.computeIfAbsent(states) { mutableListOf() }.addAll(it)
+            }.forEach {
+                mapping.componentToConditions.computeIfAbsent(it) { mutableListOf() }.add(states)
             }
 
             permutations.add(condition to componentPairs)
