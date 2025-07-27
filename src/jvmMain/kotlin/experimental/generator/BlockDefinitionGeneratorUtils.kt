@@ -4,34 +4,54 @@ import org.chorus_oss.chorus.utils.Loggable
 
 object BlockDefinitionGeneratorUtils : Loggable {
     fun minimize(conditions: List<List<Pair<String, Any>>>): List<List<Pair<String, Any>>> {
-        val discriminants = conditions.filter { it.size == 1 }.map { it.first() }
+        var input = conditions
 
-        val uses = discriminants.associateWith { d ->
-            conditions.filter {
-                it.contains(d)
-            }
-        }
+        val final = mutableListOf<List<Pair<String, Any>>>()
 
-        val flattened = uses.entries.associate { (d, u) ->
-            d to u.map { c ->
-                c.filter { it != d }
-            }
-        }
+        var i = 0
+        while (true) {
+            i++
+            if (input.all { it.size < i }) break
 
-        val minimized = flattened.entries.associate { (d, u) ->
-            d to if (u.any { it.isEmpty() }) emptyList() else u
-        }
+            val discriminants = input.filter { it.size == i }
+            if (discriminants.isEmpty()) continue
 
-        val final = minimized.entries.flatMap { (d, u) ->
-            if (u.isEmpty()) {
-                listOf(
-                    listOf(d)
-                )
-            } else {
-                u.map { c ->
-                    listOf(d) + c
+            val used = discriminants.associateWith { d ->
+                input.filter {
+                    it.containsAll(d)
                 }
             }
+
+            val unused = input.filterNot { i ->
+                discriminants.any {
+                    i.containsAll(it)
+                }
+            }
+
+            val flattened = used.entries.associate { (d, u) ->
+                d to u.map { c ->
+                    c.filterNot { d.contains(it) }
+                }
+            }
+
+            val minimized = flattened.entries.associate { (d, u) ->
+                d to if (u.any { it.isEmpty() }) emptyList() else u
+            }
+
+            final += minimized.entries.flatMap { (d, u) ->
+                if (u.isEmpty()) {
+                    listOf(
+                        d
+                    )
+                } else {
+                    u.map { c ->
+                        d + c
+                    }
+                }
+            }
+
+            i = 0
+            input = unused
         }
 
         return final

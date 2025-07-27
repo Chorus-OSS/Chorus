@@ -52,7 +52,7 @@ internal object BlockDefinitionGenerator : Loggable {
         populateFromConstructors(CACHE_CONSTRUCTORS)
 //        buildDefinitions()
 
-        val minimized = mappings[BlockID.ACACIA_FENCE_GATE]!!.componentToConditions.entries.associate { (k, c) ->
+        val minimized = mappings[BlockID.ACACIA_DOOR]!!.componentToConditions.entries.associate { (k, c) ->
             k to minimize(c)
         }
 
