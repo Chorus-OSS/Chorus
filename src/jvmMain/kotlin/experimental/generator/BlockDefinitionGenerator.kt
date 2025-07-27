@@ -5,13 +5,8 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.Block
-import org.chorus_oss.chorus.block.BlockAcaciaDoor
-import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.block.BlockProperties
 import org.chorus_oss.chorus.block.BlockState
 import org.chorus_oss.chorus.block.property.type.BlockPropertyType
@@ -50,7 +45,7 @@ internal object BlockDefinitionGenerator : Loggable {
         log.info("Starting BlockDefinitionGenerator")
         populateFromProperties(PROPERTIES)
         populateFromConstructors(CACHE_CONSTRUCTORS)
-//        buildDefinitions()
+        buildDefinitions()
 
 //        val minimized = mappings[BlockID.SNOW_LAYER]!!.componentToConditions.entries.associate { (k, c) ->
 //            k to minimize(c)
@@ -100,7 +95,7 @@ internal object BlockDefinitionGenerator : Loggable {
     }
 
     fun propertyValueToState(it: BlockPropertyType.BlockPropertyValue<*, *, *>): Pair<String, Any> {
-        return it.propertyType.name to when(it) {
+        return it.propertyType.name to when (it) {
             is EnumPropertyType.EnumPropertyValue -> it.getSerializedValue()
             else -> it.value as Any
         }
@@ -119,7 +114,9 @@ internal object BlockDefinitionGenerator : Loggable {
 
         val componentGenerators: MutableList<Pair<String, () -> String?>> = mutableListOf(
             Pair("SolidComponent") { if (it.isSolid != (default?.isSolid ?: true)) "(solid = false)" else null },
-            Pair("TransparentComponent") { if (it.isTransparent != (default?.isTransparent ?: false)) "(transparent = true)" else null },
+            Pair("TransparentComponent") {
+                if (it.isTransparent != (default?.isTransparent ?: false)) "(transparent = true)" else null
+            },
             Pair("MapColorComponent") {
                 if (it.color != (default?.color ?: BlockColor.VOID_BLOCK_COLOR)) {
                     with(it.color) {
@@ -128,10 +125,14 @@ internal object BlockDefinitionGenerator : Loggable {
                 } else null
             },
             Pair("FrictionComponent") {
-                if (it.frictionFactor != (default?.frictionFactor ?: 0.6)) "(friction = ${it.frictionFactor}f)" else null
+                if (it.frictionFactor != (default?.frictionFactor
+                        ?: 0.6)
+                ) "(friction = ${it.frictionFactor}f)" else null
             },
             Pair("InternalFrictionComponent") {
-                if (it.passableBlockFrictionFactor != (default?.passableBlockFrictionFactor ?: 1.0)) "(internalFriction = ${it.passableBlockFrictionFactor}f)" else null
+                if (it.passableBlockFrictionFactor != (default?.passableBlockFrictionFactor
+                        ?: 1.0)
+                ) "(internalFriction = ${it.passableBlockFrictionFactor}f)" else null
             },
             Pair("LightEmissionComponent") {
                 if (it.lightLevel != (default?.lightLevel ?: 0)) "(emission = ${it.lightLevel})" else null
@@ -149,7 +150,7 @@ internal object BlockDefinitionGenerator : Loggable {
                 if (
                     it.burnChance != (default?.burnChance ?: 0)
                     || it.burnAbility != (default?.burnAbility ?: 0)
-                    ) "(catchChance = ${it.burnChance}, destroyChance = ${it.burnAbility})"
+                ) "(catchChance = ${it.burnChance}, destroyChance = ${it.burnAbility})"
                 else null
             },
             Pair("MineableComponent") {
@@ -159,12 +160,12 @@ internal object BlockDefinitionGenerator : Loggable {
                 if (
                     it.canBePushed() != (default?.canBePushed() ?: true) ||
                     (
-                        it.canBePulled() != (default?.canBePulled() ?: true)
-                        || it.sticksToPiston() != (default?.sticksToPiston() ?: true)
-                    )
+                            it.canBePulled() != (default?.canBePulled() ?: true)
+                                    || it.sticksToPiston() != (default?.sticksToPiston() ?: true)
+                            )
                     || it.breaksWhenMoved() != (default?.breaksWhenMoved() ?: false)
                     || it.canSticksBlock() != (default?.canSticksBlock() ?: false)
-                    ) {
+                ) {
                     val push = it.canBePushed()
                     val pull = (it.canBePulled() || it.sticksToPiston())
                     val movement = if (it.breaksWhenMoved()) {
@@ -197,7 +198,8 @@ internal object BlockDefinitionGenerator : Loggable {
                         "(enabled = false)"
                     } else if (collision != null) {
                         val origin = "Vector3f(x = ${collision.minX}f, y = ${collision.minY}f,z = ${collision.minZ}f)"
-                        val size = "Vector3f(x = ${collision.maxX - collision.minX}f, y = ${collision.maxY - collision.minY}f, z = ${collision.maxZ - collision.minZ}f)"
+                        val size =
+                            "Vector3f(x = ${collision.maxX - collision.minX}f, y = ${collision.maxY - collision.minY}f, z = ${collision.maxZ - collision.minZ}f)"
 
                         if (it.canPassThrough()) {
                             "(origin = $origin, size = $size, enabled = false)"
@@ -207,8 +209,7 @@ internal object BlockDefinitionGenerator : Loggable {
                             extraImports.add("org.chorus_oss.chorus.math" to "Vector3f")
                         }
                     } else null
-                }
-                else null
+                } else null
             }
         )
 
@@ -254,6 +255,23 @@ internal object BlockDefinitionGenerator : Loggable {
             }.forEach {
                 mapping.componentToConditions.computeIfAbsent(it) { mutableListOf() }.add(states)
             }
+
+//            permutations.addAll(
+//                componentPairs.mapNotNull {
+//                    mapping.componentToConditions[it.first + it.second]?.let { c ->
+//                        minimize(c).joinToString(separator = " || ", prefix = "{ ", postfix = " }") { o ->
+//                            o.joinToString(separator = " && ", prefix = "(", postfix = ")") { v ->
+//                                "it[\"${v.first}\"] == ${
+//                                    when (v.second) {
+//                                        is String -> "\"${v.second}\""
+//                                        else -> "${v.second}"
+//                                    }
+//                                }"
+//                            }
+//                        } to mutableListOf(it)
+//                    }
+//                }
+//            )
 
             permutations.add(condition to componentPairs)
         } else {
@@ -308,14 +326,14 @@ internal object BlockDefinitionGenerator : Loggable {
 
         val identifier = properties.identifier
         val trimmedIdentifier = identifier.substringAfter(':')
-        val pascalIdentifier = trimmedIdentifier.split('_').joinToString("") { it.replaceFirstChar(Char::uppercase)  }
+        val pascalIdentifier = trimmedIdentifier.split('_').joinToString("") { it.replaceFirstChar(Char::uppercase) }
 
         val states = properties.getPropertyTypeSet().toList().map {
             var autoName = it.name.split("_", ":")
-            .mapIndexed { index, word ->
-                if (index == 0) word else word.replaceFirstChar(Char::uppercase)
-            }
-            .joinToString("")
+                .mapIndexed { index, word ->
+                    if (index == 0) word else word.replaceFirstChar(Char::uppercase)
+                }
+                .joinToString("")
 
             when (it.name) {
                 "age", "rail_direction" -> {
@@ -333,7 +351,7 @@ internal object BlockDefinitionGenerator : Loggable {
 
         val imports = mutableMapOf<String, String>()
 
-        val formattedStates = states.joinToString(", ") { "CommonStates.$it"}
+        val formattedStates = states.joinToString(", ") { "CommonStates.$it" }
         val formattedComponents = components.joinToString(", ") {
             "${it.first}${it.second}"
         }
@@ -348,14 +366,20 @@ internal object BlockDefinitionGenerator : Loggable {
 
         if (hasComponents) {
             components.forEach {
-                if (it.first != "TODO") imports.putIfAbsent(it.first, "org.chorus_oss.chorus.experimental.block.components")
+                if (it.first != "TODO") imports.putIfAbsent(
+                    it.first,
+                    "org.chorus_oss.chorus.experimental.block.components"
+                )
             }
         }
 
         if (hasPermutations) {
             permutations.forEach {
                 it.second.forEach { comp ->
-                    if (comp.first != "TODO") imports.putIfAbsent(comp.first, "org.chorus_oss.chorus.experimental.block.components")
+                    if (comp.first != "TODO") imports.putIfAbsent(
+                        comp.first,
+                        "org.chorus_oss.chorus.experimental.block.components"
+                    )
                 }
             }
         }
@@ -374,8 +398,9 @@ internal object BlockDefinitionGenerator : Loggable {
             }
             .build()
 
-        val fileBuilder = FileSpec.builder("org.chorus_oss.chorus.experimental.block.generated.definitions", pascalIdentifier)
-            .addType(blockObject)
+        val fileBuilder =
+            FileSpec.builder("org.chorus_oss.chorus.experimental.block.generated.definitions", pascalIdentifier)
+                .addType(blockObject)
 
         imports.forEach {
             fileBuilder.addImport(it.value, it.key)
