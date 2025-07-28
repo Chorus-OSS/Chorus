@@ -122,8 +122,7 @@ internal object BlockDefinitionGenerator : Loggable {
                 } else null
             },
             Pair("ReplaceableComponent") {
-                // TODO: Use a bool value for if it can be replaced. See SnowLayer.
-                if (it.canBeReplaced() != (default?.canBeReplaced() ?: false)) "" else null
+                if (it.canBeReplaced() != (default?.canBeReplaced() ?: false)) "(replaceable = ${it.canBeReplaced()})" else null
             },
             Pair("FlammableComponent") {
                 if (

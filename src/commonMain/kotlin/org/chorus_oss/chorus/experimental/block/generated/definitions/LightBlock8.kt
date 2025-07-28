@@ -10,7 +10,7 @@ object LightBlock8 : BlockDefinition(
         InternalFrictionComponent(internalFriction = 0.95f),
         LightEmissionComponent(emission = 8),
         LightDampeningComponent(dampening = 1),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 0.0f),
         CollisionBoxComponent(enabled = false)
     )

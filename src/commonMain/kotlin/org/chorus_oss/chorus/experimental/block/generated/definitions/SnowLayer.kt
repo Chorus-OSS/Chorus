@@ -13,7 +13,7 @@ object SnowLayer : BlockDefinition(
         MapColorComponent(r = 255, g = 255, b = 255, a = 255),
         InternalFrictionComponent(internalFriction = 0.95f),
         LightDampeningComponent(dampening = 1),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 0.2f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(
@@ -83,7 +83,7 @@ object SnowLayer : BlockDefinition(
                 )
             )
         ),
-        Permutation({ (it["height"] == 7) }, listOf(ReplaceableComponent)),
+        Permutation({ (it["height"] == 7) }, listOf(ReplaceableComponent(replaceable = false))),
         Permutation(
             { (it["height"] == 7) },
             listOf(

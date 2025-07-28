@@ -13,7 +13,7 @@ object Water : BlockDefinition(
         TransparentComponent(transparent = true),
         InternalFrictionComponent(internalFriction = 0.5f),
         LightDampeningComponent(dampening = 2),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 100.0f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(

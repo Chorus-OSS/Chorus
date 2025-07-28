@@ -13,7 +13,7 @@ object Vine : BlockDefinition(
         TransparentComponent(transparent = true),
         InternalFrictionComponent(internalFriction = 0.95f),
         LightDampeningComponent(dampening = 1),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 0.2f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(

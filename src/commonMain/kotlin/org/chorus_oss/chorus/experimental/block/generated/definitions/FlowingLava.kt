@@ -15,7 +15,7 @@ object FlowingLava : BlockDefinition(
         InternalFrictionComponent(internalFriction = 0.3f),
         LightEmissionComponent(emission = 15),
         LightDampeningComponent(dampening = 2),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 100.0f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(

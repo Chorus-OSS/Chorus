@@ -11,7 +11,7 @@ object Deadbush : BlockDefinition(
         MapColorComponent(r = 143, g = 119, b = 72, a = 255),
         InternalFrictionComponent(internalFriction = 0.95f),
         LightDampeningComponent(dampening = 1),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 0.0f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(enabled = false)

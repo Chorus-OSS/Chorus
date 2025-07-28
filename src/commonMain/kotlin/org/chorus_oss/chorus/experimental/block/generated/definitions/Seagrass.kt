@@ -13,7 +13,7 @@ object Seagrass : BlockDefinition(
         MapColorComponent(r = 64, g = 64, b = 255, a = 255),
         InternalFrictionComponent(internalFriction = 0.95f),
         LightDampeningComponent(dampening = 1),
-        ReplaceableComponent,
+        ReplaceableComponent(replaceable = true),
         MineableComponent(hardness = 0.0f),
         MoveableComponent(movement = MoveableComponent.Movement.Break, sticky = false),
         CollisionBoxComponent(enabled = false)
