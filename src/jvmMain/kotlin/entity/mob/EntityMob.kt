@@ -102,7 +102,7 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
         memoryStorage[CoreMemoryTypes.ENTITY_SPAWN_TIME] = level!!.tick
         IMemoryType.PERSISTENT_MEMORIES.forEach(Consumer { memory ->
             val mem = memory as IMemoryType<Any?>
-            val data = mem.codec?.decoder?.apply(this.namedTag!!)
+            val data = mem.codec?.decoder?.apply(this.namedTag)
             if (data != null) {
                 memoryStorage[mem] = data
             }
@@ -129,29 +129,29 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
         super.saveNBT()
         behaviorGroup.save(this)
 
-        if (activeEffects != null) namedTag!!.putList(TAG_ACTIVE_EFFECTS, ListTag(activeEffects!!))
-        namedTag!!.putShort(TAG_AIR, getAirTicks())
-        namedTag!!.putList(
+        if (activeEffects != null) namedTag.putList(TAG_ACTIVE_EFFECTS, ListTag(activeEffects!!))
+        namedTag.putShort(TAG_AIR, getAirTicks())
+        namedTag.putList(
             TAG_ARMOR, ListTag(
                 Tag.TAG_COMPOUND.toInt(),
                 equipment.getArmor().stream().map { NBTIO.putItemHelper(it) }.toList()
             )
         )
-        namedTag!!.putShort(TAG_ATTACK_TIME, attackTime.toInt())
+        namedTag.putShort(TAG_ATTACK_TIME, attackTime.toInt())
         //        this.namedTag.putList(TAG_ATTRIBUTES, new ListTag<>(Tag.TAG_Compound, this.attributes));
-        if (bodyRot != null) namedTag!!.putFloat(TAG_BODY_ROT, bodyRot!!)
-        namedTag!!.putInt(TAG_BOUND_X, boundX)
-        namedTag!!.putInt(TAG_BOUND_Y, boundY)
-        namedTag!!.putInt(TAG_BOUND_Z, boundZ)
-        namedTag!!.putBoolean(TAG_CAN_PICKUP_ITEMS, canPickupItems)
-        namedTag!!.putBoolean(TAG_DEAD, dead)
-        namedTag!!.putShort(TAG_DEATH_TIME, deathTime.toInt())
-        namedTag!!.putBoolean(TAG_HAS_BOUND_ORIGIN, hasBoundOrigin)
-        namedTag!!.putBoolean(TAG_HAS_SET_CAN_PICKUP_ITEMS, hasSetCanPickupItems)
-        namedTag!!.putShort(TAG_HURT_TIME, hurtTime.toInt())
-        namedTag!!.putLong(TAG_LEASHER_ID, leasherID)
-        namedTag!!.putLong(TAG_LIMITED_LIFE, limitedLife)
-        namedTag!!.putList(
+        if (bodyRot != null) namedTag.putFloat(TAG_BODY_ROT, bodyRot!!)
+        namedTag.putInt(TAG_BOUND_X, boundX)
+        namedTag.putInt(TAG_BOUND_Y, boundY)
+        namedTag.putInt(TAG_BOUND_Z, boundZ)
+        namedTag.putBoolean(TAG_CAN_PICKUP_ITEMS, canPickupItems)
+        namedTag.putBoolean(TAG_DEAD, dead)
+        namedTag.putShort(TAG_DEATH_TIME, deathTime.toInt())
+        namedTag.putBoolean(TAG_HAS_BOUND_ORIGIN, hasBoundOrigin)
+        namedTag.putBoolean(TAG_HAS_SET_CAN_PICKUP_ITEMS, hasSetCanPickupItems)
+        namedTag.putShort(TAG_HURT_TIME, hurtTime.toInt())
+        namedTag.putLong(TAG_LEASHER_ID, leasherID)
+        namedTag.putLong(TAG_LIMITED_LIFE, limitedLife)
+        namedTag.putList(
             TAG_MAINHAND, ListTag(
                 Tag.TAG_COMPOUND.toInt(), listOf(
                     NBTIO.putItemHelper(
@@ -160,8 +160,8 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
                 )
             )
         )
-        namedTag!!.putBoolean(TAG_NATURAL_SPAWN, naturalSpawn)
-        namedTag!!.putList(
+        namedTag.putBoolean(TAG_NATURAL_SPAWN, naturalSpawn)
+        namedTag.putList(
             TAG_OFFHAND, ListTag(
                 Tag.TAG_COMPOUND.toInt(), listOf(
                     NBTIO.putItemHelper(
@@ -170,23 +170,23 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
                 )
             )
         )
-        if (persistingOffers != null) namedTag!!.putCompound(TAG_PERSISTING_OFFERS, this.persistingOffers!!)
-        if (persistingRiches != null) namedTag!!.putInt(
+        if (persistingOffers != null) namedTag.putCompound(TAG_PERSISTING_OFFERS, this.persistingOffers!!)
+        if (persistingRiches != null) namedTag.putInt(
             TAG_PERSISTING_RICHES,
             persistingRiches!!
         )
-        namedTag!!.putBoolean(TAG_SURFACE, this.surface)
-        if (targetCaptainID != null) namedTag!!.putLong(
+        namedTag.putBoolean(TAG_SURFACE, this.surface)
+        if (targetCaptainID != null) namedTag.putLong(
             TAG_TARGET_CAPTAIN_ID,
             targetCaptainID!!
         )
-        namedTag!!.putLong(TAG_TARGET_ID, targetID)
-        if (tradeExperience != null) namedTag!!.putInt(
+        namedTag.putLong(TAG_TARGET_ID, targetID)
+        if (tradeExperience != null) namedTag.putInt(
             TAG_TRADE_EXPERIENCE,
             tradeExperience!!
         )
-        if (tradeTier != null) namedTag!!.putInt(TAG_TRADE_TIER, tradeTier!!)
-        if (wantsToBeJockey != null) namedTag!!.putBoolean(
+        if (tradeTier != null) namedTag.putInt(TAG_TRADE_TIER, tradeTier!!)
+        if (wantsToBeJockey != null) namedTag.putBoolean(
             TAG_WANTS_TO_BE_JOCKEY,
             wantsToBeJockey!!
         )
@@ -197,11 +197,8 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
     }
 
     override fun attack(source: EntityDamageEvent): Boolean {
-        val storage = memoryStorage
-        if (storage != null) {
-            storage.set(CoreMemoryTypes.BE_ATTACKED_EVENT, source)
-            storage.set(CoreMemoryTypes.LAST_BE_ATTACKED_TIME, level!!.tick)
-        }
+        memoryStorage[CoreMemoryTypes.BE_ATTACKED_EVENT] = source
+        memoryStorage[CoreMemoryTypes.LAST_BE_ATTACKED_TIME] = level!!.tick
 
         if (this.isClosed() || !this.isAlive()) {
             return false
@@ -209,7 +206,7 @@ abstract class EntityMob(chunk: IChunk?, nbt: CompoundTag) : EntityPhysical(chun
 
         if (source is EntityDamageByEntityEvent && source.damager !is EntityCreeper) {
             //更新仇恨目标
-            memoryStorage.set(CoreMemoryTypes.ATTACK_TARGET, source.damager)
+            memoryStorage[CoreMemoryTypes.ATTACK_TARGET] = source.damager
         }
 
         if (source.cause != DamageCause.VOID && source.cause != DamageCause.CUSTOM && source.cause != DamageCause.MAGIC && source.cause != DamageCause.HUNGER) {
