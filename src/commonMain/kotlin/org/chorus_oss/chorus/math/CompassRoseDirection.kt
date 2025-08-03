@@ -95,7 +95,6 @@ enum class CompassRoseDirection {
             SOUTH_SOUTH_EAST -> NORTH_NORTH_WEST
             SOUTH_SOUTH_WEST -> NORTH_NORTH_EAST
             WEST_SOUTH_WEST -> EAST_NORTH_EAST
-            else -> throw IncompatibleClassChangeError("New values was added to the enum")
         }
 
     enum class Precision(val directions: Int) {
