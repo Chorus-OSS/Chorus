@@ -199,7 +199,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             limitedWorldDepth = 16,
             newNether = false,
             educationSharedResourceUriResource = EduSharedUriResource("", ""),
-            forceExperimentalGameplay = null,
+            forceExperimentalGameplay = false,
             chatRestrictionLevel = ChatRestrictionLevel.None,
             disablePlayerInteractions = false,
             serverID = "",
@@ -231,6 +231,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             worldTemplateID = Uuid.fromLongs(0, 0),
             useBlockNetworkIDHashes = true,
             serverAuthoritativeSound = false,
+            tickDeathSystemsEnabled = false,
         )
         player.sendPacketImmediately(packet)
     }
