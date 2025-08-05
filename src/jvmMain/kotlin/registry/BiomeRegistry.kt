@@ -26,7 +26,7 @@ class BiomeRegistry : IRegistry<Int, BiomeDefinition?, BiomeDefinition> {
                     MutableMap::class.java
                 )
                 for ((key, value) in map) {
-                    NAME2ID[key] = (value as Map<*, *>)["id"].toString().toInt()
+                    NAME2ID[key] = (value as Int)
                 }
             }
         } catch (e: IOException) {
