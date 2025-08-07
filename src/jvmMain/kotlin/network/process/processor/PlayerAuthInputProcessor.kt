@@ -71,7 +71,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
             }
         }
 
-        if (packet.inputData[InputFlag.StartSprinting.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartSprinting.ordinal) { false }) {
             val event = PlayerToggleSprintEvent(player, true)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -80,7 +80,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setSprinting(true)
             }
         }
-        if (packet.inputData[InputFlag.StopSprinting.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StopSprinting.ordinal) { false }) {
             val event = PlayerToggleSprintEvent(player, false)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -89,7 +89,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setSprinting(false)
             }
         }
-        if (packet.inputData[InputFlag.StartSneaking.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartSneaking.ordinal) { false }) {
             val event = PlayerToggleSneakEvent(player, true)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -98,7 +98,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setSneaking(true)
             }
         }
-        if (packet.inputData[InputFlag.StopSneaking.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StopSneaking.ordinal) { false }) {
             val event = PlayerToggleSneakEvent(player, false)
             Server.instance.pluginManager.callEvent(event)
             if (event.cancelled) {
@@ -108,13 +108,13 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
             }
         }
         if (player.adventureSettings[AdventureSettings.Type.FLYING]) {
-            player.isFlySneaking = packet.inputData[InputFlag.Sneaking.ordinal]
+            player.isFlySneaking = packet.inputData.getOrElse(InputFlag.Sneaking.ordinal) { false }
         }
-        if (packet.inputData[InputFlag.StartJumping.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartJumping.ordinal) { false }) {
             val playerJumpEvent = PlayerJumpEvent(player)
             Server.instance.pluginManager.callEvent(playerJumpEvent)
         }
-        if (packet.inputData[InputFlag.StartSwimming.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartSwimming.ordinal) { false }) {
             val playerSwimmingEvent = PlayerToggleSwimEvent(player, true)
             Server.instance.pluginManager.callEvent(playerSwimmingEvent)
             if (playerSwimmingEvent.cancelled) {
@@ -123,7 +123,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setSwimming(true)
             }
         }
-        if (packet.inputData[InputFlag.StopSwimming.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StopSwimming.ordinal) { false }) {
             val playerSwimmingEvent = PlayerToggleSwimEvent(player, false)
             Server.instance.pluginManager.callEvent(playerSwimmingEvent)
             if (playerSwimmingEvent.cancelled) {
@@ -132,7 +132,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setSwimming(false)
             }
         }
-        if (packet.inputData[InputFlag.StartGliding.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartGliding.ordinal) { false }) {
             val playerToggleGlideEvent = PlayerToggleGlideEvent(player, true)
             Server.instance.pluginManager.callEvent(playerToggleGlideEvent)
             if (playerToggleGlideEvent.cancelled) {
@@ -141,7 +141,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setGliding(true)
             }
         }
-        if (packet.inputData[InputFlag.StopGliding.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StopGliding.ordinal) { false }) {
             val playerToggleGlideEvent = PlayerToggleGlideEvent(player, false)
             Server.instance.pluginManager.callEvent(playerToggleGlideEvent)
             if (playerToggleGlideEvent.cancelled) {
@@ -150,7 +150,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.setGliding(false)
             }
         }
-        if (packet.inputData[InputFlag.StartFlying.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StartFlying.ordinal) { false }) {
             if (!Server.instance.allowFlight && !player.adventureSettings[AdventureSettings.Type.ALLOW_FLIGHT]
             ) {
                 player.kick(PlayerKickEvent.Reason.FLYING_DISABLED, "Flying is not enabled on this server")
@@ -164,7 +164,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
                 player.adventureSettings[AdventureSettings.Type.FLYING] = playerToggleFlightEvent.isFlying
             }
         }
-        if (packet.inputData[InputFlag.StopFlying.ordinal]) {
+        if (packet.inputData.getOrElse(InputFlag.StopFlying.ordinal) { false }) {
             val playerToggleFlightEvent = PlayerToggleFlightEvent(player, false)
             Server.instance.pluginManager.callEvent(playerToggleFlightEvent)
             if (playerToggleFlightEvent.cancelled) {
@@ -194,7 +194,7 @@ class PlayerAuthInputProcessor : PacketProcessor<PlayerAuthInputPacket> {
             if (inputY >= -1.001 && inputY <= 1.001) {
                 riding.setCurrentSpeed(inputY.toDouble())
             }
-        } else if (riding is EntityBoat && packet.inputData[InputFlag.ClientPredictedVehicle.ordinal]) {
+        } else if (riding is EntityBoat && packet.inputData.getOrElse(InputFlag.ClientPredictedVehicle.ordinal) { false }) {
             if (riding.getRuntimeID() == packet.clientPredictedVehicle && riding.isControlling(player)) {
                 if (check(clientLoc, player)) {
                     val offsetLoc = clientLoc.add(0.0, player.player.getBaseOffset().toDouble(), 0.0)

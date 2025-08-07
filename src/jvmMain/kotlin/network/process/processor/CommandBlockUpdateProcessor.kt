@@ -52,7 +52,7 @@ class CommandBlockUpdateProcessor : PacketProcessor<CommandBlockUpdatePacket> {
                     blockEntity.senderName = (packet.name)
                     blockEntity.setTrackOutput(packet.trackOutput)
                     blockEntity.isConditional = conditional
-                    blockEntity.tickDelay = packet.tickDelay
+                    blockEntity.tickDelay = packet.tickDelay.toInt()
                     blockEntity.isExecutingOnFirstTick = packet.shouldExecuteOnFirstTick
 
                     //redstone mode / auto

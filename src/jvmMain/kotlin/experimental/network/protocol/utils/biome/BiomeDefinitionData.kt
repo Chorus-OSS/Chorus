@@ -7,6 +7,7 @@ import org.chorus_oss.protocol.types.biome.BiomeTagsData
 
 operator fun BiomeDefinitionData.Companion.invoke(nbt: CompoundTag): BiomeDefinitionData {
     return BiomeDefinitionData(
+        id = (-1).toUShort(),
         temperature = nbt.getFloat("temperature"),
         downfall = nbt.getFloat("downfall"),
         redSporeDensity = nbt.getFloat("redSporeDensity"),

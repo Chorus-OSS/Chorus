@@ -26,7 +26,7 @@ class BiomeRegistry : IRegistry<Int, BiomeDefinition?, BiomeDefinition> {
                     MutableMap::class.java
                 )
                 for ((key, value) in map) {
-                    NAME2ID[key] = (value as Map<*, *>)["id"].toString().toInt()
+                    NAME2ID[key] = (value as Int)
                 }
             }
         } catch (e: IOException) {
@@ -42,7 +42,7 @@ class BiomeRegistry : IRegistry<Int, BiomeDefinition?, BiomeDefinition> {
                     val biomeData: ListTag<CompoundTag> = root.getList("biomeData", CompoundTag::class.java)
                     for (biomeTag in biomeData.all) {
                         val index = biomeTag.getShort("index")
-                        val biomeID = NAME2ID[BIOME_STRINGS[index.toInt()]]!!
+                        val biomeID = NAME2ID[BIOME_STRINGS[index.toInt()].split(':')[1]]!!
                         val definition = BiomeDefinition(
                             index,
                             data = BiomeDefinitionData(biomeTag.getCompound("data"))
