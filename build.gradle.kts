@@ -52,6 +52,7 @@ kotlin {
                 implementation(libs.rwmutex)
                 implementation(libs.kotlin.reflect)
                 implementation(libs.kflate)
+                implementation(libs.logging)
 
                 implementation(compose.runtime)
                 implementation(compose.components.resources)

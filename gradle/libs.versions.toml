@@ -51,6 +51,7 @@ kflate = "0.0.1"
 compose = "1.8.2"
 maven-publish = "0.34.0"
 shadow = "9.0.0-rc2"
+logging = "7.0.12"
 
 [libraries]
 # Java Libraries
@@ -105,6 +106,7 @@ fleks = { module = "io.github.quillraven.fleks:Fleks", version.ref = "fleks" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet"}
 rwmutex = { module = "com.mayakapps.rwmutex:rwmutex", version.ref = "rwmutex" }
 kflate = { module = "org.chorus-oss:kflate", version.ref = "kflate" }
+logging = { module = "io.github.oshai:kotlin-logging", version.ref = "logging" }
 
 [bundles]
 netty = ["netty-raknet", "netty-epoll", "netty-kqueue"]
