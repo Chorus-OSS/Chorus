@@ -12,14 +12,11 @@
                 <OnStartupTriggeringPolicy/>
             </Policies>
         </RollingRandomAccessFile>
-        <Sentry name="Sentry"
-                dsn="https://2178d5db8ba6018776c15585eb511c0c@o4506530477965312.ingest.sentry.io/4506530494283776"/>
     </Appenders>
     <Loggers>
         <AsyncRoot level="INFO" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
-            <AppenderRef ref="Sentry"/>
         </AsyncRoot>
         <Logger name="oshi.hardware" level="info"/>
         <Logger name="org.jose4j" level="info"/>
