@@ -38,7 +38,7 @@ class PerchingExecutor : EntityControl, IBehaviorExecutor {
                         val transform = entity.transform.add(toPlayerVector.multiply(10.0))
                         transform.position.y =
                             (transform.level.getHighestBlockAt(transform.position.toHorizontal()) + 1).toDouble()
-                        val areaEffectCloud = Entity.Companion.createEntity(
+                        val areaEffectCloud = Entity.createEntity(
                             EntityID.AREA_EFFECT_CLOUD, transform.chunk,
                             CompoundTag().putList(
                                 "Pos", ListTag<FloatTag>()

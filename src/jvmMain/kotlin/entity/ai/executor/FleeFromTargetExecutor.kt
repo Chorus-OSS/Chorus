@@ -61,7 +61,7 @@ open class FleeFromTargetExecutor @JvmOverloads constructor(//指示执行器应
     override fun onInterrupt(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         entity.isEnablePitch = false
         if (clearDataWhenLose) entity.behaviorGroup.memoryStorage.clear(memory)
     }
@@ -69,7 +69,7 @@ open class FleeFromTargetExecutor @JvmOverloads constructor(//指示执行器应
     override fun onStop(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         entity.isEnablePitch = false
         if (clearDataWhenLose) entity.behaviorGroup.memoryStorage.clear(memory)
     }

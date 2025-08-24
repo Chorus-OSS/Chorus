@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemGoldenPickaxe @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.GOLDEN_PICKAXE, meta, count, "Golden Pickaxe") {
+    ItemTool(ItemID.GOLDEN_PICKAXE, meta, count, "Golden Pickaxe") {
     override val maxDurability: Int
         get() = DURABILITY_GOLD
 

@@ -84,7 +84,7 @@ abstract class Command @JvmOverloads constructor(
         this.activeAliases = aliases
         commandParameters["default"] =
             arrayOf<CommandParameter>(
-                CommandParameter.Companion.newType(
+                CommandParameter.newType(
                     "args",
                     true,
                     CommandParamType.RAWTEXT

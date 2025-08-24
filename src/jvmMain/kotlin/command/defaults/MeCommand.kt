@@ -13,9 +13,9 @@ class MeCommand(name: String) : VanillaCommand(name, "commands.me.description", 
         this.permission = "chorus.command.me"
         commandParameters.clear()
         commandParameters["message"] = arrayOf(
-            CommandParameter.Companion.newType("message", CommandParamType.MESSAGE)
+            CommandParameter.newType("message", CommandParamType.MESSAGE)
         )
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

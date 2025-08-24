@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.nbt.tag.ListTag
 open class ItemChestBoat : Item {
     //legacy chest boat , have aux
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.CHEST_BOAT, meta, count) {
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.CHEST_BOAT, meta, count) {
         adjustName()
     }
 

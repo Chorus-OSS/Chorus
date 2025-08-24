@@ -94,7 +94,7 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
         attributeMap = HashMap()
         if (namedTag!!.containsList("Attributes")) {
             for (nbt in namedTag!!.getList<CompoundTag>("Attributes", CompoundTag::class.java).all) {
-                attributeMap[nbt.getString("Name")] = Attribute.Companion.fromNBT(nbt)
+                attributeMap[nbt.getString("Name")] = Attribute.fromNBT(nbt)
             }
         } else {
             for (attribute in randomizeAttributes()) {
@@ -148,7 +148,7 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
 
         val compoundTagListTag = ListTag<CompoundTag>()
         for (attribute in attributeMap.values) {
-            compoundTagListTag.add(Attribute.Companion.toNBT(attribute))
+            compoundTagListTag.add(Attribute.toNBT(attribute))
         }
         namedTag!!.putList("Attributes", compoundTagListTag)
     }
@@ -490,19 +490,19 @@ open class EntityHorse(chunk: IChunk?, nbt: CompoundTag) : EntityAnimal(chunk, n
     protected fun randomizeAttributes(): Array<Attribute> {
         val maxHealth = generateRandomMaxHealth()
         val attributes = arrayOf(
-            Attribute.Companion.getAttribute(Attribute.Companion.MOVEMENT_SPEED)
+            Attribute.getAttribute(Attribute.MOVEMENT_SPEED)
                 .setValue(generateRandomSpeed()),
-            Attribute.Companion.getAttribute(Attribute.Companion.MAX_HEALTH)
+            Attribute.getAttribute(Attribute.MAX_HEALTH)
                 .setMinValue(0f).setMaxValue(maxHealth).setDefaultValue(maxHealth).setValue(maxHealth),
-            Attribute.Companion.getAttribute(Attribute.Companion.HORSE_JUMP_STRENGTH)
+            Attribute.getAttribute(Attribute.HORSE_JUMP_STRENGTH)
                 .setValue(generateRandomJumpStrength())
         )
         val compoundTagListTag = ListTag<CompoundTag>()
-        compoundTagListTag.add(Attribute.Companion.toNBT(attributes[0])).add(
-            Attribute.Companion.toNBT(
+        compoundTagListTag.add(Attribute.toNBT(attributes[0])).add(
+            Attribute.toNBT(
                 attributes[1]
             )
-        ).add(Attribute.Companion.toNBT(attributes[2]))
+        ).add(Attribute.toNBT(attributes[2]))
         namedTag!!.putList("Attributes", compoundTagListTag)
         return attributes
     }

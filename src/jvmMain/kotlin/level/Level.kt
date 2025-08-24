@@ -3392,7 +3392,7 @@ class Level(
     }
 
     val spawnLocation: Locator
-        get() = Locator.Companion.fromObject(requireProvider().spawn, this)
+        get() = Locator.fromObject(requireProvider().spawn, this)
 
     fun setSpawnLocation(pos: Vector3) {
         val previousSpawn = this.spawnLocation

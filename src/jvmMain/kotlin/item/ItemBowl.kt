@@ -1,4 +1,4 @@
 package org.chorus_oss.chorus.item
 
 
-class ItemBowl : Item(ItemID.Companion.BOWL)
+class ItemBowl : Item(ItemID.BOWL)

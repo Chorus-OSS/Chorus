@@ -12,12 +12,12 @@ class PlayAnimationCommand(name: String) : VanillaCommand(name, "commands.playan
         this.permission = "chorus.command.playanimation"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("entity", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("animation", CommandParamType.STRING),
-            CommandParameter.Companion.newType("next_state", true, CommandParamType.STRING),
-            CommandParameter.Companion.newType("blend_out_time", true, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("stop_expression", true, CommandParamType.STRING),
-            CommandParameter.Companion.newType("controller", true, CommandParamType.STRING),
+            CommandParameter.newType("entity", CommandParamType.TARGET),
+            CommandParameter.newType("animation", CommandParamType.STRING),
+            CommandParameter.newType("next_state", true, CommandParamType.STRING),
+            CommandParameter.newType("blend_out_time", true, CommandParamType.FLOAT),
+            CommandParameter.newType("stop_expression", true, CommandParamType.STRING),
+            CommandParameter.newType("controller", true, CommandParamType.STRING),
         )
         this.enableParamTree()
     }

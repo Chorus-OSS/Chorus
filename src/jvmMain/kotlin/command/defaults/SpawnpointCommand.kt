@@ -19,8 +19,8 @@ class SpawnpointCommand(name: String) : VanillaCommand(name, "commands.spawnpoin
         this.permission = "chorus.command.spawnpoint"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newType("spawnPos", true, CommandParamType.POSITION),
+            CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newType("spawnPos", true, CommandParamType.POSITION),
         )
         this.enableParamTree()
     }

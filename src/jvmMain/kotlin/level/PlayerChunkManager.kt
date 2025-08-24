@@ -78,7 +78,7 @@ class PlayerChunkManager(private val player: Player) {
 
     @ApiStatus.Internal
     fun addSendChunk(x: Int, z: Int) {
-        chunkSendQueue.add(Level.Companion.chunkHash(x, z))
+        chunkSendQueue.add(Level.chunkHash(x, z))
     }
 
     private fun updateChunkSendingQueue() {
@@ -102,7 +102,7 @@ class PlayerChunkManager(private val player: Player) {
                 if (ifChunkNotInRadius(rx, rz, viewDistance)) continue
                 val chunkX = loaderChunkX + rx
                 val chunkZ = loaderChunkZ + rz
-                val hashXZ: Long = Level.Companion.chunkHash(chunkX, chunkZ)
+                val hashXZ: Long = Level.chunkHash(chunkX, chunkZ)
                 inRadiusChunks.add(hashXZ)
             }
         }
@@ -116,8 +116,8 @@ class PlayerChunkManager(private val player: Player) {
         )
         // Unload blocks that are out of range
         for (hash in difference) {
-            val x: Int = Level.Companion.getHashX(hash)
-            val z: Int = Level.Companion.getHashZ(hash)
+            val x: Int = Level.getHashX(hash)
+            val z: Int = Level.getHashZ(hash)
             if (player.level!!.unregisterChunkLoader(player, x, z)) {
                 for (entity in player.level!!.getChunkEntities(x, z).values) {
                     if (entity !== player) {

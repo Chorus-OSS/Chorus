@@ -70,7 +70,7 @@ class VersionCommand(name: String) : Command(
         this.permission = "chorus.command.version"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("pluginName", true, CommandParamType.STRING)
+            CommandParameter.newType("pluginName", true, CommandParamType.STRING)
         )
     }
 

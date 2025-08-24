@@ -56,13 +56,13 @@ class UsePotionExecutor
     }
 
     override fun onStop(entity: EntityMob) {
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         entity.isEnablePitch = false
         endShootSequence(entity)
     }
 
     override fun onInterrupt(entity: EntityMob) {
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         entity.isEnablePitch = false
         endShootSequence(entity)
     }
@@ -78,7 +78,7 @@ class UsePotionExecutor
         if (entity is EntityMonster) {
             val item = entity.itemInHand
             if (item is ItemPotion) {
-                PotionType.Companion.get(item.damage).getEffects(false)
+                PotionType.get(item.damage).getEffects(false)
                     .forEach(Consumer { effect -> entity.addEffect(effect) })
             }
             entity.setItemInHand(Item.AIR)
@@ -87,22 +87,22 @@ class UsePotionExecutor
 
     fun getPotion(entity: Entity): Item {
         if (entity.isInsideOfWater() && !entity.hasEffect(EffectType.WATER_BREATHING)) {
-            return ItemPotion.fromPotion(PotionType.Companion.WATER_BREATHING)
+            return ItemPotion.fromPotion(PotionType.WATER_BREATHING)
         } else if (!entity.hasEffect(EffectType.FIRE_RESISTANCE) && (entity.isOnFire() || Arrays.stream<Block>(
                 entity.level!!.getCollisionBlocks(
                     entity.getBoundingBox().getOffsetBoundingBox(0.0, -1.0, 0.0)
                 )
             ).anyMatch { block: Block? -> block is BlockMagma })
         ) {
-            return ItemPotion.fromPotion(PotionType.Companion.FIRE_RESISTANCE)
+            return ItemPotion.fromPotion(PotionType.FIRE_RESISTANCE)
         } else if (entity.health < entity.maxHealth) {
-            return ItemPotion.fromPotion(PotionType.Companion.HEALING)
+            return ItemPotion.fromPotion(PotionType.HEALING)
         } else if (entity is EntityMob) {
             if (entity.memoryStorage.notEmpty(CoreMemoryTypes.BE_ATTACKED_EVENT)) {
                 val event = entity.memoryStorage.get(CoreMemoryTypes.BE_ATTACKED_EVENT)
                 if (event is EntityDamageByEntityEvent) {
                     if (event.damager.position.distance(entity.position) > 11) {
-                        return ItemPotion.fromPotion(PotionType.Companion.SWIFTNESS)
+                        return ItemPotion.fromPotion(PotionType.SWIFTNESS)
                     }
                 }
             }

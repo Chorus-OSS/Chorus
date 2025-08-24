@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemWayfinderArmorTrimSmithingTemplate : Item(ItemID.Companion.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE)
+class ItemWayfinderArmorTrimSmithingTemplate : Item(ItemID.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE)

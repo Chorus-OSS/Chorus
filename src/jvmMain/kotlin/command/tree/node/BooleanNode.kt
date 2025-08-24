@@ -17,6 +17,6 @@ class BooleanNode : ParamNode<Boolean?>() {
 
     companion object {
         private val ENUM_BOOLEAN: Set<String?> =
-            Sets.newHashSet<String?>(CommandEnum.Companion.ENUM_BOOLEAN.getValues())
+            Sets.newHashSet<String?>(CommandEnum.ENUM_BOOLEAN.getValues())
     }
 }

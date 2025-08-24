@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.item
 
 import org.chorus_oss.chorus.network.protocol.types.BannerPatternType
 
-class ItemSkullBannerPattern : ItemBannerPattern(ItemID.Companion.SKULL_BANNER_PATTERN) {
+class ItemSkullBannerPattern : ItemBannerPattern(ItemID.SKULL_BANNER_PATTERN) {
     override val patternType: BannerPatternType
         get() = BannerPatternType.SKULL
 

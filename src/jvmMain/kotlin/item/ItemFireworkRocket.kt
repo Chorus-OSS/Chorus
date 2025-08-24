@@ -18,7 +18,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class ItemFireworkRocket @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.FIREWORK_ROCKET, meta, count, "Firework Rocket") {
+    Item(ItemID.FIREWORK_ROCKET, meta, count, "Firework Rocket") {
     override fun canBeActivated(): Boolean {
         return true
     }

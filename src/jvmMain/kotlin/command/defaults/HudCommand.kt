@@ -14,9 +14,9 @@ class HudCommand(name: String) : VanillaCommand(name, "commands.hud.description"
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("player", false, CommandParamType.TARGET, PlayersNode()),
-                CommandParameter.Companion.newEnum("visible", false, arrayOf("hide", "reset")),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newType("player", false, CommandParamType.TARGET, PlayersNode()),
+                CommandParameter.newEnum("visible", false, arrayOf("hide", "reset")),
+                CommandParameter.newEnum(
                     "hud_element",
                     false,
                     arrayOf(

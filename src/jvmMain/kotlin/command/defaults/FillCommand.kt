@@ -24,11 +24,11 @@ class FillCommand(name: String) : VanillaCommand(name, "commands.fill.descriptio
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("from", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("to", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("tileName", false, CommandEnum.Companion.ENUM_BLOCK),
-                CommandParameter.Companion.newType("blockStates", true, CommandParamType.BLOCK_STATES),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newType("from", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("to", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("tileName", false, CommandEnum.ENUM_BLOCK),
+                CommandParameter.newType("blockStates", true, CommandParamType.BLOCK_STATES),
+                CommandParameter.newEnum(
                     "oldBlockHandling",
                     true,
                     arrayOf("destroy", "hollow", "keep", "outline", "replace")
@@ -37,13 +37,13 @@ class FillCommand(name: String) : VanillaCommand(name, "commands.fill.descriptio
         )
         this.addCommandParameters(
             "replace", arrayOf(
-                CommandParameter.Companion.newType("from", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("to", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("tileName", false, CommandEnum.Companion.ENUM_BLOCK),
-                CommandParameter.Companion.newType("blockStates", false, CommandParamType.BLOCK_STATES),
-                CommandParameter.Companion.newEnum("oldBlockHandling", false, arrayOf("replace")),
-                CommandParameter.Companion.newEnum("replaceTileName", false, CommandEnum.Companion.ENUM_BLOCK),
-                CommandParameter.Companion.newType("blockStates", true, CommandParamType.BLOCK_STATES)
+                CommandParameter.newType("from", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("to", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("tileName", false, CommandEnum.ENUM_BLOCK),
+                CommandParameter.newType("blockStates", false, CommandParamType.BLOCK_STATES),
+                CommandParameter.newEnum("oldBlockHandling", false, arrayOf("replace")),
+                CommandParameter.newEnum("replaceTileName", false, CommandEnum.ENUM_BLOCK),
+                CommandParameter.newType("blockStates", true, CommandParamType.BLOCK_STATES)
             )
         )
         this.enableParamTree()

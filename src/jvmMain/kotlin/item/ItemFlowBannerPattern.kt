@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.network.protocol.types.BannerPatternType
 /**
  * todo future
  */
-class ItemFlowBannerPattern : ItemBannerPattern(ItemID.Companion.FLOW_BANNER_PATTERN) {
+class ItemFlowBannerPattern : ItemBannerPattern(ItemID.FLOW_BANNER_PATTERN) {
     override val patternType: BannerPatternType?
         get() =//todo future
             null

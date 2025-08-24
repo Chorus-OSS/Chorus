@@ -96,7 +96,7 @@ class PotionThrowExecutor(
     override fun onStop(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -108,7 +108,7 @@ class PotionThrowExecutor(
     override fun onInterrupt(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -141,7 +141,7 @@ class PotionThrowExecutor(
             )
             .putInt("PotionId", getPotionEffect(entity))
 
-        val projectile: Entity = Entity.Companion.createEntity(
+        val projectile: Entity = Entity.createEntity(
             EntityID.SPLASH_POTION,
             entity.level!!.getChunk(entity.position.chunkX, entity.position.chunkZ),
             nbt

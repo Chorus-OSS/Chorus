@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemOakChestBoat : ItemChestBoat(ItemID.Companion.OAK_CHEST_BOAT) {
+class ItemOakChestBoat : ItemChestBoat(ItemID.OAK_CHEST_BOAT) {
     override val boatId: Int
         get() = 0
 

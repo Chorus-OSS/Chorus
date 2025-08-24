@@ -7,10 +7,10 @@ import org.chorus_oss.chorus.level.updater.util.tagupdater.CompoundTagUpdaterCon
 
 class BlockStateUpdater_1_20_40 : Updater {
     override fun registerUpdaters(ctx: CompoundTagUpdaterContext) {
-        this.addDirectionUpdater(ctx, "minecraft:chest", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:ender_chest", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:stonecutter_block", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:trapped_chest", OrderedUpdater.Companion.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:chest", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:ender_chest", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:stonecutter_block", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:trapped_chest", OrderedUpdater.FACING_TO_CARDINAL)
     }
 
     private fun addDirectionUpdater(ctx: CompoundTagUpdaterContext, identifier: String, updater: OrderedUpdater) {

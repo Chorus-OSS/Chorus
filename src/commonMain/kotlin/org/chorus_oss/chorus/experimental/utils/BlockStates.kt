@@ -34,7 +34,7 @@ object BlockStates {
         )
 
         return Buffer().run {
-            Tag.Companion.serialize(tag, this, TagSerialization.LE, isRoot = true)
+            Tag.serialize(tag, this, TagSerialization.LE, isRoot = true)
             `FNV1A-32`(this.readByteArray())
         }
     }

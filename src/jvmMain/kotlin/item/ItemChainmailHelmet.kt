@@ -1,10 +1,10 @@
 package org.chorus_oss.chorus.item
 
 class ItemChainmailHelmet : ItemArmor {
-    constructor() : super(ItemID.Companion.CHAINMAIL_HELMET)
+    constructor() : super(ItemID.CHAINMAIL_HELMET)
 
     @JvmOverloads
-    constructor(meta: Int, count: Int = 1) : super(ItemID.Companion.CHAINMAIL_HELMET, meta, count, "Chainmail Helmet")
+    constructor(meta: Int, count: Int = 1) : super(ItemID.CHAINMAIL_HELMET, meta, count, "Chainmail Helmet")
 
     override val tier: Int
         get() = TIER_CHAIN

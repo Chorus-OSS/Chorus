@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.block.property.CommonBlockProperties
 class BlockSpruceLog @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
     BlockLog(blockstate) {
     override fun getStrippedState(): BlockState {
-        return BlockStrippedSpruceLog.Companion.properties.defaultState
+        return BlockStrippedSpruceLog.properties.defaultState
     }
 
     override val properties: BlockProperties

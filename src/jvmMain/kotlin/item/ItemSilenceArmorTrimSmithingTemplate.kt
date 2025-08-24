@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemSilenceArmorTrimSmithingTemplate : Item(ItemID.Companion.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE)
+class ItemSilenceArmorTrimSmithingTemplate : Item(ItemID.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE)

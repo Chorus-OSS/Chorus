@@ -11,7 +11,7 @@ class StopCommand(name: String) : VanillaCommand(name, "commands.stop.descriptio
     init {
         this.permission = "chorus.command.stop"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

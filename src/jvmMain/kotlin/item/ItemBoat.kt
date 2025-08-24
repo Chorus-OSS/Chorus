@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.utils.Identifier
 
 open class ItemBoat : Item {
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.BOAT, meta, count)
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.BOAT, meta, count)
 
     constructor(id: String) : super(id)
 
@@ -23,64 +23,64 @@ open class ItemBoat : Item {
         when (damage) {
             0 -> {
                 name = "Oak Boat"
-                this.id = ItemID.Companion.OAK_BOAT
-                this.identifier = Identifier(ItemID.Companion.OAK_BOAT)
+                this.id = ItemID.OAK_BOAT
+                this.identifier = Identifier(ItemID.OAK_BOAT)
                 return
             }
 
             1 -> {
                 name = "Spruce Boat"
-                this.id = ItemID.Companion.SPRUCE_BOAT
-                this.identifier = Identifier(ItemID.Companion.SPRUCE_BOAT)
+                this.id = ItemID.SPRUCE_BOAT
+                this.identifier = Identifier(ItemID.SPRUCE_BOAT)
                 return
             }
 
             2 -> {
                 name = "Birch Boat"
-                this.id = ItemID.Companion.BIRCH_BOAT
-                this.identifier = Identifier(ItemID.Companion.BIRCH_BOAT)
+                this.id = ItemID.BIRCH_BOAT
+                this.identifier = Identifier(ItemID.BIRCH_BOAT)
                 return
             }
 
             3 -> {
                 name = "Jungle Boat"
-                this.id = ItemID.Companion.JUNGLE_BOAT
-                this.identifier = Identifier(ItemID.Companion.JUNGLE_BOAT)
+                this.id = ItemID.JUNGLE_BOAT
+                this.identifier = Identifier(ItemID.JUNGLE_BOAT)
                 return
             }
 
             4 -> {
                 name = "Acacia Boat"
-                this.id = ItemID.Companion.ACACIA_BOAT
-                this.identifier = Identifier(ItemID.Companion.ACACIA_BOAT)
+                this.id = ItemID.ACACIA_BOAT
+                this.identifier = Identifier(ItemID.ACACIA_BOAT)
                 return
             }
 
             5 -> {
                 name = "Dark Oak Boat"
-                this.id = ItemID.Companion.DARK_OAK_BOAT
-                this.identifier = Identifier(ItemID.Companion.DARK_OAK_BOAT)
+                this.id = ItemID.DARK_OAK_BOAT
+                this.identifier = Identifier(ItemID.DARK_OAK_BOAT)
                 return
             }
 
             6 -> {
                 name = "Mangrove Boat"
-                this.id = ItemID.Companion.MANGROVE_BOAT
-                this.identifier = Identifier(ItemID.Companion.MANGROVE_BOAT)
+                this.id = ItemID.MANGROVE_BOAT
+                this.identifier = Identifier(ItemID.MANGROVE_BOAT)
                 return
             }
 
             7 -> {
                 name = "Bamboo Raft"
-                this.id = ItemID.Companion.BAMBOO_RAFT
-                this.identifier = Identifier(ItemID.Companion.BAMBOO_RAFT)
+                this.id = ItemID.BAMBOO_RAFT
+                this.identifier = Identifier(ItemID.BAMBOO_RAFT)
                 return
             }
 
             8 -> {
                 name = "Cherry Boat"
-                this.id = ItemID.Companion.CHERRY_BOAT
-                this.identifier = Identifier(ItemID.Companion.CHERRY_BOAT)
+                this.id = ItemID.CHERRY_BOAT
+                this.identifier = Identifier(ItemID.CHERRY_BOAT)
             }
         }
         this.meta = 0

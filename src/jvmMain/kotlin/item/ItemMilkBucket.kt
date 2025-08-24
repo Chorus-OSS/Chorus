@@ -8,7 +8,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
 
-class ItemMilkBucket : ItemBucket(ItemID.Companion.MILK_BUCKET) {
+class ItemMilkBucket : ItemBucket(ItemID.MILK_BUCKET) {
     override var damage: Int
         get() = super.damage
         set(meta) {
@@ -36,7 +36,7 @@ class ItemMilkBucket : ItemBucket(ItemID.Companion.MILK_BUCKET) {
 
         if (player.isAdventure || player.isSurvival) {
             --this.count
-            player.inventory.addItem(get(ItemID.Companion.BUCKET, 0, 1))
+            player.inventory.addItem(get(ItemID.BUCKET, 0, 1))
             player.inventory.setItemInHand(this)
             player.level!!.addSound(player.position, Sound.RANDOM_BURP)
         }

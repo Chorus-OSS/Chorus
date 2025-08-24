@@ -14,7 +14,7 @@ import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.utils.Rail
 
 class ItemHopperMinecart @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.HOPPER_MINECART, meta, count, "Minecart with Hopper") {
+    Item(ItemID.HOPPER_MINECART, meta, count, "Minecart with Hopper") {
     override fun canBeActivated(): Boolean {
         return true
     }

@@ -65,7 +65,7 @@ class VillagerBreedingExecutor(
             sendInLoveParticles(another!!)
         }
 
-        val baby = Entity.Companion.createEntity(entity.getNetworkID(), entity.locator) as EntityVillagerV2
+        val baby = Entity.createEntity(entity.getNetworkID(), entity.locator) as EntityVillagerV2
         baby.setBaby(true)
         //防止小屁孩去生baby
         baby.memoryStorage.set(CoreMemoryTypes.LAST_IN_LOVE_TIME, entity.level!!.tick)

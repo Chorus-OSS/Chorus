@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.item
 
 import org.chorus_oss.chorus.network.protocol.types.BannerPatternType
 
-class ItemPiglinBannerPattern : ItemBannerPattern(ItemID.Companion.PIGLIN_BANNER_PATTERN) {
+class ItemPiglinBannerPattern : ItemBannerPattern(ItemID.PIGLIN_BANNER_PATTERN) {
     override val patternType: BannerPatternType
         get() = BannerPatternType.PIGLIN
 

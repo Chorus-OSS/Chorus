@@ -330,7 +330,7 @@ class BlockRedstoneWire @JvmOverloads constructor(blockState: BlockState = prope
         protected fun canConnectTo(block: Block, side: BlockFace?): Boolean {
             if (block.id == BlockID.REDSTONE_WIRE) {
                 return true
-            } else if (BlockRedstoneDiode.Companion.isDiode(block)) {
+            } else if (BlockRedstoneDiode.isDiode(block)) {
                 val face = (block as BlockRedstoneDiode).facing
                 return face == side || face!!.getOpposite() == side
             } else {

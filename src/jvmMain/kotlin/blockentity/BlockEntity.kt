@@ -1,8 +1,8 @@
 package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.block.Block
-import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Locator
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.registry.Registries

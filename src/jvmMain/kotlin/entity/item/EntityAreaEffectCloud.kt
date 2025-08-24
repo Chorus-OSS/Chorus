@@ -72,7 +72,7 @@ class EntityAreaEffectCloud(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, n
         } else {
             color[0] = 255
 
-            val potion: PotionType = PotionType.Companion.get(getPotionId())
+            val potion: PotionType = PotionType.get(getPotionId())
             for (effect: Effect in potion.getEffects(true)) {
                 val effectColor: Color = effect.getColor()
                 color[1] += effectColor.red * effect.getLevel()

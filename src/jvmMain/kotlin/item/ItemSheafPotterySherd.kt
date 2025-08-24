@@ -1,4 +1,4 @@
 package org.chorus_oss.chorus.item
 
 
-class ItemSheafPotterySherd : ItemPotterySherd(ItemID.Companion.SHEAF_POTTERY_SHERD)
+class ItemSheafPotterySherd : ItemPotterySherd(ItemID.SHEAF_POTTERY_SHERD)

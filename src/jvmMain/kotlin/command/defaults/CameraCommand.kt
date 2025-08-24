@@ -25,126 +25,126 @@ class CameraCommand(name: String) : VanillaCommand(name, "commands.camera.descri
         this.permission = "chorus.command.camera"
         commandParameters.clear()
         commandParameters["clear"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("clear", false, arrayOf("clear"))
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("clear", false, arrayOf("clear"))
         )
         commandParameters["fade"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("fade", false, arrayOf("fade"))
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("fade", false, arrayOf("fade"))
         )
         commandParameters["fade-color"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("fade", false, arrayOf("fade")),
-            CommandParameter.Companion.newEnum("color", false, arrayOf("color")),
-            CommandParameter.Companion.newType("red", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("green", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("blue", false, CommandParamType.FLOAT)
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("fade", false, arrayOf("fade")),
+            CommandParameter.newEnum("color", false, arrayOf("color")),
+            CommandParameter.newType("red", false, CommandParamType.FLOAT),
+            CommandParameter.newType("green", false, CommandParamType.FLOAT),
+            CommandParameter.newType("blue", false, CommandParamType.FLOAT)
         )
         commandParameters["fade-time-color"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("fade", false, arrayOf("fade")),
-            CommandParameter.Companion.newEnum("time", false, arrayOf("time")),
-            CommandParameter.Companion.newType("fadeInSeconds", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("holdSeconds", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("fadeOutSeconds", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newEnum("color", false, arrayOf("color")),
-            CommandParameter.Companion.newType("red", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("green", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("blue", false, CommandParamType.FLOAT)
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("fade", false, arrayOf("fade")),
+            CommandParameter.newEnum("time", false, arrayOf("time")),
+            CommandParameter.newType("fadeInSeconds", false, CommandParamType.FLOAT),
+            CommandParameter.newType("holdSeconds", false, CommandParamType.FLOAT),
+            CommandParameter.newType("fadeOutSeconds", false, CommandParamType.FLOAT),
+            CommandParameter.newEnum("color", false, arrayOf("color")),
+            CommandParameter.newType("red", false, CommandParamType.FLOAT),
+            CommandParameter.newType("green", false, CommandParamType.FLOAT),
+            CommandParameter.newType("blue", false, CommandParamType.FLOAT)
         )
         commandParameters["set-default"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("default", true, arrayOf("default"))
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("default", true, arrayOf("default"))
         )
         commandParameters["set-rot"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
-            CommandParameter.Companion.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
-            CommandParameter.Companion.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("rot", false, arrayOf("rot")),
+            CommandParameter.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
+            CommandParameter.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
         )
         commandParameters["set-pos"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
-            CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("pos", false, arrayOf("pos")),
+            CommandParameter.newType("position", false, CommandParamType.POSITION),
         )
         commandParameters["set-pos-rot"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
-            CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
-            CommandParameter.Companion.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
-            CommandParameter.Companion.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("pos", false, arrayOf("pos")),
+            CommandParameter.newType("position", false, CommandParamType.POSITION),
+            CommandParameter.newEnum("rot", false, arrayOf("rot")),
+            CommandParameter.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
+            CommandParameter.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
         )
         commandParameters["set-ease-default"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("ease", false, arrayOf("ease")),
-            CommandParameter.Companion.newType(
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("ease", false, arrayOf("ease")),
+            CommandParameter.newType(
                 "easeTime",
                 false,
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
-            CommandParameter.Companion.newEnum("default", true, arrayOf("default"))
+            CommandParameter.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
+            CommandParameter.newEnum("default", true, arrayOf("default"))
         )
         commandParameters["set-ease-rot"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("ease", false, arrayOf("ease")),
-            CommandParameter.Companion.newType(
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("ease", false, arrayOf("ease")),
+            CommandParameter.newType(
                 "easeTime",
                 false,
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
-            CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
-            CommandParameter.Companion.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
-            CommandParameter.Companion.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
+            CommandParameter.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
+            CommandParameter.newEnum("rot", false, arrayOf("rot")),
+            CommandParameter.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
+            CommandParameter.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
         )
         commandParameters["set-ease-pos"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("ease", false, arrayOf("ease")),
-            CommandParameter.Companion.newType(
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("ease", false, arrayOf("ease")),
+            CommandParameter.newType(
                 "easeTime",
                 false,
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
-            CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
-            CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
+            CommandParameter.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
+            CommandParameter.newEnum("pos", false, arrayOf("pos")),
+            CommandParameter.newType("position", false, CommandParamType.POSITION),
         )
         commandParameters["set-ease-pos-rot"] = arrayOf(
-            CommandParameter.Companion.newType("players", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("set", false, arrayOf("set")),
-            CommandParameter.Companion.newEnum("preset", false, CommandEnum.Companion.CAMERA_PRESETS),
-            CommandParameter.Companion.newEnum("ease", false, arrayOf("ease")),
-            CommandParameter.Companion.newType(
+            CommandParameter.newType("players", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("set", false, arrayOf("set")),
+            CommandParameter.newEnum("preset", false, CommandEnum.CAMERA_PRESETS),
+            CommandParameter.newEnum("ease", false, arrayOf("ease")),
+            CommandParameter.newType(
                 "easeTime",
                 false,
                 CommandParamType.FLOAT,
                 FloatNode()
             ),
-            CommandParameter.Companion.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
-            CommandParameter.Companion.newEnum("pos", false, arrayOf("pos")),
-            CommandParameter.Companion.newType("position", false, CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("rot", false, arrayOf("rot")),
-            CommandParameter.Companion.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
-            CommandParameter.Companion.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
+            CommandParameter.newEnum("easeType", false, EASE_MAP.keys.toTypedArray()),
+            CommandParameter.newEnum("pos", false, arrayOf("pos")),
+            CommandParameter.newType("position", false, CommandParamType.POSITION),
+            CommandParameter.newEnum("rot", false, arrayOf("rot")),
+            CommandParameter.newType("xRot", false, CommandParamType.VALUE, RelativeFloatNode()),
+            CommandParameter.newType("yRot", false, CommandParamType.VALUE, RelativeFloatNode())
         )
         this.enableParamTree()
     }

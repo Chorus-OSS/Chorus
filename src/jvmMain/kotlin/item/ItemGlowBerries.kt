@@ -10,7 +10,7 @@ import org.chorus_oss.chorus.math.BlockFace
 import java.util.concurrent.ThreadLocalRandom
 
 class ItemGlowBerries @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.GLOW_BERRIES, 0, count, "Glow Berries") {
+    ItemFood(ItemID.GLOW_BERRIES, 0, count, "Glow Berries") {
     override fun canBeActivated(): Boolean {
         return true
     }

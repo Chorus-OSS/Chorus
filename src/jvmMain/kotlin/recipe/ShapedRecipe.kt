@@ -216,7 +216,7 @@ class ShapedRecipe @JvmOverloads constructor(
                 if (row == inputs.size - 1) {
                     input.col = (0)
                     input.row = (0)
-                    input.data = (Input.Companion.EMPTY_INPUT_ARRAY)
+                    input.data = (Input.EMPTY_INPUT_ARRAY)
                     return
                 }
             }

@@ -89,7 +89,7 @@ class SnowGolemShootExecutor(
     override fun onStop(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -100,7 +100,7 @@ class SnowGolemShootExecutor(
     override fun onInterrupt(entity: EntityMob) {
         removeRouteTarget(entity)
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }

@@ -15,8 +15,8 @@ class FishingEnchantmentItemSelector : EnchantmentItemSelector {
 
     override fun getSupportEnchantments(item: Item): List<Enchantment> {
         val enchantments = ArrayList<Enchantment>()
-        for (enchantment in Enchantment.Companion.registeredEnchantments) {
-            if (enchantment.isFishable && (item.id == ItemID.Companion.ENCHANTED_BOOK || enchantment.canEnchant(item))) {
+        for (enchantment in Enchantment.registeredEnchantments) {
+            if (enchantment.isFishable && (item.id == ItemID.ENCHANTED_BOOK || enchantment.canEnchant(item))) {
                 enchantments.add(enchantment)
             }
         }

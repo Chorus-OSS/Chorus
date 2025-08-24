@@ -18,11 +18,11 @@ class SpreadPlayersCommand(name: String) : VanillaCommand(name, "commands.spread
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("x", false, CommandParamType.VALUE),
-                CommandParameter.Companion.newType("z", false, CommandParamType.VALUE),
-                CommandParameter.Companion.newType("spreadDistance", false, CommandParamType.FLOAT),
-                CommandParameter.Companion.newType("maxRange", false, CommandParamType.FLOAT),
-                CommandParameter.Companion.newType("victim", false, CommandParamType.TARGET)
+                CommandParameter.newType("x", false, CommandParamType.VALUE),
+                CommandParameter.newType("z", false, CommandParamType.VALUE),
+                CommandParameter.newType("spreadDistance", false, CommandParamType.FLOAT),
+                CommandParameter.newType("maxRange", false, CommandParamType.FLOAT),
+                CommandParameter.newType("victim", false, CommandParamType.TARGET)
             )
         )
         this.random = ThreadLocalRandom.current()

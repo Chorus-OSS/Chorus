@@ -10,7 +10,7 @@ class SaveOnCommand(name: String) : VanillaCommand(name, "Enable auto saving") {
     init {
         this.permission = "chorus.command.save.enable"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

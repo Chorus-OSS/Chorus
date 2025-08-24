@@ -16,12 +16,7 @@ import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag
 import org.chorus_oss.chorus.network.protocol.types.GameType
-import org.chorus_oss.chorus.utils.ChunkException
-import org.chorus_oss.chorus.utils.Loggable
-import org.chorus_oss.chorus.utils.SemVersion
-import org.chorus_oss.chorus.utils.Utils
-import org.chorus_oss.chorus.utils.from
-import org.chorus_oss.chorus.utils.toTag
+import org.chorus_oss.chorus.utils.*
 import org.iq80.leveldb.CompressionType
 import org.iq80.leveldb.Options
 import java.io.*
@@ -337,7 +332,7 @@ class LevelDBProvider(override val level: Level, override val path: String) : Le
     }
 
     override fun getEmptyChunk(x: Int, z: Int): IChunk {
-        return Chunk.Companion.builder().levelProvider(this).emptyChunk(x, z)
+        return Chunk.builder().levelProvider(this).emptyChunk(x, z)
     }
 
     override fun isChunkPopulated(x: Int, z: Int): Boolean {

@@ -27,7 +27,7 @@ class StatusCommand(name: String) :
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newEnum("mode", true, arrayOf("full", "simple"))
+                CommandParameter.newEnum("mode", true, arrayOf("full", "simple"))
             )
         )
     }

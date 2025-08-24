@@ -18,14 +18,14 @@ class EnchantCommand(name: String) :
         this.permission = "chorus.command.enchant"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("enchantmentId", CommandParamType.INT),
-            CommandParameter.Companion.newType("level", true, CommandParamType.INT)
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newType("enchantmentId", CommandParamType.INT),
+            CommandParameter.newType("level", true, CommandParamType.INT)
         )
         commandParameters["byName"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("enchantmentName", CommandEnum.Companion.ENUM_ENCHANTMENT),
-            CommandParameter.Companion.newType("level", true, CommandParamType.INT)
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("enchantmentName", CommandEnum.ENUM_ENCHANTMENT),
+            CommandParameter.newType("level", true, CommandParamType.INT)
         )
         this.enableParamTree()
     }

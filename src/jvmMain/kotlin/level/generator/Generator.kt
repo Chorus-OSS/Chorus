@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.level.generator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.chorus_oss.chorus.block.BlockID
 import org.chorus_oss.chorus.level.DimensionData
 import org.chorus_oss.chorus.level.Level
 import org.chorus_oss.chorus.level.format.IChunk

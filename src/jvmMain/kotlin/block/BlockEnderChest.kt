@@ -102,7 +102,7 @@ class BlockEnderChest @JvmOverloads constructor(blockstate: BlockState = propert
             }
         }
 
-        return BlockEntityHolder.Companion.setBlockAndCreateEntity(
+        return BlockEntityHolder.setBlockAndCreateEntity(
             this,
             direct = true,
             update = true,

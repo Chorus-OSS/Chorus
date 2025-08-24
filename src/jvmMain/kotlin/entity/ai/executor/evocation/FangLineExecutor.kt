@@ -94,7 +94,7 @@ open class FangLineExecutor : EntityControl, IBehaviorExecutor {
                     .add(FloatTag(0f))
             )
 
-        val fang = Entity.Companion.createEntity(
+        val fang = Entity.createEntity(
             EntityID.EVOCATION_FANG,
             transform.level.getChunk(transform.position.chunkX, transform.position.chunkZ),
             nbt

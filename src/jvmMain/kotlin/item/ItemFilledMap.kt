@@ -18,7 +18,7 @@ import javax.imageio.ImageIO
 
 
 class ItemFilledMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.FILLED_MAP, meta, count, "Map") {
+    Item(ItemID.FILLED_MAP, meta, count, "Map") {
     // not very pretty but definitely better than before.
     private var image: BufferedImage? = null
 

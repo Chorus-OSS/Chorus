@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemStainedGlassPane @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.STAINED_GLASS_PANE, meta, count) {
+    Item(ItemID.STAINED_GLASS_PANE, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

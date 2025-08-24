@@ -17,7 +17,7 @@ class PluginsCommand(name: String) : Command(
     init {
         this.permission = "chorus.command.plugins"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

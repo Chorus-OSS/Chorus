@@ -74,7 +74,7 @@ abstract class ItemTool @JvmOverloads constructor(id: String, meta: Int = 0, cou
             }
 
             val durability =
-                getEnchantment(Enchantment.Companion.ID_DURABILITY)
+                getEnchantment(Enchantment.ID_DURABILITY)
             return durability != null && durability.level > 0 && (100 / (durability.level + 1)) <= Random()
                 .nextInt(100)
         }
@@ -101,7 +101,7 @@ abstract class ItemTool @JvmOverloads constructor(id: String, meta: Int = 0, cou
         get() = false
 
     override val isShears: Boolean
-        get() = (this.id == ItemID.Companion.SHEARS)
+        get() = (this.id == ItemID.SHEARS)
 
     override val isTool: Boolean
         get() = true
@@ -196,34 +196,34 @@ abstract class ItemTool @JvmOverloads constructor(id: String, meta: Int = 0, cou
         fun getBestTool(toolType: Int): Item {
             when (toolType) {
                 TYPE_NONE, TYPE_PICKAXE -> {
-                    return get(ItemID.Companion.NETHERITE_PICKAXE)
+                    return get(ItemID.NETHERITE_PICKAXE)
                 }
 
                 TYPE_AXE -> {
-                    return get(ItemID.Companion.NETHERITE_AXE)
+                    return get(ItemID.NETHERITE_AXE)
                 }
 
                 TYPE_SHOVEL -> {
-                    return get(ItemID.Companion.NETHERITE_SHOVEL)
+                    return get(ItemID.NETHERITE_SHOVEL)
                 }
 
                 TYPE_SHEARS -> {
-                    return get(ItemID.Companion.SHEARS)
+                    return get(ItemID.SHEARS)
                 }
 
                 TYPE_SWORD -> {
-                    return get(ItemID.Companion.NETHERITE_SWORD)
+                    return get(ItemID.NETHERITE_SWORD)
                 }
 
                 else -> {
                     // Can't use the switch-case syntax because they are dynamic types
                     if (toolType == TYPE_HOE) {
-                        return get(ItemID.Companion.NETHERITE_HOE)
+                        return get(ItemID.NETHERITE_HOE)
                     }
                     if (toolType == TYPE_HANDS_ONLY) {
                         return AIR
                     }
-                    return get(ItemID.Companion.NETHERITE_PICKAXE)
+                    return get(ItemID.NETHERITE_PICKAXE)
                 }
             }
         }

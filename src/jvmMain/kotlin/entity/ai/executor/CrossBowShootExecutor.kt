@@ -111,7 +111,7 @@ class CrossBowShootExecutor(
         removeRouteTarget(entity)
         removeLookTarget(entity)
         //重置速度
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -166,7 +166,7 @@ class CrossBowShootExecutor(
         val p = pullBowTick.toDouble() / 20
         val f = min((p * p + p * 2) / 3, 1.0) * 3
 
-        val arrow = Entity.Companion.createEntity(
+        val arrow = Entity.createEntity(
             EntityID.ARROW,
             entity.chunk!!, nbt, entity, f == 2.0
         ) as EntityArrow

@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.entity.effect.PotionType
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 class ItemSplashPotion @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ProjectileItem(ItemID.Companion.SPLASH_POTION, meta, count, "Splash Potion") {
+    ProjectileItem(ItemID.SPLASH_POTION, meta, count, "Splash Potion") {
     init {
         updateName()
     }
@@ -21,7 +21,7 @@ class ItemSplashPotion @JvmOverloads constructor(meta: Int = 0, count: Int = 1) 
         name = if (PotionType.WATER.equals(potion)) {
             "Splash Water Bottle"
         } else {
-            ItemPotion.Companion.buildName(potion, "Splash Potion", true)
+            ItemPotion.buildName(potion, "Splash Potion", true)
         }
     }
 
@@ -33,7 +33,7 @@ class ItemSplashPotion @JvmOverloads constructor(meta: Int = 0, count: Int = 1) 
     }
 
     override val projectileEntityType: String
-        get() = ItemID.Companion.SPLASH_POTION
+        get() = ItemID.SPLASH_POTION
 
     override val throwForce: Float
         get() = 0.5f

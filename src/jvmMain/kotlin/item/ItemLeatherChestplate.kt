@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemLeatherChestplate @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemColorArmor(ItemID.Companion.LEATHER_CHESTPLATE, meta, count) {
+    ItemColorArmor(ItemID.LEATHER_CHESTPLATE, meta, count) {
     override val tier: Int
         get() = TIER_LEATHER
 

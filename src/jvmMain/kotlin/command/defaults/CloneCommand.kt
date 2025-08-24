@@ -22,22 +22,22 @@ class CloneCommand(name: String) : VanillaCommand(name, "commands.clone.descript
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("begin", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("end", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("destination", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("maskMode", true, arrayOf("masked", "replace")),
-                CommandParameter.Companion.newEnum("cloneMode", true, arrayOf("force", "move", "normal"))
+                CommandParameter.newType("begin", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("end", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("destination", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("maskMode", true, arrayOf("masked", "replace")),
+                CommandParameter.newEnum("cloneMode", true, arrayOf("force", "move", "normal"))
             )
         )
         this.addCommandParameters(
             "filtered", arrayOf(
-                CommandParameter.Companion.newType("begin", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("end", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("destination", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("maskMode", false, arrayOf("filtered")),
-                CommandParameter.Companion.newEnum("cloneMode", false, arrayOf("force", "move", "normal")),
-                CommandParameter.Companion.newType("tileId", false, CommandParamType.INT),
-                CommandParameter.Companion.newType("tileData", false, CommandParamType.INT)
+                CommandParameter.newType("begin", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("end", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("destination", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("maskMode", false, arrayOf("filtered")),
+                CommandParameter.newEnum("cloneMode", false, arrayOf("force", "move", "normal")),
+                CommandParameter.newType("tileId", false, CommandParamType.INT),
+                CommandParameter.newType("tileData", false, CommandParamType.INT)
             )
         )
         this.enableParamTree()

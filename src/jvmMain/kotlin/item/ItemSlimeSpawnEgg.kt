@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemSlimeSpawnEgg : ItemSpawnEgg(ItemID.Companion.SLIME_SPAWN_EGG) {
+class ItemSlimeSpawnEgg : ItemSpawnEgg(ItemID.SLIME_SPAWN_EGG) {
     override val entityNetworkId: Int
         get() = 37
 

@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemPlanks @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.PLANKS, meta, count) {
+    Item(ItemID.PLANKS, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

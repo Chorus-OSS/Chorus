@@ -34,7 +34,7 @@ class BlockShortGrass(blockState: BlockState = properties.defaultState) : BlockF
     ): Boolean {
         if (level.getBlock(this.position).id == BlockID.SHORT_GRASS) return false
 
-        if (BlockSweetBerryBush.Companion.isSupportValid(block.down())) {
+        if (BlockSweetBerryBush.isSupportValid(block.down())) {
             level.setBlock(block.position, this, true)
             return true
         }
@@ -43,7 +43,7 @@ class BlockShortGrass(blockState: BlockState = properties.defaultState) : BlockF
 
     override fun onUpdate(type: Int): Int {
         if (type == Level.BLOCK_UPDATE_NORMAL) {
-            if (!BlockSweetBerryBush.Companion.isSupportValid(down(1, 0))) {
+            if (!BlockSweetBerryBush.isSupportValid(down(1, 0))) {
                 level.useBreakOn(this.position)
                 return Level.BLOCK_UPDATE_NORMAL
             }

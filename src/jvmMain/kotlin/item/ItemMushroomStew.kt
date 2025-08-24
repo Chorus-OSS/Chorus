@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.Player
 
 
 class ItemMushroomStew @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.MUSHROOM_STEW, 0, count, "Mushroom Stew") {
+    ItemFood(ItemID.MUSHROOM_STEW, 0, count, "Mushroom Stew") {
     override val maxStackSize: Int
         get() = 1
 

@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 
 class ItemPainting @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    Item(ItemID.Companion.PAINTING, 0, count, "Painting") {
+    Item(ItemID.PAINTING, 0, count, "Painting") {
     override fun canBeActivated(): Boolean {
         return true
     }

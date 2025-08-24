@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemDriedKelp @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.DRIED_KELP, 0, count, "Dried Kelp") {
+    ItemFood(ItemID.DRIED_KELP, 0, count, "Dried Kelp") {
     override val foodRestore: Int
         get() = 1
 

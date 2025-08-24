@@ -119,7 +119,7 @@ class JavaPluginLoader(private val server: Server) : PluginLoader {
 
     override fun disablePlugin(plugin: Plugin) {
         if (plugin is PluginBase && plugin.isEnabled) {
-            if (plugin === InternalPlugin.Companion.INSTANCE) {
+            if (plugin === InternalPlugin.INSTANCE) {
                 throw UnsupportedOperationException("The PowerNukkitX Internal Plugin cannot be disabled")
             }
 

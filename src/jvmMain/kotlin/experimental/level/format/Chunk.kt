@@ -42,15 +42,17 @@ class Chunk(
     private val height = MutableList<Short>(256) { 0 }
 
     private val entities: Pair<ReadWriteMutex, MutableMap<Long, Entity>> = Pair(ReadWriteMutex(), mutableMapOf())
-    private val blockEntities: Pair<ReadWriteMutex, MutableMap<Long, BlockEntity>> = Pair(ReadWriteMutex(), mutableMapOf())
-    private val blockToEntity: Pair<ReadWriteMutex, MutableMap<Long, BlockEntity>> = Pair(ReadWriteMutex(), mutableMapOf())
+    private val blockEntities: Pair<ReadWriteMutex, MutableMap<Long, BlockEntity>> =
+        Pair(ReadWriteMutex(), mutableMapOf())
+    private val blockToEntity: Pair<ReadWriteMutex, MutableMap<Long, BlockEntity>> =
+        Pair(ReadWriteMutex(), mutableMapOf())
 
     private val subChunksRWM = ReadWriteMutex()
     private val heightRWM = ReadWriteMutex()
     private val biomeRWM = ReadWriteMutex()
     private val blockLightRWM = ReadWriteMutex()
     private val skyLightRWM = ReadWriteMutex()
-    
+
     private val _changes = AtomicLong(0)
 
     val changes: Long
@@ -124,8 +126,8 @@ class Chunk(
     }
 
     suspend fun recalculateHeight() {
-        for (z in 0 .. 15) {
-            for (x in 0 .. 15) {
+        for (z in 0..15) {
+            for (x in 0..15) {
                 recalculateHeight(Vector2i(x, z))
             }
         }
@@ -146,8 +148,8 @@ class Chunk(
     }
 
     suspend fun populateSkyLight() {
-        for (z in 0 .. 15) {
-            for (x in 0 .. 15) {
+        for (z in 0..15) {
+            for (x in 0..15) {
                 val top = getHeight(Vector2i(x, z))
                 var y = provider.dimensionData.minHeight
                 while (y > top) {
@@ -220,7 +222,10 @@ class Chunk(
         val pos = blockEntity.position
         val index = ((pos.floorZ and 0xF) shl 16) or
                 ((pos.floorX and 0xF) shl 12) or
-                (pos.floorY.coerceIn(provider.dimensionData.minHeight, provider.dimensionData.maxHeight) + 64) // TODO: Why + 64 ?
+                (pos.floorY.coerceIn(
+                    provider.dimensionData.minHeight,
+                    provider.dimensionData.maxHeight
+                ) + 64) // TODO: Why + 64 ?
         blockEntities.first.withWriteLock {
             blockEntities.second[blockEntity.id] = blockEntity
         }
@@ -249,7 +254,10 @@ class Chunk(
         val pos = blockEntity.position
         val index = ((pos.floorZ and 0xF) shl 16) or
                 ((pos.floorX and 0xF) shl 12) or
-                (pos.floorY.coerceIn(provider.dimensionData.minHeight, provider.dimensionData.maxHeight) + 64) // TODO: Why + 64 ?
+                (pos.floorY.coerceIn(
+                    provider.dimensionData.minHeight,
+                    provider.dimensionData.maxHeight
+                ) + 64) // TODO: Why + 64 ?
 
         blockEntities.first.withWriteLock {
             blockEntities.second.remove(blockEntity.id)
@@ -265,7 +273,10 @@ class Chunk(
     suspend fun getBlockEntity(position: Vector3i): BlockEntity? {
         val index = ((position.z and 0xF) shl 16) or
                 ((position.x and 0xF) shl 12) or
-                (position.y.coerceIn(provider.dimensionData.minHeight, provider.dimensionData.maxHeight) + 64) // TODO: Why + 64 ?
+                (position.y.coerceIn(
+                    provider.dimensionData.minHeight,
+                    provider.dimensionData.maxHeight
+                ) + 64) // TODO: Why + 64 ?
         return blockToEntity.first.withReadLock {
             blockToEntity.second[index.toLong()]
         }
@@ -277,7 +288,12 @@ class Chunk(
         }
     }
 
-    suspend fun getBlocks(from: Vector3i, to: Vector3i, condition: (Vector3i, BlockPermutation) -> Boolean = { _, _ -> true }, layer: Int = 0): List<Block> {
+    suspend fun getBlocks(
+        from: Vector3i,
+        to: Vector3i,
+        condition: (Vector3i, BlockPermutation) -> Boolean = { _, _ -> true },
+        layer: Int = 0
+    ): List<Block> {
         val xOffset = x shl 4
         val zOffset = z shl 4
         subChunksRWM.withReadLock {

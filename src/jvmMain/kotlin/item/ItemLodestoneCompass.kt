@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.positiontracking.NamedPosition
 import java.io.IOException
 
 class ItemLodestoneCompass @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.LODESTONE_COMPASS, meta, count, "Lodestone Compass") {
+    Item(ItemID.LODESTONE_COMPASS, meta, count, "Lodestone Compass") {
     override val maxStackSize: Int
         get() = 1
 

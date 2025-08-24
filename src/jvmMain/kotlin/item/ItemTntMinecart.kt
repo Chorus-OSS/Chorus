@@ -14,7 +14,7 @@ import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.utils.Rail
 
 class ItemTntMinecart @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.TNT_MINECART, meta, count, "Minecart with TNT") {
+    Item(ItemID.TNT_MINECART, meta, count, "Minecart with TNT") {
     override fun canBeActivated(): Boolean {
         return true
     }

@@ -78,7 +78,7 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
 
     fun loadInternalPlugin() {
         val pluginLoader = fileAssociations[JavaPluginLoader::class.java.name]!!
-        val plugin: InternalPlugin = InternalPlugin.Companion.INSTANCE
+        val plugin: InternalPlugin = InternalPlugin.INSTANCE
         val file = try {
             File(Server::class.java.protectionDomain.codeSource.location.toURI())
         } catch (_: Exception) {
@@ -503,14 +503,14 @@ open class PluginManager(private val server: Server, private val commandMap: Sim
 
         while (plugins.hasPrevious()) {
             val previous = plugins.previous()
-            if (previous !== InternalPlugin.Companion.INSTANCE) {
+            if (previous !== InternalPlugin.INSTANCE) {
                 this.disablePlugin(previous)
             }
         }
     }
 
     fun disablePlugin(plugin: Plugin) {
-        if (InternalPlugin.Companion.INSTANCE == plugin) {
+        if (InternalPlugin.INSTANCE == plugin) {
             throw UnsupportedOperationException("The PowerNukkitX Internal plugin can't be disabled.")
         }
 

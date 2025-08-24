@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemNetheriteLeggings @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemArmor(ItemID.Companion.NETHERITE_LEGGINGS, meta, count, "Netherite Leggings") {
+    ItemArmor(ItemID.NETHERITE_LEGGINGS, meta, count, "Netherite Leggings") {
     override val isLeggings: Boolean
         get() = true
 

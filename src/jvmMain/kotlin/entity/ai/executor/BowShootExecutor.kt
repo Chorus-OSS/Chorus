@@ -187,7 +187,7 @@ class BowShootExecutor(
             val infinity = infinityEnchant != null && infinityEnchant.level > 0
             val projectile: EntityProjectile = entityShootBowEvent.projectile
             if (infinity && projectile is EntityArrow) {
-                projectile.pickupMode = (EntityProjectile.Companion.PICKUP_CREATIVE)
+                projectile.pickupMode = (EntityProjectile.PICKUP_CREATIVE)
             }
 
             for (enc in bow.enchantments) {

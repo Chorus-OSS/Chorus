@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemOminousBottle : Item(ItemID.Companion.OMINOUS_BOTTLE)
+class ItemOminousBottle : Item(ItemID.OMINOUS_BOTTLE)

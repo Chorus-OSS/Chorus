@@ -187,7 +187,7 @@ open class MeleeAttackExecutor(
         removeRouteTarget(entity)
         removeLookTarget(entity)
         //重置速度
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -200,7 +200,7 @@ open class MeleeAttackExecutor(
         removeRouteTarget(entity)
         removeLookTarget(entity)
         //重置速度
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }

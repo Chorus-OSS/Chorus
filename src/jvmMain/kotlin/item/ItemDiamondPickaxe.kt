@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemDiamondPickaxe : ItemTool(ItemID.Companion.DIAMOND_PICKAXE) {
+class ItemDiamondPickaxe : ItemTool(ItemID.DIAMOND_PICKAXE) {
     override val maxDurability: Int
         get() = DURABILITY_DIAMOND
 

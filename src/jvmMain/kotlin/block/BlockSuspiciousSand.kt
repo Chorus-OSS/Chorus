@@ -43,7 +43,7 @@ class BlockSuspiciousSand @JvmOverloads constructor(blockstate: BlockState = pro
             level.addSound(this.position, Sound.HIT_SUSPICIOUS_SAND)
             level.setBlock(this.position, this)
         } else {
-            level.setBlock(this.position, BlockSand.Companion.properties.defaultState.toBlock())
+            level.setBlock(this.position, BlockSand.properties.defaultState.toBlock())
             level.addSound(this.position, Sound.BREAK_SUSPICIOUS_SAND)
         }
         super.onTouch(vector, item, face, fx, fy, fz, player, action)

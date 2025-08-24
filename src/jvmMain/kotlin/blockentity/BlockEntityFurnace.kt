@@ -8,8 +8,8 @@ import org.chorus_oss.chorus.event.inventory.FurnaceSmeltEvent
 import org.chorus_oss.chorus.inventory.*
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemLavaBucket
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag

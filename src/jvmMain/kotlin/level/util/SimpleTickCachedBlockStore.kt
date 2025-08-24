@@ -14,7 +14,7 @@ class SimpleTickCachedBlockStore(private val level: Level) : TickCachedBlockStor
     }
 
     override fun saveIntoCachedStore(block: Block, x: Int, y: Int, z: Int, layer: Int) {
-        tickCachedBlockStore[Level.Companion.localBlockHash(x, y, z, layer, level)] = block
+        tickCachedBlockStore[Level.localBlockHash(x, y, z, layer, level)] = block
     }
 
     override fun getFromCachedStore(x: Int, y: Int, z: Int, layer: Int): Block {

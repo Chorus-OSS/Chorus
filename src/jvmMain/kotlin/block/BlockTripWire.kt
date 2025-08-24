@@ -120,7 +120,7 @@ class BlockTripWire @JvmOverloads constructor(state: BlockState = properties.def
         }
 
         for (side in arrayOf<BlockFace>(BlockFace.SOUTH, BlockFace.WEST)) {
-            for (i in 1..<BlockTripwireHook.Companion.MAX_TRIPWIRE_CIRCUIT_LENGTH) {
+            for (i in 1..<BlockTripwireHook.MAX_TRIPWIRE_CIRCUIT_LENGTH) {
                 val block = this.getSide(side, i)
 
                 if (block is BlockTripwireHook) {

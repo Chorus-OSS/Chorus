@@ -12,7 +12,7 @@ class ListCommand(name: String) : VanillaCommand(name, "commands.list.descriptio
     init {
         this.permission = "chorus.command.list"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

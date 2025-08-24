@@ -20,10 +20,10 @@ class SummonCommand(name: String) : VanillaCommand(name, "commands.summon.descri
             entity_key.add(key.replace("minecraft:", ""))
         }
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newEnum("entityType", false, entity_key.toTypedArray<String>(), true),
-            CommandParameter.Companion.newType("spawnPos", true, CommandParamType.POSITION),
-            CommandParameter.Companion.newType("nameTag", true, CommandParamType.STRING),
-            CommandParameter.Companion.newEnum("nameTagAlwaysVisible", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newEnum("entityType", false, entity_key.toTypedArray<String>(), true),
+            CommandParameter.newType("spawnPos", true, CommandParamType.POSITION),
+            CommandParameter.newType("nameTag", true, CommandParamType.STRING),
+            CommandParameter.newEnum("nameTagAlwaysVisible", true, CommandEnum.ENUM_BOOLEAN)
         )
         this.enableParamTree()
     }
@@ -40,7 +40,7 @@ class SummonCommand(name: String) : VanillaCommand(name, "commands.summon.descri
             log.addError("commands.summon.failed").output()
             return 0
         }
-        val entityId = Type.Companion.ENTITY_TYPE2ID[entityType]
+        val entityId = Type.ENTITY_TYPE2ID[entityType]
         var pos: Locator? = sender.locator
         if (list.hasResult(1)) {
             pos = list.getResult(1)
@@ -79,7 +79,7 @@ class SummonCommand(name: String) : VanillaCommand(name, "commands.summon.descri
 
     protected fun completionPrefix(type: String): String {
         val completed = if (type.contains(":")) type else "minecraft:$type"
-        if (!Type.Companion.ENTITY_TYPE2ID.containsKey(type) && !Type.Companion.ENTITY_TYPE2ID.containsKey(completed)) {
+        if (!Type.ENTITY_TYPE2ID.containsKey(type) && !Type.ENTITY_TYPE2ID.containsKey(completed)) {
             //是自定义生物，不需要补全
             return type
         }

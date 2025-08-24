@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.item
 
 import org.chorus_oss.chorus.utils.DyeColor
 
-class ItemGreenDye : ItemDye(ItemID.Companion.GREEN_DYE) {
+class ItemGreenDye : ItemDye(ItemID.GREEN_DYE) {
     override val dyeColor: DyeColor
         get() = DyeColor.GREEN
 

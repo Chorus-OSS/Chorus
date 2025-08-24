@@ -15,9 +15,9 @@ class TestForBlockCommand(name: String) : VanillaCommand(name, "commands.testfor
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("position", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("tileName", false, CommandEnum.Companion.ENUM_BLOCK),
-                CommandParameter.Companion.newType("dataValue", true, CommandParamType.INT)
+                CommandParameter.newType("position", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("tileName", false, CommandEnum.ENUM_BLOCK),
+                CommandParameter.newType("dataValue", true, CommandParamType.INT)
             )
         )
         this.enableParamTree()

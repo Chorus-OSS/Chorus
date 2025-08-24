@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemNetheriteHoe @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.NETHERITE_HOE, meta, count, "Netherite Hoe") {
+    ItemTool(ItemID.NETHERITE_HOE, meta, count, "Netherite Hoe") {
     override val isHoe: Boolean
         get() = true
 

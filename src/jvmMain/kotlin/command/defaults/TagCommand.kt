@@ -14,18 +14,18 @@ class TagCommand(name: String) : VanillaCommand(name, "commands.tag.description"
         this.permission = "chorus.command.tag"
         commandParameters.clear()
         commandParameters["add"] = arrayOf(
-            CommandParameter.Companion.newType("targets", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("add", arrayOf("add")),
-            CommandParameter.Companion.newType("name", CommandParamType.STRING)
+            CommandParameter.newType("targets", CommandParamType.TARGET),
+            CommandParameter.newEnum("add", arrayOf("add")),
+            CommandParameter.newType("name", CommandParamType.STRING)
         )
         commandParameters["remove"] = arrayOf(
-            CommandParameter.Companion.newType("targets", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("remove", arrayOf("remove")),
-            CommandParameter.Companion.newType("name", CommandParamType.STRING)
+            CommandParameter.newType("targets", CommandParamType.TARGET),
+            CommandParameter.newEnum("remove", arrayOf("remove")),
+            CommandParameter.newType("name", CommandParamType.STRING)
         )
         commandParameters["list"] = arrayOf(
-            CommandParameter.Companion.newType("targets", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("list", arrayOf("list")),
+            CommandParameter.newType("targets", CommandParamType.TARGET),
+            CommandParameter.newEnum("list", arrayOf("list")),
         )
         this.enableParamTree()
     }

@@ -23,7 +23,7 @@ object VectorMath {
         val axis =
             if (vector.x != 0.0) BlockFace.Axis.X else if (vector.z != 0.0) BlockFace.Axis.Z else BlockFace.Axis.Y
         val direction = vector.getAxis(axis)
-        return BlockFace.Companion.fromAxis(if (direction < 0) AxisDirection.NEGATIVE else AxisDirection.POSITIVE, axis)
+        return BlockFace.fromAxis(if (direction < 0) AxisDirection.NEGATIVE else AxisDirection.POSITIVE, axis)
     }
 
     fun getPassByVector3(from: Vector3, to: Vector3): List<Vector3> {

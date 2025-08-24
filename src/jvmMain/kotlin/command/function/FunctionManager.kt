@@ -44,7 +44,7 @@ class FunctionManager(private val rootPath: Path) {
     fun reload() {
         functions.clear()
         loadFunctions()
-        CommandEnum.Companion.FUNCTION_FILE.updateSoftEnum()
+        CommandEnum.FUNCTION_FILE.updateSoftEnum()
     }
 
     fun containFunction(name: String): Boolean {

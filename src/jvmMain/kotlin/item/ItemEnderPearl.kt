@@ -5,12 +5,12 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.projectile.throwable.EntityEnderPearl
 
 class ItemEnderPearl @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    ProjectileItem(ItemID.Companion.ENDER_PEARL, 0, count, "Ender Pearl") {
+    ProjectileItem(ItemID.ENDER_PEARL, 0, count, "Ender Pearl") {
     override val maxStackSize: Int
         get() = 16
 
     override val projectileEntityType: String
-        get() = ItemID.Companion.ENDER_PEARL
+        get() = ItemID.ENDER_PEARL
 
     override val throwForce: Float
         get() = 1.5f

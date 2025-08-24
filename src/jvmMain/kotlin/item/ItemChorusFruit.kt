@@ -7,7 +7,7 @@ import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.utils.ChorusRandom
 
 class ItemChorusFruit @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.CHORUS_FRUIT, meta, count, "Chorus Fruit") {
+    ItemFood(ItemID.CHORUS_FRUIT, meta, count, "Chorus Fruit") {
     override fun onClickAir(player: Player, directionVector: Vector3): Boolean {
         return player.isItemCoolDownEnd(this.identifier)
     }

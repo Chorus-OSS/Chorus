@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.entity.Entity
 import kotlin.math.floor
 
-class ItemMace : ItemTool(ItemID.Companion.MACE) {
+class ItemMace : ItemTool(ItemID.MACE) {
     override val maxDurability: Int
         get() = 501
 

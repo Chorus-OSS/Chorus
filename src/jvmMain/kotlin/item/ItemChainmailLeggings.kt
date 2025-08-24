@@ -1,11 +1,11 @@
 package org.chorus_oss.chorus.item
 
 class ItemChainmailLeggings : ItemArmor {
-    constructor() : super(ItemID.Companion.CHAINMAIL_LEGGINGS)
+    constructor() : super(ItemID.CHAINMAIL_LEGGINGS)
 
     @JvmOverloads
     constructor(meta: Int, count: Int = 1) : super(
-        ItemID.Companion.CHAINMAIL_LEGGINGS,
+        ItemID.CHAINMAIL_LEGGINGS,
         meta,
         count,
         "Chainmail Leggings"

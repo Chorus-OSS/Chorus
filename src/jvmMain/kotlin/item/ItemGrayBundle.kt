@@ -1,4 +1,4 @@
 package org.chorus_oss.chorus.item
 
-class ItemGrayBundle @JvmOverloads constructor(id: String = ItemID.Companion.GRAY_BUNDLE) : ItemBundle(id)
+class ItemGrayBundle @JvmOverloads constructor(id: String = ItemID.GRAY_BUNDLE) : ItemBundle(id)
 

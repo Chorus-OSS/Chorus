@@ -74,20 +74,20 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
         this.perm = PermissibleBase(this)
         this.currentTick = 0
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_POWERED)) {
-            this.isPowered = namedTag.getBoolean(ICommandBlock.Companion.TAG_POWERED)
+        if (namedTag.contains(ICommandBlock.TAG_POWERED)) {
+            this.isPowered = namedTag.getBoolean(ICommandBlock.TAG_POWERED)
         } else {
             this.isPowered = false
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_CONDITIONAL_MODE)) {
-            this.conditionalMode = namedTag.getBoolean(ICommandBlock.Companion.TAG_CONDITIONAL_MODE)
+        if (namedTag.contains(ICommandBlock.TAG_CONDITIONAL_MODE)) {
+            this.conditionalMode = namedTag.getBoolean(ICommandBlock.TAG_CONDITIONAL_MODE)
         } else {
             this.conditionalMode = false
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_AUTO)) {
-            this.isAuto = namedTag.getBoolean(ICommandBlock.Companion.TAG_AUTO)
+        if (namedTag.contains(ICommandBlock.TAG_AUTO)) {
+            this.isAuto = namedTag.getBoolean(ICommandBlock.TAG_AUTO)
         } else {
             this.isAuto = false
         }
@@ -98,71 +98,71 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
             ""
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LAST_EXECUTION)) {
-            this.lastExecution = namedTag.getLong(ICommandBlock.Companion.TAG_LAST_EXECUTION)
+        if (namedTag.contains(ICommandBlock.TAG_LAST_EXECUTION)) {
+            this.lastExecution = namedTag.getLong(ICommandBlock.TAG_LAST_EXECUTION)
         } else {
             this.lastExecution = 0
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_TRACK_OUTPUT)) {
-            this.isTrackingOutput = namedTag.getBoolean(ICommandBlock.Companion.TAG_TRACK_OUTPUT)
+        if (namedTag.contains(ICommandBlock.TAG_TRACK_OUTPUT)) {
+            this.isTrackingOutput = namedTag.getBoolean(ICommandBlock.TAG_TRACK_OUTPUT)
         } else {
             this.isTrackingOutput = true
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LAST_OUTPUT)) {
-            this.lastOutput = namedTag.getString(ICommandBlock.Companion.TAG_LAST_OUTPUT)
+        if (namedTag.contains(ICommandBlock.TAG_LAST_OUTPUT)) {
+            this.lastOutput = namedTag.getString(ICommandBlock.TAG_LAST_OUTPUT)
         } else {
             this.lastOutput = null
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LAST_OUTPUT_PARAMS)) {
+        if (namedTag.contains(ICommandBlock.TAG_LAST_OUTPUT_PARAMS)) {
             this.lastOutputParams = namedTag.getList<StringTag>(
-                ICommandBlock.Companion.TAG_LAST_OUTPUT_PARAMS,
+                ICommandBlock.TAG_LAST_OUTPUT_PARAMS,
                 StringTag::class.java
             )
         } else {
             this.lastOutputParams = ListTag()
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LP_COMMAND_MODE)) {
-            this.lastOutputCommandMode = namedTag.getInt(ICommandBlock.Companion.TAG_LP_COMMAND_MODE)
+        if (namedTag.contains(ICommandBlock.TAG_LP_COMMAND_MODE)) {
+            this.lastOutputCommandMode = namedTag.getInt(ICommandBlock.TAG_LP_COMMAND_MODE)
         } else {
             this.lastOutputCommandMode = 0
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LP_CONDIONAL_MODE)) {
-            this.isLastOutputCondionalMode = namedTag.getBoolean(ICommandBlock.Companion.TAG_LP_CONDIONAL_MODE)
+        if (namedTag.contains(ICommandBlock.TAG_LP_CONDIONAL_MODE)) {
+            this.isLastOutputCondionalMode = namedTag.getBoolean(ICommandBlock.TAG_LP_CONDIONAL_MODE)
         } else {
             this.isLastOutputCondionalMode = true
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_LP_REDSTONE_MODE)) {
-            this.isLastOutputRedstoneMode = namedTag.getBoolean(ICommandBlock.Companion.TAG_LP_REDSTONE_MODE)
+        if (namedTag.contains(ICommandBlock.TAG_LP_REDSTONE_MODE)) {
+            this.isLastOutputRedstoneMode = namedTag.getBoolean(ICommandBlock.TAG_LP_REDSTONE_MODE)
         } else {
             this.isLastOutputRedstoneMode = true
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_SUCCESS_COUNT)) {
-            this.successCount = namedTag.getInt(ICommandBlock.Companion.TAG_SUCCESS_COUNT)
+        if (namedTag.contains(ICommandBlock.TAG_SUCCESS_COUNT)) {
+            this.successCount = namedTag.getInt(ICommandBlock.TAG_SUCCESS_COUNT)
         } else {
             this.successCount = 0
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_CONDITION_MET)) {
-            this.isConditionMet = namedTag.getBoolean(ICommandBlock.Companion.TAG_CONDITION_MET)
+        if (namedTag.contains(ICommandBlock.TAG_CONDITION_MET)) {
+            this.isConditionMet = namedTag.getBoolean(ICommandBlock.TAG_CONDITION_MET)
         } else {
             this.isConditionMet = false
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_TICK_DELAY)) {
-            this.tickDelay = namedTag.getInt(ICommandBlock.Companion.TAG_TICK_DELAY)
+        if (namedTag.contains(ICommandBlock.TAG_TICK_DELAY)) {
+            this.tickDelay = namedTag.getInt(ICommandBlock.TAG_TICK_DELAY)
         } else {
             this.tickDelay = 0
         }
 
-        if (namedTag.contains(ICommandBlock.Companion.TAG_EXECUTE_ON_FIRST_TICK)) {
-            this.isExecutingOnFirstTick = namedTag.getBoolean(ICommandBlock.Companion.TAG_EXECUTE_ON_FIRST_TICK)
+        if (namedTag.contains(ICommandBlock.TAG_EXECUTE_ON_FIRST_TICK)) {
+            this.isExecutingOnFirstTick = namedTag.getBoolean(ICommandBlock.TAG_EXECUTE_ON_FIRST_TICK)
         } else {
             this.isExecutingOnFirstTick = false
         }
@@ -200,32 +200,32 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
     override val spawnCompound: CompoundTag
         get() {
             val nbt = super.spawnCompound
-                .putBoolean(ICommandBlock.Companion.TAG_CONDITIONAL_MODE, this.conditionalMode)
-                .putBoolean(ICommandBlock.Companion.TAG_AUTO, this.isAuto)
-                .putLong(ICommandBlock.Companion.TAG_LAST_EXECUTION, this.lastExecution)
-                .putBoolean(ICommandBlock.Companion.TAG_TRACK_OUTPUT, this.isTrackingOutput)
-                .putInt(ICommandBlock.Companion.TAG_LP_COMMAND_MODE, this.lastOutputCommandMode)
-                .putBoolean(ICommandBlock.Companion.TAG_LP_CONDIONAL_MODE, this.isLastOutputCondionalMode)
-                .putBoolean(ICommandBlock.Companion.TAG_LP_REDSTONE_MODE, this.isLastOutputRedstoneMode)
-                .putInt(ICommandBlock.Companion.TAG_SUCCESS_COUNT, this.successCount)
-                .putBoolean(ICommandBlock.Companion.TAG_CONDITION_MET, this.isConditionMet)
-                .putInt(ICommandBlock.Companion.TAG_VERSION, ICommandBlock.Companion.CURRENT_VERSION)
-                .putInt(ICommandBlock.Companion.TAG_TICK_DELAY, this.tickDelay)
+                .putBoolean(ICommandBlock.TAG_CONDITIONAL_MODE, this.conditionalMode)
+                .putBoolean(ICommandBlock.TAG_AUTO, this.isAuto)
+                .putLong(ICommandBlock.TAG_LAST_EXECUTION, this.lastExecution)
+                .putBoolean(ICommandBlock.TAG_TRACK_OUTPUT, this.isTrackingOutput)
+                .putInt(ICommandBlock.TAG_LP_COMMAND_MODE, this.lastOutputCommandMode)
+                .putBoolean(ICommandBlock.TAG_LP_CONDIONAL_MODE, this.isLastOutputCondionalMode)
+                .putBoolean(ICommandBlock.TAG_LP_REDSTONE_MODE, this.isLastOutputRedstoneMode)
+                .putInt(ICommandBlock.TAG_SUCCESS_COUNT, this.successCount)
+                .putBoolean(ICommandBlock.TAG_CONDITION_MET, this.isConditionMet)
+                .putInt(ICommandBlock.TAG_VERSION, ICommandBlock.CURRENT_VERSION)
+                .putInt(ICommandBlock.TAG_TICK_DELAY, this.tickDelay)
                 .putBoolean(
-                    ICommandBlock.Companion.TAG_EXECUTE_ON_FIRST_TICK,
+                    ICommandBlock.TAG_EXECUTE_ON_FIRST_TICK,
                     isExecutingOnFirstTick
                 )
             if (this.command != null) {
-                nbt.putString(ICommandBlock.Companion.TAG_COMMAND, command!!)
+                nbt.putString(ICommandBlock.TAG_COMMAND, command!!)
             }
             if (this.lastOutput != null) {
-                nbt.putString(ICommandBlock.Companion.TAG_LAST_OUTPUT, lastOutput!!)
+                nbt.putString(ICommandBlock.TAG_LAST_OUTPUT, lastOutput!!)
             }
             if (this.lastOutputParams != null) {
-                nbt.putList(ICommandBlock.Companion.TAG_LAST_OUTPUT_PARAMS, this.lastOutputParams!!)
+                nbt.putList(ICommandBlock.TAG_LAST_OUTPUT_PARAMS, this.lastOutputParams!!)
             }
             if (this.hasName()) {
-                nbt.putString(ICommandBlock.Companion.TAG_CUSTOM_NAME, this.senderName)
+                nbt.putString(ICommandBlock.TAG_CUSTOM_NAME, this.senderName)
             }
             return nbt
         }
@@ -249,7 +249,7 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
         }
 
     override fun hasName(): Boolean {
-        return namedTag.contains(ICommandBlock.Companion.TAG_CUSTOM_NAME)
+        return namedTag.contains(ICommandBlock.TAG_CUSTOM_NAME)
     }
 
     override val transform: Transform
@@ -258,7 +258,7 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
         }
 
     override fun onUpdate(): Boolean {
-        if (this.mode != ICommandBlock.Companion.MODE_REPEATING) {
+        if (this.mode != ICommandBlock.MODE_REPEATING) {
             return false
         }
 
@@ -333,11 +333,11 @@ class BlockEntityCommandBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawn
         get() {
             val block = this.levelBlock
             if (block.id === BlockID.REPEATING_COMMAND_BLOCK) {
-                return ICommandBlock.Companion.MODE_REPEATING
+                return ICommandBlock.MODE_REPEATING
             } else if (block.id === BlockID.CHAIN_COMMAND_BLOCK) {
-                return ICommandBlock.Companion.MODE_CHAIN
+                return ICommandBlock.MODE_CHAIN
             }
-            return ICommandBlock.Companion.MODE_NORMAL
+            return ICommandBlock.MODE_NORMAL
         }
 
     override var isConditional: Boolean

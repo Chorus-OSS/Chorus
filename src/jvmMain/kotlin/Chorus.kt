@@ -1,9 +1,6 @@
 package org.chorus_oss.chorus
 
-import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.option
 import io.netty.util.ResourceLeakDetector
 import io.netty.util.internal.logging.InternalLoggerFactory
 import io.netty.util.internal.logging.Log4J2LoggerFactory
@@ -14,10 +11,6 @@ import org.chorus_oss.chorus.config.ChorusOpts
 import org.chorus_oss.chorus.nbt.stream.PGZIPOutputStream
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils.dynamic
-
-fun main(args: Array<String>) {
-    Chorus.main(args)
-}
 
 /**
  *   _____  _

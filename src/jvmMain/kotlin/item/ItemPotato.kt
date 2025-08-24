@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.block.BlockPotatoes
 
 
 open class ItemPotato @JvmOverloads constructor(
-    id: String = ItemID.Companion.POTATO,
+    id: String = ItemID.POTATO,
     meta: Int = 0,
     count: Int = 1,
     name: String? = "Potato"

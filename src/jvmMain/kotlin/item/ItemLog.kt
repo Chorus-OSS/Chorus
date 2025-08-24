@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.block.BlockOakLog
 import org.chorus_oss.chorus.block.BlockSpruceLog
 
 class ItemLog @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.LOG, meta, count) {
+    Item(ItemID.LOG, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

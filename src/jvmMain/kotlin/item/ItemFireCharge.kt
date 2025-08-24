@@ -12,7 +12,7 @@ import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.concurrent.ThreadLocalRandom
 
 class ItemFireCharge @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    Item(ItemID.Companion.FIRE_CHARGE, 0, count, "Fire Charge") {
+    Item(ItemID.FIRE_CHARGE, 0, count, "Fire Charge") {
     override fun canBeActivated(): Boolean {
         return true
     }

@@ -14,8 +14,8 @@ class KickCommand(name: String) : VanillaCommand(name, "commands.kick.descriptio
         this.permission = "chorus.command.kick"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newType("reason", true, CommandParamType.MESSAGE)
+            CommandParameter.newType("player", CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newType("reason", true, CommandParamType.MESSAGE)
         )
         this.enableParamTree()
     }

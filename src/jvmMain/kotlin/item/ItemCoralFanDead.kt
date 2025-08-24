@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemCoralFanDead : Item(ItemID.Companion.CORAL_FAN_DEAD)
+class ItemCoralFanDead : Item(ItemID.CORAL_FAN_DEAD)

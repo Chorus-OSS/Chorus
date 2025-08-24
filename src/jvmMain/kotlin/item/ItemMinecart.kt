@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.utils.Rail
 
 
 class ItemMinecart @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.MINECART, meta, count, "Minecart") {
+    Item(ItemID.MINECART, meta, count, "Minecart") {
     override fun canBeActivated(): Boolean {
         return true
     }

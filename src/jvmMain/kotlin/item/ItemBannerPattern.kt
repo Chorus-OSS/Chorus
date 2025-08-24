@@ -5,7 +5,7 @@ import org.jetbrains.annotations.ApiStatus
 
 open class ItemBannerPattern : Item {
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.BANNER_PATTERN, meta, count, "Bone")
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.BANNER_PATTERN, meta, count, "Bone")
 
     constructor(id: String) : super(id)
 

@@ -144,7 +144,7 @@ object EnchantmentHelper {
                 enchantingPower /= 2
             }
         }
-        if (inputItem.id == ItemID.Companion.BOOK) {
+        if (inputItem.id == ItemID.BOOK) {
             if (resultEnchantments.size > 1) {
                 resultEnchantments.removeAt(random.nextInt(resultEnchantments.size - 1))
             }

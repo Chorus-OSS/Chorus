@@ -73,7 +73,7 @@ class VexSummonExecutor : FangLineExecutor() {
                     .add(FloatTag(0f))
             )
 
-        val vexEntity = Entity.Companion.createEntity(
+        val vexEntity = Entity.createEntity(
             EntityID.VEX,
             entity.level!!.getChunk(entity.position.chunkX, entity.position.chunkZ),
             nbt

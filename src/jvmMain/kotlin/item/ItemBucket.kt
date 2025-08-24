@@ -22,7 +22,7 @@ import org.chorus_oss.chorus.utils.Identifier
 
 open class ItemBucket : Item {
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.BUCKET, meta, count)
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.BUCKET, meta, count)
 
     @JvmOverloads
     constructor(id: String, count: Int = 0) : super(id, 0, count)
@@ -30,61 +30,61 @@ open class ItemBucket : Item {
     constructor(id: String, count: Int, name: String?) : super(id, 0, count, name)
 
     override fun internalAdjust() {
-        if (this.id == ItemID.Companion.BUCKET) {
+        if (this.id == ItemID.BUCKET) {
             when (damage) {
                 1 -> {
-                    this.id = ItemID.Companion.MILK_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.MILK_BUCKET)
+                    this.id = ItemID.MILK_BUCKET
+                    this.identifier = Identifier(ItemID.MILK_BUCKET)
                 }
 
                 2 -> {
-                    this.id = ItemID.Companion.COD_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.COD_BUCKET)
+                    this.id = ItemID.COD_BUCKET
+                    this.identifier = Identifier(ItemID.COD_BUCKET)
                 }
 
                 3 -> {
-                    this.id = ItemID.Companion.SALMON_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.SALMON_BUCKET)
+                    this.id = ItemID.SALMON_BUCKET
+                    this.identifier = Identifier(ItemID.SALMON_BUCKET)
                 }
 
                 4 -> {
-                    this.id = ItemID.Companion.TROPICAL_FISH_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.TROPICAL_FISH_BUCKET)
+                    this.id = ItemID.TROPICAL_FISH_BUCKET
+                    this.identifier = Identifier(ItemID.TROPICAL_FISH_BUCKET)
                 }
 
                 5 -> {
-                    this.id = ItemID.Companion.PUFFERFISH_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.PUFFERFISH_BUCKET)
+                    this.id = ItemID.PUFFERFISH_BUCKET
+                    this.identifier = Identifier(ItemID.PUFFERFISH_BUCKET)
                 }
 
                 8 -> {
-                    this.id = ItemID.Companion.WATER_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.WATER_BUCKET)
+                    this.id = ItemID.WATER_BUCKET
+                    this.identifier = Identifier(ItemID.WATER_BUCKET)
                 }
 
                 10 -> {
-                    this.id = ItemID.Companion.LAVA_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.LAVA_BUCKET)
+                    this.id = ItemID.LAVA_BUCKET
+                    this.identifier = Identifier(ItemID.LAVA_BUCKET)
                 }
 
                 11 -> {
-                    this.id = ItemID.Companion.POWDER_SNOW_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.POWDER_SNOW_BUCKET)
+                    this.id = ItemID.POWDER_SNOW_BUCKET
+                    this.identifier = Identifier(ItemID.POWDER_SNOW_BUCKET)
                 }
 
                 12 -> {
-                    this.id = ItemID.Companion.AXOLOTL_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.AXOLOTL_BUCKET)
+                    this.id = ItemID.AXOLOTL_BUCKET
+                    this.identifier = Identifier(ItemID.AXOLOTL_BUCKET)
                 }
 
                 13 -> {
-                    this.id = ItemID.Companion.TADPOLE_BUCKET
-                    this.identifier = Identifier(ItemID.Companion.TADPOLE_BUCKET)
+                    this.id = ItemID.TADPOLE_BUCKET
+                    this.identifier = Identifier(ItemID.TADPOLE_BUCKET)
                 }
 
                 else -> {
-                    this.id = ItemID.Companion.BUCKET
-                    this.identifier = Identifier(ItemID.Companion.BUCKET)
+                    this.id = ItemID.BUCKET
+                    this.identifier = Identifier(ItemID.BUCKET)
                 }
             }
             this.meta = 0
@@ -93,36 +93,36 @@ open class ItemBucket : Item {
     }
 
     val isEmpty: Boolean
-        get() = this.id == ItemID.Companion.BUCKET && meta == 0
+        get() = this.id == ItemID.BUCKET && meta == 0
 
     val isWater: Boolean
         get() = when (this.id) {
-            ItemID.Companion.COD_BUCKET, ItemID.Companion.SALMON_BUCKET, ItemID.Companion.TROPICAL_FISH_BUCKET, ItemID.Companion.PUFFERFISH_BUCKET, ItemID.Companion.WATER_BUCKET, ItemID.Companion.AXOLOTL_BUCKET, ItemID.Companion.TADPOLE_BUCKET -> true
+            ItemID.COD_BUCKET, ItemID.SALMON_BUCKET, ItemID.TROPICAL_FISH_BUCKET, ItemID.PUFFERFISH_BUCKET, ItemID.WATER_BUCKET, ItemID.AXOLOTL_BUCKET, ItemID.TADPOLE_BUCKET -> true
             else -> false
         }
 
     val isMilk: Boolean
-        get() = this.id == ItemID.Companion.MILK_BUCKET
+        get() = this.id == ItemID.MILK_BUCKET
 
     val isLava: Boolean
-        get() = this.id == ItemID.Companion.LAVA_BUCKET
+        get() = this.id == ItemID.LAVA_BUCKET
 
     val isPowderSnow: Boolean
-        get() = this.id == ItemID.Companion.POWDER_SNOW_BUCKET
+        get() = this.id == ItemID.POWDER_SNOW_BUCKET
 
     val fishEntityId: String?
         get() = when (this.id) {
-            ItemID.Companion.COD_BUCKET -> EntityID.COD
-            ItemID.Companion.SALMON_BUCKET -> EntityID.SALMON
-            ItemID.Companion.TROPICAL_FISH_BUCKET -> EntityID.TROPICALFISH
-            ItemID.Companion.PUFFERFISH_BUCKET -> EntityID.PUFFERFISH
-            ItemID.Companion.AXOLOTL_BUCKET -> EntityID.AXOLOTL
-            ItemID.Companion.TADPOLE_BUCKET -> EntityID.TADPOLE
+            ItemID.COD_BUCKET -> EntityID.COD
+            ItemID.SALMON_BUCKET -> EntityID.SALMON
+            ItemID.TROPICAL_FISH_BUCKET -> EntityID.TROPICALFISH
+            ItemID.PUFFERFISH_BUCKET -> EntityID.PUFFERFISH
+            ItemID.AXOLOTL_BUCKET -> EntityID.AXOLOTL
+            ItemID.TADPOLE_BUCKET -> EntityID.TADPOLE
             else -> null
         }
 
     override val maxStackSize: Int
-        get() = if (meta == 0 && this.id == ItemID.Companion.BUCKET) 16 else 1
+        get() = if (meta == 0 && this.id == ItemID.BUCKET) 16 else 1
 
     override fun canBeActivated(): Boolean {
         return true
@@ -149,8 +149,8 @@ open class ItemBucket : Item {
         if (player.isAdventure) {
             return false
         }
-        if (player.isItemCoolDownEnd(ItemID.Companion.BUCKET)) {
-            player.setItemCoolDown(5, ItemID.Companion.BUCKET)
+        if (player.isItemCoolDownEnd(ItemID.BUCKET)) {
+            player.setItemCoolDown(5, ItemID.BUCKET)
         } else {
             return false
         }
@@ -172,13 +172,13 @@ open class ItemBucket : Item {
             }
             if ((target is BlockLiquid || target is BlockPowderSnow) && target.isDefaultState) {
                 val result = if (player.isCreative) {
-                    get(ItemID.Companion.BUCKET, 0, 1)
+                    get(ItemID.BUCKET, 0, 1)
                 } else if (target is BlockPowderSnow) {
-                    get(ItemID.Companion.BUCKET, 11, 1)
+                    get(ItemID.BUCKET, 11, 1)
                 } else if (target is BlockFlowingLava) {
-                    get(ItemID.Companion.BUCKET, 10, 1)
+                    get(ItemID.BUCKET, 10, 1)
                 } else {
-                    get(ItemID.Companion.BUCKET, 8, 1)
+                    get(ItemID.BUCKET, 8, 1)
                 }
                 val ev: PlayerBucketFillEvent
                 Server.instance.pluginManager.callEvent(
@@ -235,7 +235,7 @@ open class ItemBucket : Item {
                 }
             }
         } else if (targetBlock is BlockLiquid) {
-            val result = get(ItemID.Companion.BUCKET, 0, 1)
+            val result = get(ItemID.BUCKET, 0, 1)
             val usesWaterlogging = targetBlock.usesWaterLogging()
             val placementBlock = if (usesWaterlogging) {
                 if (block.id == BlockID.BAMBOO) {
@@ -307,7 +307,7 @@ open class ItemBucket : Item {
                 player.inventory.sendContents(player)
             }
         } else if (targetBlock is BlockPowderSnow) {
-            val result = get(ItemID.Companion.BUCKET, 0, 1)
+            val result = get(ItemID.BUCKET, 0, 1)
             if (!target.canBeReplaced()) {
                 val side = target.getSide(face)
                 if (side.canBeReplaced()) {
@@ -390,15 +390,15 @@ open class ItemBucket : Item {
     }
 
     override fun onClickAir(player: Player, directionVector: Vector3): Boolean {
-        return this.id == ItemID.Companion.BUCKET && isMilk // Milk
+        return this.id == ItemID.BUCKET && isMilk // Milk
     }
 
     companion object {
         fun getDamageByTarget(target: String): String {
             return when (target) {
-                ItemID.Companion.COD_BUCKET, ItemID.Companion.SALMON_BUCKET, ItemID.Companion.TROPICAL_FISH_BUCKET, ItemID.Companion.PUFFERFISH_BUCKET, ItemID.Companion.WATER_BUCKET, ItemID.Companion.AXOLOTL_BUCKET, ItemID.Companion.TADPOLE_BUCKET -> BlockID.FLOWING_WATER
-                ItemID.Companion.LAVA_BUCKET -> BlockID.FLOWING_LAVA
-                ItemID.Companion.POWDER_SNOW_BUCKET -> BlockID.POWDER_SNOW
+                ItemID.COD_BUCKET, ItemID.SALMON_BUCKET, ItemID.TROPICAL_FISH_BUCKET, ItemID.PUFFERFISH_BUCKET, ItemID.WATER_BUCKET, ItemID.AXOLOTL_BUCKET, ItemID.TADPOLE_BUCKET -> BlockID.FLOWING_WATER
+                ItemID.LAVA_BUCKET -> BlockID.FLOWING_LAVA
+                ItemID.POWDER_SNOW_BUCKET -> BlockID.POWDER_SNOW
                 else -> BlockID.AIR
             }
         }

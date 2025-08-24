@@ -20,11 +20,11 @@ class GiveCommand(name: String) : VanillaCommand(name, "commands.give.descriptio
         this.permission = "chorus.command.give"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET, PlayersNode()),
-            GenericParameter.Companion.ITEM_NAME.get(false),
-            CommandParameter.Companion.newType("amount", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("components", true, CommandParamType.JSON, RemainStringNode())
+            CommandParameter.newType("player", CommandParamType.TARGET, PlayersNode()),
+            GenericParameter.ITEM_NAME.get(false),
+            CommandParameter.newType("amount", true, CommandParamType.INT),
+            CommandParameter.newType("data", true, CommandParamType.INT),
+            CommandParameter.newType("components", true, CommandParamType.JSON, RemainStringNode())
         )
         this.enableParamTree()
     }

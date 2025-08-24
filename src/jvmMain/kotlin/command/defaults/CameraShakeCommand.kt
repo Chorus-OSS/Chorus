@@ -14,19 +14,19 @@ class CameraShakeCommand(name: String) : VanillaCommand(name, "commands.screensh
         this.permission = "chorus.command.camerashake"
         commandParameters.clear()
         commandParameters["add"] = arrayOf(
-            CommandParameter.Companion.newEnum("add", false, arrayOf("add")),
-            CommandParameter.Companion.newType("player", false, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newType("intensity", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newType("second", false, CommandParamType.FLOAT),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum("add", false, arrayOf("add")),
+            CommandParameter.newType("player", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newType("intensity", false, CommandParamType.FLOAT),
+            CommandParameter.newType("second", false, CommandParamType.FLOAT),
+            CommandParameter.newEnum(
                 "shakeType",
                 false,
                 arrayOf("positional", "rotational")
             )
         )
         commandParameters["stop"] = arrayOf(
-            CommandParameter.Companion.newEnum("stop", false, arrayOf("stop")),
-            CommandParameter.Companion.newType("player", false, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("stop", false, arrayOf("stop")),
+            CommandParameter.newType("player", false, CommandParamType.TARGET, PlayersNode()),
         )
         this.enableParamTree()
     }

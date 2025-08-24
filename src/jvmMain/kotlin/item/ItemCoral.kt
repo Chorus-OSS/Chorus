@@ -3,10 +3,10 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemCoral : Item {
-    constructor() : super(ItemID.Companion.CORAL)
+    constructor() : super(ItemID.CORAL)
 
     @JvmOverloads
-    constructor(meta: Int, count: Int = 1) : super(ItemID.Companion.CONCRETE, meta, count) {
+    constructor(meta: Int, count: Int = 1) : super(ItemID.CONCRETE, meta, count) {
         adjustName()
         adjustBlock()
     }

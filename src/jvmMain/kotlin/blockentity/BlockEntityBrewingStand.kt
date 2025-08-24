@@ -11,8 +11,8 @@ import org.chorus_oss.chorus.inventory.InventorySlice
 import org.chorus_oss.chorus.inventory.RecipeInventoryHolder
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemID
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag

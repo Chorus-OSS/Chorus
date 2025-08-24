@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 import org.chorus_oss.chorus.math.Vector3
 
-class ItemEnchantedGoldenApple : ItemFood(ItemID.Companion.ENCHANTED_GOLDEN_APPLE) {
+class ItemEnchantedGoldenApple : ItemFood(ItemID.ENCHANTED_GOLDEN_APPLE) {
     override fun onClickAir(player: Player, directionVector: Vector3): Boolean {
         return true
     }

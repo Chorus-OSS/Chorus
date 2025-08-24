@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemDiamondSword : ItemTool(ItemID.Companion.DIAMOND_SWORD) {
+class ItemDiamondSword : ItemTool(ItemID.DIAMOND_SWORD) {
     override val maxDurability: Int
         get() = DURABILITY_DIAMOND
 

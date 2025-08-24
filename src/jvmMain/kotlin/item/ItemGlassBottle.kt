@@ -14,7 +14,7 @@ import org.chorus_oss.chorus.math.BlockFace
 
 
 class ItemGlassBottle @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.GLASS_BOTTLE, meta, count, "Glass Bottle") {
+    Item(ItemID.GLASS_BOTTLE, meta, count, "Glass Bottle") {
     override fun canBeActivated(): Boolean {
         return true
     }
@@ -49,7 +49,7 @@ class ItemGlassBottle @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         } else if (target.id == BlockID.FLOWING_WATER || target.id == BlockID.WATER) {
             filled = ItemPotion()
         } else if (target is BlockBeehive && target.isFull) {
-            filled = get(ItemID.Companion.HONEY_BOTTLE)
+            filled = get(ItemID.HONEY_BOTTLE)
             target.honeyCollected(player)
             level.addSound(player.position, Sound.BUCKET_FILL_WATER)
         }

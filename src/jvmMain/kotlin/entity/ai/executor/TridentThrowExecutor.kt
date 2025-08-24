@@ -102,7 +102,7 @@ class TridentThrowExecutor(
         removeRouteTarget(entity)
         removeLookTarget(entity)
         //重置速度
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -115,7 +115,7 @@ class TridentThrowExecutor(
         removeRouteTarget(entity)
         removeLookTarget(entity)
         //重置速度
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -153,7 +153,7 @@ class TridentThrowExecutor(
         val p = 1.0
         min((p * p + p * 2) / 3, 1.0) * 3
 
-        val projectile: Entity = Entity.Companion.createEntity(
+        val projectile: Entity = Entity.createEntity(
             EntityID.THROWN_TRIDENT,
             entity.level!!.getChunk(entity.position.chunkX, entity.position.chunkZ),
             nbt
@@ -162,7 +162,7 @@ class TridentThrowExecutor(
 
         if (projectile is EntityThrownTrident) {
             projectile.shootingEntity = entity
-            projectile.pickupMode = EntityProjectile.Companion.PICKUP_CREATIVE
+            projectile.pickupMode = EntityProjectile.PICKUP_CREATIVE
         }
 
         val projectev = ProjectileLaunchEvent(projectile as EntityProjectile, entity)

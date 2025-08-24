@@ -12,7 +12,7 @@ class ZlibKFlate : ZlibProvider {
     }
 
     override fun inflate(data: ByteArray, maxSize: Int, raw: Boolean): ByteArray {
-        val decompressor: Decompressor = when(raw) {
+        val decompressor: Decompressor = when (raw) {
             true -> DeflateDecompressor()
             false -> ZlibDecompressor()
         }

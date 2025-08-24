@@ -15,12 +15,12 @@ class XpCommand(name: String) : Command(name, "commands.xp.description") {
         this.permission = "chorus.command.xp"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("amount", CommandParamType.INT),
-            CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode())
+            CommandParameter.newType("amount", CommandParamType.INT),
+            CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode())
         )
         commandParameters["level"] = arrayOf(
-            CommandParameter.Companion.newType("level", CommandParamType.STRING, XpLevelNode()),
-            CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode())
+            CommandParameter.newType("level", CommandParamType.STRING, XpLevelNode()),
+            CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode())
         )
         this.enableParamTree()
     }

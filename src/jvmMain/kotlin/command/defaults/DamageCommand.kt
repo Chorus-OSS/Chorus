@@ -19,9 +19,9 @@ class DamageCommand(name: String) : VanillaCommand(name, "commands.damage.descri
         this.addCommandParameters(
             "default",
             arrayOf(
-                CommandParameter.Companion.newType("target", false, CommandParamType.TARGET),
-                CommandParameter.Companion.newType("amount", false, CommandParamType.INT),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newType("target", false, CommandParamType.TARGET),
+                CommandParameter.newType("amount", false, CommandParamType.INT),
+                CommandParameter.newEnum(
                     "cause",
                     true,
                     EntityDamageEvent.DamageCause.entries.map { e: EntityDamageEvent.DamageCause -> e.name.lowercase() }
@@ -32,16 +32,16 @@ class DamageCommand(name: String) : VanillaCommand(name, "commands.damage.descri
         this.addCommandParameters(
             "damager",
             arrayOf(
-                CommandParameter.Companion.newType("target", false, CommandParamType.TARGET),
-                CommandParameter.Companion.newType("amount", false, CommandParamType.INT),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newType("target", false, CommandParamType.TARGET),
+                CommandParameter.newType("amount", false, CommandParamType.INT),
+                CommandParameter.newEnum(
                     "cause",
                     false,
                     EntityDamageEvent.DamageCause.entries.map { e: EntityDamageEvent.DamageCause -> e.name.lowercase() }
                         .toList().toTypedArray()
                 ),
-                CommandParameter.Companion.newEnum("entity", false, arrayOf("entity")),
-                CommandParameter.Companion.newType("damager", false, CommandParamType.TARGET)
+                CommandParameter.newEnum("entity", false, arrayOf("entity")),
+                CommandParameter.newType("damager", false, CommandParamType.TARGET)
             )
         )
         this.enableParamTree()

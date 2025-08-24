@@ -18,19 +18,19 @@ class TimeCommand(name: String) : VanillaCommand(name, "commands.time.descriptio
                 "chorus.command.time.stop"
         commandParameters.clear()
         commandParameters["1arg"] = arrayOf(
-            CommandParameter.Companion.newEnum("mode", CommandEnum("TimeMode", "query", "start", "stop"))
+            CommandParameter.newEnum("mode", CommandEnum("TimeMode", "query", "start", "stop"))
         )
         commandParameters["add"] = arrayOf(
-            CommandParameter.Companion.newEnum("mode", CommandEnum("TimeModeAdd", "add")),
-            CommandParameter.Companion.newType("amount", CommandParamType.INT)
+            CommandParameter.newEnum("mode", CommandEnum("TimeModeAdd", "add")),
+            CommandParameter.newType("amount", CommandParamType.INT)
         )
         commandParameters["setAmount"] = arrayOf(
-            CommandParameter.Companion.newEnum("mode", false, CommandEnum("TimeModeSet", "set")),
-            CommandParameter.Companion.newType("amount", CommandParamType.INT)
+            CommandParameter.newEnum("mode", false, CommandEnum("TimeModeSet", "set")),
+            CommandParameter.newType("amount", CommandParamType.INT)
         )
         commandParameters["setTime"] = arrayOf(
-            CommandParameter.Companion.newEnum("mode", CommandEnum("TimeModeSet", "set")),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum("mode", CommandEnum("TimeModeSet", "set")),
+            CommandParameter.newEnum(
                 "time",
                 CommandEnum("TimeSpec", "day", "night", "midnight", "noon", "sunrise", "sunset")
             )

@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemFence @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.FENCE, meta, count) {
+    Item(ItemID.FENCE, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

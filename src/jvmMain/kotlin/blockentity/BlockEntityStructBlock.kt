@@ -34,104 +34,104 @@ class BlockEntityStructBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawna
 
     override fun loadNBT() {
         super.loadNBT()
-        if (namedTag.contains(IStructBlock.Companion.TAG_ANIMATION_MODE)) {
+        if (namedTag.contains(IStructBlock.TAG_ANIMATION_MODE)) {
             this.animationMode =
-                StructureAnimationMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_ANIMATION_MODE).toInt()]
+                StructureAnimationMode.entries[namedTag.getByte(IStructBlock.TAG_ANIMATION_MODE).toInt()]
         } else {
             this.animationMode = StructureAnimationMode.entries[0]
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_ANIMATION_SECONDS)) {
-            this.animationSeconds = namedTag.getFloat(IStructBlock.Companion.TAG_ANIMATION_SECONDS)
+        if (namedTag.contains(IStructBlock.TAG_ANIMATION_SECONDS)) {
+            this.animationSeconds = namedTag.getFloat(IStructBlock.TAG_ANIMATION_SECONDS)
         } else {
             this.animationSeconds = 0f
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_DATA)) {
-            this.data = StructureBlockType.entries[namedTag.getByte(IStructBlock.Companion.TAG_DATA).toInt()]
+        if (namedTag.contains(IStructBlock.TAG_DATA)) {
+            this.data = StructureBlockType.entries[namedTag.getByte(IStructBlock.TAG_DATA).toInt()]
         } else {
             this.data = StructureBlockType.entries[1]
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_DATA_FIELD)) {
-            this.dataField = namedTag.getString(IStructBlock.Companion.TAG_DATA_FIELD)
+        if (namedTag.contains(IStructBlock.TAG_DATA_FIELD)) {
+            this.dataField = namedTag.getString(IStructBlock.TAG_DATA_FIELD)
         } else {
             this.dataField = ""
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_IGNORE_ENTITIES)) {
-            this.ignoreEntities = namedTag.getBoolean(IStructBlock.Companion.TAG_IGNORE_ENTITIES)
+        if (namedTag.contains(IStructBlock.TAG_IGNORE_ENTITIES)) {
+            this.ignoreEntities = namedTag.getBoolean(IStructBlock.TAG_IGNORE_ENTITIES)
         } else {
             this.ignoreEntities = false
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_INCLUDE_PLAYERS)) {
-            this.includePlayers = namedTag.getBoolean(IStructBlock.Companion.TAG_INCLUDE_PLAYERS)
+        if (namedTag.contains(IStructBlock.TAG_INCLUDE_PLAYERS)) {
+            this.includePlayers = namedTag.getBoolean(IStructBlock.TAG_INCLUDE_PLAYERS)
         } else {
             this.includePlayers = false
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_INTEGRITY)) {
-            this.integrity = namedTag.getFloat(IStructBlock.Companion.TAG_INTEGRITY)
+        if (namedTag.contains(IStructBlock.TAG_INTEGRITY)) {
+            this.integrity = namedTag.getFloat(IStructBlock.TAG_INTEGRITY)
         } else {
             this.integrity = 100f
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_IS_POWERED)) {
-            this.isPowered = namedTag.getBoolean(IStructBlock.Companion.TAG_IS_POWERED)
+        if (namedTag.contains(IStructBlock.TAG_IS_POWERED)) {
+            this.isPowered = namedTag.getBoolean(IStructBlock.TAG_IS_POWERED)
         } else {
             this.isPowered = false
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_MIRROR)) {
-            this.mirror = StructureMirror.entries[namedTag.getByte(IStructBlock.Companion.TAG_MIRROR).toInt()]
+        if (namedTag.contains(IStructBlock.TAG_MIRROR)) {
+            this.mirror = StructureMirror.entries[namedTag.getByte(IStructBlock.TAG_MIRROR).toInt()]
         } else {
             this.mirror = StructureMirror.entries[0]
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)) {
+        if (namedTag.contains(IStructBlock.TAG_REDSTONE_SAVEMODE)) {
             this.redstoneSaveMode =
-                StructureRedstoneSaveMode.entries[namedTag.getByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE)
+                StructureRedstoneSaveMode.entries[namedTag.getByte(IStructBlock.TAG_REDSTONE_SAVEMODE)
                     .toInt()]
         } else {
             this.redstoneSaveMode = StructureRedstoneSaveMode.entries[0]
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_REMOVE_BLOCKS)) {
-            this.removeBlocks = namedTag.getBoolean(IStructBlock.Companion.TAG_REMOVE_BLOCKS)
+        if (namedTag.contains(IStructBlock.TAG_REMOVE_BLOCKS)) {
+            this.removeBlocks = namedTag.getBoolean(IStructBlock.TAG_REMOVE_BLOCKS)
         } else {
             this.removeBlocks = false
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_ROTATION)) {
-            this.rotation = StructureRotation.entries[namedTag.getByte(IStructBlock.Companion.TAG_ROTATION).toInt()]
+        if (namedTag.contains(IStructBlock.TAG_ROTATION)) {
+            this.rotation = StructureRotation.entries[namedTag.getByte(IStructBlock.TAG_ROTATION).toInt()]
         } else {
             this.rotation = StructureRotation.entries[0]
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_SEED)) {
-            this.seed = namedTag.getLong(IStructBlock.Companion.TAG_SEED)
+        if (namedTag.contains(IStructBlock.TAG_SEED)) {
+            this.seed = namedTag.getLong(IStructBlock.TAG_SEED)
         } else {
             this.seed = 0L
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_SHOW_BOUNDING_BOX)) {
-            this.showBoundingBox = namedTag.getBoolean(IStructBlock.Companion.TAG_SHOW_BOUNDING_BOX)
+        if (namedTag.contains(IStructBlock.TAG_SHOW_BOUNDING_BOX)) {
+            this.showBoundingBox = namedTag.getBoolean(IStructBlock.TAG_SHOW_BOUNDING_BOX)
         } else {
             this.showBoundingBox = true
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_STRUCTURE_NAME)) {
-            this.structureName = namedTag.getString(IStructBlock.Companion.TAG_STRUCTURE_NAME)
+        if (namedTag.contains(IStructBlock.TAG_STRUCTURE_NAME)) {
+            this.structureName = namedTag.getString(IStructBlock.TAG_STRUCTURE_NAME)
         } else {
             this.structureName = ""
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_X_STRUCTURE_OFFSET) && namedTag.contains(IStructBlock.Companion.TAG_Y_STRUCTURE_OFFSET) && namedTag.contains(
-                IStructBlock.Companion.TAG_Z_STRUCTURE_OFFSET
+        if (namedTag.contains(IStructBlock.TAG_X_STRUCTURE_OFFSET) && namedTag.contains(IStructBlock.TAG_Y_STRUCTURE_OFFSET) && namedTag.contains(
+                IStructBlock.TAG_Z_STRUCTURE_OFFSET
             )
         ) {
             this.offset = BlockVector3(
-                namedTag.getInt(IStructBlock.Companion.TAG_X_STRUCTURE_OFFSET),
-                namedTag.getInt(IStructBlock.Companion.TAG_Y_STRUCTURE_OFFSET),
-                namedTag.getInt(IStructBlock.Companion.TAG_Z_STRUCTURE_OFFSET)
+                namedTag.getInt(IStructBlock.TAG_X_STRUCTURE_OFFSET),
+                namedTag.getInt(IStructBlock.TAG_Y_STRUCTURE_OFFSET),
+                namedTag.getInt(IStructBlock.TAG_Z_STRUCTURE_OFFSET)
             )
         } else {
             this.offset = BlockVector3(0, -1, 0)
         }
-        if (namedTag.contains(IStructBlock.Companion.TAG_X_STRUCTURE_SIZE) && namedTag.contains(IStructBlock.Companion.TAG_Y_STRUCTURE_SIZE) && namedTag.contains(
-                IStructBlock.Companion.TAG_Z_STRUCTURE_SIZE
+        if (namedTag.contains(IStructBlock.TAG_X_STRUCTURE_SIZE) && namedTag.contains(IStructBlock.TAG_Y_STRUCTURE_SIZE) && namedTag.contains(
+                IStructBlock.TAG_Z_STRUCTURE_SIZE
             )
         ) {
             this.size = BlockVector3(
-                namedTag.getInt(IStructBlock.Companion.TAG_X_STRUCTURE_SIZE),
-                namedTag.getInt(IStructBlock.Companion.TAG_Y_STRUCTURE_SIZE),
-                namedTag.getInt(IStructBlock.Companion.TAG_Z_STRUCTURE_SIZE)
+                namedTag.getInt(IStructBlock.TAG_X_STRUCTURE_SIZE),
+                namedTag.getInt(IStructBlock.TAG_Y_STRUCTURE_SIZE),
+                namedTag.getInt(IStructBlock.TAG_Z_STRUCTURE_SIZE)
             )
         } else {
             this.size = BlockVector3(5, 5, 5)
@@ -140,54 +140,54 @@ class BlockEntityStructBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawna
 
     override val spawnCompound: CompoundTag
         get() = super.spawnCompound
-            .putByte(IStructBlock.Companion.TAG_ANIMATION_MODE, animationMode!!.ordinal)
-            .putFloat(IStructBlock.Companion.TAG_ANIMATION_SECONDS, this.animationSeconds)
-            .putInt(IStructBlock.Companion.TAG_DATA, data!!.ordinal)
-            .putString(IStructBlock.Companion.TAG_DATA_FIELD, this.dataField!!)
-            .putBoolean(IStructBlock.Companion.TAG_IGNORE_ENTITIES, ignoreEntities)
-            .putBoolean(IStructBlock.Companion.TAG_INCLUDE_PLAYERS, includePlayers)
-            .putFloat(IStructBlock.Companion.TAG_INTEGRITY, integrity)
-            .putBoolean(IStructBlock.Companion.TAG_IS_POWERED, isPowered)
-            .putByte(IStructBlock.Companion.TAG_MIRROR, mirror!!.ordinal)
-            .putByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE, redstoneSaveMode!!.ordinal)
-            .putBoolean(IStructBlock.Companion.TAG_REMOVE_BLOCKS, removeBlocks)
-            .putByte(IStructBlock.Companion.TAG_ROTATION, rotation!!.ordinal)
-            .putLong(IStructBlock.Companion.TAG_SEED, seed)
-            .putBoolean(IStructBlock.Companion.TAG_SHOW_BOUNDING_BOX, showBoundingBox)
-            .putString(IStructBlock.Companion.TAG_STRUCTURE_NAME, structureName!!)
-            .putInt(IStructBlock.Companion.TAG_X_STRUCTURE_OFFSET, offset!!.x)
-            .putInt(IStructBlock.Companion.TAG_Y_STRUCTURE_OFFSET, offset!!.y)
-            .putInt(IStructBlock.Companion.TAG_Z_STRUCTURE_OFFSET, offset!!.z)
-            .putInt(IStructBlock.Companion.TAG_X_STRUCTURE_SIZE, size!!.x)
-            .putInt(IStructBlock.Companion.TAG_Y_STRUCTURE_SIZE, size!!.y)
-            .putInt(IStructBlock.Companion.TAG_Z_STRUCTURE_SIZE, size!!.z)
+            .putByte(IStructBlock.TAG_ANIMATION_MODE, animationMode!!.ordinal)
+            .putFloat(IStructBlock.TAG_ANIMATION_SECONDS, this.animationSeconds)
+            .putInt(IStructBlock.TAG_DATA, data!!.ordinal)
+            .putString(IStructBlock.TAG_DATA_FIELD, this.dataField!!)
+            .putBoolean(IStructBlock.TAG_IGNORE_ENTITIES, ignoreEntities)
+            .putBoolean(IStructBlock.TAG_INCLUDE_PLAYERS, includePlayers)
+            .putFloat(IStructBlock.TAG_INTEGRITY, integrity)
+            .putBoolean(IStructBlock.TAG_IS_POWERED, isPowered)
+            .putByte(IStructBlock.TAG_MIRROR, mirror!!.ordinal)
+            .putByte(IStructBlock.TAG_REDSTONE_SAVEMODE, redstoneSaveMode!!.ordinal)
+            .putBoolean(IStructBlock.TAG_REMOVE_BLOCKS, removeBlocks)
+            .putByte(IStructBlock.TAG_ROTATION, rotation!!.ordinal)
+            .putLong(IStructBlock.TAG_SEED, seed)
+            .putBoolean(IStructBlock.TAG_SHOW_BOUNDING_BOX, showBoundingBox)
+            .putString(IStructBlock.TAG_STRUCTURE_NAME, structureName!!)
+            .putInt(IStructBlock.TAG_X_STRUCTURE_OFFSET, offset!!.x)
+            .putInt(IStructBlock.TAG_Y_STRUCTURE_OFFSET, offset!!.y)
+            .putInt(IStructBlock.TAG_Z_STRUCTURE_OFFSET, offset!!.z)
+            .putInt(IStructBlock.TAG_X_STRUCTURE_SIZE, size!!.x)
+            .putInt(IStructBlock.TAG_Y_STRUCTURE_SIZE, size!!.y)
+            .putInt(IStructBlock.TAG_Z_STRUCTURE_SIZE, size!!.z)
 
     override fun saveNBT() {
         super.saveNBT()
         namedTag.putByte(
-            IStructBlock.Companion.TAG_ANIMATION_MODE,
+            IStructBlock.TAG_ANIMATION_MODE,
             animationMode!!.ordinal
         )
-            .putFloat(IStructBlock.Companion.TAG_ANIMATION_SECONDS, this.animationSeconds)
-            .putInt(IStructBlock.Companion.TAG_DATA, data!!.ordinal)
-            .putString(IStructBlock.Companion.TAG_DATA_FIELD, dataField!!)
-            .putBoolean(IStructBlock.Companion.TAG_IGNORE_ENTITIES, ignoreEntities)
-            .putBoolean(IStructBlock.Companion.TAG_INCLUDE_PLAYERS, includePlayers)
-            .putFloat(IStructBlock.Companion.TAG_INTEGRITY, integrity)
-            .putBoolean(IStructBlock.Companion.TAG_IS_POWERED, isPowered)
-            .putByte(IStructBlock.Companion.TAG_MIRROR, mirror!!.ordinal)
-            .putByte(IStructBlock.Companion.TAG_REDSTONE_SAVEMODE, redstoneSaveMode!!.ordinal)
-            .putBoolean(IStructBlock.Companion.TAG_REMOVE_BLOCKS, removeBlocks)
-            .putByte(IStructBlock.Companion.TAG_ROTATION, rotation!!.ordinal)
-            .putLong(IStructBlock.Companion.TAG_SEED, seed)
-            .putBoolean(IStructBlock.Companion.TAG_SHOW_BOUNDING_BOX, showBoundingBox)
-            .putString(IStructBlock.Companion.TAG_STRUCTURE_NAME, structureName!!)
-            .putInt(IStructBlock.Companion.TAG_X_STRUCTURE_OFFSET, offset!!.x)
-            .putInt(IStructBlock.Companion.TAG_Y_STRUCTURE_OFFSET, offset!!.y)
-            .putInt(IStructBlock.Companion.TAG_Z_STRUCTURE_OFFSET, offset!!.z)
-            .putInt(IStructBlock.Companion.TAG_X_STRUCTURE_SIZE, size!!.x)
-            .putInt(IStructBlock.Companion.TAG_Y_STRUCTURE_SIZE, size!!.y)
-            .putInt(IStructBlock.Companion.TAG_Z_STRUCTURE_SIZE, size!!.z)
+            .putFloat(IStructBlock.TAG_ANIMATION_SECONDS, this.animationSeconds)
+            .putInt(IStructBlock.TAG_DATA, data!!.ordinal)
+            .putString(IStructBlock.TAG_DATA_FIELD, dataField!!)
+            .putBoolean(IStructBlock.TAG_IGNORE_ENTITIES, ignoreEntities)
+            .putBoolean(IStructBlock.TAG_INCLUDE_PLAYERS, includePlayers)
+            .putFloat(IStructBlock.TAG_INTEGRITY, integrity)
+            .putBoolean(IStructBlock.TAG_IS_POWERED, isPowered)
+            .putByte(IStructBlock.TAG_MIRROR, mirror!!.ordinal)
+            .putByte(IStructBlock.TAG_REDSTONE_SAVEMODE, redstoneSaveMode!!.ordinal)
+            .putBoolean(IStructBlock.TAG_REMOVE_BLOCKS, removeBlocks)
+            .putByte(IStructBlock.TAG_ROTATION, rotation!!.ordinal)
+            .putLong(IStructBlock.TAG_SEED, seed)
+            .putBoolean(IStructBlock.TAG_SHOW_BOUNDING_BOX, showBoundingBox)
+            .putString(IStructBlock.TAG_STRUCTURE_NAME, structureName!!)
+            .putInt(IStructBlock.TAG_X_STRUCTURE_OFFSET, offset!!.x)
+            .putInt(IStructBlock.TAG_Y_STRUCTURE_OFFSET, offset!!.y)
+            .putInt(IStructBlock.TAG_Z_STRUCTURE_OFFSET, offset!!.z)
+            .putInt(IStructBlock.TAG_X_STRUCTURE_SIZE, size!!.x)
+            .putInt(IStructBlock.TAG_Y_STRUCTURE_SIZE, size!!.y)
+            .putInt(IStructBlock.TAG_Z_STRUCTURE_SIZE, size!!.z)
     }
 
     override val isBlockEntityValid: Boolean
@@ -197,17 +197,17 @@ class BlockEntityStructBlock(level: Level, nbt: CompoundTag) : BlockEntitySpawna
         }
 
     override var name: String
-        get() = if (this.hasName()) namedTag.getString(IStructBlock.Companion.TAG_CUSTOM_NAME) else BlockEntityID.STRUCTURE_BLOCK
+        get() = if (this.hasName()) namedTag.getString(IStructBlock.TAG_CUSTOM_NAME) else BlockEntityID.STRUCTURE_BLOCK
         set(name) {
             if (name.isEmpty()) {
-                namedTag.remove(IStructBlock.Companion.TAG_CUSTOM_NAME)
+                namedTag.remove(IStructBlock.TAG_CUSTOM_NAME)
             } else {
-                namedTag.putString(IStructBlock.Companion.TAG_CUSTOM_NAME, name)
+                namedTag.putString(IStructBlock.TAG_CUSTOM_NAME, name)
             }
         }
 
     override fun hasName(): Boolean {
-        return namedTag.contains(IStructBlock.Companion.TAG_CUSTOM_NAME)
+        return namedTag.contains(IStructBlock.TAG_CUSTOM_NAME)
     }
 
     override val inventory

@@ -20,6 +20,6 @@ object RandomItem {
                 f
         }
         if (child.size == 0) return selector!!.select()
-        return selectFrom(Selector.Companion.selectRandom(child))
+        return selectFrom(Selector.selectRandom(child))
     }
 }

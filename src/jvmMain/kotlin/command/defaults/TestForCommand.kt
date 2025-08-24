@@ -14,7 +14,7 @@ class TestForCommand(name: String) : VanillaCommand(name, "commands.testfor.desc
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("victim", false, CommandParamType.TARGET)
+                CommandParameter.newType("victim", false, CommandParamType.TARGET)
             )
         )
         this.enableParamTree()

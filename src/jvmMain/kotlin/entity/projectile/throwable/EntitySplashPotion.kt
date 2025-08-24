@@ -76,7 +76,7 @@ open class EntitySplashPotion(chunk: IChunk?, nbt: CompoundTag, shootingEntity: 
     }
 
     protected open fun splash(collidedWith: Entity?) {
-        var potion = PotionType.Companion.get(this.potionId)
+        var potion = PotionType.get(this.potionId)
         val event: PotionCollideEvent = PotionCollideEvent(potion, this)
         Server.instance.pluginManager.callEvent(event)
 
@@ -88,7 +88,7 @@ open class EntitySplashPotion(chunk: IChunk?, nbt: CompoundTag, shootingEntity: 
 
         potion = event.potion
 
-        if (potion == PotionType.Companion.WATER) {
+        if (potion == PotionType.WATER) {
             if (collidedWith is EntityBlaze) {
                 collidedWith.attack(EntityDamageByEntityEvent(this, collidedWith, DamageCause.MAGIC, 1f))
             }

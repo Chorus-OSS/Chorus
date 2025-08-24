@@ -94,7 +94,7 @@ class GuardianAttackExecutor(
 
     override fun onStop(entity: EntityMob) {
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }
@@ -105,7 +105,7 @@ class GuardianAttackExecutor(
 
     override fun onInterrupt(entity: EntityMob) {
         removeLookTarget(entity)
-        entity.movementSpeed = EntityLiving.Companion.DEFAULT_SPEED
+        entity.movementSpeed = EntityLiving.DEFAULT_SPEED
         if (clearDataWhenLose) {
             entity.behaviorGroup.memoryStorage.clear(memory)
         }

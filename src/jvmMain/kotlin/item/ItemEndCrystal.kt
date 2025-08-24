@@ -16,7 +16,7 @@ import org.chorus_oss.chorus.nbt.tag.ListTag
 import java.util.*
 
 class ItemEndCrystal @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.END_CRYSTAL, meta, count, "End Crystal") {
+    Item(ItemID.END_CRYSTAL, meta, count, "End Crystal") {
     override fun canBeActivated(): Boolean {
         return true
     }

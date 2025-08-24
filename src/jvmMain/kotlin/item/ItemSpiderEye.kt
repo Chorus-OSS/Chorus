@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 
 class ItemSpiderEye @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.SPIDER_EYE, meta, count, "Spider Eye") {
+    ItemFood(ItemID.SPIDER_EYE, meta, count, "Spider Eye") {
     override val foodRestore: Int
         get() = 2
 

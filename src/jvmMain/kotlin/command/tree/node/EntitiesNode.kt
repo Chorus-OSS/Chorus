@@ -17,7 +17,7 @@ class EntitiesNode : TargetNode<Entity?>() {
         val entities: MutableList<Entity>
         if (arg.isBlank()) {
             this.error()
-        } else if (EntitySelectorAPI.Companion.api.checkValid(arg)) {
+        } else if (EntitySelectorAPI.api.checkValid(arg)) {
             try {
                 entities = EntitySelectorAPI.api.matchEntities(paramList.paramTree.sender!!, arg)
             } catch (exception: SelectorSyntaxException) {

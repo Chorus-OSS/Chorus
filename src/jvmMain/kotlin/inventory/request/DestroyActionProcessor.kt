@@ -18,7 +18,7 @@ class DestroyActionProcessor : ItemStackRequestActionProcessor<DestroyRequestAct
         context: ItemStackRequestContext
     ): ActionResponse? {
         val noResponseForDestroyAction =
-            context.get<Boolean>(CraftResultDeprecatedActionProcessor.Companion.NO_RESPONSE_DESTROY_KEY)
+            context.get<Boolean>(CraftResultDeprecatedActionProcessor.NO_RESPONSE_DESTROY_KEY)
         if (noResponseForDestroyAction != null && noResponseForDestroyAction) {
             return null
         }

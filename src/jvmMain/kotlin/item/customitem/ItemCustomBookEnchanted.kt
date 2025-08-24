@@ -8,7 +8,7 @@ import java.util.function.Consumer
 
 abstract class ItemCustomBookEnchanted(id: String) : ItemEnchantedBook(id), CustomItem {
     override val definition: CustomItemDefinition
-        get() = CustomItemDefinition.Companion.customBuilder(this)
+        get() = CustomItemDefinition.customBuilder(this)
             .name(name!!)
             .texture("book_enchanted")
             .allowOffHand(false)

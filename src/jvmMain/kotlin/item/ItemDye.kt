@@ -10,7 +10,7 @@ open class ItemDye : Item {
 
     @JvmOverloads
     constructor(meta: Int = 0, amount: Int = 1) : super(
-        ItemID.Companion.DYE,
+        ItemID.DYE,
         meta,
         amount,
         if (meta <= 15) DyeColor.getByDyeData(meta).dyeName else DyeColor.getByDyeData(meta).name + " Dye"

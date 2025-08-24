@@ -21,10 +21,10 @@ class TestForBlocksCommand(name: String) : VanillaCommand(name, "commands.testfo
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("begin", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("end", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("destination", false, CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("mode", true, arrayOf("all", "masked"))
+                CommandParameter.newType("begin", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("end", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("destination", false, CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("mode", true, arrayOf("all", "masked"))
             )
         )
         this.enableParamTree()

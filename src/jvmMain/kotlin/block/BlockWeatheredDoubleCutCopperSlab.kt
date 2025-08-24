@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.block.property.enums.OxidizationLevel
 
 open class BlockWeatheredDoubleCutCopperSlab @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
     BlockDoubleCutCopperSlab(blockstate) {
-    override fun getSingleSlab() = BlockWeatheredCutCopperSlab.Companion.properties.defaultState
+    override fun getSingleSlab() = BlockWeatheredCutCopperSlab.properties.defaultState
 
     override val oxidizationLevel
         get(): OxidizationLevel {
