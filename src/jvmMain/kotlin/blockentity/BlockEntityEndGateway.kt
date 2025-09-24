@@ -161,7 +161,7 @@ class BlockEntityEndGateway(level: Level, nbt: CompoundTag) : BlockEntitySpawnab
                     val chunkX = (exitPortal!!.x shr 4) + x
                     val chunkZ = (exitPortal!!.z shr 4) + z
                     val chunk = level.getChunk(chunkX, chunkZ, false)
-                    if (chunk == null || !(chunk.isGenerated || chunk.isPopulated)) {
+                    if (!(chunk.isGenerated || chunk.isPopulated)) {
                         level.syncGenerateChunk(chunkX, chunkZ)
                     }
                 }
@@ -207,10 +207,6 @@ class BlockEntityEndGateway(level: Level, nbt: CompoundTag) : BlockEntitySpawnab
 
     private fun sendBlockEventPacket(eventData: Int) {
         if (this.closed) {
-            return
-        }
-
-        if (this.level == null) {
             return
         }
 

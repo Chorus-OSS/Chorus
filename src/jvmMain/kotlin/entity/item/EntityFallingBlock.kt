@@ -66,22 +66,20 @@ class EntityFallingBlock(chunk: IChunk?, nbt: CompoundTag?) : Entity(chunk, nbt)
     override fun initEntity() {
         super.initEntity()
 
-        if (namedTag != null) {
-            if (namedTag!!.contains("Block")) {
-                val blockState: BlockState? = NBTIO.getBlockStateHelper(namedTag!!.getCompound("Block"))
-                if (blockState == null) {
-                    close()
-                    return
-                } else this.blockState = blockState
-            }
-
-            breakOnLava = namedTag!!.getBoolean("BreakOnLava")
-            breakOnGround = namedTag!!.getBoolean("BreakOnGround")
-            this.fireProof = true
-            this.setDataFlag(EntityFlag.FIRE_IMMUNE, true)
-
-            setDataProperty(EntityDataTypes.VARIANT, blockState!!.blockStateHash())
+        if (namedTag.contains("Block")) {
+            val blockState: BlockState? = NBTIO.getBlockStateHelper(namedTag.getCompound("Block"))
+            if (blockState == null) {
+                close()
+                return
+            } else this.blockState = blockState
         }
+
+        breakOnLava = namedTag.getBoolean("BreakOnLava")
+        breakOnGround = namedTag.getBoolean("BreakOnGround")
+        this.fireProof = true
+        this.setDataFlag(EntityFlag.FIRE_IMMUNE, true)
+
+        setDataProperty(EntityDataTypes.VARIANT, blockState!!.blockStateHash())
     }
 
     override fun canCollideWith(entity: Entity): Boolean {

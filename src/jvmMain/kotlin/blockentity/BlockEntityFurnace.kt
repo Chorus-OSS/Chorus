@@ -107,7 +107,7 @@ open class BlockEntityFurnace(level: Level, nbt: CompoundTag) : BlockEntitySpawn
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else furnaceName
         set(name) {
-            if (name == null || name == "") {
+            if (name == "") {
                 namedTag.remove("CustomName")
                 return
             }

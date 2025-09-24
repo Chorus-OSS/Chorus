@@ -61,7 +61,7 @@ class BlockEntityBrewingStand(level: Level, nbt: CompoundTag) : BlockEntitySpawn
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "Brewing Stand"
         set(name) {
-            if (name == null || name == "") {
+            if (name == "") {
                 namedTag.remove("CustomName")
                 return
             }

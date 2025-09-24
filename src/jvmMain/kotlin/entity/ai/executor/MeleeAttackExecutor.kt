@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.entity.ai.executor
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.entity.Entity
-import org.chorus_oss.chorus.entity.EntityCanAttack
 import org.chorus_oss.chorus.entity.EntityLiving
 import org.chorus_oss.chorus.entity.ai.memory.CoreMemoryTypes
 import org.chorus_oss.chorus.entity.ai.memory.NullableMemoryType
@@ -12,8 +11,6 @@ import org.chorus_oss.chorus.entity.mob.EntityMob
 import org.chorus_oss.chorus.event.entity.EntityDamageByEntityEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageCause
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent.DamageModifier
-import org.chorus_oss.chorus.inventory.EntityInventoryHolder
-import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.enchantment.Enchantment
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.protocol.packets.ActorEventPacket
@@ -127,12 +124,8 @@ open class MeleeAttackExecutor(
 
         //attack logic
         if (entity.position.distanceSquared(target!!.position) <= attackRange && attackTick > coolDown) {
-            val item = if (entity is EntityInventoryHolder) entity.itemInHand else Item.AIR
-
-            var defaultDamage = 0f
-            if (entity is EntityCanAttack) {
-                defaultDamage = entity.getDiffHandDamage(Server.instance.getDifficulty())
-            }
+            val item = entity.itemInHand
+            val defaultDamage: Float = entity.getDiffHandDamage(Server.instance.getDifficulty())
             var itemDamage = item.getAttackDamage(entity) + defaultDamage
 
             val enchantments = item.enchantments

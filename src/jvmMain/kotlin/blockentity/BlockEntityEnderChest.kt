@@ -25,7 +25,7 @@ class BlockEntityEnderChest(level: Level, nbt: CompoundTag) : BlockEntitySpawnab
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "EnderChest"
         set(name) {
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 namedTag.remove("CustomName")
                 return
             }

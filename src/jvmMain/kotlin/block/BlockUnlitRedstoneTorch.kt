@@ -17,7 +17,7 @@ class BlockUnlitRedstoneTorch @JvmOverloads constructor(blockstate: BlockState =
     override val lightLevel: Int
         get() = 0
 
-    override fun getWeakPower(side: BlockFace): Int {
+    override fun getWeakPower(face: BlockFace): Int {
         return 0
     }
 

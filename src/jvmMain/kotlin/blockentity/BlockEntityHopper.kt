@@ -105,7 +105,7 @@ class BlockEntityHopper(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(l
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "Hopper"
         set(name) {
-            if (name == null || name.isEmpty()) {
+            if (name.isEmpty()) {
                 namedTag.remove("CustomName")
                 return
             }

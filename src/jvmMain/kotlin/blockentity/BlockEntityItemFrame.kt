@@ -82,13 +82,9 @@ open class BlockEntityItemFrame(level: Level, nbt: CompoundTag) : BlockEntitySpa
 
             if (!item.isNothing) {
                 val itemTag = NBTIO.putItemHelper(item)
-                val networkDamage = item.damage
-                val namespacedId = item.id
-                if (namespacedId != null) {
-                    itemTag.remove("id")
-                    itemTag.putShort("Damage", networkDamage)
-                    itemTag.putString("Name", namespacedId)
-                }
+                itemTag.remove("id")
+                itemTag.putShort("Damage", item.damage)
+                itemTag.putString("Name", item.id)
                 if (item.isBlock()) {
                     itemTag.putCompound("Block", item.getSafeBlockState().blockStateTag)
                 }
@@ -99,11 +95,11 @@ open class BlockEntityItemFrame(level: Level, nbt: CompoundTag) : BlockEntitySpa
         }
 
     val analogOutput: Int
-        get() = if (this.item == null || item.isNothing) 0 else itemRotation % 8 + 1
+        get() = if (item.isNothing) 0 else itemRotation % 8 + 1
 
     fun dropItem(player: Player?): Boolean {
         val before = this.item
-        if (before == null || before.isNothing) {
+        if (before.isNothing) {
             return false
         }
 
@@ -115,8 +111,7 @@ open class BlockEntityItemFrame(level: Level, nbt: CompoundTag) : BlockEntitySpa
         if (drop != null) {
             return true
         }
-        val after = this.item
-        return after == null || after.isNothing
+        return item.isNothing
     }
 
     fun dropItemAndGetEntity(player: Player?): EntityItem? {

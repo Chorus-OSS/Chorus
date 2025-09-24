@@ -112,7 +112,7 @@ interface ISelectorArgument : Comparable<ISelectorArgument> {
         return null
     }
 
-    override fun compareTo(o: ISelectorArgument): Int {
-        return Integer.compare(this.priority, o.priority)
+    override fun compareTo(other: ISelectorArgument): Int {
+        return this.priority.compareTo(other.priority)
     }
 }

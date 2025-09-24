@@ -153,9 +153,6 @@ interface IHuman : InventoryHolder {
                 this.skin = (newSkin)
             }
 
-            if (this.skin == null) {
-                this.skin = (Skin())
-            }
             this.setUUID(
                 Utils.dataToUUID(
                     human.getRuntimeID().toString().toByteArray(StandardCharsets.UTF_8),
@@ -200,113 +197,105 @@ interface IHuman : InventoryHolder {
 
     fun saveHumanEntity(human: Entity) {
         //EntityHumanType
-        val inventoryTag: ListTag<CompoundTag>?
-        if (this.inventory != null) {
-            inventoryTag = ListTag()
-            human.namedTag!!.putList("Inventory", inventoryTag)
+        val inventoryTag: ListTag<CompoundTag> = ListTag()
 
-            for (entry in inventory.contents.entries) {
-                inventoryTag.add(NBTIO.putItemHelper(entry.value, entry.key))
+        human.namedTag.putList("Inventory", inventoryTag)
+
+        for (entry in inventory.contents.entries) {
+            inventoryTag.add(NBTIO.putItemHelper(entry.value, entry.key))
+        }
+
+        human.namedTag.putInt("SelectedInventorySlot", inventory.heldItemIndex)
+
+        val item: Item = offhandInventory.getItem(0)
+        human.namedTag.putCompound("OffInventory", NBTIO.putItemHelper(item, 0))
+
+        human.namedTag.putList("EnderItems", ListTag<CompoundTag>())
+        val enderItems: ListTag<CompoundTag> = human.namedTag.getList("EnderItems", CompoundTag::class.java)
+        for (slot in 0..<enderChestInventory.size) {
+            val item: Item = enderChestInventory.getItem(slot)
+            if (!item.isNothing) {
+                enderItems.add(NBTIO.putItemHelper(item, slot))
             }
-
-            human.namedTag!!.putInt("SelectedInventorySlot", inventory.heldItemIndex)
         }
-
-        if (this.offhandInventory != null) {
-            val item: Item = offhandInventory.getItem(0)
-            human.namedTag!!.putCompound("OffInventory", NBTIO.putItemHelper(item, 0))
-        }
-
-        human.namedTag!!.putList("EnderItems", ListTag<CompoundTag>())
-        if (this.enderChestInventory != null) {
-            val enderItems: ListTag<CompoundTag> = human.namedTag!!.getList("EnderItems", CompoundTag::class.java)
-            for (slot in 0..<enderChestInventory.size) {
-                val item: Item = enderChestInventory.getItem(slot)
-                if (!item.isNothing) {
-                    enderItems.add(NBTIO.putItemHelper(item, slot))
-                }
-            }
-            human.namedTag!!.putList("EnderItems", enderItems)
-        }
+        human.namedTag.putList("EnderItems", enderItems)
 
         //EntityHuman
         val skin: Skin = skin
-        if (skin != null) {
-            val skinTag: CompoundTag = CompoundTag()
-                .putByteArray("Data", skin.getSkinData().data)
-                .putInt("SkinImageWidth", skin.getSkinData().width)
-                .putInt("SkinImageHeight", skin.getSkinData().height)
-                .putString("ModelId", skin.getSkinId())
-                .putString("CapeId", skin.getCapeId())
-                .putByteArray("CapeData", skin.getCapeData().data)
-                .putInt("CapeImageWidth", skin.getCapeData().width)
-                .putInt("CapeImageHeight", skin.getCapeData().height)
-                .putByteArray("SkinResourcePatch", skin.getSkinResourcePatch().toByteArray(StandardCharsets.UTF_8))
-                .putByteArray("GeometryData", skin.getGeometryData().toByteArray(StandardCharsets.UTF_8))
-                .putByteArray("SkinAnimationData", skin.getAnimationData().toByteArray(StandardCharsets.UTF_8))
-                .putBoolean("PremiumSkin", skin.isPremium())
-                .putBoolean("PersonaSkin", skin.isPersona())
-                .putBoolean("CapeOnClassicSkin", skin.isCapeOnClassic())
-                .putString("ArmSize", skin.getArmSize()!!)
-                .putString("SkinColor", skin.getSkinColor()!!)
-                .putBoolean("IsTrustedSkin", skin.isTrusted())
+        val skinTag: CompoundTag = CompoundTag()
+            .putByteArray("Data", skin.getSkinData().data)
+            .putInt("SkinImageWidth", skin.getSkinData().width)
+            .putInt("SkinImageHeight", skin.getSkinData().height)
+            .putString("ModelId", skin.getSkinId())
+            .putString("CapeId", skin.getCapeId())
+            .putByteArray("CapeData", skin.getCapeData().data)
+            .putInt("CapeImageWidth", skin.getCapeData().width)
+            .putInt("CapeImageHeight", skin.getCapeData().height)
+            .putByteArray("SkinResourcePatch", skin.getSkinResourcePatch().toByteArray(StandardCharsets.UTF_8))
+            .putByteArray("GeometryData", skin.getGeometryData().toByteArray(StandardCharsets.UTF_8))
+            .putByteArray("SkinAnimationData", skin.getAnimationData().toByteArray(StandardCharsets.UTF_8))
+            .putBoolean("PremiumSkin", skin.isPremium())
+            .putBoolean("PersonaSkin", skin.isPersona())
+            .putBoolean("CapeOnClassicSkin", skin.isCapeOnClassic())
+            .putString("ArmSize", skin.getArmSize()!!)
+            .putString("SkinColor", skin.getSkinColor()!!)
+            .putBoolean("IsTrustedSkin", skin.isTrusted())
 
-            val animations = skin.getAnimations()
-            if (animations.isNotEmpty()) {
-                val animationsTag: ListTag<CompoundTag> = ListTag()
-                for (animation in animations) {
-                    animationsTag.add(
-                        CompoundTag()
-                            .putFloat("Frames", animation.frames)
-                            .putInt("Type", animation.type)
-                            .putInt("ImageWidth", animation.image.width)
-                            .putInt("ImageHeight", animation.image.height)
-                            .putInt("AnimationExpression", animation.expression)
-                            .putByteArray("Image", animation.image.data)
-                    )
-                }
-                skinTag.putList("AnimatedImageData", animationsTag)
+        val animations = skin.getAnimations()
+        if (animations.isNotEmpty()) {
+            val animationsTag: ListTag<CompoundTag> = ListTag()
+            for (animation in animations) {
+                animationsTag.add(
+                    CompoundTag()
+                        .putFloat("Frames", animation.frames)
+                        .putInt("Type", animation.type)
+                        .putInt("ImageWidth", animation.image.width)
+                        .putInt("ImageHeight", animation.image.height)
+                        .putInt("AnimationExpression", animation.expression)
+                        .putByteArray("Image", animation.image.data)
+                )
             }
-
-            val personaPieces = skin.getPersonaPieces()
-            if (personaPieces.isNotEmpty()) {
-                val piecesTag: ListTag<CompoundTag> = ListTag()
-                for (piece: PersonaPiece in personaPieces) {
-                    piecesTag.add(
-                        CompoundTag().putString("PieceId", piece.id)
-                            .putString("PieceType", piece.type)
-                            .putString("PackId", piece.packId)
-                            .putBoolean("IsDefault", piece.isDefault)
-                            .putString("ProductId", piece.productId)
-                    )
-                }
-                skinTag.putList("PersonaPieces", piecesTag)
-            }
-            val tints = skin.getTintColors()
-            if (tints.isNotEmpty()) {
-                val tintsTag: ListTag<CompoundTag> = ListTag()
-                for (tint: PersonaPieceTint in tints) {
-                    val colors: ListTag<StringTag> = ListTag()
-                    colors.all = (tint.colors.stream().map { data: String? ->
-                        StringTag(
-                            data!!
-                        )
-                    }.collect(Collectors.toList()))
-                    tintsTag.add(
-                        CompoundTag()
-                            .putString("PieceType", tint.pieceType)
-                            .putList("Colors", colors)
-                    )
-                }
-                skinTag.putList("PieceTintColors", tintsTag)
-            }
-
-            if (skin.getPlayFabId().isNotEmpty()) {
-                skinTag.putString("PlayFabId", skin.getPlayFabId())
-            }
-
-            human.namedTag!!.putCompound("Skin", skinTag)
+            skinTag.putList("AnimatedImageData", animationsTag)
         }
+
+        val personaPieces = skin.getPersonaPieces()
+        if (personaPieces.isNotEmpty()) {
+            val piecesTag: ListTag<CompoundTag> = ListTag()
+            for (piece: PersonaPiece in personaPieces) {
+                piecesTag.add(
+                    CompoundTag().putString("PieceId", piece.id)
+                        .putString("PieceType", piece.type)
+                        .putString("PackId", piece.packId)
+                        .putBoolean("IsDefault", piece.isDefault)
+                        .putString("ProductId", piece.productId)
+                )
+            }
+            skinTag.putList("PersonaPieces", piecesTag)
+        }
+        val tints = skin.getTintColors()
+        if (tints.isNotEmpty()) {
+            val tintsTag: ListTag<CompoundTag> = ListTag()
+            for (tint: PersonaPieceTint in tints) {
+                val colors: ListTag<StringTag> = ListTag()
+                colors.all = (tint.colors.stream().map { data: String? ->
+                    StringTag(
+                        data!!
+                    )
+                }.collect(Collectors.toList()))
+                tintsTag.add(
+                    CompoundTag()
+                        .putString("PieceType", tint.pieceType)
+                        .putList("Colors", colors)
+                )
+            }
+            skinTag.putList("PieceTintColors", tintsTag)
+        }
+
+        if (skin.getPlayFabId().isNotEmpty()) {
+            skinTag.putString("PlayFabId", skin.getPlayFabId())
+        }
+
+        human.namedTag!!.putCompound("Skin", skinTag)
     }
 
     var skin: Skin

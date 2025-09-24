@@ -1116,7 +1116,6 @@ open class Player(
 
     fun checkNearEntities() {
         for (entity in level!!.getNearbyEntities(boundingBox.grow(1.0, 0.5, 1.0), this)) {
-            if (entity == null) continue
             entity.scheduleUpdate()
 
             if (!entity.isAlive() || !this.isAlive()) {
@@ -1485,8 +1484,8 @@ open class Player(
 
         adventureSettings.init(nbt)
 
-        val level: Level?
-        if (Server.instance.getLevelByName(nbt.getString("Level")).also { level = it } == null) {
+        val level: Level? = Server.instance.getLevelByName(nbt.getString("Level"))
+        if (level == null) {
             this.level = Server.instance.defaultLevel
             nbt.putString("Level", this.level!!.getLevelName())
             val spawnLocation = this.level!!.safeSpawn
@@ -1905,10 +1904,10 @@ open class Player(
         get() = this
 
     override val firstPlayed: Long?
-        get() = if (this.namedTag != null) namedTag!!.getLong("firstPlayed") else null
+        get() = namedTag.getLong("firstPlayed")
 
     override val lastPlayed: Long?
-        get() = if (this.namedTag != null) namedTag!!.getLong("lastPlayed") else null
+        get() = namedTag.getLong("lastPlayed")
 
     override fun hasPlayedBefore(): Boolean {
         return this.playedBefore
@@ -2908,18 +2907,16 @@ open class Player(
                 //鞘翅检查和耐久计算
                 if (this.isGliding()) {
                     val playerInventory = this.inventory
-                    if (playerInventory != null) {
-                        val chestplate = playerInventory.chestplate
-                        if ((chestplate == null || chestplate.id != ItemID.ELYTRA)) {
+                    val chestplate = playerInventory.chestplate
+                    if (chestplate.id != ItemID.ELYTRA) {
+                        this.setGliding(false)
+                    } else if (this.age % (20 * (chestplate.getEnchantmentLevel(Enchantment.ID_DURABILITY) + 1)) == 0 && !isCreative) {
+                        val newDamage = chestplate.damage + 1
+                        if (newDamage < chestplate.maxDurability) {
+                            chestplate.damage = newDamage
+                            playerInventory.setChestplate(chestplate)
+                        } else {
                             this.setGliding(false)
-                        } else if (this.age % (20 * (chestplate.getEnchantmentLevel(Enchantment.ID_DURABILITY) + 1)) == 0 && !isCreative) {
-                            val newDamage = chestplate.damage + 1
-                            if (newDamage < chestplate.maxDurability) {
-                                chestplate.damage = newDamage
-                                playerInventory.setChestplate(chestplate)
-                            } else {
-                                this.setGliding(false)
-                            }
                         }
                     }
                 }
@@ -3830,22 +3827,22 @@ open class Player(
         saveNBT()
 
         if (this.level != null) {
-            namedTag!!.putString("Level", level!!.getLevelName())
+            namedTag.putString("Level", level!!.getLevelName())
 
             val achievements = CompoundTag()
             for (achievement in this.achievements) {
                 achievements.putByte(achievement!!, 1)
             }
 
-            namedTag!!.putCompound("Achievements", achievements)
-            namedTag!!.putInt("playerGameType", this.gamemode)
-            namedTag!!.putLong("lastPlayed", System.currentTimeMillis() / 1000)
-            namedTag!!.putString("lastIP", this.address)
-            namedTag!!.putInt("EXP", this.experience)
-            namedTag!!.putInt("expLevel", this.experienceLevel)
-            namedTag!!.putInt("foodLevel", foodData!!.getFood())
-            namedTag!!.putFloat("foodSaturationLevel", foodData!!.getSaturation())
-            namedTag!!.putInt("enchSeed", this.enchSeed)
+            namedTag.putCompound("Achievements", achievements)
+            namedTag.putInt("playerGameType", this.gamemode)
+            namedTag.putLong("lastPlayed", System.currentTimeMillis() / 1000)
+            namedTag.putString("lastIP", this.address)
+            namedTag.putInt("EXP", this.experience)
+            namedTag.putInt("expLevel", this.experienceLevel)
+            namedTag.putInt("foodLevel", foodData!!.getFood())
+            namedTag.putFloat("foodSaturationLevel", foodData!!.getSaturation())
+            namedTag.putInt("enchSeed", this.enchSeed)
 
             val fogIdentifiers = ListTag<StringTag>()
             val userProvidedFogIds = ListTag<StringTag>()
@@ -3853,15 +3850,15 @@ open class Player(
                 userProvidedFogIds.add(StringTag(fog.first))
                 fogIdentifiers.add(StringTag(fog.second))
             }
-            namedTag!!.putList("fogIdentifiers", fogIdentifiers)
-            namedTag!!.putList("userProvidedFogIds", userProvidedFogIds)
+            namedTag.putList("fogIdentifiers", fogIdentifiers)
+            namedTag.putList("userProvidedFogIds", userProvidedFogIds)
 
-            namedTag!!.putInt("TimeSinceRest", this.timeSinceRest)
+            namedTag.putInt("TimeSinceRest", this.timeSinceRest)
 
-            if (getEntityName().isNotBlank() && this.namedTag != null) {
+            if (getEntityName().isNotBlank()) {
                 Server.instance.saveOfflinePlayerData(
                     uuid,
-                    namedTag!!, async
+                    namedTag, async
                 )
             }
         }
@@ -3896,7 +3893,7 @@ open class Player(
             params.add(this.displayName)
 
             run switch@{
-                when (if (cause == null) DamageCause.CUSTOM else cause.cause) {
+                when (cause?.cause ?: DamageCause.CUSTOM) {
                     DamageCause.ENTITY_ATTACK -> if (cause is EntityDamageByEntityEvent) {
                         val e = cause.damager
                         killer = e
@@ -4034,11 +4031,9 @@ open class Player(
                     }
                 }
 
-                if (this.offhandInventory != null) {
-                    offhandInventory.contents.forEach { (slot, item) ->
-                        if (!item.keepOnDeath()) {
-                            offhandInventory.clear(slot)
-                        }
+                offhandInventory.contents.forEach { (slot, item) ->
+                    if (!item.keepOnDeath()) {
+                        offhandInventory.clear(slot)
                     }
                 }
             }
@@ -5102,7 +5097,7 @@ open class Player(
         if (near) {
             var inventory: Inventory? = this.inventory
             if (entity is EntityArrow && entity.hadCollision) {
-                val item = if (entity.getArrowItem() != null) entity.getArrowItem() else ItemArrow()
+                val item = entity.getArrowItem()
                 if (!this.isCreative) {
                     // Should only collect to the offhand slot if the item matches what is already there
                     if (offhandInventory.getItem(0).id == item.id && offhandInventory.canAddItem(
@@ -5263,7 +5258,7 @@ open class Player(
 
     override fun hashCode(): Int {
         if ((this.hash == 0) || (this.hash == 485)) {
-            this.hash = (485 + (if (getUniqueID() != null) getUniqueID().hashCode() else 0))
+            this.hash = (485 + getUniqueID().hashCode())
         }
 
         return this.hash

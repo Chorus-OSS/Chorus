@@ -169,7 +169,7 @@ class CrossBowShootExecutor(
         val arrow = Entity.createEntity(
             EntityID.ARROW,
             entity.chunk!!, nbt, entity, f == 2.0
-        ) as EntityArrow
+        ) as EntityArrow?
         if (arrow == null) {
             return
         }
@@ -183,15 +183,13 @@ class CrossBowShootExecutor(
             entityShootBowEvent.projectile.setMotion(
                 entityShootBowEvent.projectile.getMotion().multiply(entityShootBowEvent.force)
             )
-            if (entityShootBowEvent.projectile != null) {
-                val projectev = ProjectileLaunchEvent(entityShootBowEvent.projectile, entity)
-                Server.instance.pluginManager.callEvent(projectev)
-                if (projectev.cancelled) {
-                    entityShootBowEvent.projectile.kill()
-                } else {
-                    entityShootBowEvent.projectile.spawnToAll()
-                    entity.level!!.addSound(entity.position, Sound.RANDOM_BOW)
-                }
+            val projectev = ProjectileLaunchEvent(entityShootBowEvent.projectile, entity)
+            Server.instance.pluginManager.callEvent(projectev)
+            if (projectev.cancelled) {
+                entityShootBowEvent.projectile.kill()
+            } else {
+                entityShootBowEvent.projectile.spawnToAll()
+                entity.level!!.addSound(entity.position, Sound.RANDOM_BOW)
             }
         }
     }

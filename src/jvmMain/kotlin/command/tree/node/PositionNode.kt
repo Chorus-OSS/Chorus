@@ -29,6 +29,7 @@ abstract class PositionNode(private val pattern: Pattern) : ParamNode<Locator?>(
         if (this.getRelative(2)) {
             value!!.position.setZ(value!!.position.z + basePos.z)
         }
+        @Suppress("UNCHECKED_CAST")
         return value as E?
     }
 

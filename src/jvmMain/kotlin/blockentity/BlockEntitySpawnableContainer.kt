@@ -21,7 +21,7 @@ abstract class BlockEntitySpawnableContainer(level: Level, nbt: CompoundTag) : B
             namedTag.putList("Items", ListTag<CompoundTag>())
         }
 
-        val list = namedTag.getList("Items") as ListTag<CompoundTag>
+        val list = namedTag.getList("Items", CompoundTag::class.java)
         for (compound in list.all) {
             val item = NBTIO.getItemHelper(compound)
             (inventory as? ContainerInventory)?.setItemInternal(compound.getByte("Slot").toInt(), item)

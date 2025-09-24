@@ -67,10 +67,8 @@ class PerchingExecutor : EntityControl, IBehaviorExecutor {
 
                         val effects = PotionType.get(PotionType.HARMING.id).getEffects(false)
                         for (effect in effects) {
-                            if (effect != null && areaEffectCloud != null) {
-                                areaEffectCloud.cloudEffects!!.add(effect.setVisible(false).setAmbient(false))
-                                areaEffectCloud.spawnToAll()
-                            }
+                            areaEffectCloud.cloudEffects!!.add(effect.setVisible(false).setAmbient(false))
+                            areaEffectCloud.spawnToAll()
                         }
                         areaEffectCloud.spawnToAll()
                     }

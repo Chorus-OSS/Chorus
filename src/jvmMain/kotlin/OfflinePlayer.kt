@@ -48,24 +48,24 @@ class OfflinePlayer(override var uuid: UUID) :
         get() = Server.instance.bannedPlayers.isBanned(this.getEntityName())
         set(value) {
             if (value) {
-                Server.instance.bannedPlayers.addBan(this.getEntityName()!!, null, null, null)
+                Server.instance.bannedPlayers.addBan(this.getEntityName(), null, null, null)
             } else {
-                Server.instance.bannedPlayers.remove(this.getEntityName()!!)
+                Server.instance.bannedPlayers.remove(this.getEntityName())
             }
         }
 
     override var isWhitelisted: Boolean
-        get() = Server.instance.isWhitelisted(getEntityName()!!.lowercase())
+        get() = Server.instance.isWhitelisted(getEntityName().lowercase())
         set(value) {
             if (value) {
-                Server.instance.addWhitelist(getEntityName()!!.lowercase())
+                Server.instance.addWhitelist(getEntityName().lowercase())
             } else {
-                Server.instance.removeWhitelist(getEntityName()!!.lowercase())
+                Server.instance.removeWhitelist(getEntityName().lowercase())
             }
         }
 
     override val player: Player?
-        get() = if (getEntityName() != null) Server.instance.getPlayerExact(getEntityName()!!) else null
+        get() = Server.instance.getPlayerExact(getEntityName())
 
     override val firstPlayed: Long
         get() = namedTag.getLong("firstPlayed")

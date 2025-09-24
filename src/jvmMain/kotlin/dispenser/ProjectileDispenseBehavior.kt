@@ -12,18 +12,18 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 
 open class ProjectileDispenseBehavior(protected val entityType: String) : DefaultDispenseBehavior() {
-    override fun dispense(source: BlockDispenser, face: BlockFace, item: Item): Item? {
-        val dispensePos = source.dispensePosition
+    override fun dispense(block: BlockDispenser, face: BlockFace, item: Item): Item? {
+        val dispensePos = block.dispensePosition
 
         val nbt = Entity.getDefaultNBT(dispensePos)
         this.correctNBT(nbt, item)
 
         val projectile = Entity.createEntity(
             entityType,
-            source.level.getChunk(dispensePos.chunkX, dispensePos.chunkZ),
+            block.level.getChunk(dispensePos.chunkX, dispensePos.chunkZ),
             nbt
         ) as? EntityProjectile
-            ?: return super.dispense(source, face, item)
+            ?: return super.dispense(block, face, item)
 
         val motion = initMotion(face)
 
@@ -35,7 +35,7 @@ open class ProjectileDispenseBehavior(protected val entityType: String) : Defaul
 
         projectile.spawnToAll()
 
-        source.level.addSound(source.position, shootingSound)
+        block.level.addSound(block.position, shootingSound)
 
         return null
     }

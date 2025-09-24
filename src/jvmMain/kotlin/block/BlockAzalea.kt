@@ -59,7 +59,7 @@ open class BlockAzalea @JvmOverloads constructor(blockstate: BlockState = proper
         val aged = chance > 0.8
         if (type == Level.BLOCK_UPDATE_NORMAL) {
             val down = down()
-            if (down != null && !BlockFlower.isSupportValid(down)) {
+            if (!BlockFlower.isSupportValid(down)) {
                 level.useBreakOn(this.position)
                 return Level.BLOCK_UPDATE_NORMAL
             }
@@ -92,7 +92,7 @@ open class BlockAzalea @JvmOverloads constructor(blockstate: BlockState = proper
         player: Player?
     ): Boolean {
         val down = down()
-        if (down != null && BlockFlower.isSupportValid(down)) {
+        if (BlockFlower.isSupportValid(down)) {
             level.setBlock(block.position, this, direct = true, update = true)
             return true
         }

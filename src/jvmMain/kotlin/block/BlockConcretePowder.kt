@@ -37,7 +37,7 @@ abstract class BlockConcretePowder(blockState: BlockState) : BlockFallable(block
 
     override fun place(
         item: Item?,
-        b: Block,
+        block: Block,
         target: Block?,
         face: BlockFace,
         fx: Double,
@@ -48,8 +48,8 @@ abstract class BlockConcretePowder(blockState: BlockState) : BlockFallable(block
         var concrete = false
 
         for (side in 1..5) {
-            val block = this.getSide(fromIndex(side))
-            if (block.id == BlockID.FLOWING_WATER || block.id == BlockID.WATER) {
+            val side = this.getSide(fromIndex(side))
+            if (side.id == BlockID.FLOWING_WATER || side.id == BlockID.WATER) {
                 concrete = true
                 break
             }

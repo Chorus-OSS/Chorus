@@ -68,49 +68,47 @@ class BlockBubbleColumn @JvmOverloads constructor(blockstate: BlockState = prope
     }
 
     override fun onEntityCollide(entity: Entity) {
-        if (entity != null) {
-            if (entity.canBeMovedByCurrents()) {
-                if (up().isAir) {
-                    if (isDragDown) {
-                        entity.motion.y = max(-0.9, entity.motion.y - 0.03)
-                    } else {
-                        if (entity is EntityPhysical && entity.motion.y < -entity.getGravity() * 8) {
-                            entity.motion.y = (-entity.getGravity() * 2).toDouble()
-                        }
-                        entity.motion.y = min(1.8, entity.motion.y + 0.1)
-                    }
-
-                    val random = ThreadLocalRandom.current()
-                    for (i in 0..1) {
-                        level.addParticle(
-                            SplashParticle(
-                                position.add(
-                                    random.nextFloat().toDouble(),
-                                    (random.nextFloat() + 1).toDouble(),
-                                    random.nextFloat().toDouble()
-                                )
-                            )
-                        )
-                        level.addParticle(
-                            BubbleParticle(
-                                position.add(
-                                    random.nextFloat().toDouble(),
-                                    (random.nextFloat() + 1).toDouble(),
-                                    random.nextFloat().toDouble()
-                                )
-                            )
-                        )
-                    }
+        if (entity.canBeMovedByCurrents()) {
+            if (up().isAir) {
+                if (isDragDown) {
+                    entity.motion.y = max(-0.9, entity.motion.y - 0.03)
                 } else {
-                    if (isDragDown) {
-                        entity.motion.y = max(-0.3, entity.motion.y - 0.3)
-                    } else {
-                        entity.motion.y = min(0.7, entity.motion.y + 0.06)
+                    if (entity is EntityPhysical && entity.motion.y < -entity.getGravity() * 8) {
+                        entity.motion.y = (-entity.getGravity() * 2).toDouble()
                     }
+                    entity.motion.y = min(1.8, entity.motion.y + 0.1)
                 }
-                entity.motionChanged = true
-                entity.resetFallDistance()
+
+                val random = ThreadLocalRandom.current()
+                for (i in 0..1) {
+                    level.addParticle(
+                        SplashParticle(
+                            position.add(
+                                random.nextFloat().toDouble(),
+                                (random.nextFloat() + 1).toDouble(),
+                                random.nextFloat().toDouble()
+                            )
+                        )
+                    )
+                    level.addParticle(
+                        BubbleParticle(
+                            position.add(
+                                random.nextFloat().toDouble(),
+                                (random.nextFloat() + 1).toDouble(),
+                                random.nextFloat().toDouble()
+                            )
+                        )
+                    )
+                }
+            } else {
+                if (isDragDown) {
+                    entity.motion.y = max(-0.3, entity.motion.y - 0.3)
+                } else {
+                    entity.motion.y = min(0.7, entity.motion.y + 0.06)
+                }
             }
+            entity.motionChanged = true
+            entity.resetFallDistance()
         }
     }
 

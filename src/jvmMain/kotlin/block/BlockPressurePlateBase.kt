@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.block
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
-import org.chorus_oss.chorus.block.property.type.IntPropertyType
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.event.Event
 import org.chorus_oss.chorus.event.block.BlockRedstoneEvent
@@ -189,7 +188,7 @@ abstract class BlockPressurePlateBase(blockState: BlockState) : BlockFlowable(bl
         return true
     }
 
-    override fun getWeakPower(side: BlockFace): Int {
+    override fun getWeakPower(face: BlockFace): Int {
         return redstonePower
     }
 
@@ -198,9 +197,9 @@ abstract class BlockPressurePlateBase(blockState: BlockState) : BlockFlowable(bl
     }
 
     var redstonePower: Int
-        get() = getPropertyValue<Int, IntPropertyType>(CommonBlockProperties.REDSTONE_SIGNAL)
+        get() = getPropertyValue(CommonBlockProperties.REDSTONE_SIGNAL)
         set(power) {
-            setPropertyValue<Int, IntPropertyType>(CommonBlockProperties.REDSTONE_SIGNAL, power)
+            setPropertyValue(CommonBlockProperties.REDSTONE_SIGNAL, power)
         }
 
     protected fun playOnSound() {
