@@ -1,3 +1,3 @@
 files:
-  - source: /src/jvmMain/resources/language/eng/*.*
-    translation: /src/jvmMain/resources/language/%three_letters_code%/%original_file_name%
+  - source: /src/commonMain/resources/files/language/eng/*.*
+    translation: /src/commonMain/resources/files/language/%three_letters_code%/%original_file_name%
