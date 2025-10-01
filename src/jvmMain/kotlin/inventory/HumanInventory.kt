@@ -16,10 +16,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationEvent
 import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.network.protocol.types.inventory.FullContainerName
 import org.chorus_oss.chorus.network.protocol.types.itemstack.ContainerSlotType
-import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_BOOTS
-import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_CHESTPLATE
-import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_HELMET
-import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket.Companion.FLAG_LEGGINGS
+import org.chorus_oss.protocol.packets.PlayerArmorDamagePacket
 import org.chorus_oss.protocol.types.BlockPos
 import org.chorus_oss.protocol.types.ContainerType
 import org.chorus_oss.protocol.types.item.ItemStack
@@ -515,43 +512,17 @@ class HumanInventory(human: IHuman) //9+27+4
                 )
                 player.sendPacket(packet)
 
-                var pk2 = org.chorus_oss.protocol.packets.PlayerArmorDamagePacket(
-                    bitset = 0,
-                    helmetDamage = 0,
-                    chestplateDamage = 0,
-                    leggingsDamage = 0,
-                    bootsDamage = 0,
-                    bodyDamage = 0,
+                val pk2 = PlayerArmorDamagePacket(
+                    list = armor.toList().foldIndexed(mutableListOf()) { i, acc, item ->
+                        if (!item.isNothing) acc.add(
+                            PlayerArmorDamagePacket.Entry(
+                                slot = i.toByte(),
+                                damage = item.damage.toShort()
+                            )
+                        )
+                        acc
+                    }
                 )
-
-                if (!armor[0].isNothing) {
-                    pk2 = pk2.copy(
-                        bitset = pk2.bitset or FLAG_HELMET,
-                        helmetDamage = armor[0].damage
-                    )
-                }
-
-                if (!armor[1].isNothing) {
-                    pk2 = pk2.copy(
-                        bitset = pk2.bitset or FLAG_CHESTPLATE,
-                        chestplateDamage = armor[1].damage
-                    )
-                }
-
-                if (!armor[2].isNothing) {
-                    pk2 = pk2.copy(
-                        bitset = pk2.bitset or FLAG_LEGGINGS,
-                        leggingsDamage = armor[2].damage
-                    )
-                }
-
-                if (!armor[3].isNothing) {
-                    pk2 = pk2.copy(
-                        bitset = pk2.bitset or FLAG_BOOTS,
-                        bootsDamage = armor[3].damage
-                    )
-                }
-
                 player.sendPacket(pk2)
             } else {
                 player.sendPacket(pk)
@@ -612,19 +583,13 @@ class HumanInventory(human: IHuman) //9+27+4
                 )
                 player.sendPacket(packet)
 
-                val pk2 = org.chorus_oss.protocol.packets.PlayerArmorDamagePacket(
-                    bitset = when (index) {
-                        0 -> FLAG_HELMET
-                        1 -> FLAG_CHESTPLATE
-                        2 -> FLAG_LEGGINGS
-                        3 -> FLAG_BOOTS
-                        else -> 0
-                    },
-                    helmetDamage = if (!armor[0].isNothing) armor[0].damage else 0,
-                    chestplateDamage = if (!armor[1].isNothing) armor[1].damage else 0,
-                    leggingsDamage = if (!armor[2].isNothing) armor[2].damage else 0,
-                    bootsDamage = if (!armor[3].isNothing) armor[3].damage else 0,
-                    bodyDamage = 0,
+                val pk2 = PlayerArmorDamagePacket(
+                    list = listOf(
+                        PlayerArmorDamagePacket.Entry(
+                            slot = index.toByte(),
+                            damage = (if (!armor[index].isNothing) armor[index].damage else 0).toShort()
+                        )
+                    )
                 )
                 player.sendPacket(pk2)
             } else {

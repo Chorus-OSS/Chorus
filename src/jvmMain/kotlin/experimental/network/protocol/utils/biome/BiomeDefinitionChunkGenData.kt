@@ -18,6 +18,7 @@ operator fun BiomeDefinitionChunkGenData.Companion.invoke(nbt: CompoundTag): Bio
                 "surfaceMaterials"
             )
         ) else null,
+        hasDefaultOverworldSurface = false,
         hasSwampSurface = nbt.getBoolean("hasSwampSurface"),
         hasFrozenOceanSurface = nbt.getBoolean("hasFrozenOceanSurface"),
         hasTheEndSurface = nbt.getBoolean("hasTheEndSurface"),
