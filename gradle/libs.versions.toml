@@ -36,7 +36,10 @@ disruptor = "4.0.0"
 caffeine-ver = "3.2.0"
 
 # Kotlin Multiplatform Libraries
-protocol = "v844.0"
+chorus-protocol = "v844.0"
+chorus-raknet = "0.1.0"
+chorus-kflate = "0.0.1"
+chorus-snappy = "0.0.1"
 kotlinx-io = "0.8.0"
 kotlinx-coroutines = "1.10.2"
 cryptography = "0.5.0"
@@ -46,7 +49,6 @@ kotlin = "2.2.0"
 fleks = "2.11"
 kotlin-poet = "2.2.0"
 rwmutex = "1.0.0"
-kflate = "0.0.1"
 compose = "1.8.2"
 maven-publish = "0.34.0"
 shadow = "9.0.0-rc2"
@@ -90,7 +92,10 @@ rng-sampling = { module = "org.apache.commons:commons-rng-sampling", version.ref
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine-ver"}
 
 # Kotlin Multiplatform Libraries
-chorus-protocol = { module = "org.chorus-oss:protocol", version.ref = "protocol" }
+chorus-protocol = { module = "org.chorus-oss:protocol", version.ref = "chorus-protocol" }
+chorus-raknet = { module = "org.chorus-oss:raknet", version.ref = "chorus-raknet" }
+chorus-kflate = { module = "org.chorus-oss:kflate", version.ref = "chorus-kflate" }
+chorus-snappy = { module = "org.chorus-oss:snappy", version.ref = "chorus-snappy" }
 kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "cryptography" }
@@ -103,7 +108,6 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 fleks = { module = "io.github.quillraven.fleks:Fleks", version.ref = "fleks" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet"}
 rwmutex = { module = "com.mayakapps.rwmutex:rwmutex", version.ref = "rwmutex" }
-kflate = { module = "org.chorus-oss:kflate", version.ref = "kflate" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 
 [bundles]

@@ -211,7 +211,7 @@ open class Player(
      *
      * @return [InetSocketAddress]
      */
-    val rawSocketAddress: InetSocketAddress?
+    val rawSocketAddress: io.ktor.network.sockets.InetSocketAddress?
     val hiddenPlayers: MutableMap<UUID, Player> = HashMap()
     val chunkSendCountPerTick: Int
     val spawnThreshold: Int
@@ -226,7 +226,7 @@ open class Player(
      *
      * @return [InetSocketAddress]
      */
-    var socketAddress: InetSocketAddress?
+    var socketAddress: io.ktor.network.sockets.InetSocketAddress?
     /**
      * 得到[.removeFormat]
      *
@@ -2159,7 +2159,7 @@ open class Player(
          *
          * @return [String]
          */
-        get() = rawSocketAddress!!.address.hostAddress
+        get() = rawSocketAddress!!.hostname
 
     val rawPort: Int
         /**
@@ -2187,7 +2187,7 @@ open class Player(
          *
          * @return [String]
          */
-        get() = socketAddress!!.address.hostAddress
+        get() = socketAddress!!.hostname
 
     val port: Int
         /**
@@ -2399,17 +2399,6 @@ open class Player(
     fun sendPacket(packet: Packet) {
         session.sendPacket(packet)
     }
-
-    val ping: Int
-        /**
-         * 得到该玩家的网络延迟。
-         *
-         *
-         * Get the network latency of the player.
-         *
-         * @return int
-         */
-        get() = session.ping.toInt()
 
     fun sleepOn(pos: Vector3): Boolean {
         if (!this.isOnline) {
@@ -3714,7 +3703,7 @@ open class Player(
             message = reason1,
             filteredMessage = reason1
         )
-        session.sendPacketSync(packet)
+        session.sendPacketImmediately(packet)
 
         //call quit event
         var ev: PlayerQuitEvent? = null

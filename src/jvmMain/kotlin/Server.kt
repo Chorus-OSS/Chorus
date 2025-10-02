@@ -28,6 +28,7 @@ import org.chorus_oss.chorus.event.level.LevelLoadEvent
 import org.chorus_oss.chorus.event.player.PlayerLoginEvent
 import org.chorus_oss.chorus.event.server.ServerStartedEvent
 import org.chorus_oss.chorus.event.server.ServerStopEvent
+import org.chorus_oss.chorus.experimental.network.Network
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.item.enchantment.Enchantment
@@ -54,7 +55,6 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.FloatTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 import org.chorus_oss.chorus.nbt.tag.Tag
-import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.ProtocolInfo
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
 import org.chorus_oss.chorus.network.protocol.types.XboxLivePlayerInfo
@@ -217,8 +217,7 @@ class Server internal constructor(
          */
         set(defaultGamemode) {
             field = defaultGamemode
-            network.pong.gameType = getGamemodeString(defaultGamemode, true)
-            network.pong.update()
+            network.updateMessage()
         }
     private var autoSaveTicker = 0
     private var autoSaveTicks = 6000
@@ -232,7 +231,7 @@ class Server internal constructor(
     var serverID: UUID
         private set
 
-    private val players: MutableMap<InetSocketAddress?, Player> = ConcurrentHashMap()
+    private val players: MutableMap<io.ktor.network.sockets.InetSocketAddress?, Player> = ConcurrentHashMap()
     private val playerList: MutableMap<UUID, Player> = ConcurrentHashMap()
 
     private var positionTrackingService: PositionTrackingService? = null
@@ -603,7 +602,8 @@ class Server internal constructor(
 
         for (entry in bannedIPs.entries.values) {
             try {
-                network.blockAddress(InetAddress.getByName(entry.name), -1)
+                // TODO
+//                network.blockAddress(InetAddress.getByName(entry.name), -1)
             } catch (e: UnknownHostException) {
                 // ignore
             }
@@ -727,7 +727,8 @@ class Server internal constructor(
 
         for (entry in bannedIPs.entries.values) {
             try {
-                network.blockAddress(InetAddress.getByName(entry.name))
+                // TODO
+//                network.blockAddress(InetAddress.getByName(entry.name))
             } catch (ignore: UnknownHostException) {
             }
         }
@@ -893,7 +894,7 @@ class Server internal constructor(
         }
 
         ++this.tick
-        network.processInterfaces()
+        network.tick()
 
         scheduler.mainThreadHeartbeat(this.tick)
 
@@ -958,10 +959,10 @@ class Server internal constructor(
                 + this.chorusVersion
                 + " | Online " + players.size + "/" + this.maxPlayers
                 + " | Memory " + usage)
-        if (!Chorus.shortTitle) {
-            title += (" | U " + round((network.upload / 1024 * 1000), 2)
-                    + " D " + round((network.download / 1024 * 1000), 2) + " kB/s")
-        }
+//        if (!Chorus.shortTitle) {
+//            title += (" | U " + round((network.upload / 1024 * 1000), 2)
+//                    + " D " + round((network.download / 1024 * 1000), 2) + " kB/s")
+//        }
         title += (" | TPS " + this.ticksPerSecond
                 + " | Load " + this.tickUsage + "%" + 0x07.toChar())
 
@@ -1237,7 +1238,7 @@ class Server internal constructor(
         this.sendFullPlayerListData(player)
     }
 
-    fun onPlayerLogin(socketAddress: InetSocketAddress?, player: Player) {
+    fun onPlayerLogin(socketAddress: io.ktor.network.sockets.InetSocketAddress?, player: Player) {
         val ev: PlayerLoginEvent
         pluginManager.callEvent(PlayerLoginEvent(player, "Plugin reason").also { ev = it })
         if (ev.cancelled) {
@@ -1258,8 +1259,7 @@ class Server internal constructor(
             player.skin,
             player.loginChainData.xuid
         )
-        network.pong.playerCount = playerList.size
-        network.pong.update()
+        network.updateMessage()
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -1277,9 +1277,7 @@ class Server internal constructor(
                 )
             )
             broadcastPacket(playerList.values, pk)
-
-            network.pong.playerCount = playerList.size
-            network.pong.update()
+            network.updateMessage()
         }
     }
 
@@ -1861,7 +1859,7 @@ class Server internal constructor(
      * @param player 玩家
      */
     fun sendRecipeList(player: Player) {
-        player.session.sendRawPacket(CraftingDataPacket.id, Registries.RECIPE.craftingPacket)
+        player.session.sendRawPacket(CraftingDataPacket.id, Registries.RECIPE.packet)
     }
 
     /**
@@ -2183,8 +2181,7 @@ class Server internal constructor(
      */
     fun setMaxPlayers(maxPlayers: Int) {
         this.maxPlayers = maxPlayers
-        network.pong.maximumPlayerCount = maxPlayers
-        network.pong.update()
+        network.updateMessage()
     }
 
     val port: Int
@@ -2303,8 +2300,7 @@ class Server internal constructor(
          */
         set(motd) {
             settings.serverSettings.motd = motd
-            network.pong.motd = motd
-            network.pong.update()
+            network.updateMessage()
         }
 
     var subMotd: String
@@ -2321,8 +2317,7 @@ class Server internal constructor(
          */
         set(subMotd) {
             settings.serverSettings.subMotd = subMotd
-            network.pong.subMotd = subMotd
-            network.pong.update()
+            network.updateMessage()
         }
 
     val forceResources: Boolean

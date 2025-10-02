@@ -3,11 +3,20 @@ package org.chorus_oss.chorus.experimental.network.connection
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.*
 import dev.whyoleg.cryptography.random.CryptographyRandom
+import kotlinx.io.Buffer
+import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToByteString
 import kotlinx.io.bytestring.encode
 import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.io.readByteArray
+import kotlinx.io.readByteString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.chorus_oss.protocol.core.ProtoLE
+import org.chorus_oss.protocol.core.types.Long
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -108,5 +117,15 @@ object EncryptionUtils {
         val signatureB64 = Base64.UrlSafe.encode(signature)
 
         return "$unsigned.$signatureB64"
+    }
+
+    @OptIn(ExperimentalAtomicApi::class)
+    fun createTrailer(data: ByteArray, key: AES.CTR.Key, counter: AtomicLong): ByteArray {
+        val hasher = digest.hasher()
+
+        val counterBytes = Buffer().also { ProtoLE.Long.serialize(counter.fetchAndIncrement(), it) }.readByteArray()
+        val keyBytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
+
+        return hasher.hashBlocking(counterBytes + data + keyBytes).copyOf(8)
     }
 }

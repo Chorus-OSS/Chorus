@@ -60,8 +60,8 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
         //set proxy ip
         if (server.settings.baseSettings.waterdogpe && chainData.waterdogIP != null) {
             val oldAddress = session.address
-            session.address = InetSocketAddress(chainData.waterdogIP, session.address!!.port)
-            Server.instance.network.replaceSessionAddress(oldAddress, session.address!!, session)
+            session.address = io.ktor.network.sockets.InetSocketAddress(chainData.waterdogIP!!, session.address!!.port)
+//            Server.instance.network.replaceSessionAddress(oldAddress, session.address!!, session)
         }
 
         // Verify if the titleId match with DeviceOs

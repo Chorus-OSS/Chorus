@@ -5,7 +5,6 @@ import io.netty.util.AbstractReferenceCounted
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.ReferenceCounted
 import io.netty.util.internal.ObjectPool
-import org.chorus_oss.chorus.network.protocol.types.CompressionAlgorithm
 import org.chorus_oss.protocol.core.Packet
 import java.util.function.Consumer
 
@@ -24,9 +23,6 @@ class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Han
         }
 
         this.compressed = compressed
-        if (compressed == null) {
-            this.algorithm = null
-        }
     }
 
     fun setUncompressed(value: ByteBuf?) {
@@ -35,8 +31,6 @@ class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Han
         }
         this.uncompressed = value
     }
-
-    var algorithm: CompressionAlgorithm? = null
 
     private val packets: MutableList<BedrockPacketWrapper?> = mutableListOf()
 
@@ -50,7 +44,6 @@ class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Han
         this.uncompressed = null
         packets.clear()
         this.modified = false
-        this.algorithm = null
         handle.recycle(this)
     }
 
@@ -61,15 +54,6 @@ class BedrockBatchWrapper private constructor(private val handle: ObjectPool.Han
 
     fun modify() {
         this.modified = true
-    }
-
-    fun setCompressed(compressed: ByteBuf?, algorithm: CompressionAlgorithm?) {
-        if (this.compressed != null) {
-            this.compressed!!.release()
-        }
-
-        this.compressed = compressed
-        this.algorithm = algorithm
     }
 
     override fun touch(o: Any): ReferenceCounted {

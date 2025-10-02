@@ -11,6 +11,7 @@ import org.chorus_oss.chorus.dispenser.DispenseBehaviorRegister
 import org.chorus_oss.chorus.entity.Attribute
 import org.chorus_oss.chorus.entity.data.Skin
 import org.chorus_oss.chorus.entity.data.profession.Profession
+import org.chorus_oss.chorus.experimental.network.Network
 import org.chorus_oss.chorus.inventory.HumanEnderChestInventory
 import org.chorus_oss.chorus.inventory.HumanInventory
 import org.chorus_oss.chorus.inventory.HumanOffHandInventory
@@ -24,7 +25,6 @@ import org.chorus_oss.chorus.level.format.LevelConfig.GeneratorConfig
 import org.chorus_oss.chorus.level.format.LevelProvider
 import org.chorus_oss.chorus.level.format.leveldb.LevelDBProvider
 import org.chorus_oss.chorus.math.Vector3
-import org.chorus_oss.chorus.network.Network
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.PacketManager
 import org.chorus_oss.chorus.network.protocol.types.PlayerInfo
@@ -104,7 +104,7 @@ class GameMockExtension : MockitoExtension() {
         val t = Thread {
             while (running.get()) {
                 try {
-                    network!!.process()
+                    network!!.tick()
                 } catch (ignore: Exception) {
                 }
                 try {

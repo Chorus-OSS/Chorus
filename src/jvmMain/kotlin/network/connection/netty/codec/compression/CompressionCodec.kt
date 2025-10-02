@@ -15,7 +15,6 @@ class CompressionCodec(val strategy: CompressionStrategy, private val prefixed: 
         check(!(msg.compressed == null && msg.uncompressed == null)) { "Batch was not encoded before" }
 
         if (msg.compressed != null && !msg.modified) {
-            this.onPassedThrough(ctx, msg)
             out.add(msg.retain())
             return
         }
@@ -35,12 +34,11 @@ class CompressionCodec(val strategy: CompressionStrategy, private val prefixed: 
                 outBuf = compressed!!.retain()
             }
 
-            msg.setCompressed(outBuf, compression.algorithm)
+            msg.setCompressed(outBuf)
         } finally {
             compressed!!.release()
         }
 
-        this.onCompressed(ctx, msg)
         out.add(msg.retain())
     }
 
@@ -60,18 +58,9 @@ class CompressionCodec(val strategy: CompressionStrategy, private val prefixed: 
             compression = strategy.defaultCompression
         }
 
-        msg.algorithm = compression!!.algorithm
-
-        msg.setUncompressed(compression.decode(ctx, compressed.slice()))
-        this.onDecompressed(ctx, msg)
+        msg.setUncompressed(compression!!.decode(ctx, compressed.slice()))
         out.add(msg.retain())
     }
-
-    protected fun onPassedThrough(ctx: ChannelHandlerContext?, msg: BedrockBatchWrapper?) {}
-
-    protected fun onCompressed(ctx: ChannelHandlerContext?, msg: BedrockBatchWrapper?) {}
-
-    protected fun onDecompressed(ctx: ChannelHandlerContext?, msg: BedrockBatchWrapper?) {}
 
     protected fun getCompressionHeader(algorithm: CompressionAlgorithm): Byte {
         return when (algorithm) {

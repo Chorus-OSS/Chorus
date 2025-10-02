@@ -180,38 +180,6 @@ class StatusCommand(name: String) :
                 }
                 sender.sendMessage("")
             }
-            // 网络信息
-            try {
-                val network = Server.instance.network
-                if (network.getHardWareNetworkInterfaces() != null) {
-                    sender.sendMessage(TextFormat.YELLOW.toString() + ">>> " + TextFormat.WHITE + "Network Info" + TextFormat.YELLOW + " <<<" + TextFormat.RESET)
-                    sender.sendMessage(
-                        TextFormat.GOLD.toString() + "Network upload: " + TextFormat.GREEN + formatKB(
-                            network.upload
-                        ) + "/s"
-                    )
-                    sender.sendMessage(
-                        TextFormat.GOLD.toString() + "Network download: " + TextFormat.GREEN + formatKB(
-                            network.download
-                        ) + "/s"
-                    )
-                    sender.sendMessage(TextFormat.GOLD.toString() + "Network hardware list: ")
-                    var list: List<String?>
-                    for (each in network.getHardWareNetworkInterfaces()!!) {
-                        list = listOf(*each.iPv4addr, *each.iPv6addr)
-                        sender.sendMessage(TextFormat.AQUA.toString() + "  " + each.displayName)
-                        sender.sendMessage(
-                            TextFormat.RESET.toString() + "    " + formatKB(each.speed) + "/s " + TextFormat.GRAY + java.lang.String.join(
-                                ", ",
-                                list
-                            )
-                        )
-                    }
-                    sender.sendMessage("")
-                }
-            } catch (ignored: Exception) {
-                sender.sendMessage(TextFormat.RED.toString() + "    Failed to get network info.")
-            }
             // CPU信息
             run {
                 val cpu = systemInfo.hardware.processor

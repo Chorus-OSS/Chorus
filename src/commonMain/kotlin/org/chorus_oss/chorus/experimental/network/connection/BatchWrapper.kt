@@ -8,7 +8,7 @@ import org.chorus_oss.protocol.core.ProtoVAR
 import org.chorus_oss.protocol.core.types.UInt
 
 data class BatchWrapper(
-    val packets: MutableList<PacketWrapper>
+    val packets: List<PacketWrapper>
 ) {
     companion object : ProtoCodec<BatchWrapper> {
         override fun serialize(value: BatchWrapper, stream: Sink) {

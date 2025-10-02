@@ -107,7 +107,7 @@ class BanIpCommand(name: String) : VanillaCommand(name, "commands.banip.descript
         }
 
         try {
-            Server.instance.network.blockAddress(InetAddress.getByName(ip), -1)
+//            Server.instance.network.blockAddress(InetAddress.getByName(ip), -1)
         } catch (e: UnknownHostException) {
             // ignore
         }

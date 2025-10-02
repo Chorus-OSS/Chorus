@@ -42,6 +42,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(libs.chorus.protocol)
+                implementation(libs.chorus.raknet)
+                implementation(libs.chorus.kflate)
+                implementation(libs.chorus.snappy)
                 implementation(libs.kotlinx.io)
                 implementation(libs.kotlinx.coroutines)
                 implementation(libs.bundles.cryptography)
@@ -51,7 +54,6 @@ kotlin {
                 implementation(libs.kotlin.poet)
                 implementation(libs.rwmutex)
                 implementation(libs.kotlin.reflect)
-                implementation(libs.kflate)
                 implementation(libs.clikt)
 
                 implementation(compose.runtime)

@@ -36,7 +36,7 @@ class PardonIpCommand(name: String) : VanillaCommand(name, "unban an IP") {
         ) {
             Server.instance.bannedIPs.remove(value)
             try {
-                Server.instance.network.unblockAddress(InetAddress.getByName(value))
+//                Server.instance.network.unblockAddress(InetAddress.getByName(value))
             } catch (e: UnknownHostException) {
                 log.addError("commands.unbanip.invalid").output()
                 return 0

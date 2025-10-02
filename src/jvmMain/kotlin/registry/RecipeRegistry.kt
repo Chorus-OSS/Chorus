@@ -1,12 +1,9 @@
 package org.chorus_oss.chorus.registry
 
 
-import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
 import io.netty.util.collection.CharObjectHashMap
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
 import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.generated.resources.Res
@@ -308,11 +305,6 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         }
         return null
     }
-
-    val craftingPacket: ByteBuf
-        get() = Unpooled.buffer().apply {
-            this.writeBytes(packet.readByteArray())
-        }
 
     val packet: Buffer
         get() = Companion.packet.copy()
