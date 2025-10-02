@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 open class ItemSalmon : ItemFish {
-    constructor() : super(ItemID.Companion.SALMON, 0, 1)
+    constructor() : super(ItemID.SALMON, 0, 1)
 
     protected constructor(id: String, meta: Int, count: Int) : super(id, meta, count)
 

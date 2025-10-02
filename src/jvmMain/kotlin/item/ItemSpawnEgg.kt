@@ -19,7 +19,7 @@ import java.util.*
 
 open class ItemSpawnEgg : Item {
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.SPAWN_EGG, meta, count, "Spawn Egg") {
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.SPAWN_EGG, meta, count, "Spawn Egg") {
         updateName()
     }
 

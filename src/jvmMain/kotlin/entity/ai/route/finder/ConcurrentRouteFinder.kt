@@ -74,9 +74,9 @@ abstract class ConcurrentRouteFinder(blockEvaluator: IPosEvaluator?) : SimpleRou
     override fun hasNext(): Boolean {
         try {
             if (this.nodeIndex + 1 < nodes.size) {
-                return nodes[nodeIndex + 1] != null
+                return nodes.getOrNull(nodeIndex + 1) != null
             }
-        } catch (ignore: Exception) {
+        } catch (_: Exception) {
         }
         return false
     }

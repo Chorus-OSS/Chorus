@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.entity.effect.PotionType
 
 
 class ItemArrow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.ARROW, meta, count, GENERIC_NAME) {
+    Item(ItemID.ARROW, meta, count, GENERIC_NAME) {
     init {
         updateName()
     }
@@ -27,7 +27,7 @@ class ItemArrow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         this.name = when (potion.stringId) {
             "minecraft:water" -> "Arrow of Splashing"
             "minecraft:mundane", "minecraft:long_mundane", "minecraft:thick", "minecraft:awkward" -> "Tipped Arrow"
-            else -> ItemPotion.Companion.buildName(potion, GENERIC_NAME, false)
+            else -> ItemPotion.buildName(potion, GENERIC_NAME, false)
         }
     }
 

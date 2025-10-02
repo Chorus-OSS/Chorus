@@ -94,6 +94,7 @@ class NearestTargetEntitySensor<T : Entity?> @SafeVarargs constructor(
             for (p in entity.level!!.entities.values) {
                 if (entity.position.distanceSquared(p.position) in minRangeSquared..maxRangeSquared && (p != entity)) {
                     for ((i, targetFunction) in allTargetFunction!!.withIndex()) {
+                        @Suppress("UNCHECKED_CAST")
                         if (targetFunction.apply(p as T)) {
                             sortEntities[i].add(p)
                         }

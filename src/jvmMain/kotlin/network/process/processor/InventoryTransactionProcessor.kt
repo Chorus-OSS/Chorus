@@ -443,6 +443,7 @@ class InventoryTransactionProcessor : PacketProcessor<InventoryTransactionPacket
                     }
                 }
             }
+            else -> Unit
         }
     }
 

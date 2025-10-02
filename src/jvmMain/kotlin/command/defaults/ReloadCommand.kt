@@ -13,13 +13,13 @@ class ReloadCommand(name: String) : VanillaCommand(name, "Reload the server/plug
     init {
         this.permission = "chorus.command.reload"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         commandParameters["function"] = arrayOf(
-            CommandParameter.Companion.newEnum("function", false, arrayOf("function"))
+            CommandParameter.newEnum("function", false, arrayOf("function"))
         )
         commandParameters["plugin"] = arrayOf(
-            CommandParameter.Companion.newEnum("plugin", arrayOf("plugin")),
-            CommandParameter.Companion.newType("plugin", CommandParamType.STRING)
+            CommandParameter.newEnum("plugin", arrayOf("plugin")),
+            CommandParameter.newType("plugin", CommandParamType.STRING)
         )
         this.enableParamTree()
     }

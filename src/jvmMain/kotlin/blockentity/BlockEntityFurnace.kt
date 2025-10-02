@@ -8,8 +8,8 @@ import org.chorus_oss.chorus.event.inventory.FurnaceSmeltEvent
 import org.chorus_oss.chorus.inventory.*
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.item.ItemLavaBucket
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.NBTIO
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
@@ -107,7 +107,7 @@ open class BlockEntityFurnace(level: Level, nbt: CompoundTag) : BlockEntitySpawn
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else furnaceName
         set(name) {
-            if (name == null || name == "") {
+            if (name == "") {
                 namedTag.remove("CustomName")
                 return
             }

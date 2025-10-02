@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.Vector3
 
-class ItemGoatHorn(aux: Int, count: Int) : Item(ItemID.Companion.GOAT_HORN) {
+class ItemGoatHorn(aux: Int, count: Int) : Item(ItemID.GOAT_HORN) {
     protected var coolDownTick: Int = 140
 
     @JvmOverloads

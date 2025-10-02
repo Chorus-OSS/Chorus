@@ -11,42 +11,42 @@ interface GenericParameter {
     companion object {
         val OBJECTIVES: CommandParameterSupplier<CommandParameter> =
             CommandParameterSupplier<CommandParameter> { optional: Boolean ->
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "objective",
                     optional,
-                    CommandEnum.Companion.SCOREBOARD_OBJECTIVES
+                    CommandEnum.SCOREBOARD_OBJECTIVES
                 )
             }
         val TARGET_OBJECTIVES: CommandParameterSupplier<CommandParameter> =
             CommandParameterSupplier<CommandParameter> { optional: Boolean ->
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "targetObjective",
                     optional,
-                    CommandEnum.Companion.SCOREBOARD_OBJECTIVES
+                    CommandEnum.SCOREBOARD_OBJECTIVES
                 )
             }
         val ITEM_NAME: CommandParameterSupplier<CommandParameter> =
             CommandParameterSupplier<CommandParameter> { optional: Boolean ->
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "itemName",
                     optional,
-                    CommandEnum.Companion.ENUM_ITEM,
+                    CommandEnum.ENUM_ITEM,
                     ItemNode()
                 )
             }
         val CHAINED_COMMAND: CommandParameterSupplier<CommandParameter> =
             CommandParameterSupplier<CommandParameter> { optional: Boolean ->
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "chainedCommand",
                     optional,
-                    CommandEnum.Companion.CHAINED_COMMAND_ENUM,
+                    CommandEnum.CHAINED_COMMAND_ENUM,
                     ChainedCommandNode(),
                     CommandParamOption.ENUM_AS_CHAINED_COMMAND
                 )
             }
         val ORIGIN: CommandParameterSupplier<CommandParameter> =
             CommandParameterSupplier<CommandParameter> { optional: Boolean ->
-                CommandParameter.Companion.newType(
+                CommandParameter.newType(
                     "origin",
                     optional,
                     CommandParamType.TARGET

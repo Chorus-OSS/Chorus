@@ -14,9 +14,9 @@ class SetWorldSpawnCommand(name: String) : VanillaCommand(name, "commands.setwor
     init {
         this.permission = "chorus.command.setworldspawn"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         commandParameters["spawnPoint"] = arrayOf(
-            CommandParameter.Companion.newType("spawnPoint", true, CommandParamType.POSITION)
+            CommandParameter.newType("spawnPoint", true, CommandParamType.POSITION)
         )
         this.enableParamTree()
     }

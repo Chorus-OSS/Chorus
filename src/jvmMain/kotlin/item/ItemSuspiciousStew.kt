@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 
 class ItemSuspiciousStew @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.SUSPICIOUS_STEW, meta, count, "Suspicious Stew") {
+    ItemFood(ItemID.SUSPICIOUS_STEW, meta, count, "Suspicious Stew") {
     override val maxStackSize: Int
         get() = 1
 

@@ -36,35 +36,35 @@ class BlockStateUpdater_1_20_30 : Updater {
             }
         }
 
-        this.addDirectionUpdater(ctx, "minecraft:amethyst_cluster", OrderedUpdater.Companion.FACING_TO_BLOCK)
-        this.addDirectionUpdater(ctx, "minecraft:medium_amethyst_bud", OrderedUpdater.Companion.FACING_TO_BLOCK)
-        this.addDirectionUpdater(ctx, "minecraft:large_amethyst_bud", OrderedUpdater.Companion.FACING_TO_BLOCK)
-        this.addDirectionUpdater(ctx, "minecraft:small_amethyst_bud", OrderedUpdater.Companion.FACING_TO_BLOCK)
+        this.addDirectionUpdater(ctx, "minecraft:amethyst_cluster", OrderedUpdater.FACING_TO_BLOCK)
+        this.addDirectionUpdater(ctx, "minecraft:medium_amethyst_bud", OrderedUpdater.FACING_TO_BLOCK)
+        this.addDirectionUpdater(ctx, "minecraft:large_amethyst_bud", OrderedUpdater.FACING_TO_BLOCK)
+        this.addDirectionUpdater(ctx, "minecraft:small_amethyst_bud", OrderedUpdater.FACING_TO_BLOCK)
 
-        this.addDirectionUpdater(ctx, "minecraft:blast_furnace", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:furnace", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:lit_blast_furnace", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:lit_furnace", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:lit_smoker", OrderedUpdater.Companion.FACING_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:smoker", OrderedUpdater.Companion.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:blast_furnace", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:furnace", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:lit_blast_furnace", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:lit_furnace", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:lit_smoker", OrderedUpdater.FACING_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:smoker", OrderedUpdater.FACING_TO_CARDINAL)
 
-        this.addDirectionUpdater(ctx, "minecraft:anvil", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:big_dripleaf", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:anvil", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:big_dripleaf", OrderedUpdater.DIRECTION_TO_CARDINAL)
         this.addDirectionUpdater(
             ctx,
             "minecraft:calibrated_sculk_sensor",
-            OrderedUpdater.Companion.DIRECTION_TO_CARDINAL
+            OrderedUpdater.DIRECTION_TO_CARDINAL
         )
-        this.addDirectionUpdater(ctx, "minecraft:campfire", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:end_portal_frame", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:lectern", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:pink_petals", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:powered_comparator", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:powered_repeater", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:small_dripleaf_block", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:soul_campfire", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:unpowered_comparator", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
-        this.addDirectionUpdater(ctx, "minecraft:unpowered_repeater", OrderedUpdater.Companion.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:campfire", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:end_portal_frame", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:lectern", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:pink_petals", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:powered_comparator", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:powered_repeater", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:small_dripleaf_block", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:soul_campfire", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:unpowered_comparator", OrderedUpdater.DIRECTION_TO_CARDINAL)
+        this.addDirectionUpdater(ctx, "minecraft:unpowered_repeater", OrderedUpdater.DIRECTION_TO_CARDINAL)
 
         ctx.addUpdater(1, 20, 30)
             .regex("name", "minecraft:.+slab(?:[2-4])?\\b")

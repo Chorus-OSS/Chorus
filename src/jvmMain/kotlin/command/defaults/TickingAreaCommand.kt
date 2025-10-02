@@ -19,32 +19,32 @@ class TickingAreaCommand(name: String) : VanillaCommand(name, "commands.tickinga
         this.permission = "chorus.command.tickingarea"
         commandParameters.clear()
         commandParameters["add-pos"] = arrayOf(
-            CommandParameter.Companion.newEnum("add", arrayOf("add")),
-            CommandParameter.Companion.newType("from", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("to", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("name", true, CommandParamType.STRING)
+            CommandParameter.newEnum("add", arrayOf("add")),
+            CommandParameter.newType("from", CommandParamType.POSITION),
+            CommandParameter.newType("to", CommandParamType.POSITION),
+            CommandParameter.newType("name", true, CommandParamType.STRING)
         )
         commandParameters["add-circle"] = arrayOf(
-            CommandParameter.Companion.newEnum("add", arrayOf("add")),
-            CommandParameter.Companion.newEnum("circle", arrayOf("circle")),
-            CommandParameter.Companion.newType("center", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("radius", CommandParamType.INT),
-            CommandParameter.Companion.newType("name", true, CommandParamType.STRING)
+            CommandParameter.newEnum("add", arrayOf("add")),
+            CommandParameter.newEnum("circle", arrayOf("circle")),
+            CommandParameter.newType("center", CommandParamType.POSITION),
+            CommandParameter.newType("radius", CommandParamType.INT),
+            CommandParameter.newType("name", true, CommandParamType.STRING)
         )
         commandParameters["remove-pos"] = arrayOf(
-            CommandParameter.Companion.newEnum("remove", arrayOf("remove")),
-            CommandParameter.Companion.newType("position", CommandParamType.POSITION)
+            CommandParameter.newEnum("remove", arrayOf("remove")),
+            CommandParameter.newType("position", CommandParamType.POSITION)
         )
         commandParameters["remove-name"] = arrayOf(
-            CommandParameter.Companion.newEnum("remove", arrayOf("remove")),
-            CommandParameter.Companion.newType("name", CommandParamType.STRING)
+            CommandParameter.newEnum("remove", arrayOf("remove")),
+            CommandParameter.newType("name", CommandParamType.STRING)
         )
         commandParameters["remove-all"] = arrayOf(
-            CommandParameter.Companion.newEnum("remove-all", arrayOf("remove-all"))
+            CommandParameter.newEnum("remove-all", arrayOf("remove-all"))
         )
         commandParameters["list"] = arrayOf(
-            CommandParameter.Companion.newEnum("list", arrayOf("list")),
-            CommandParameter.Companion.newEnum("all-dimensions", true, arrayOf("all-dimensions"))
+            CommandParameter.newEnum("list", arrayOf("list")),
+            CommandParameter.newEnum("all-dimensions", true, arrayOf("all-dimensions"))
         )
         this.enableParamTree()
     }

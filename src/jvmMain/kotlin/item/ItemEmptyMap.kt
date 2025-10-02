@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.math.Vector3
 
 class ItemEmptyMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.EMPTY_MAP, meta, count, "Empty Map") {
+    Item(ItemID.EMPTY_MAP, meta, count, "Empty Map") {
     init {
         updateName()
     }
@@ -28,7 +28,7 @@ class ItemEmptyMap @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         if (!player.isCreative) {
             count--
         }
-        player.inventory.addItem(get(ItemID.Companion.FILLED_MAP))
+        player.inventory.addItem(get(ItemID.FILLED_MAP))
         return true
     }
 }

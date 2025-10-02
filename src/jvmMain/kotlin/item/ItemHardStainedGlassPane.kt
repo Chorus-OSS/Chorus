@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemHardStainedGlassPane : Item(ItemID.Companion.HARD_STAINED_GLASS_PANE)
+class ItemHardStainedGlassPane : Item(ItemID.HARD_STAINED_GLASS_PANE)

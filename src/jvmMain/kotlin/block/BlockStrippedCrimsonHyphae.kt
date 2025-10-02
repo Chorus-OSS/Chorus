@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.block.property.CommonBlockProperties
 class BlockStrippedCrimsonHyphae @JvmOverloads constructor(blockstate: BlockState = properties.defaultState) :
     BlockStemStripped(blockstate) {
     override fun getStrippedState(): BlockState {
-        return BlockStrippedAcaciaLog.Companion.properties.defaultState
+        return BlockStrippedAcaciaLog.properties.defaultState
     }
 
     override val properties: BlockProperties

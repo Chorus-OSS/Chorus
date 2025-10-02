@@ -3,7 +3,6 @@ package org.chorus_oss.chorus.entity.ai.executor
 import kotlinx.io.Buffer
 import kotlinx.io.readByteString
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.entity.EntityCanAttack
 import org.chorus_oss.chorus.entity.ai.memory.CoreMemoryTypes
 import org.chorus_oss.chorus.entity.data.EntityFlag
 import org.chorus_oss.chorus.entity.mob.EntityMob
@@ -15,7 +14,10 @@ import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.Vector3
 import org.chorus_oss.chorus.math.Vector3f
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
+import org.chorus_oss.nbt.Tag
 import org.chorus_oss.nbt.TagSerialization
+import org.chorus_oss.protocol.packets.LevelEventGenericPacket
+import org.chorus_oss.protocol.packets.LevelEventPacket
 import java.util.*
 
 class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var totalRunningTime: Int) :
@@ -53,12 +55,7 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
             val damages: MutableMap<DamageModifier, Float> = EnumMap(
                 DamageModifier::class.java
             )
-
-            var damage = 0f
-            if (entity is EntityCanAttack) {
-                damage = entity.getDiffHandDamage(Server.instance.getDifficulty())
-            }
-            damages[DamageModifier.BASE] = damage
+            damages[DamageModifier.BASE] = entity.getDiffHandDamage(Server.instance.getDifficulty())
 
             val ev = EntityDamageByEntityEvent(
                 entity,
@@ -71,7 +68,7 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
         if (currentTick > this.totalRunningTime) {
             return false
         } else {
-            val target = entity.memoryStorage.get(CoreMemoryTypes.ATTACK_TARGET)!!
+            val target = entity.memoryStorage[CoreMemoryTypes.ATTACK_TARGET]!!
             //更新视线target
             entity.lookTarget = target.position.clone()
             entity.moveTarget = target.position.clone()
@@ -113,15 +110,15 @@ class WardenRangedAttackExecutor(protected var chargingTime: Int, protected var 
         val relativeVector = Vector3(to.x - from.x, to.y - from.y, to.z - from.z)
         var i = 1
         while (i <= (length + 4)) {
-            val pk = org.chorus_oss.protocol.packets.LevelEventGenericPacket(
-                eventID = org.chorus_oss.protocol.packets.LevelEventPacket.SONIC_EXPLOSION,
+            val pk = LevelEventGenericPacket(
+                eventID = LevelEventPacket.SONIC_EXPLOSION,
                 serializedEventData = Buffer().apply {
                     val tag = org.chorus_oss.nbt.tags.CompoundTag(
                         createVec3fTag(
                             from.add(relativeVector.multiply(i / length)).asVector3f()
                         )
                     )
-                    org.chorus_oss.nbt.Tag.serialize(tag, this, TagSerialization.NetLE, false)
+                    Tag.serialize(tag, this, TagSerialization.NetLE, false)
                 }.readByteString()
             )
             Server.broadcastPacket(entity.viewers.values, pk)

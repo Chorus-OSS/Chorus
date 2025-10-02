@@ -15,6 +15,7 @@ abstract class ParamNode<T> : IParamNode<T> {
         protected set
 
     override fun <E> get(): E? {
+        @Suppress("UNCHECKED_CAST")
         return if (value == null) null
         else value as E
     }

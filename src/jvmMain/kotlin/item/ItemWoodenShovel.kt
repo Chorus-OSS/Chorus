@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemWoodenShovel @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.WOODEN_SHOVEL, meta, count, "Wooden Shovel") {
+    ItemTool(ItemID.WOODEN_SHOVEL, meta, count, "Wooden Shovel") {
     override val maxDurability: Int
         get() = DURABILITY_WOODEN
 

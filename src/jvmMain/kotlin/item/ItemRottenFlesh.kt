@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 
 class ItemRottenFlesh @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.ROTTEN_FLESH, meta, count, "Rotten Flesh") {
+    ItemFood(ItemID.ROTTEN_FLESH, meta, count, "Rotten Flesh") {
     override val foodRestore: Int
         get() = 4
 

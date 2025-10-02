@@ -26,7 +26,7 @@ class WorkExecutor : NearbyFlatRandomRoamExecutor(CoreMemoryTypes.SITE_BLOCK, 0.
                     setLookTarget(entity, site.position)
                     stayTick++
                     if (stayTick == 40 || stayTick == 90) entity.level!!.addSound(
-                        entity.position, Profession.Companion.getProfession(
+                        entity.position, Profession.getProfession(
                             entity.profession
                         )!!
                             .getWorkSound()

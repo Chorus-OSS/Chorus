@@ -18,52 +18,52 @@ class TeleportCommand(name: String) :
         this.permission = "chorus.command.teleport"
         commandParameters.clear()
         commandParameters["->Entity"] = arrayOf(
-            CommandParameter.Companion.newType("destination", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("destination", CommandParamType.TARGET),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["Entity->Entity"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("destination", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("victim", CommandParamType.TARGET),
+            CommandParameter.newType("destination", CommandParamType.TARGET),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["Entity->Pos"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("yRot", true, CommandParamType.VALUE),
-            CommandParameter.Companion.newType("xRot", true, CommandParamType.VALUE),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("victim", CommandParamType.TARGET),
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newType("yRot", true, CommandParamType.VALUE),
+            CommandParameter.newType("xRot", true, CommandParamType.VALUE),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["Entity->Pos(FacingPos)"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("facing", false, arrayOf("facing")),
-            CommandParameter.Companion.newType("lookAtPosition", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("victim", CommandParamType.TARGET),
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newEnum("facing", false, arrayOf("facing")),
+            CommandParameter.newType("lookAtPosition", CommandParamType.POSITION),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["Entity->Pos(FacingEntity)"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("facing", false, arrayOf("facing")),
-            CommandParameter.Companion.newType("lookAtEntity", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("victim", CommandParamType.TARGET),
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newEnum("facing", false, arrayOf("facing")),
+            CommandParameter.newType("lookAtEntity", CommandParamType.TARGET),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["->Pos"] = arrayOf(
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("yRot", true, CommandParamType.VALUE),
-            CommandParameter.Companion.newType("xRot", true, CommandParamType.VALUE),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newType("yRot", true, CommandParamType.VALUE),
+            CommandParameter.newType("xRot", true, CommandParamType.VALUE),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["->Pos(FacingPos)"] = arrayOf(
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("facing", false, arrayOf("facing")),
-            CommandParameter.Companion.newType("lookAtPosition", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newEnum("facing", false, arrayOf("facing")),
+            CommandParameter.newType("lookAtPosition", CommandParamType.POSITION),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["->Pos(FacingEntity)"] = arrayOf(
-            CommandParameter.Companion.newType("destination", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("facing", false, arrayOf("facing")),
-            CommandParameter.Companion.newType("lookAtEntity", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("checkForBlocks", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("destination", CommandParamType.POSITION),
+            CommandParameter.newEnum("facing", false, arrayOf("facing")),
+            CommandParameter.newType("lookAtEntity", CommandParamType.TARGET),
+            CommandParameter.newEnum("checkForBlocks", true, CommandEnum.ENUM_BOOLEAN)
         )
         this.enableParamTree()
     }

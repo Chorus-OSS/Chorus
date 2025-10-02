@@ -314,7 +314,7 @@ class EntityEnderDragon(chunk: IChunk?, nbt: CompoundTag) : EntityBoss(chunk, nb
         }
     }
 
-    private inner class EnderDragonPosEvaluator : FlyingPosEvaluator() {
+    private class EnderDragonPosEvaluator : FlyingPosEvaluator() {
         override fun isPassable(entity: EntityMob, vector3: Vector3): Boolean {
             return true
         }

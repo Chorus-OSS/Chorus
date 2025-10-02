@@ -2,4 +2,4 @@ package org.chorus_oss.chorus.item
 
 
 class ItemCompass @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.COMPASS, meta, count, "Compass")
+    Item(ItemID.COMPASS, meta, count, "Compass")

@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemBrush : ItemTool(ItemID.Companion.BRUSH) {
+class ItemBrush : ItemTool(ItemID.BRUSH) {
     override fun canBeActivated(): Boolean {
         return true
     }

@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.Player
 
 class ItemRabbitStew @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFood(ItemID.Companion.RABBIT_STEW, meta, count, "Rabbit Stew") {
+    ItemFood(ItemID.RABBIT_STEW, meta, count, "Rabbit Stew") {
     override val maxStackSize: Int
         get() = 1
 

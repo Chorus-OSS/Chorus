@@ -44,12 +44,8 @@ open class BlockEntitySign(level: Level, nbt: CompoundTag) : BlockEntitySpawnabl
         }
 
         // Check old text to sanitize
-        if (frontText != null) {
-            sanitizeText(frontText)
-        }
-        if (backText != null) {
-            sanitizeText(backText)
-        }
+        sanitizeText(frontText)
+        sanitizeText(backText)
         if (!namedTag.getCompound(TAG_FRONT_TEXT).containsInt(TAG_TEXT_COLOR)) {
             this.setColor(true, DyeColor.BLACK.signColor)
         }
@@ -126,9 +122,7 @@ open class BlockEntitySign(level: Level, nbt: CompoundTag) : BlockEntitySpawnabl
             namedTag.getCompound(TAG_BACK_TEXT).putString(TAG_TEXT_BLOB, lines.filterNotNull().joinToString("\n"))
         }
         this.spawnToAll()
-        if (this.chunk != null) {
-            setDirty()
-        }
+        setDirty()
         return true
     }
 

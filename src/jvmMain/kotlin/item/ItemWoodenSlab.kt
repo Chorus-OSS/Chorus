@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.block.property.CommonBlockProperties
 import org.chorus_oss.chorus.block.property.enums.MinecraftVerticalHalf
 
 class ItemWoodenSlab @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.WOODEN_SLAB, meta, count) {
+    Item(ItemID.WOODEN_SLAB, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0, 6, 7 -> {

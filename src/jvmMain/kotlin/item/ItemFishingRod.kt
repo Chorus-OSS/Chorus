@@ -6,7 +6,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
 
 class ItemFishingRod @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.FISHING_ROD, meta, count, "Fishing Rod") {
+    ItemTool(ItemID.FISHING_ROD, meta, count, "Fishing Rod") {
     override val enchantAbility: Int
         get() = 1
 

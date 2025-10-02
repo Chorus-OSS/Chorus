@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemCookedRabbit : ItemFood(ItemID.Companion.COOKED_RABBIT) {
+class ItemCookedRabbit : ItemFood(ItemID.COOKED_RABBIT) {
     override val foodRestore: Int
         get() = 5
 

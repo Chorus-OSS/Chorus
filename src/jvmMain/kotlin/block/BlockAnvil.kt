@@ -30,7 +30,7 @@ open class BlockAnvil @JvmOverloads constructor(blockstate: BlockState = propert
                 Damage.UNDAMAGED -> Companion.properties.defaultState
                 Damage.SLIGHTLY_DAMAGED -> BlockChippedAnvil.properties.defaultState
                 Damage.VERY_DAMAGED -> BlockDamagedAnvil.properties.defaultState
-                Damage.BROKEN -> BlockAir.Companion.STATE
+                Damage.BROKEN -> BlockAir.STATE
             }
         }
 

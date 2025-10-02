@@ -39,7 +39,7 @@ abstract class Profession(
         }
 
         fun getProfessions(): HashMap<Int, Profession> {
-            return knownProfessions.clone() as HashMap<Int, Profession>
+            return knownProfessions.toMap() as HashMap<Int, Profession>
         }
 
         fun getProfession(index: Int): Profession? {

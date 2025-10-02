@@ -72,7 +72,7 @@ class BlockStateUpdater_1_20_0 : Updater {
     }
 
     private fun addPumpkinUpdater(ctx: CompoundTagUpdaterContext, identifier: String) {
-        val updater: OrderedUpdater = OrderedUpdater.Companion.DIRECTION_TO_CARDINAL
+        val updater: OrderedUpdater = OrderedUpdater.DIRECTION_TO_CARDINAL
         ctx.addUpdater(1, 20, 0)
             .match("name", identifier)
             .visit("states")

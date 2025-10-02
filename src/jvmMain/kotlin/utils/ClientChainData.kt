@@ -142,7 +142,7 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
         this.rawData = skinToken
     }
 
-    private fun decodeToken(token: String): JsonObject? {
+    private fun decodeToken(token: String): JsonObject {
         val base = token.split(".", limit = 3)
         val json = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(base[1]).decodeToString()
         return Json.parseToJsonElement(json).jsonObject

@@ -19,17 +19,17 @@ class DebugCommand(name: String) : TestCommand(name, "commands.debug.description
         //生物AI debug模式开关
         commandParameters["entity"] =
             arrayOf(
-                CommandParameter.Companion.newEnum("entity", arrayOf("entity")),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum("entity", arrayOf("entity")),
+                CommandParameter.newEnum(
                     "option",
                     EntityAI.DebugOption.entries.map { option: EntityAI.DebugOption -> option.name.lowercase() }
                         .toTypedArray()
                 ),
-                CommandParameter.Companion.newEnum("value", false, CommandEnum.Companion.ENUM_BOOLEAN)
+                CommandParameter.newEnum("value", false, CommandEnum.ENUM_BOOLEAN)
             )
         commandParameters["rendermap"] = arrayOf(
-            CommandParameter.Companion.newEnum("rendermap", arrayOf("rendermap")),
-            CommandParameter.Companion.newType("zoom", CommandParamType.INT)
+            CommandParameter.newEnum("rendermap", arrayOf("rendermap")),
+            CommandParameter.newType("zoom", CommandParamType.INT)
         )
         this.enableParamTree()
     }

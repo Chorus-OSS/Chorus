@@ -143,7 +143,7 @@ class BreezeShootExecutor(
         val p = 1.0
         min((p * p + p * 2) / 3, 1.0) * 3
 
-        val projectile: Entity = Entity.Companion.createEntity(
+        val projectile: Entity = Entity.createEntity(
             EntityID.BREEZE_WIND_CHARGE_PROJECTILE,
             entity.level!!.getChunk(entity.position.chunkX, entity.position.chunkZ),
             nbt

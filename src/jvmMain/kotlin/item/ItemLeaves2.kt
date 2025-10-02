@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.block.BlockAcaciaLeaves
 import org.chorus_oss.chorus.block.BlockDarkOakLeaves
 
 class ItemLeaves2 @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.LEAVES2, meta, count) {
+    Item(ItemID.LEAVES2, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

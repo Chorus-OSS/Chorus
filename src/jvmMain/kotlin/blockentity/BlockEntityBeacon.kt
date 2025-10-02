@@ -7,8 +7,8 @@ import org.chorus_oss.chorus.entity.effect.EffectType
 import org.chorus_oss.chorus.inventory.BeaconInventory
 import org.chorus_oss.chorus.inventory.Inventory
 import org.chorus_oss.chorus.item.Item
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 class BlockEntityBeacon(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(level, nbt),

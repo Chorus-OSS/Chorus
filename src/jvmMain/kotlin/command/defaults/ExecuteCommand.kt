@@ -30,101 +30,101 @@ class ExecuteCommand(name: String) : VanillaCommand(name, "commands.execute.desc
         commandParameters.clear()
         this.addCommandParameters(
             "as", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_As", "as")),
-                GenericParameter.Companion.ORIGIN.get(false),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_As", "as")),
+                GenericParameter.ORIGIN.get(false),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "at", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_At", "at")),
-                GenericParameter.Companion.ORIGIN.get(false),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_At", "at")),
+                GenericParameter.ORIGIN.get(false),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "in", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_In", "in")),
-                CommandParameter.Companion.newType("dimension", CommandParamType.STRING),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_In", "in")),
+                CommandParameter.newType("dimension", CommandParamType.STRING),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "facing", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Facing", "facing")),
-                CommandParameter.Companion.newType("pos", CommandParamType.POSITION),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Facing", "facing")),
+                CommandParameter.newType("pos", CommandParamType.POSITION),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "facing-entity", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Facing", "facing")),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Facing", "facing")),
+                CommandParameter.newEnum(
                     "secondary subcommand",
                     false,
                     CommandEnum("Option_Entity", "entity")
                 ),
-                CommandParameter.Companion.newType("targets", CommandParamType.TARGET),
-                CommandParameter.Companion.newEnum("anchor", arrayOf("eyes", "feet")),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newType("targets", CommandParamType.TARGET),
+                CommandParameter.newEnum("anchor", arrayOf("eyes", "feet")),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "rotated", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Rotated", "rotated")),
-                CommandParameter.Companion.newType("yaw", false, CommandParamType.VALUE),
-                CommandParameter.Companion.newType("pitch", false, CommandParamType.VALUE),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Rotated", "rotated")),
+                CommandParameter.newType("yaw", false, CommandParamType.VALUE),
+                CommandParameter.newType("pitch", false, CommandParamType.VALUE),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "rotated as", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Rotated", "rotated")),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_As", "as")),
-                CommandParameter.Companion.newType("targets", CommandParamType.TARGET),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Rotated", "rotated")),
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_As", "as")),
+                CommandParameter.newType("targets", CommandParamType.TARGET),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "align", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Align", "align")),
-                CommandParameter.Companion.newType("axes", CommandParamType.STRING),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Align", "align")),
+                CommandParameter.newType("axes", CommandParamType.STRING),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "anchored", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Anchored", "anchored")),
-                CommandParameter.Companion.newEnum("anchor", arrayOf("eyes", "feet")),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Anchored", "anchored")),
+                CommandParameter.newEnum("anchor", arrayOf("eyes", "feet")),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "positioned", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Positioned", "positioned")),
-                CommandParameter.Companion.newType("position", CommandParamType.POSITION),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Positioned", "positioned")),
+                CommandParameter.newType("position", CommandParamType.POSITION),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "positioned as", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Positioned", "positioned")),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_As", "as")),
-                GenericParameter.Companion.ORIGIN.get(false),
-                GenericParameter.Companion.CHAINED_COMMAND.get(false)
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Positioned", "positioned")),
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_As", "as")),
+                GenericParameter.ORIGIN.get(false),
+                GenericParameter.CHAINED_COMMAND.get(false)
             )
         )
         this.addCommandParameters(
             "if-unless-block", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_Block", "block")),
-                CommandParameter.Companion.newType("position", CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("block", false, CommandEnum.Companion.ENUM_BLOCK),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_Block", "block")),
+                CommandParameter.newType("position", CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("block", false, CommandEnum.ENUM_BLOCK),
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         /*todo 暂时没实现，因为我也不知道这个blockStates填什么
@@ -138,100 +138,100 @@ class ExecuteCommand(name: String) : VanillaCommand(name, "commands.execute.desc
         });*/
         this.addCommandParameters(
             "if-unless-block-data", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_Block", "block")),
-                CommandParameter.Companion.newType("position", CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("block", false, CommandEnum.Companion.ENUM_BLOCK),
-                CommandParameter.Companion.newType("data", CommandParamType.INT),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_Block", "block")),
+                CommandParameter.newType("position", CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("block", false, CommandEnum.ENUM_BLOCK),
+                CommandParameter.newType("data", CommandParamType.INT),
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         this.addCommandParameters(
             "if-unless-blocks", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "secondary subcommand",
                     false,
                     CommandEnum("Option_Blocks", "blocks")
                 ),
-                CommandParameter.Companion.newType("begin", CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("end", CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newType("destination", CommandParamType.BLOCK_POSITION),
-                CommandParameter.Companion.newEnum("scan mode", true, arrayOf("all", "masked")),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                CommandParameter.newType("begin", CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("end", CommandParamType.BLOCK_POSITION),
+                CommandParameter.newType("destination", CommandParamType.BLOCK_POSITION),
+                CommandParameter.newEnum("scan mode", true, arrayOf("all", "masked")),
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         this.addCommandParameters(
             "if-unless-entity", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "secondary subcommand",
                     false,
                     CommandEnum("Option_Entity", "entity")
                 ),
-                CommandParameter.Companion.newType("target", CommandParamType.TARGET),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                CommandParameter.newType("target", CommandParamType.TARGET),
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         this.addCommandParameters(
             "if-unless-score", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_Score", "score")),
-                CommandParameter.Companion.newType("target", CommandParamType.TARGET),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_Score", "score")),
+                CommandParameter.newType("target", CommandParamType.TARGET),
+                CommandParameter.newEnum(
                     "objective",
                     false,
                     CommandEnum("ScoreboardObjectives", listOf<String>(), true)
                 ),
-                CommandParameter.Companion.newType("operation", CommandParamType.COMPARE_OPERATOR),
-                CommandParameter.Companion.newType("source", CommandParamType.TARGET),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newType("operation", CommandParamType.COMPARE_OPERATOR),
+                CommandParameter.newType("source", CommandParamType.TARGET),
+                CommandParameter.newEnum(
                     "objective",
                     false,
                     CommandEnum("ScoreboardObjectives", listOf<String>(), true)
                 ),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         this.addCommandParameters(
             "if-unless-score-matches", arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "subcommand",
                     false,
                     CommandEnum("Option_If_Unless", "if", "unless")
                 ),
-                CommandParameter.Companion.newEnum("secondary subcommand", false, CommandEnum("Option_Score", "score")),
-                CommandParameter.Companion.newType("target", CommandParamType.TARGET),
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum("secondary subcommand", false, CommandEnum("Option_Score", "score")),
+                CommandParameter.newType("target", CommandParamType.TARGET),
+                CommandParameter.newEnum(
                     "objective",
                     false,
                     CommandEnum("ScoreboardObjectives", listOf<String>(), true)
                 ),
-                CommandParameter.Companion.newEnum("matches", arrayOf("matches")),
-                CommandParameter.Companion.newType("range", CommandParamType.STRING),
-                GenericParameter.Companion.CHAINED_COMMAND.get(true)
+                CommandParameter.newEnum("matches", arrayOf("matches")),
+                CommandParameter.newType("range", CommandParamType.STRING),
+                GenericParameter.CHAINED_COMMAND.get(true)
             )
         )
         this.addCommandParameters(
             "run", arrayOf(
-                CommandParameter.Companion.newEnum("subcommand", false, CommandEnum("Option_Run", "run")),
-                CommandParameter.Companion.newType(
+                CommandParameter.newEnum("subcommand", false, CommandEnum("Option_Run", "run")),
+                CommandParameter.newType(
                     "command",
                     false,
                     CommandParamType.COMMAND,

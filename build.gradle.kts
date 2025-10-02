@@ -52,6 +52,7 @@ kotlin {
                 implementation(libs.rwmutex)
                 implementation(libs.kotlin.reflect)
                 implementation(libs.kflate)
+                implementation(libs.clikt)
 
                 implementation(compose.runtime)
                 implementation(compose.components.resources)
@@ -77,7 +78,6 @@ kotlin {
                 implementation(libs.rng.sampling)
                 implementation(libs.asm)
                 implementation(libs.jose4j)
-                implementation(libs.joptsimple)
                 implementation(libs.sentry)
                 implementation(libs.sentry.log4j2)
                 implementation(libs.disruptor)

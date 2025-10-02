@@ -18,7 +18,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class ItemCrossbow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.CROSSBOW, meta, count, "Crossbow") {
+    ItemTool(ItemID.CROSSBOW, meta, count, "Crossbow") {
     private var loadTick = 0
 
     override val maxDurability: Int
@@ -28,7 +28,7 @@ class ItemCrossbow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         if (isLoaded) return true
         this.loadTick = player.level!!.tick
         var needTickUsed = 25
-        val enchantment = this.getEnchantment(Enchantment.Companion.ID_CROSSBOW_QUICK_CHARGE)
+        val enchantment = this.getEnchantment(Enchantment.ID_CROSSBOW_QUICK_CHARGE)
         if (enchantment != null) {
             needTickUsed -= enchantment.level * 5 //0.25s
         }
@@ -65,7 +65,7 @@ class ItemCrossbow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
 
                 if (!player.isCreative) {
                     if (!this.isUnbreakable) {
-                        val durability = this.getEnchantment(Enchantment.Companion.ID_DURABILITY)
+                        val durability = this.getEnchantment(Enchantment.ID_DURABILITY)
                         if (durability == null || durability.level <= 0 || 100 / (durability.level + 1) > Utils.random.nextInt(
                                 100
                             )
@@ -89,7 +89,7 @@ class ItemCrossbow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
 
     protected fun canLoad(item: Item): Boolean {
         return when (item.id) {
-            ItemID.Companion.ARROW, ItemID.Companion.FIREWORK_ROCKET -> true
+            ItemID.ARROW, ItemID.FIREWORK_ROCKET -> true
             else -> false
         }
     }

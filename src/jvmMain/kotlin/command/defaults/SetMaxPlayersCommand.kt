@@ -13,7 +13,7 @@ class SetMaxPlayersCommand(name: String) : VanillaCommand(name, "commands.setmax
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("maxPlayers", false, CommandParamType.INT)
+                CommandParameter.newType("maxPlayers", false, CommandParamType.INT)
             )
         )
         this.enableParamTree()

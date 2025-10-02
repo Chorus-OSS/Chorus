@@ -9,7 +9,7 @@ import org.chorus_oss.chorus.level.vibration.VibrationType
 import org.chorus_oss.chorus.math.Vector3
 
 class ItemPotion @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.POTION, meta, count, "Potion") {
+    Item(ItemID.POTION, meta, count, "Potion") {
     init {
         updateName()
     }

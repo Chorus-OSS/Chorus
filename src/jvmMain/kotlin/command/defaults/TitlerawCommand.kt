@@ -14,27 +14,27 @@ class TitlerawCommand(name: String) : VanillaCommand(name, "commands.titleraw.de
         this.permission = "chorus.command.titleraw"
         commandParameters.clear()
         commandParameters["clear"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("clear", CommandEnum("TitleClear", "clear"))
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("clear", CommandEnum("TitleClear", "clear"))
         )
         commandParameters["reset"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("reset", CommandEnum("TitleReset", "reset"))
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("reset", CommandEnum("TitleReset", "reset"))
         )
         commandParameters["set"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum(
                 "titleLocation",
                 CommandEnum("TitleSet", "title", "subtitle", "actionbar")
             ),
-            CommandParameter.Companion.newType("titleJson", CommandParamType.RAWTEXT)
+            CommandParameter.newType("titleJson", CommandParamType.RAWTEXT)
         )
         commandParameters["times"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("times", CommandEnum("TitleTimes", "times")),
-            CommandParameter.Companion.newType("fadeIn", CommandParamType.INT),
-            CommandParameter.Companion.newType("stay", CommandParamType.INT),
-            CommandParameter.Companion.newType("fadeOut", CommandParamType.INT)
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("times", CommandEnum("TitleTimes", "times")),
+            CommandParameter.newType("fadeIn", CommandParamType.INT),
+            CommandParameter.newType("stay", CommandParamType.INT),
+            CommandParameter.newType("fadeOut", CommandParamType.INT)
         )
         this.enableParamTree()
     }

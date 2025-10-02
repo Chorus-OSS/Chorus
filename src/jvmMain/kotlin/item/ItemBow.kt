@@ -23,7 +23,7 @@ import kotlin.math.sin
 
 
 class ItemBow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.BOW, meta, count, "Bow") {
+    ItemTool(ItemID.BOW, meta, count, "Bow") {
     override val maxDurability: Int
         get() = DURABILITY_BOW
 
@@ -53,12 +53,12 @@ class ItemBow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
 
         var damage = 2.0
 
-        val bowDamage = this.getEnchantment(Enchantment.Companion.ID_BOW_POWER)
+        val bowDamage = this.getEnchantment(Enchantment.ID_BOW_POWER)
         if (bowDamage != null && bowDamage.level > 0) {
             damage += bowDamage.level.toDouble() * 0.5 + 0.5
         }
 
-        val flameEnchant = this.getEnchantment(Enchantment.Companion.ID_BOW_FLAME)
+        val flameEnchant = this.getEnchantment(Enchantment.ID_BOW_FLAME)
         val flame = flameEnchant != null && flameEnchant.level > 0
 
         var arrowTransform: Transform = player.transform
@@ -114,7 +114,7 @@ class ItemBow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
         } else {
             entityShootBowEvent.projectile
                 .setMotion(entityShootBowEvent.projectile.getMotion().multiply(entityShootBowEvent.force))
-            val infinityEnchant = this.getEnchantment(Enchantment.Companion.ID_BOW_INFINITY)
+            val infinityEnchant = this.getEnchantment(Enchantment.ID_BOW_INFINITY)
             val infinity = infinityEnchant != null && infinityEnchant.level > 0
             val projectile = entityShootBowEvent.projectile
             if (infinity && (projectile is EntityArrow)) {
@@ -139,7 +139,7 @@ class ItemBow @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
                     }
                 }
                 if (!this.isUnbreakable) {
-                    val durability = this.getEnchantment(Enchantment.Companion.ID_DURABILITY)
+                    val durability = this.getEnchantment(Enchantment.ID_DURABILITY)
                     if (!(durability != null && durability.level > 0 && (100 / (durability.level + 1)) <= Random().nextInt(
                             100
                         ))

@@ -40,10 +40,10 @@ Minecraft: Bedrock server software, open source and written in Kotlin
 <!-- CHORUS -->
 
 <!-- BADGES -->
-[minecraft_badge_url]: https://img.shields.io/badge/minecraft-1.21.100-black?style=flat-square
-[minecraft_url]: https://www.minecraft.net/en-us/article/minecraft-1-21-100-bedrock-changelog
+[minecraft_badge_url]: https://img.shields.io/badge/minecraft-1.21.111-black?style=flat-square
+[minecraft_url]: https://www.minecraft.net/en-us/article/the-copper-age---minecraft--bedrock-edition-1-21-111-changelog
 
-[protocol_badge_url]: https://img.shields.io/badge/protocol-v827-white?style=flat-square
+[protocol_badge_url]: https://img.shields.io/badge/protocol-v844-white?style=flat-square
 [protocol_url]: https://github.com/Mojang/bedrock-protocol-docs
 
 [kotlin_badge_url]: https://img.shields.io/badge/kotlin-2.2.0-%237F52FF?style=flat-square&logo=kotlin&labelColor=white

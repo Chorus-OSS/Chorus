@@ -17,8 +17,8 @@ class CraftResultDeprecatedActionProcessor : ItemStackRequestActionProcessor<Cra
         player: Player,
         context: ItemStackRequestContext
     ): ActionResponse? {
-        if (context.has(CraftRecipeActionProcessor.Companion.RECIPE_DATA_KEY) && (context.get<Any>(
-                CraftRecipeActionProcessor.Companion.RECIPE_DATA_KEY
+        if (context.has(CraftRecipeActionProcessor.RECIPE_DATA_KEY) && (context.get<Any>(
+                CraftRecipeActionProcessor.RECIPE_DATA_KEY
             ) as Recipe).type == RecipeType.MULTI
         ) {
             val createdOutput = player.creativeOutputInventory

@@ -15,8 +15,8 @@ class TellCommand(name: String) :
         this.permission = "chorus.command.tell"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newType("message", CommandParamType.MESSAGE)
+            CommandParameter.newType("player", CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newType("message", CommandParamType.MESSAGE)
         )
         this.enableParamTree()
     }

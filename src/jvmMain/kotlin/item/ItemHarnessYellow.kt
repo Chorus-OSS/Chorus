@@ -1,3 +1,3 @@
 package org.chorus_oss.chorus.item
 
-class ItemHarnessYellow : ItemHarness(ItemID.Companion.HARNESS_YELLOW)
+class ItemHarnessYellow : ItemHarness(ItemID.HARNESS_YELLOW)

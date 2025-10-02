@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.utils.DyeColor
 
 class ItemShield : ItemTool {
     @JvmOverloads
-    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.Companion.SHIELD, meta, count, "Shield")
+    constructor(meta: Int = 0, count: Int = 1) : super(ItemID.SHIELD, meta, count, "Shield")
 
     /**
      * 为自定义盾牌提供的构造函数

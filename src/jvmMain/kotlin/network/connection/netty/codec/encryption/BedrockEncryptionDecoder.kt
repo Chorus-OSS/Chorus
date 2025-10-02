@@ -23,7 +23,7 @@ class BedrockEncryptionDecoder(val key: AES.CTR.Key) :
         if (VALIDATE) {
             val trailer = decrypted.copyOfRange(decrypted.size - 8, decrypted.size)
 
-            val expected: ByteArray = BedrockEncryptionEncoder.Companion.generateTrailer(
+            val expected: ByteArray = BedrockEncryptionEncoder.generateTrailer(
                 ctx.alloc().buffer(payload.size).writeBytes(payload),
                 key, this.packetCounter
             )

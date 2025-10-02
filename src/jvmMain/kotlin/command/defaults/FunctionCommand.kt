@@ -12,10 +12,10 @@ class FunctionCommand(name: String) : VanillaCommand(name, "commands.function.de
         this.permission = "chorus.command.function"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum(
                 "name",
                 false,
-                CommandEnum.Companion.FUNCTION_FILE
+                CommandEnum.FUNCTION_FILE
             ) //todo 找到CommandParamType.FILE_PATH自动补全的工作原理
         )
         this.enableParamTree()

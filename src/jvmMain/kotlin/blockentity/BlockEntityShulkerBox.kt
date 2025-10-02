@@ -26,7 +26,7 @@ class BlockEntityShulkerBox(level: Level, nbt: CompoundTag) : BlockEntitySpawnab
             namedTag.putList("Items", ListTag<CompoundTag>())
         }
 
-        val list = namedTag.getList("Items") as ListTag<CompoundTag>
+        val list = namedTag.getList("Items", CompoundTag::class.java)
         for (compound in list.all) {
             val item = NBTIO.getItemHelper(compound)
             realInventory!!.setItemInternal(compound.getByte("Slot").toInt(), item)
@@ -108,7 +108,7 @@ class BlockEntityShulkerBox(level: Level, nbt: CompoundTag) : BlockEntitySpawnab
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "Shulker Box"
         set(name) {
-            if (name == null || name.isEmpty()) {
+            if (name.isEmpty()) {
                 namedTag.remove("CustomName")
                 return
             }

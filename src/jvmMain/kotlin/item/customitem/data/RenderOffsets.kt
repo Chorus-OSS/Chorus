@@ -116,10 +116,10 @@ class RenderOffsets(
             val scale2 = (0.125 / multiplier).toFloat()
             val scale3 = (0.075 / (multiplier * 2.4f)).toFloat()
             return RenderOffsets(
-                Offset.Companion.builder().scale(scale3, scale3, scale3),
-                Offset.Companion.builder().scale(scale1, scale2, scale1),
-                Offset.Companion.builder().scale(scale1, scale2, scale1),
-                Offset.Companion.builder().scale(scale1, scale2, scale1)
+                Offset.builder().scale(scale3, scale3, scale3),
+                Offset.builder().scale(scale1, scale2, scale1),
+                Offset.builder().scale(scale1, scale2, scale1),
+                Offset.builder().scale(scale1, scale2, scale1)
             )
         }
 

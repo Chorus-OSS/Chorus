@@ -13,8 +13,8 @@ class WeatherCommand(name: String) : VanillaCommand(name, "commands.weather.desc
         this.permission = "chorus.command.weather"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newEnum("type", CommandEnum("WeatherType", "clear", "rain", "thunder")),
-            CommandParameter.Companion.newType("duration", true, CommandParamType.INT)
+            CommandParameter.newEnum("type", CommandEnum("WeatherType", "clear", "rain", "thunder")),
+            CommandParameter.newType("duration", true, CommandParamType.INT)
         )
         this.enableParamTree()
     }

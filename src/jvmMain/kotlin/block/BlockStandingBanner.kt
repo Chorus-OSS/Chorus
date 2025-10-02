@@ -171,17 +171,7 @@ open class BlockStandingBanner @JvmOverloads constructor(blockstate: BlockState 
     }
 
     val dyeColor: DyeColor
-        get() {
-            if (this.level != null) {
-                val blockEntity: BlockEntityBanner? = blockEntity
-
-                if (blockEntity != null) {
-                    return blockEntity.dyeColor
-                }
-            }
-
-            return DyeColor.WHITE
-        }
+        get() = blockEntity?.dyeColor ?: DyeColor.WHITE
 
     override val isSolid: Boolean
         get() = false

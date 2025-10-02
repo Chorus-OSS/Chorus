@@ -24,7 +24,7 @@ class MessageStringNode : ParamNode<String?>() {
             TMP.add(arg)
 
             val str = java.lang.String.join(" ", TMP)
-            val match: Matcher = EntitySelectorAPI.Companion.ENTITY_SELECTOR.matcher(str)
+            val match: Matcher = EntitySelectorAPI.ENTITY_SELECTOR.matcher(str)
             this.value = match.replaceAll { r: MatchResult? ->
                 val start = max(0.0, (match.start() - 1).toDouble()).toInt()
                 val end = min(str.length.toDouble(), match.end().toDouble()).toInt()
@@ -37,10 +37,10 @@ class MessageStringNode : ParamNode<String?>() {
                     if (after == '”' || after == '\'' || after == '\\' || after == ';') return@replaceAll match.group()
                 }
                 val m = match.group()
-                if (EntitySelectorAPI.Companion.api.checkValid(m)) {
+                if (EntitySelectorAPI.api.checkValid(m)) {
                     val join = StringJoiner(", ")
                     try {
-                        for (entity in EntitySelectorAPI.Companion.api
+                        for (entity in EntitySelectorAPI.api
                             .matchEntities(paramList.paramTree.sender!!, m)) {
                             var name = entity.getEntityName()
                             if (name.isBlank()) name = entity.getOriginalName()

@@ -10,7 +10,7 @@ class SaveCommand(name: String) : VanillaCommand(name, "Save the server (levels 
     init {
         this.permission = "chorus.command.save.perform"
         commandParameters.clear()
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         this.enableParamTree()
     }
 

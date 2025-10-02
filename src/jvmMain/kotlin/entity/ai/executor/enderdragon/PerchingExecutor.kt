@@ -38,7 +38,7 @@ class PerchingExecutor : EntityControl, IBehaviorExecutor {
                         val transform = entity.transform.add(toPlayerVector.multiply(10.0))
                         transform.position.y =
                             (transform.level.getHighestBlockAt(transform.position.toHorizontal()) + 1).toDouble()
-                        val areaEffectCloud = Entity.Companion.createEntity(
+                        val areaEffectCloud = Entity.createEntity(
                             EntityID.AREA_EFFECT_CLOUD, transform.chunk,
                             CompoundTag().putList(
                                 "Pos", ListTag<FloatTag>()
@@ -67,10 +67,8 @@ class PerchingExecutor : EntityControl, IBehaviorExecutor {
 
                         val effects = PotionType.get(PotionType.HARMING.id).getEffects(false)
                         for (effect in effects) {
-                            if (effect != null && areaEffectCloud != null) {
-                                areaEffectCloud.cloudEffects!!.add(effect.setVisible(false).setAmbient(false))
-                                areaEffectCloud.spawnToAll()
-                            }
+                            areaEffectCloud.cloudEffects!!.add(effect.setVisible(false).setAmbient(false))
+                            areaEffectCloud.spawnToAll()
                         }
                         areaEffectCloud.spawnToAll()
                     }

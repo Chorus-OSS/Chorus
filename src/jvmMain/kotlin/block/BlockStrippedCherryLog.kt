@@ -9,7 +9,7 @@ class BlockStrippedCherryLog @JvmOverloads constructor(blockstate: BlockState = 
         get() = "Stripped Cherry Log"
 
     override fun getStrippedState(): BlockState {
-        return BlockStrippedAcaciaLog.Companion.properties.defaultState
+        return BlockStrippedAcaciaLog.properties.defaultState
     }
 
     override fun getWoodType(): WoodType {

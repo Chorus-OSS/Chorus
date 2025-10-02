@@ -451,7 +451,7 @@ class ServerScheduler {
             }
         }
         this.currentTick = currentTick
-        AsyncTask.Companion.collectTask()
+        AsyncTask.collectTask()
     }
 
     private fun runTasks(currentTick: Int) {

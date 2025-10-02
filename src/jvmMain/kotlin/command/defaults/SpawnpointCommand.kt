@@ -19,8 +19,8 @@ class SpawnpointCommand(name: String) : VanillaCommand(name, "commands.spawnpoin
         this.permission = "chorus.command.spawnpoint"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newType("spawnPos", true, CommandParamType.POSITION),
+            CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newType("spawnPos", true, CommandParamType.POSITION),
         )
         this.enableParamTree()
     }
@@ -42,29 +42,27 @@ class SpawnpointCommand(name: String) : VanillaCommand(name, "commands.spawnpoin
             }
             val level = sender.locator.level
             if (list.hasResult(1)) {
-                if (level != null) {
-                    val locator = list.getResult<Locator>(1)
-                    if (level.isOverWorld) {
-                        if (locator!!.position.y < -64) locator.position.y = -64.0
-                        if (locator.position.y > 320) locator.position.y = 320.0
-                    } else {
-                        if (locator!!.position.y < 0) locator.position.y = 0.0
-                        if (locator.position.y > 255) locator.position.y = 255.0
-                    }
-                    for (player in players) {
-                        player.setSpawn(locator, SpawnPointType.PLAYER)
-                    }
-                    log.addSuccess(
-                        "commands.spawnpoint.success.multiple.specific",
-                        players.stream().map { obj: Player -> obj.getEntityName() }.collect(
-                            Collectors.joining(" ")
-                        ),
-                        round2.format(locator.position.x),
-                        round2.format(locator.position.y),
-                        round2.format(locator.position.z)
-                    ).successCount(players.size).output(true)
-                    return players.size
+                val locator = list.getResult<Locator>(1)
+                if (level.isOverWorld) {
+                    if (locator!!.position.y < -64) locator.position.y = -64.0
+                    if (locator.position.y > 320) locator.position.y = 320.0
+                } else {
+                    if (locator!!.position.y < 0) locator.position.y = 0.0
+                    if (locator.position.y > 255) locator.position.y = 255.0
                 }
+                for (player in players) {
+                    player.setSpawn(locator, SpawnPointType.PLAYER)
+                }
+                log.addSuccess(
+                    "commands.spawnpoint.success.multiple.specific",
+                    players.stream().map { obj: Player -> obj.getEntityName() }.collect(
+                        Collectors.joining(" ")
+                    ),
+                    round2.format(locator.position.x),
+                    round2.format(locator.position.y),
+                    round2.format(locator.position.z)
+                ).successCount(players.size).output(true)
+                return players.size
             }
             log.addSyntaxErrors(1).output()
             return 0

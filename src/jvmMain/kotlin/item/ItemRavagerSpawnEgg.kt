@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemRavagerSpawnEgg : ItemSpawnEgg(ItemID.Companion.RAVAGER_SPAWN_EGG) {
+class ItemRavagerSpawnEgg : ItemSpawnEgg(ItemID.RAVAGER_SPAWN_EGG) {
     override val entityNetworkId: Int
         get() = 59
 

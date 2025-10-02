@@ -15,17 +15,17 @@ open class EntityBreedingExecutor<T : EntityMob>(
     protected var finded: Boolean = false
     protected var another: T? = null
 
-    override fun execute(uncasted: EntityMob): Boolean {
-        if (entityClass.isInstance(uncasted)) {
-            val entity = entityClass.cast(uncasted)
-            if (shouldFindingSpouse(entity)) {
-                if (!entity!!.memoryStorage[CoreMemoryTypes.IS_IN_LOVE]) return false
-                another = getNearestInLove(entity)
+    override fun execute(entity: EntityMob): Boolean {
+        if (entityClass.isInstance(entity)) {
+            val castEntity = entityClass.cast(entity)
+            if (shouldFindingSpouse(castEntity)) {
+                if (!castEntity!!.memoryStorage[CoreMemoryTypes.IS_IN_LOVE]) return false
+                another = getNearestInLove(castEntity)
                 if (another == null) return true
-                setSpouse(entity, another!!)
+                setSpouse(castEntity, another!!)
 
                 //set move speed
-                entity.movementSpeed = moveSpeed
+                castEntity.movementSpeed = moveSpeed
                 another!!.movementSpeed = moveSpeed
 
                 finded = true
@@ -33,16 +33,16 @@ open class EntityBreedingExecutor<T : EntityMob>(
             if (finded) {
                 currentTick++
 
-                updateMove(entity, another)
+                updateMove(castEntity, another)
 
                 if (currentTick > duration) {
-                    bear(entity)
-                    clearData(entity)
+                    bear(castEntity)
+                    clearData(castEntity)
                     clearData(another!!)
 
                     currentTick = 0
                     finded = false
-                    entity!!.isEnablePitch = false
+                    castEntity!!.isEnablePitch = false
                     another!!.isEnablePitch = false
                     another = null
                     return false
@@ -55,6 +55,7 @@ open class EntityBreedingExecutor<T : EntityMob>(
     }
 
     override fun onInterrupt(entity: EntityMob) {
+        @Suppress("UNCHECKED_CAST")
         clearData(entity as T)
 
         currentTick = 0
@@ -117,6 +118,7 @@ open class EntityBreedingExecutor<T : EntityMob>(
         for (e in entities.values) {
             val newDistance = e.position.distanceSquared(entity.position)
             if (e != entity && entityClass.isInstance(e)) {
+                @Suppress("UNCHECKED_CAST")
                 val another = e as T
                 if (!another.isBaby() && another.memoryStorage[CoreMemoryTypes.IS_IN_LOVE] && another.memoryStorage
                         .isEmpty(CoreMemoryTypes.ENTITY_SPOUSE) && (maxDistanceSquared == -1.0 || newDistance < maxDistanceSquared)
@@ -134,11 +136,12 @@ open class EntityBreedingExecutor<T : EntityMob>(
     }
 
     protected open fun bear(entity: T) {
+        @Suppress("UNCHECKED_CAST")
         val baby: T = Entity.createEntity(entity.getNetworkID(), entity.locator) as T
         baby.setBaby(true)
         //防止小屁孩去生baby
-        baby.memoryStorage.set(CoreMemoryTypes.LAST_IN_LOVE_TIME, entity.level!!.tick)
-        baby.memoryStorage.set(CoreMemoryTypes.PARENT, entity)
+        baby.memoryStorage[CoreMemoryTypes.LAST_IN_LOVE_TIME] = entity.level!!.tick
+        baby.memoryStorage[CoreMemoryTypes.PARENT] = entity
         baby.spawnToAll()
     }
 }

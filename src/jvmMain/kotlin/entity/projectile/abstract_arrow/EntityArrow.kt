@@ -157,7 +157,7 @@ class EntityArrow @JvmOverloads constructor(
     override fun saveNBT() {
         super.saveNBT()
 
-        namedTag!!.putByte("pickup", this.pickupMode)
+        namedTag.putByte("pickup", this.pickupMode)
     }
 
     fun getArrowItem(): ItemArrow {

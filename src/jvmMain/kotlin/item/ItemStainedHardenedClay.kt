@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemStainedHardenedClay @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.STAINED_HARDENED_CLAY, meta, count) {
+    Item(ItemID.STAINED_HARDENED_CLAY, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0 -> {

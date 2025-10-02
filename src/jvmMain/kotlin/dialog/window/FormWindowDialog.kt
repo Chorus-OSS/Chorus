@@ -9,10 +9,7 @@ import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.generated.resources.Res
 import org.chorus_oss.chorus.utils.JSONUtils
 import org.chorus_oss.chorus.utils.Loggable
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.util.stream.Collectors
 
 
 class FormWindowDialog @JvmOverloads constructor(

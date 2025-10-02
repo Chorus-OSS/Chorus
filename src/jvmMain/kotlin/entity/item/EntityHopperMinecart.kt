@@ -171,14 +171,12 @@ class EntityHopperMinecart(chunk: IChunk?, nbt: CompoundTag) : EntityMinecartAbs
 
     override fun saveNBT() {
         super.saveNBT()
-        namedTag!!.putList("Items", ListTag<CompoundTag>())
-        if (this.inventory != null) {
-            for (slot in 0..4) {
-                val item: Item = inventory.getItem(slot)
-                if (item != null && !item.isNothing) {
-                    namedTag!!.getList("Items", CompoundTag::class.java)
-                        .add(NBTIO.putItemHelper(item, slot))
-                }
+        namedTag.putList("Items", ListTag<CompoundTag>())
+        for (slot in 0..4) {
+            val item: Item = inventory.getItem(slot)
+            if (!item.isNothing) {
+                namedTag.getList("Items", CompoundTag::class.java)
+                    .add(NBTIO.putItemHelper(item, slot))
             }
         }
     }

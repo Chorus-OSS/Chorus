@@ -16,8 +16,8 @@ class StopSoundCommand(name: String) : VanillaCommand(name, "commands.stopsound.
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("player", false, CommandParamType.TARGET, PlayersNode()),
-                CommandParameter.Companion.newType("sound", true, CommandParamType.STRING)
+                CommandParameter.newType("player", false, CommandParamType.TARGET, PlayersNode()),
+                CommandParameter.newType("sound", true, CommandParamType.STRING)
             )
         )
         this.enableParamTree()

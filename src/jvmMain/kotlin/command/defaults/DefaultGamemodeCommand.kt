@@ -13,10 +13,10 @@ class DefaultGamemodeCommand(name: String) : VanillaCommand(name, "commands.defa
         this.permission = "chorus.command.defaultgamemode"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("gameMode", CommandParamType.INT)
+            CommandParameter.newType("gameMode", CommandParamType.INT)
         )
         commandParameters["byString"] = arrayOf(
-            CommandParameter.Companion.newEnum("gameMode", CommandEnum.Companion.ENUM_GAMEMODE)
+            CommandParameter.newEnum("gameMode", CommandEnum.ENUM_GAMEMODE)
         )
         this.enableParamTree()
     }

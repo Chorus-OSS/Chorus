@@ -846,7 +846,7 @@ abstract class Item : Cloneable, ItemID, Loggable {
             if (!Registries.FUEL.isFuel(this)) {
                 return null
             }
-            if (this.id != ItemID.Companion.BUCKET || this.meta == 10) {
+            if (this.id != ItemID.BUCKET || this.meta == 10) {
                 return Registries.FUEL.getFuelDuration(this)
             }
             return null

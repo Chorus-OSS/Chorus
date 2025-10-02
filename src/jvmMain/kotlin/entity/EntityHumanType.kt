@@ -33,15 +33,11 @@ abstract class EntityHumanType(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chu
     }
 
     override fun getDrops(): Array<Item> {
-        if (this.inventory != null) {
-            val drops: MutableList<Item> = ArrayList(
-                inventory.contents.values
-            )
-            drops.addAll(offhandInventory.contents.values)
-            return drops.stream().filter { item: Item -> !item.keepOnDeath() }.toList()
-                .toTypedArray()
-        }
-        return Item.EMPTY_ARRAY
+        val drops: MutableList<Item> = ArrayList(
+            inventory.contents.values
+        )
+        drops.addAll(offhandInventory.contents.values)
+        return drops.filter { !it.keepOnDeath() }.toTypedArray()
     }
 
     override fun asyncPrepare(currentTick: Int) {}
@@ -57,7 +53,6 @@ abstract class EntityHumanType(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chu
 
             //            int toughness = 0;
             for (armor in inventory.armorContents) {
-                if (armor == null) continue
                 armorPoints += armor.armorPoints
                 epf = (epf + calculateEnchantmentProtectionFactor(armor, source)).toInt()
                 //toughness += armor.getToughness();
@@ -119,7 +114,6 @@ abstract class EntityHumanType(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chu
         var level: Int = 0
 
         for (armor in inventory.armorContents) {
-            if (armor == null) continue
             val fireProtection: Enchantment? = armor.getEnchantment(Enchantment.ID_PROTECTION_FIRE)
 
             if (fireProtection != null && fireProtection.level > 0) {

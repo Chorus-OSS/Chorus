@@ -15,7 +15,7 @@ import org.chorus_oss.chorus.math.CompassRoseDirection
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector3
 
-class ItemArmorStand : Item(ItemID.Companion.ARMOR_STAND) {
+class ItemArmorStand : Item(ItemID.ARMOR_STAND) {
     override fun canBeActivated(): Boolean {
         return true
     }

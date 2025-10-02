@@ -15,9 +15,9 @@ class ParticleCommand(name: String) : VanillaCommand(name, "commands.particle.de
         commandParameters.clear()
         val particles = ParticleEffect.entries.map { it.identifier }
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newEnum("effect", CommandEnum("particle", particles, true)),
-            CommandParameter.Companion.newType("position", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("count", true, CommandParamType.INT)
+            CommandParameter.newEnum("effect", CommandEnum("particle", particles, true)),
+            CommandParameter.newType("position", CommandParamType.POSITION),
+            CommandParameter.newType("count", true, CommandParamType.INT)
         )
         this.enableParamTree()
     }

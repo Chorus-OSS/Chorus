@@ -5,9 +5,9 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 
 class ItemChicken : ItemFood {
-    constructor() : super(ItemID.Companion.CHICKEN, 0, 1, "Raw Chicken")
+    constructor() : super(ItemID.CHICKEN, 0, 1, "Raw Chicken")
 
-    constructor(count: Int) : super(ItemID.Companion.CHICKEN, 0, count, "Raw Chicken")
+    constructor(count: Int) : super(ItemID.CHICKEN, 0, count, "Raw Chicken")
 
     override val foodRestore: Int
         get() = 2

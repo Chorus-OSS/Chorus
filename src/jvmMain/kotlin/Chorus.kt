@@ -1,17 +1,16 @@
 package org.chorus_oss.chorus
 
+import com.github.ajalt.clikt.core.main
 import io.netty.util.ResourceLeakDetector
 import io.netty.util.internal.logging.InternalLoggerFactory
 import io.netty.util.internal.logging.Log4J2LoggerFactory
-import joptsimple.OptionParser
-import joptsimple.OptionSpec
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
+import org.chorus_oss.chorus.config.ChorusOpts
 import org.chorus_oss.chorus.nbt.stream.PGZIPOutputStream
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.chorus.utils.Utils.dynamic
-import java.io.IOException
 
 /**
  *   _____  _
@@ -20,9 +19,6 @@ import java.io.IOException
  * | |     | '_ \  / _ \ | '__|| | | |/ __|
  * | |____ | | | || (_) || |   | |_| |\__ \
  *  \_____||_| |_| \___/ |_|    \__,_||___/
- */
-/**
- * The launcher class of Chorus, including the `main` function.
  */
 object Chorus : Loggable {
     const val VERSION: String = "1.0-SNAPSHOT"
@@ -71,60 +67,26 @@ object Chorus : Loggable {
         // Netty logger for debug info
         InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE)
 
+        val opts = ChorusOpts().also { it.main(args) }
+
         // Define args
-        val parser = OptionParser()
-        parser.allowsUnrecognizedOptions()
-        val helpSpec: OptionSpec<Void> = parser.accepts("help", "Shows this page").forHelp()
-        val ansiSpec: OptionSpec<Void> = parser.accepts("disable-ansi", "Disables console coloring")
-        val titleSpec: OptionSpec<Void> = parser.accepts("enable-title", "Enables title at the top of the window")
-        val vSpec: OptionSpec<String> = parser.accepts("v", "Set verbosity of logging").withRequiredArg().ofType(
-            String::class.java
-        )
-        val verbositySpec: OptionSpec<String> =
-            parser.accepts("verbosity", "Set verbosity of logging").withRequiredArg().ofType(
-                String::class.java
-            )
-        val languageSpec: OptionSpec<String> =
-            parser.accepts("language", "Set a predefined language").withOptionalArg().ofType(
-                String::class.java
-            )
+        ANSI = !opts.disableAnsi
+        TITLE = opts.enableTitle
 
-        // Parse arguments
-        val options = parser.parse(*args)
-
-        if (options.has(helpSpec)) {
+        if (opts.verbosity != null) {
             try {
-                // Display help page
-                parser.printHelpOn(System.out)
-            } catch (_: IOException) {
-                // ignore
-            }
-            return
-        }
-
-        ANSI = !options.has(ansiSpec)
-        TITLE = options.has(titleSpec)
-
-        var verbosity = options.valueOf(vSpec)
-        if (verbosity == null) {
-            verbosity = options.valueOf(verbositySpec)
-        }
-        if (verbosity != null) {
-            try {
-                val level = Level.valueOf(verbosity)
+                val level = Level.valueOf(opts.verbosity)
                 logLevel = level
             } catch (_: Exception) {
                 // ignore
             }
         }
 
-        val language = options.valueOf(languageSpec)
-
         try {
             if (TITLE) {
                 print(0x1b.toChar().toString() + "]0;Chorus is starting up..." + 0x07.toChar())
             }
-            Server(PATH, DATA_PATH, PLUGIN_PATH, language)
+            Server(PATH, DATA_PATH, PLUGIN_PATH, opts.language)
         } catch (t: Throwable) {
             log.error("", t)
         }

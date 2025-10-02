@@ -12,8 +12,8 @@ import org.chorus_oss.chorus.event.block.ConduitActivateEvent
 import org.chorus_oss.chorus.event.block.ConduitDeactivateEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageByBlockEvent
 import org.chorus_oss.chorus.event.entity.EntityDamageEvent
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.math.SimpleAxisAlignedBB
 import org.chorus_oss.chorus.math.Vector2
 import org.chorus_oss.chorus.nbt.tag.CompoundTag

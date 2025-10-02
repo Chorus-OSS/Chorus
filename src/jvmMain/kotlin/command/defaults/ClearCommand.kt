@@ -16,10 +16,10 @@ class ClearCommand(name: String) : VanillaCommand(name, "commands.clear.descript
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode()),
-                GenericParameter.Companion.ITEM_NAME.get(true),
-                CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-                CommandParameter.Companion.newType("maxCount", true, CommandParamType.INT)
+                CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode()),
+                GenericParameter.ITEM_NAME.get(true),
+                CommandParameter.newType("data", true, CommandParamType.INT),
+                CommandParameter.newType("maxCount", true, CommandParamType.INT)
             )
         )
         this.enableParamTree()

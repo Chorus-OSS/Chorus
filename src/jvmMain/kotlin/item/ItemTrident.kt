@@ -17,7 +17,7 @@ import kotlin.math.min
 import kotlin.math.sin
 
 class ItemTrident @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.TRIDENT, meta, count, "Trident") {
+    ItemTool(ItemID.TRIDENT, meta, count, "Trident") {
     override val maxDurability: Int
         get() = DURABILITY_TRIDENT
 
@@ -29,7 +29,7 @@ class ItemTrident @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
     }
 
     override fun onRelease(player: Player, ticksUsed: Int): Boolean {
-        if (this.hasEnchantment(Enchantment.Companion.ID_TRIDENT_RIPTIDE)) {
+        if (this.hasEnchantment(Enchantment.ID_TRIDENT_RIPTIDE)) {
             return true
         }
 

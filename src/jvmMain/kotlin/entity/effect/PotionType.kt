@@ -59,67 +59,67 @@ data class PotionType(
 
     companion object {
         @JvmField
-        val WATER: PotionType = PotionType("Water", "minecraft:water", 0, PotionEffects.Companion.EMPTY)
+        val WATER: PotionType = PotionType("Water", "minecraft:water", 0, PotionEffects.EMPTY)
 
         @JvmField
-        val MUNDANE: PotionType = PotionType("Mundane", "minecraft:mundane", 1, PotionEffects.Companion.EMPTY)
+        val MUNDANE: PotionType = PotionType("Mundane", "minecraft:mundane", 1, PotionEffects.EMPTY)
 
         @JvmField
         val MUNDANE_LONG: PotionType =
-            PotionType("Long Mundane", "minecraft:long_mundane", 2, PotionEffects.Companion.EMPTY)
+            PotionType("Long Mundane", "minecraft:long_mundane", 2, PotionEffects.EMPTY)
 
         @JvmField
-        val THICK: PotionType = PotionType("Thick", "minecraft:thick", 3, PotionEffects.Companion.EMPTY)
+        val THICK: PotionType = PotionType("Thick", "minecraft:thick", 3, PotionEffects.EMPTY)
 
         @JvmField
-        val AWKWARD: PotionType = PotionType("Awkward", "minecraft:awkward", 4, PotionEffects.Companion.EMPTY)
+        val AWKWARD: PotionType = PotionType("Awkward", "minecraft:awkward", 4, PotionEffects.EMPTY)
 
         @JvmField
         val NIGHT_VISION: PotionType =
-            PotionType("Night Vision", "minecraft:nightvision", 5, PotionEffects.Companion.NIGHT_VISION)
+            PotionType("Night Vision", "minecraft:nightvision", 5, PotionEffects.NIGHT_VISION)
 
         @JvmField
         val NIGHT_VISION_LONG: PotionType =
-            PotionType("Long Night Vision", "minecraft:long_nightvision", 6, PotionEffects.Companion.NIGHT_VISION_LONG)
+            PotionType("Long Night Vision", "minecraft:long_nightvision", 6, PotionEffects.NIGHT_VISION_LONG)
 
         @JvmField
         val INVISIBILITY: PotionType =
-            PotionType("Invisibility", "minecraft:invisibility", 7, PotionEffects.Companion.INVISIBILITY)
+            PotionType("Invisibility", "minecraft:invisibility", 7, PotionEffects.INVISIBILITY)
 
         @JvmField
         val INVISIBILITY_LONG: PotionType =
-            PotionType("Long Invisibility", "minecraft:long_invisibility", 8, PotionEffects.Companion.INVISIBILITY_LONG)
+            PotionType("Long Invisibility", "minecraft:long_invisibility", 8, PotionEffects.INVISIBILITY_LONG)
 
         @JvmField
-        val LEAPING: PotionType = PotionType("Leaping", "minecraft:leaping", 9, PotionEffects.Companion.LEAPING)
+        val LEAPING: PotionType = PotionType("Leaping", "minecraft:leaping", 9, PotionEffects.LEAPING)
 
         @JvmField
         val LEAPING_LONG: PotionType =
-            PotionType("Long Leaping", "minecraft:long_leaping", 10, PotionEffects.Companion.LEAPING_LONG)
+            PotionType("Long Leaping", "minecraft:long_leaping", 10, PotionEffects.LEAPING_LONG)
 
         @JvmField
         val LEAPING_STRONG: PotionType =
-            PotionType("Strong Leaping", "minecraft:strong_leaping", 11, 2, PotionEffects.Companion.LEAPING_STRONG)
+            PotionType("Strong Leaping", "minecraft:strong_leaping", 11, 2, PotionEffects.LEAPING_STRONG)
 
         @JvmField
         val FIRE_RESISTANCE: PotionType =
-            PotionType("Fire Resistance", "minecraft:fire_resistance", 12, PotionEffects.Companion.FIRE_RESISTANCE)
+            PotionType("Fire Resistance", "minecraft:fire_resistance", 12, PotionEffects.FIRE_RESISTANCE)
 
         @JvmField
         val FIRE_RESISTANCE_LONG: PotionType = PotionType(
             "Long Fire Resistance",
             "minecraft:long_fire_resistance",
             13,
-            PotionEffects.Companion.FIRE_RESISTANCE_LONG
+            PotionEffects.FIRE_RESISTANCE_LONG
         )
 
         @JvmField
         val SWIFTNESS: PotionType =
-            PotionType("Swiftness", "minecraft:swiftness", 14, PotionEffects.Companion.SWIFTNESS)
+            PotionType("Swiftness", "minecraft:swiftness", 14, PotionEffects.SWIFTNESS)
 
         @JvmField
         val SWIFTNESS_LONG: PotionType =
-            PotionType("Long Swiftness", "minecraft:long_swiftness", 15, PotionEffects.Companion.SWIFTNESS_LONG)
+            PotionType("Long Swiftness", "minecraft:long_swiftness", 15, PotionEffects.SWIFTNESS_LONG)
 
         @JvmField
         val SWIFTNESS_STRONG: PotionType = PotionType(
@@ -127,63 +127,63 @@ data class PotionType(
             "minecraft:strong_swiftness",
             16,
             2,
-            PotionEffects.Companion.SWIFTNESS_STRONG
+            PotionEffects.SWIFTNESS_STRONG
         )
 
         @JvmField
-        val SLOWNESS: PotionType = PotionType("Slowness", "minecraft:slowness", 17, PotionEffects.Companion.SLOWNESS)
+        val SLOWNESS: PotionType = PotionType("Slowness", "minecraft:slowness", 17, PotionEffects.SLOWNESS)
 
         @JvmField
         val SLOWNESS_LONG: PotionType =
-            PotionType("Long Slowness", "minecraft:long_slowness", 18, PotionEffects.Companion.SLOWNESS_LONG)
+            PotionType("Long Slowness", "minecraft:long_slowness", 18, PotionEffects.SLOWNESS_LONG)
 
         @JvmField
         val WATER_BREATHING: PotionType =
-            PotionType("Water Breathing", "minecraft:water_breathing", 19, PotionEffects.Companion.WATER_BREATHING)
+            PotionType("Water Breathing", "minecraft:water_breathing", 19, PotionEffects.WATER_BREATHING)
 
         @JvmField
         val WATER_BREATHING_LONG: PotionType = PotionType(
             "Long Water Breathing",
             "minecraft:long_water_breathing",
             20,
-            PotionEffects.Companion.WATER_BREATHING_LONG
+            PotionEffects.WATER_BREATHING_LONG
         )
 
         @JvmField
-        val HEALING: PotionType = PotionType("Healing", "minecraft:healing", 21, PotionEffects.Companion.HEALING)
+        val HEALING: PotionType = PotionType("Healing", "minecraft:healing", 21, PotionEffects.HEALING)
 
         @JvmField
         val HEALING_STRONG: PotionType =
-            PotionType("Strong Healing", "minecraft:strong_healing", 22, 2, PotionEffects.Companion.HEALING_STRONG)
+            PotionType("Strong Healing", "minecraft:strong_healing", 22, 2, PotionEffects.HEALING_STRONG)
 
         @JvmField
-        val HARMING: PotionType = PotionType("Harming", "minecraft:harming", 23, PotionEffects.Companion.HARMING)
+        val HARMING: PotionType = PotionType("Harming", "minecraft:harming", 23, PotionEffects.HARMING)
 
         @JvmField
         val HARMING_STRONG: PotionType =
-            PotionType("Strong Harming", "minecraft:strong_harming", 24, 2, PotionEffects.Companion.HARMING_STRONG)
+            PotionType("Strong Harming", "minecraft:strong_harming", 24, 2, PotionEffects.HARMING_STRONG)
 
         @JvmField
-        val POISON: PotionType = PotionType("Poison", "minecraft:poison", 25, PotionEffects.Companion.POISON)
+        val POISON: PotionType = PotionType("Poison", "minecraft:poison", 25, PotionEffects.POISON)
 
         @JvmField
         val POISON_LONG: PotionType =
-            PotionType("Long Poison", "minecraft:long_poison", 26, PotionEffects.Companion.POISON_LONG)
+            PotionType("Long Poison", "minecraft:long_poison", 26, PotionEffects.POISON_LONG)
 
         @JvmField
         val POISON_STRONG: PotionType =
-            PotionType("Strong Poison", "minecraft:strong_poison", 27, 2, PotionEffects.Companion.POISON_STRONG)
+            PotionType("Strong Poison", "minecraft:strong_poison", 27, 2, PotionEffects.POISON_STRONG)
 
         @JvmField
         val REGENERATION: PotionType =
-            PotionType("Regeneration", "minecraft:regeneration", 28, PotionEffects.Companion.REGENERATION)
+            PotionType("Regeneration", "minecraft:regeneration", 28, PotionEffects.REGENERATION)
 
         @JvmField
         val REGENERATION_LONG: PotionType = PotionType(
             "Long Regeneration",
             "minecraft:long_regeneration",
             29,
-            PotionEffects.Companion.REGENERATION_LONG
+            PotionEffects.REGENERATION_LONG
         )
 
         @JvmField
@@ -192,40 +192,40 @@ data class PotionType(
             "minecraft:strong_regeneration",
             30,
             2,
-            PotionEffects.Companion.REGENERATION_STRONG
+            PotionEffects.REGENERATION_STRONG
         )
 
         @JvmField
-        val STRENGTH: PotionType = PotionType("Strength", "minecraft:strength", 31, PotionEffects.Companion.STRENGTH)
+        val STRENGTH: PotionType = PotionType("Strength", "minecraft:strength", 31, PotionEffects.STRENGTH)
 
         @JvmField
         val STRENGTH_LONG: PotionType =
-            PotionType("Long Strength", "minecraft:long_strength", 32, PotionEffects.Companion.STRENGTH_LONG)
+            PotionType("Long Strength", "minecraft:long_strength", 32, PotionEffects.STRENGTH_LONG)
 
         @JvmField
         val STRENGTH_STRONG: PotionType =
-            PotionType("Strong Strength", "minecraft:strong_strength", 33, 2, PotionEffects.Companion.STRENGTH_STRONG)
+            PotionType("Strong Strength", "minecraft:strong_strength", 33, 2, PotionEffects.STRENGTH_STRONG)
 
         @JvmField
-        val WEAKNESS: PotionType = PotionType("Weakness", "minecraft:weakness", 34, PotionEffects.Companion.WEAKNESS)
+        val WEAKNESS: PotionType = PotionType("Weakness", "minecraft:weakness", 34, PotionEffects.WEAKNESS)
 
         @JvmField
         val WEAKNESS_LONG: PotionType =
-            PotionType("Long Weakness", "minecraft:long_weakness", 35, PotionEffects.Companion.WEAKNESS_LONG)
+            PotionType("Long Weakness", "minecraft:long_weakness", 35, PotionEffects.WEAKNESS_LONG)
 
         @JvmField
-        val WITHER: PotionType = PotionType("Wither", "minecraft:strong_wither", 36, 2, PotionEffects.Companion.WITHER)
+        val WITHER: PotionType = PotionType("Wither", "minecraft:strong_wither", 36, 2, PotionEffects.WITHER)
 
         @JvmField
         val TURTLE_MASTER: PotionType =
-            PotionType("Turtle Master", "minecraft:turtle_master", 37, PotionEffects.Companion.TURTLE_MASTER)
+            PotionType("Turtle Master", "minecraft:turtle_master", 37, PotionEffects.TURTLE_MASTER)
 
         @JvmField
         val TURTLE_MASTER_LONG: PotionType = PotionType(
             "Long Turtle Master",
             "minecraft:long_turtle_master",
             38,
-            PotionEffects.Companion.TURTLE_MASTER_LONG
+            PotionEffects.TURTLE_MASTER_LONG
         )
 
         @JvmField
@@ -234,37 +234,37 @@ data class PotionType(
             "minecraft:strong_turtle_master",
             39,
             2,
-            PotionEffects.Companion.TURTLE_MASTER_STRONG
+            PotionEffects.TURTLE_MASTER_STRONG
         )
 
         @JvmField
         val SLOW_FALLING: PotionType =
-            PotionType("Slow Falling", "minecraft:slow_falling", 40, PotionEffects.Companion.SLOW_FALLING)
+            PotionType("Slow Falling", "minecraft:slow_falling", 40, PotionEffects.SLOW_FALLING)
 
         @JvmField
         val SLOW_FALLING_LONG: PotionType = PotionType(
             "Long Slow Falling",
             "minecraft:long_slow_falling",
             41,
-            PotionEffects.Companion.SLOW_FALLING_LONG
+            PotionEffects.SLOW_FALLING_LONG
         )
 
         @JvmField
         val SLOWNESS_STRONG: PotionType =
-            PotionType("Strong Slowness", "minecraft:strong_slowness", 42, 2, PotionEffects.Companion.SLOWNESS_STRONG)
+            PotionType("Strong Slowness", "minecraft:strong_slowness", 42, 2, PotionEffects.SLOWNESS_STRONG)
 
         @JvmField
         val WIND_CHARGED: PotionType =
-            PotionType("Wind Charged", "minecraft:wind_charged", 43, PotionEffects.Companion.EMPTY)
+            PotionType("Wind Charged", "minecraft:wind_charged", 43, PotionEffects.EMPTY)
 
         @JvmField
-        val WEAVING: PotionType = PotionType("Weaving", "minecraft:weaving", 44, PotionEffects.Companion.EMPTY)
+        val WEAVING: PotionType = PotionType("Weaving", "minecraft:weaving", 44, PotionEffects.EMPTY)
 
         @JvmField
-        val OOZING: PotionType = PotionType("Oozing", "minecraft:oozing", 45, PotionEffects.Companion.EMPTY)
+        val OOZING: PotionType = PotionType("Oozing", "minecraft:oozing", 45, PotionEffects.EMPTY)
 
         @JvmField
-        val INFESTED: PotionType = PotionType("Infested", "minecraft:infested", 46, PotionEffects.Companion.EMPTY)
+        val INFESTED: PotionType = PotionType("Infested", "minecraft:infested", 46, PotionEffects.EMPTY)
 
         private fun appendRoman(sb: StringBuilder, num: Int) {
             var num1: Int = num

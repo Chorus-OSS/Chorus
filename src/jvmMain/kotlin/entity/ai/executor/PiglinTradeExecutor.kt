@@ -28,7 +28,7 @@ class PiglinTradeExecutor : EntityControl, IBehaviorExecutor {
             if (entity is EntityMonster) {
                 val offhand = entity.itemInOffhand
                 if (offhand is ItemGoldIngot && !entity.isBaby()) {
-                    entity.equipment.decreaseCount(EntityEquipment.Companion.OFF_HAND)
+                    entity.equipment.decreaseCount(EntityEquipment.OFF_HAND)
                     val motion = entity.getDirectionVector().multiply(0.4)
                     entity.level!!.dropItem(entity.position.add(0.0, 1.3, 0.0), drop, motion, 40)
                 }

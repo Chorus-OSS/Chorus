@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemDiamondHelmet : ItemArmor(ItemID.Companion.DIAMOND_HELMET) {
+class ItemDiamondHelmet : ItemArmor(ItemID.DIAMOND_HELMET) {
     override val tier: Int
         get() = TIER_DIAMOND
 

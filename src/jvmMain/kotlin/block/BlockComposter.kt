@@ -95,7 +95,7 @@ class BlockComposter @JvmOverloads constructor(blockstate: BlockState = properti
             return true
         }
 
-        if (player != null && !player.isCreative) {
+        if (!player.isCreative) {
             item.setCount(item.getCount() - 1)
         }
 
@@ -120,11 +120,9 @@ class BlockComposter @JvmOverloads constructor(blockstate: BlockState = properti
         val event = ComposterEmptyEvent(this, player!!, item!!, ItemBoneMeal(), 0)
         Server.instance.pluginManager.callEvent(event)
         if (!event.cancelled) {
-            setPropertyValue<Int, IntPropertyType>(CommonBlockProperties.COMPOSTER_FILL_LEVEL, event.getNewLevel())
+            setPropertyValue(CommonBlockProperties.COMPOSTER_FILL_LEVEL, event.getNewLevel())
             level.setBlock(this.position, this, direct = true, update = true)
-            if (item != null) {
-                level.dropItem(position.add(0.5, 0.85, 0.5), event.getDrop(), event.motion, false, 10)
-            }
+            level.dropItem(position.add(0.5, 0.85, 0.5), event.getDrop(), event.motion, false, 10)
             level.addSound(position.add(0.5, 0.5, 0.5), Sound.BLOCK_COMPOSTER_EMPTY)
             return event.getDrop()
         }

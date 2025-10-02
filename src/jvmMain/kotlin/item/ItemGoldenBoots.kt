@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemGoldenBoots @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemArmor(ItemID.Companion.GOLDEN_BOOTS, meta, count, "Golden Boots") {
+    ItemArmor(ItemID.GOLDEN_BOOTS, meta, count, "Golden Boots") {
     override val tier: Int
         get() = TIER_GOLD
 

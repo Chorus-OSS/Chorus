@@ -15,7 +15,7 @@ class BlockEntityEnchantTable(level: Level, nbt: CompoundTag) : BlockEntitySpawn
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else "Enchanting Table"
         set(name) {
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 namedTag.remove("CustomName")
                 return
             }

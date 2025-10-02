@@ -14,7 +14,7 @@ class TpsCommand(name: String) : Command(name, "get server tps"), CoreCommand {
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newType("count", true, CommandParamType.INT)
+                CommandParameter.newType("count", true, CommandParamType.INT)
             )
         )
     }

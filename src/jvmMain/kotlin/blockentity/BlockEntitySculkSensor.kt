@@ -64,8 +64,7 @@ class BlockEntitySculkSensor(level: Level, nbt: CompoundTag) : BlockEntity(level
     }
 
     override fun onVibrationArrive(event: VibrationEvent) {
-        if (this.level != null && this.isBlockEntityValid && Server.instance.settings.levelSettings.enableRedstone
-        ) {
+        if (this.isBlockEntityValid && Server.instance.settings.levelSettings.enableRedstone) {
             this.lastVibrationEvent = event
             this.updateLastActiveTime()
             waitForVibration = false

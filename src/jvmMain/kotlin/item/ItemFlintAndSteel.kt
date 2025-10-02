@@ -14,7 +14,7 @@ import org.chorus_oss.chorus.math.BlockFace
 import java.util.concurrent.ThreadLocalRandom
 
 class ItemFlintAndSteel @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.FLINT_AND_STEEL, meta, count, "Flint and Steel") {
+    ItemTool(ItemID.FLINT_AND_STEEL, meta, count, "Flint and Steel") {
     override fun canBeActivated(): Boolean {
         return true
     }

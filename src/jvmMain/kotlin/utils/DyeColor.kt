@@ -19,7 +19,7 @@ enum class DyeColor(
         16,
         "Black",
         "Ink Sac",
-        BlockColor.Companion.BLACK_BLOCK_COLOR,
+        BlockColor.BLACK_BLOCK_COLOR,
         BlockColor(0x1D1D21),
         BlockColor(0x00, 0x00, 0x00)
     ),

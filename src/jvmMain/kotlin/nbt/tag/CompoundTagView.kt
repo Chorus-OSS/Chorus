@@ -121,7 +121,7 @@ class CompoundTagView(private val delegate: CompoundTag) : CompoundTag() {
         throw UnsupportedOperationException()
     }
 
-    override fun <T : Tag<*>> removeAndGet(name: String): T? {
+    override fun <T : Tag<*>> removeAndGet(name: String): T {
         throw UnsupportedOperationException()
     }
 

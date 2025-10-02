@@ -169,12 +169,12 @@ class NBTOutputStream @JvmOverloads constructor(
                 this.write(byteArray)
             }
 
-            Tag.Companion.TAG_STRING -> {
+            Tag.TAG_STRING -> {
                 val string = tag.parseValue() as String
                 this.writeUTF(string)
             }
 
-            Tag.Companion.TAG_COMPOUND -> {
+            Tag.TAG_COMPOUND -> {
                 val map = tag as CompoundTag
                 for ((key, value) in map.tags) {
                     this.writeByte(value.id.toInt())
@@ -184,7 +184,7 @@ class NBTOutputStream @JvmOverloads constructor(
                 this.writeByte(0) // End tag
             }
 
-            Tag.Companion.TAG_LIST -> {
+            Tag.TAG_LIST -> {
                 val list = tag as ListTag<out Tag<*>>
                 this.writeByte(list.type.toInt())
                 this.writeInt(list.size())

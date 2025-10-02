@@ -14,7 +14,7 @@ class DayLockCommand(name: String) :
         commandParameters.clear()
         this.addCommandParameters(
             "default", arrayOf(
-                CommandParameter.Companion.newEnum("lock", true, CommandEnum.Companion.ENUM_BOOLEAN)
+                CommandParameter.newEnum("lock", true, CommandEnum.ENUM_BOOLEAN)
             )
         )
         this.enableParamTree()

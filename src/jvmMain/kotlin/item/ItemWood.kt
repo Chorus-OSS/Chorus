@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.item
 import org.chorus_oss.chorus.block.*
 
 class ItemWood @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    Item(ItemID.Companion.WOOD, meta, count) {
+    Item(ItemID.WOOD, meta, count) {
     override fun internalAdjust() {
         when (damage) {
             0, 6, 7, 14, 15 -> {

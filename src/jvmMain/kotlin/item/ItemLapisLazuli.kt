@@ -2,7 +2,7 @@ package org.chorus_oss.chorus.item
 
 import org.chorus_oss.chorus.utils.DyeColor
 
-class ItemLapisLazuli : ItemDye(ItemID.Companion.LAPIS_LAZULI) {
+class ItemLapisLazuli : ItemDye(ItemID.LAPIS_LAZULI) {
     override val dyeColor: DyeColor
         get() = DyeColor.BLUE
 

@@ -325,7 +325,7 @@ class Explosion protected constructor(private val source: Locator, size: Double,
                         ev = BlockUpdateEvent(layer1)
                         Server.instance.pluginManager.callEvent(ev)
                         if (!ev.cancelled) {
-                            ev.block.onUpdate(Level.Companion.BLOCK_UPDATE_NORMAL)
+                            ev.block.onUpdate(Level.BLOCK_UPDATE_NORMAL)
                         }
                     }
                     updateBlocks.add(index)

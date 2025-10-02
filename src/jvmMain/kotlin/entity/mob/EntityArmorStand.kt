@@ -109,44 +109,44 @@ class EntityArmorStand(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt)
             slot = getArmorSlot(item)
         } else if (hasItemInHand && (item.id == BlockID.SKULL) || item.blockId == BlockID.CARVED_PUMPKIN) {
             isArmor = true
-            slot = EntityEquipment.Companion.HEAD
+            slot = EntityEquipment.HEAD
         } else if (hasItemInHand) {
             isArmor = false
             if (item is ItemShield) {
-                slot = EntityEquipment.Companion.OFF_HAND
+                slot = EntityEquipment.OFF_HAND
             } else {
-                slot = EntityEquipment.Companion.MAIN_HAND
+                slot = EntityEquipment.MAIN_HAND
             }
         } else {
             val clickHeight: Double = clickedPos.y - position.y
             if (clickHeight >= 0.1 && clickHeight < 0.55 && !boots.isNothing) {
                 isArmor = true
-                slot = EntityEquipment.Companion.FEET
+                slot = EntityEquipment.FEET
             } else if (clickHeight >= 0.9 && clickHeight < 1.6) {
                 if (!itemInOffhand.isNothing) {
                     isArmor = false
-                    slot = EntityEquipment.Companion.OFF_HAND
+                    slot = EntityEquipment.OFF_HAND
                 } else if (!itemInHand.isNothing) {
                     isArmor = false
-                    slot = EntityEquipment.Companion.MAIN_HAND
+                    slot = EntityEquipment.MAIN_HAND
                 } else if (!chestplate.isNothing) {
                     isArmor = true
-                    slot = EntityEquipment.Companion.CHEST
+                    slot = EntityEquipment.CHEST
                 } else {
                     return false
                 }
             } else if (clickHeight >= 0.4 && clickHeight < 1.2 && !leggings.isNothing) {
                 isArmor = true
-                slot = EntityEquipment.Companion.LEGS
+                slot = EntityEquipment.LEGS
             } else if (clickHeight >= 1.6 && !helmet.isNothing) {
                 isArmor = true
-                slot = EntityEquipment.Companion.HEAD
+                slot = EntityEquipment.HEAD
             } else if (!itemInOffhand.isNothing) {
                 isArmor = false
-                slot = EntityEquipment.Companion.OFF_HAND
+                slot = EntityEquipment.OFF_HAND
             } else if (!itemInHand.isNothing) {
                 isArmor = false
-                slot = EntityEquipment.Companion.MAIN_HAND
+                slot = EntityEquipment.MAIN_HAND
             } else {
                 return false
             }
@@ -159,7 +159,7 @@ class EntityArmorStand(chunk: IChunk?, nbt: CompoundTag) : EntityMob(chunk, nbt)
         var changed: Boolean = false
         if (isArmor) {
             changed = this.tryChangeEquipment(player, ev.item, slot)
-            slot = EntityEquipment.Companion.MAIN_HAND
+            slot = EntityEquipment.MAIN_HAND
         }
 
         if (!changed) {

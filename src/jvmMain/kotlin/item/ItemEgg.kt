@@ -5,12 +5,12 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 
 
 open class ItemEgg : ProjectileItem {
-    constructor(meta: Int = 0, count: Int = 1) : this(ItemID.Companion.EGG, meta, count, "Egg")
+    constructor(meta: Int = 0, count: Int = 1) : this(ItemID.EGG, meta, count, "Egg")
 
     constructor(id: String, meta: Int, count: Int, name: String) : super(id, meta, count, name)
 
     override val projectileEntityType: String
-        get() = ItemID.Companion.EGG
+        get() = ItemID.EGG
 
     override val throwForce: Float
         get() = 1.5f

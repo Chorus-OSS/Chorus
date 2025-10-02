@@ -47,9 +47,9 @@ abstract class SimpleRouteFinder(//方块评估器
     override fun hasNext(): Boolean {
         try {
             if (this.nodeIndex + 1 < nodes.size) {
-                return nodes[nodeIndex + 1] != null
+                return nodes.getOrNull(nodeIndex + 1) != null
             }
-        } catch (ignore: Exception) {
+        } catch (_: Exception) {
         }
         return false
     }

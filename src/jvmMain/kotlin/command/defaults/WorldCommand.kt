@@ -15,11 +15,11 @@ class WorldCommand(name: String) : VanillaCommand(name, "chorus.command.world.de
         this.permission = "chorus.command.world"
         commandParameters.clear()
         commandParameters["tp"] = arrayOf(
-            CommandParameter.Companion.newEnum("tp", arrayOf("tp")),
-            CommandParameter.Companion.newEnum("world", false, WORLD_NAME_ENUM)
+            CommandParameter.newEnum("tp", arrayOf("tp")),
+            CommandParameter.newEnum("world", false, WORLD_NAME_ENUM)
         )
         commandParameters["list"] = arrayOf(
-            CommandParameter.Companion.newEnum("list", arrayOf("list"))
+            CommandParameter.newEnum("list", arrayOf("list"))
         )
         this.enableParamTree()
     }

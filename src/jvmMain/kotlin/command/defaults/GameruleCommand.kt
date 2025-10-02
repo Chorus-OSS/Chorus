@@ -32,29 +32,29 @@ class GameruleCommand(name: String) : VanillaCommand(name, "commands.gamerule.de
                 else -> unknownGameRules.add(rule.name.lowercase())
             }
         }
-        commandParameters["default"] = CommandParameter.Companion.EMPTY_ARRAY
+        commandParameters["default"] = CommandParameter.EMPTY_ARRAY
         if (!boolGameRules.isEmpty()) {
             commandParameters["boolGameRules"] = arrayOf(
-                CommandParameter.Companion.newEnum("rule", CommandEnum("BoolGameRule", boolGameRules)),
-                CommandParameter.Companion.newEnum("value", true, CommandEnum.Companion.ENUM_BOOLEAN)
+                CommandParameter.newEnum("rule", CommandEnum("BoolGameRule", boolGameRules)),
+                CommandParameter.newEnum("value", true, CommandEnum.ENUM_BOOLEAN)
             )
         }
         if (!intGameRules.isEmpty()) {
             commandParameters["intGameRules"] = arrayOf(
-                CommandParameter.Companion.newEnum("rule", CommandEnum("IntGameRule", intGameRules)),
-                CommandParameter.Companion.newType("value", true, CommandParamType.INT)
+                CommandParameter.newEnum("rule", CommandEnum("IntGameRule", intGameRules)),
+                CommandParameter.newType("value", true, CommandParamType.INT)
             )
         }
         if (!floatGameRules.isEmpty()) {
             commandParameters["floatGameRules"] = arrayOf(
-                CommandParameter.Companion.newEnum("rule", CommandEnum("FloatGameRule", floatGameRules)),
-                CommandParameter.Companion.newType("value", true, CommandParamType.FLOAT)
+                CommandParameter.newEnum("rule", CommandEnum("FloatGameRule", floatGameRules)),
+                CommandParameter.newType("value", true, CommandParamType.FLOAT)
             )
         }
         if (!unknownGameRules.isEmpty()) {
             commandParameters["unknownGameRules"] = arrayOf(
-                CommandParameter.Companion.newEnum("rule", CommandEnum("UnknownGameRule", unknownGameRules)),
-                CommandParameter.Companion.newType("value", true, CommandParamType.STRING)
+                CommandParameter.newEnum("rule", CommandEnum("UnknownGameRule", unknownGameRules)),
+                CommandParameter.newType("value", true, CommandParamType.STRING)
             )
         }
         this.enableParamTree()

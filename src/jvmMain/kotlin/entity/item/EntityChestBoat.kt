@@ -59,22 +59,20 @@ class EntityChestBoat(chunk: IChunk?, nbt: CompoundTag?) : EntityBoat(chunk, nbt
             }
         }
 
-        entityDataMap.put(EntityDataTypes.CONTAINER_TYPE, InventoryType.CHEST_BOAT.networkType)
-        entityDataMap.put(EntityDataTypes.CONTAINER_SIZE, inventory.size)
-        entityDataMap.put(EntityDataTypes.CONTAINER_STRENGTH_MODIFIER, 0)
+        entityDataMap[EntityDataTypes.CONTAINER_TYPE] = InventoryType.CHEST_BOAT.networkType
+        entityDataMap[EntityDataTypes.CONTAINER_SIZE] = inventory.size
+        entityDataMap[EntityDataTypes.CONTAINER_STRENGTH_MODIFIER] = 0
     }
 
     override fun saveNBT() {
         super.saveNBT()
 
-        namedTag!!.putList("Items", ListTag<CompoundTag>())
-        if (this.inventory != null) {
-            for (slot in 0..26) {
-                val item = inventory.getItem(slot)
-                if (item != null && !item.isNothing) {
-                    namedTag!!.getList("Items", CompoundTag::class.java)
-                        .add(NBTIO.putItemHelper(item, slot))
-                }
+        namedTag.putList("Items", ListTag<CompoundTag>())
+        for (slot in 0..26) {
+            val item = inventory.getItem(slot)
+            if (!item.isNothing) {
+                namedTag.getList("Items", CompoundTag::class.java)
+                    .add(NBTIO.putItemHelper(item, slot))
             }
         }
     }

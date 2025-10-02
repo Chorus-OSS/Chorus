@@ -6,8 +6,10 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     private val map: MutableMap<EntityDataType<Any>, Any> = LinkedHashMap()
 
     fun getOrCreateFlags(): EnumSet<EntityFlag> {
+        @Suppress("UNCHECKED_CAST")
         var flags = get(EntityDataTypes.FLAGS) as EnumSet<EntityFlag>?
         if (flags == null) {
+            @Suppress("UNCHECKED_CAST")
             flags = get(EntityDataTypes.FLAGS_2) as EnumSet<EntityFlag>?
             if (flags == null) {
                 flags = EnumSet.noneOf(EntityFlag::class.java)
@@ -44,14 +46,16 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     }
 
     fun <T : Any> getType(type: EntityDataType<T>): T {
+        @Suppress("UNCHECKED_CAST")
         return map.getOrDefault(type, type.getDefaultValue()) as T
     }
 
     fun <T : Any> getOrDefault(type: EntityDataType<T>, defaultValue: T): T {
         val `object`: Any = map.getOrDefault(type, defaultValue)
         return try {
+            @Suppress("UNCHECKED_CAST")
             `object` as T
-        } catch (e: ClassCastException) {
+        } catch (_: ClassCastException) {
             defaultValue
         }
     }
@@ -82,6 +86,7 @@ class EntityDataMap : MutableMap<EntityDataType<Any>, Any> {
     override fun put(key: EntityDataType<*>, value: Any): Any? {
         var value1: Any = value
         if (key === EntityDataTypes.FLAGS || key === EntityDataTypes.FLAGS_2) {
+            @Suppress("UNCHECKED_CAST")
             return this.putFlags(value1 as EnumSet<EntityFlag>)
         }
         if (Number::class.java.isAssignableFrom(value1.javaClass)) {

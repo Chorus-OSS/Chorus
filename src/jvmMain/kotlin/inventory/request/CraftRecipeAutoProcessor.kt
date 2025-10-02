@@ -38,8 +38,7 @@ class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipe
             for (serverExpect in action.ingredients) {
                 var match = false
 
-                val descriptor = serverExpect.descriptor
-                when (descriptor) {
+                when (val descriptor = serverExpect.descriptor) {
                     is ItemTagItemDescriptor -> match = ItemTags.getTagSet(clientInputItem.id).contains(descriptor.tag)
                     is DefaultItemDescriptor -> match =
                         clientInputItem.getNetId() == descriptor.networkID.toInt() && clientInputItem.meta == descriptor.metadataValue?.toInt()
@@ -61,8 +60,8 @@ class CraftRecipeAutoProcessor : ItemStackRequestActionProcessor<AutoCraftRecipe
             )
             return context.error()
         } else {
-            context.put(CraftRecipeActionProcessor.Companion.RECIPE_DATA_KEY, recipe)
-            val consumeActions = CraftRecipeActionProcessor.Companion.findAllConsumeActions(
+            context.put(CraftRecipeActionProcessor.RECIPE_DATA_KEY, recipe)
+            val consumeActions = CraftRecipeActionProcessor.findAllConsumeActions(
                 context.itemStackRequest.actions,
                 context.currentActionIndex + 1
             )

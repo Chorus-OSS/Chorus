@@ -47,9 +47,7 @@ class BlockEntitySkull(level: Level, nbt: CompoundTag) : BlockEntitySpawnable(le
         }
         level.updateComparatorOutputLevelSelective(this.position, true)
         spawnToAll()
-        if (chunk != null) {
-            setDirty()
-        }
+        setDirty()
     }
 
     override val isObservable: Boolean

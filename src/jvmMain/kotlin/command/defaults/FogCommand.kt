@@ -17,15 +17,15 @@ class FogCommand(name: String) : VanillaCommand(name, "commands.fog.description"
         this.permission = "chorus.command.fog"
         commandParameters.clear()
         commandParameters["push"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("push", arrayOf("push")),
-            CommandParameter.Companion.newType("fogId", CommandParamType.STRING),
-            CommandParameter.Companion.newType("userProvidedId", CommandParamType.STRING)
+            CommandParameter.newType("victim", CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("push", arrayOf("push")),
+            CommandParameter.newType("fogId", CommandParamType.STRING),
+            CommandParameter.newType("userProvidedId", CommandParamType.STRING)
         )
         commandParameters["delete"] = arrayOf(
-            CommandParameter.Companion.newType("victim", CommandParamType.TARGET, PlayersNode()),
-            CommandParameter.Companion.newEnum("mode", CommandEnum("delete", "pop", "remove")),
-            CommandParameter.Companion.newType("userProvidedId", CommandParamType.STRING)
+            CommandParameter.newType("victim", CommandParamType.TARGET, PlayersNode()),
+            CommandParameter.newEnum("mode", CommandEnum("delete", "pop", "remove")),
+            CommandParameter.newType("userProvidedId", CommandParamType.STRING)
         )
         this.enableParamTree()
     }

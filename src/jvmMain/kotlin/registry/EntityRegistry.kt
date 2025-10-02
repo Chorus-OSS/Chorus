@@ -2,7 +2,6 @@ package org.chorus_oss.chorus.registry
 
 
 import kotlinx.coroutines.runBlocking
-import org.chorus_oss.chorus.Chorus
 import org.chorus_oss.chorus.entity.Entity
 import org.chorus_oss.chorus.entity.EntityID
 import org.chorus_oss.chorus.entity.custom.CustomEntity

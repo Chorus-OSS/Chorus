@@ -101,9 +101,9 @@ data class SubChunk(
         )
 
         val result = mutableListOf<Block>()
-        for (x in from.x .. to.x) {
-            for (y in from.y .. to.y) {
-                for (z in from.z .. to.z) {
+        for (x in from.x..to.x) {
+            for (y in from.y..to.y) {
+                for (z in from.z..to.z) {
                     val position = Vector3i(x, y, z)
                     val permutation = getPermutation(position, layer)
                     if (condition(position, permutation)) {
@@ -132,7 +132,10 @@ data class SubChunk(
              * - Bedrock: `XZY`
              * - Java: `YZX`
              */
-            return (position.x.coerceIn(0, 15) shl 8) or (position.z.coerceIn(0, 15) shl 4) or position.y.coerceIn(0, 15)
+            return (position.x.coerceIn(0, 15) shl 8) or (position.z.coerceIn(0, 15) shl 4) or position.y.coerceIn(
+                0,
+                15
+            )
         }
     }
 }

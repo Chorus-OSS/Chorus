@@ -6,11 +6,11 @@ import java.util.zip.DeflaterOutputStream
 
 class PGZIPState(parent: PGZIPOutputStream) {
     val str: DeflaterOutputStream
-    val buf: ByteArrayOutputStream = ByteArrayOutputStream(PGZIPBlock.Companion.SIZE)
+    val buf: ByteArrayOutputStream = ByteArrayOutputStream(PGZIPBlock.SIZE)
 
     val def: Deflater = parent.newDeflater()
 
     init {
-        this.str = PGZIPOutputStream.Companion.newDeflaterOutputStream(buf, def)
+        this.str = PGZIPOutputStream.newDeflaterOutputStream(buf, def)
     }
 }

@@ -2,8 +2,8 @@ package org.chorus_oss.chorus.blockentity
 
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.block.BlockID
-import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.level.Level
+import org.chorus_oss.chorus.level.Sound
 import org.chorus_oss.chorus.nbt.tag.ByteTag
 import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.IntTag

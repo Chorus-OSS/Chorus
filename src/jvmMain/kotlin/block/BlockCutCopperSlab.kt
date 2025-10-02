@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.block
 import org.chorus_oss.chorus.block.property.CommonBlockProperties
 import org.chorus_oss.chorus.block.property.enums.OxidizationLevel
 
-open class BlockCutCopperSlab constructor(
+open class BlockCutCopperSlab(
     blockState: BlockState = properties.defaultState,
     doubleSlabId: String = BlockID.DOUBLE_CUT_COPPER_SLAB,
 ) : BlockSlabCopperBase(blockState, doubleSlabId) {

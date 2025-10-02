@@ -146,7 +146,7 @@ class BlockLadder @JvmOverloads constructor(blockstate: BlockState = properties.
             || support is BlockLeaves
         ) return false
         if (support.id == BlockID.BEACON) return false
-        return BlockLever.Companion.isSupportValid(support, face!!)
+        return BlockLever.isSupportValid(support, face!!)
     }
 
     override fun onUpdate(type: Int): Int {

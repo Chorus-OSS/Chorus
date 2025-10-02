@@ -39,7 +39,7 @@ class HoppingController(moveCooldown: Int) : WalkController() {
                 direction.y - entity.position.y, direction.z - entity.position.z
             )
             val xzLengthSquared = relativeVector.x * relativeVector.x + relativeVector.z * relativeVector.z
-            if (abs(xzLengthSquared) < EntityPhysical.Companion.PRECISION) {
+            if (abs(xzLengthSquared) < EntityPhysical.PRECISION) {
                 entity.setDataFlag(EntityFlag.MOVING, false)
                 return false
             }

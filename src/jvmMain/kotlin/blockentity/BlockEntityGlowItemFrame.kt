@@ -26,13 +26,9 @@ class BlockEntityGlowItemFrame(level: Level, nbt: CompoundTag) : BlockEntityItem
 
             if (!item.isNothing) {
                 val itemTag = NBTIO.putItemHelper(item)
-                val networkDamage = item.damage
-                val namespacedId = item.id
-                if (namespacedId != null) {
-                    itemTag.remove("id")
-                    itemTag.putShort("Damage", networkDamage)
-                    itemTag.putString("Name", namespacedId)
-                }
+                itemTag.remove("id")
+                itemTag.putShort("Damage", item.damage)
+                itemTag.putString("Name", item.id)
                 if (item.isBlock()) {
                     itemTag.putCompound("Block", item.getSafeBlockState().blockStateTag)
                 }

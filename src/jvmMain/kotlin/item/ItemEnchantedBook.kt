@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 open class ItemEnchantedBook : Item {
-    constructor() : super(ItemID.Companion.ENCHANTED_BOOK)
+    constructor() : super(ItemID.ENCHANTED_BOOK)
 
     protected constructor(id: String) : super(id)
 

@@ -74,8 +74,8 @@ class EntityChestMinecart(chunk: IChunk?, nbt: CompoundTag) : EntityMinecartAbst
     override fun initEntity() {
         super.initEntity()
 
-        if (namedTag!!.contains("Items") && namedTag!!.get("Items") is ListTag<*>) {
-            val inventoryList: ListTag<CompoundTag> = namedTag!!.getList(
+        if (namedTag.contains("Items") && namedTag["Items"] is ListTag<*>) {
+            val inventoryList: ListTag<CompoundTag> = namedTag.getList(
                 "Items",
                 CompoundTag::class.java
             )
@@ -84,22 +84,20 @@ class EntityChestMinecart(chunk: IChunk?, nbt: CompoundTag) : EntityMinecartAbst
             }
         }
 
-        entityDataMap.put(EntityDataTypes.CONTAINER_TYPE, 10)
-        entityDataMap.put(EntityDataTypes.CONTAINER_SIZE, inventory.size)
-        entityDataMap.put(EntityDataTypes.CONTAINER_STRENGTH_MODIFIER, 0)
+        entityDataMap[EntityDataTypes.CONTAINER_TYPE] = 10
+        entityDataMap[EntityDataTypes.CONTAINER_SIZE] = inventory.size
+        entityDataMap[EntityDataTypes.CONTAINER_STRENGTH_MODIFIER] = 0
     }
 
     override fun saveNBT() {
         super.saveNBT()
 
-        namedTag!!.putList("Items", ListTag<CompoundTag>())
-        if (this.inventory != null) {
-            for (slot in 0..26) {
-                val item: Item = inventory.getItem(slot)
-                if (item != null && !item.isNothing) {
-                    namedTag!!.getList("Items", CompoundTag::class.java)
-                        .add(NBTIO.putItemHelper(item, slot))
-                }
+        namedTag.putList("Items", ListTag<CompoundTag>())
+        for (slot in 0..26) {
+            val item: Item = inventory.getItem(slot)
+            if (!item.isNothing) {
+                namedTag.getList("Items", CompoundTag::class.java)
+                    .add(NBTIO.putItemHelper(item, slot))
             }
         }
     }

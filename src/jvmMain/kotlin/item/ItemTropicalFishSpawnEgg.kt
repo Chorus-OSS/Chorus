@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemTropicalFishSpawnEgg : ItemSpawnEgg(ItemID.Companion.TROPICAL_FISH_SPAWN_EGG) {
+class ItemTropicalFishSpawnEgg : ItemSpawnEgg(ItemID.TROPICAL_FISH_SPAWN_EGG) {
     override val entityNetworkId: Int
         get() = 111
 

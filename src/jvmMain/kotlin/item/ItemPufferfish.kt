@@ -5,7 +5,7 @@ import org.chorus_oss.chorus.entity.effect.Effect
 import org.chorus_oss.chorus.entity.effect.EffectType
 
 class ItemPufferfish @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemFish(ItemID.Companion.PUFFERFISH, meta, count) {
+    ItemFish(ItemID.PUFFERFISH, meta, count) {
     override val foodRestore: Int
         get() = 1
 

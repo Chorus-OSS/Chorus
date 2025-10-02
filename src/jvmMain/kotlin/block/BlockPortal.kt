@@ -47,10 +47,8 @@ class BlockPortal @JvmOverloads constructor(blockstate: BlockState = properties.
         var result = super.onBreak(item)
         for (face in BlockFace.entries) {
             val b = this.getSide(face)
-            if (b != null) {
-                if (b is BlockPortal) {
-                    result = result and b.onBreak(item)
-                }
+            if (b is BlockPortal) {
+                result = result and b.onBreak(item)
             }
         }
         return result

@@ -17,18 +17,18 @@ class ExecuteCommandOld(name: String) : VanillaCommand(name, "old execute comman
         this.permission = "chorus.command.executeold"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("origin", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("position", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("command", CommandParamType.COMMAND)
+            CommandParameter.newType("origin", CommandParamType.TARGET),
+            CommandParameter.newType("position", CommandParamType.POSITION),
+            CommandParameter.newType("command", CommandParamType.COMMAND)
         )
         commandParameters["detect"] = arrayOf(
-            CommandParameter.Companion.newType("origin", CommandParamType.TARGET),
-            CommandParameter.Companion.newType("position", CommandParamType.POSITION),
-            CommandParameter.Companion.newEnum("detect", arrayOf("detect")),
-            CommandParameter.Companion.newType("detectPos", CommandParamType.POSITION),
-            CommandParameter.Companion.newType("block", CommandParamType.INT),
-            CommandParameter.Companion.newType("data", CommandParamType.INT),
-            CommandParameter.Companion.newType("command", CommandParamType.COMMAND)
+            CommandParameter.newType("origin", CommandParamType.TARGET),
+            CommandParameter.newType("position", CommandParamType.POSITION),
+            CommandParameter.newEnum("detect", arrayOf("detect")),
+            CommandParameter.newType("detectPos", CommandParamType.POSITION),
+            CommandParameter.newType("block", CommandParamType.INT),
+            CommandParameter.newType("data", CommandParamType.INT),
+            CommandParameter.newType("command", CommandParamType.COMMAND)
         )
         this.enableParamTree()
     }

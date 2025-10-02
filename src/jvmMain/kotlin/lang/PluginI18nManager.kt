@@ -47,7 +47,7 @@ object PluginI18nManager : Loggable {
                     if (name.startsWith("language") && name.endsWith(".json")) {
                         // 开始读取文件内容
                         val inputStream = checkNotNull(plugin.getResource(name))
-                        i18n.reloadLang(LangCode.Companion.from(name.substring(9, name.indexOf("."))), inputStream)
+                        i18n.reloadLang(LangCode.from(name.substring(9, name.indexOf("."))), inputStream)
                         count++
                         inputStream.close()
                     }
@@ -78,7 +78,7 @@ object PluginI18nManager : Loggable {
             for (f in files) {
                 try {
                     FileInputStream(f).use { inputStream ->
-                        i18n.reloadLang(LangCode.Companion.from(f.name.replace(".json", "")), inputStream)
+                        i18n.reloadLang(LangCode.from(f.name.replace(".json", "")), inputStream)
                         count++
                     }
                 } catch (e: IOException) {
@@ -113,7 +113,7 @@ object PluginI18nManager : Loggable {
                         // 开始读取文件内容
                         val inputStream = checkNotNull(plugin.getResource(name))
                         pluginMultiLanguage.addLang(
-                            LangCode.Companion.from(name.substring(9, name.indexOf("."))),
+                            LangCode.from(name.substring(9, name.indexOf("."))),
                             inputStream
                         )
                         inputStream.close()
@@ -145,7 +145,7 @@ object PluginI18nManager : Loggable {
             for (f in files) {
                 try {
                     FileInputStream(f).use { inputStream ->
-                        pluginMultiLanguage.addLang(LangCode.Companion.from(f.name.replace(".json", "")), inputStream)
+                        pluginMultiLanguage.addLang(LangCode.from(f.name.replace(".json", "")), inputStream)
                     }
                 } catch (e: IOException) {
                     throw RuntimeException(e)

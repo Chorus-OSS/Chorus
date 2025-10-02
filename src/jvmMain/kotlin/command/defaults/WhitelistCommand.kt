@@ -32,11 +32,11 @@ class WhitelistCommand(name: String) :
                 "chorus.command.allowlist.remove"
         commandParameters.clear()
         commandParameters["1arg"] = arrayOf(
-            CommandParameter.Companion.newEnum("action", CommandEnum("AllowlistAction", "on", "off", "list", "reload"))
+            CommandParameter.newEnum("action", CommandEnum("AllowlistAction", "on", "off", "list", "reload"))
         )
         commandParameters["2args"] = arrayOf(
-            CommandParameter.Companion.newEnum("action", CommandEnum("AllowlistPlayerAction", "add", "remove")),
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET, StringNode())
+            CommandParameter.newEnum("action", CommandEnum("AllowlistPlayerAction", "add", "remove")),
+            CommandParameter.newType("player", CommandParamType.TARGET, StringNode())
         )
         this.enableParamTree()
     }

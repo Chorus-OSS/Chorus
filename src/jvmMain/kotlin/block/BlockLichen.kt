@@ -86,7 +86,7 @@ abstract class BlockLichen(blockState: BlockState) : BlockTransparent(blockState
     override fun onUpdate(type: Int): Int {
         for (side in BlockFace.entries) {
             val support = this.getSide(side)
-            if (isGrowthToSide(side) && support != null && !support.isSolid) {
+            if (isGrowthToSide(side) && !support.isSolid) {
                 this.witherAtSide(side)
             }
         }

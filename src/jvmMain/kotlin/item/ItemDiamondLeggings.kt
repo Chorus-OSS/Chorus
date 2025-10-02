@@ -1,6 +1,6 @@
 package org.chorus_oss.chorus.item
 
-class ItemDiamondLeggings : ItemArmor(ItemID.Companion.DIAMOND_LEGGINGS) {
+class ItemDiamondLeggings : ItemArmor(ItemID.DIAMOND_LEGGINGS) {
     override val isLeggings: Boolean
         get() = true
 

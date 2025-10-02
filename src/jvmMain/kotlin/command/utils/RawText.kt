@@ -145,7 +145,7 @@ class RawText private constructor(private var base: Component) {
         ): Component? {
             val entities: List<Entity>
             try {
-                entities = EntitySelectorAPI.Companion.api.matchEntities(sender, component.selector!!)
+                entities = EntitySelectorAPI.api.matchEntities(sender, component.selector!!)
             } catch (e: Exception) {
                 return null
             }

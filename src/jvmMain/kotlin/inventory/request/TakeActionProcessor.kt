@@ -53,8 +53,8 @@ class TakeActionProcessor : ItemStackRequestActionProcessor<TakeRequestAction> {
             return context.error()
         }
 
-        if (context.has(CraftCreativeActionProcessor.Companion.CRAFT_CREATIVE_KEY) && (context.get<Any>(
-                CraftCreativeActionProcessor.Companion.CRAFT_CREATIVE_KEY
+        if (context.has(CraftCreativeActionProcessor.CRAFT_CREATIVE_KEY) && (context.get<Any>(
+                CraftCreativeActionProcessor.CRAFT_CREATIVE_KEY
             ) as Boolean)
         ) { //If the player takes an item from creative mode, the destination is overridden directly
             if (source is CreativeOutputInventory) {

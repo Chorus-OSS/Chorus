@@ -27,7 +27,7 @@ class BlockObsidian(blockState: BlockState = properties.defaultState) : BlockSol
             this.west(), this.east(),
         )
         for (aNearby in nearby) {
-            if (aNearby != null && aNearby.id == BlockID.PORTAL) {
+            if (aNearby.id == BlockID.PORTAL) {
                 aNearby.onBreak(item)
             }
         }

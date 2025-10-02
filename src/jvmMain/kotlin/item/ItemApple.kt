@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 
-class ItemApple : ItemFood(ItemID.Companion.APPLE) {
+class ItemApple : ItemFood(ItemID.APPLE) {
     override val foodRestore: Int
         get() = 4
 

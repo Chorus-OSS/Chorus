@@ -44,7 +44,7 @@ class EntityLingeringPotion(chunk: IChunk?, nbt: CompoundTag, shootingEntity: En
                 .putShort("PotionId", potionId)
         ) as EntityAreaEffectCloud?
 
-        val effects: List<Effect?> = PotionType.Companion.get(potionId).getEffects(true)
+        val effects: List<Effect?> = PotionType.get(potionId).getEffects(true)
         for (effect: Effect? in effects) {
             if (effect != null && entity != null) {
                 entity.cloudEffects!!.add(effect /*.setDuration(1)*/.setVisible(false).setAmbient(false))

@@ -19,37 +19,37 @@ class ReplaceItemCommand(name: String) : VanillaCommand(name, "commands.replacei
         this.permission = "chorus.command.replaceitem"
         commandParameters.clear()
         commandParameters["block"] = arrayOf(
-            CommandParameter.Companion.newEnum("block", false, arrayOf("block")),
-            CommandParameter.Companion.newType("position", CommandParamType.BLOCK_POSITION),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum("block", false, arrayOf("block")),
+            CommandParameter.newType("position", CommandParamType.BLOCK_POSITION),
+            CommandParameter.newEnum(
                 "slot.container",
                 false,
                 arrayOf("slot.container")
             ),
-            CommandParameter.Companion.newType("slotId", CommandParamType.INT),
-            CommandParameter.Companion.newEnum("itemName", CommandEnum.Companion.ENUM_ITEM),
-            CommandParameter.Companion.newType("amount", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("components", true, CommandParamType.JSON),
+            CommandParameter.newType("slotId", CommandParamType.INT),
+            CommandParameter.newEnum("itemName", CommandEnum.ENUM_ITEM),
+            CommandParameter.newType("amount", true, CommandParamType.INT),
+            CommandParameter.newType("data", true, CommandParamType.INT),
+            CommandParameter.newType("components", true, CommandParamType.JSON),
         )
         commandParameters["block-oldItemHandling"] = arrayOf(
-            CommandParameter.Companion.newEnum("block", false, arrayOf("block")),
-            CommandParameter.Companion.newType("position", CommandParamType.BLOCK_POSITION),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum("block", false, arrayOf("block")),
+            CommandParameter.newType("position", CommandParamType.BLOCK_POSITION),
+            CommandParameter.newEnum(
                 "slot.container",
                 false,
                 arrayOf("slot.container")
             ),
-            CommandParameter.Companion.newType("slotId", CommandParamType.INT),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newType("slotId", CommandParamType.INT),
+            CommandParameter.newEnum(
                 "oldItemHandling",
                 false,
                 arrayOf("destroy", "keep")
             ),
-            CommandParameter.Companion.newEnum("itemName", CommandEnum.Companion.ENUM_ITEM),
-            CommandParameter.Companion.newType("amount", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("components", true, CommandParamType.JSON),
+            CommandParameter.newEnum("itemName", CommandEnum.ENUM_ITEM),
+            CommandParameter.newType("amount", true, CommandParamType.INT),
+            CommandParameter.newType("data", true, CommandParamType.INT),
+            CommandParameter.newType("components", true, CommandParamType.JSON),
         )
         val slotTypes: List<String> = listOf(
             "slot.weapon.mainhand",
@@ -66,29 +66,29 @@ class ReplaceItemCommand(name: String) : VanillaCommand(name, "commands.replacei
             "slot.equippable"
         )
         commandParameters["entity"] = arrayOf(
-            CommandParameter.Companion.newEnum("entity", false, arrayOf("entity")),
-            CommandParameter.Companion.newType("target", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("slotType", false, slotTypes.toTypedArray()),
-            CommandParameter.Companion.newType("slotId", CommandParamType.INT),
-            CommandParameter.Companion.newEnum("itemName", CommandEnum.Companion.ENUM_ITEM),
-            CommandParameter.Companion.newType("amount", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("components", true, CommandParamType.JSON),
+            CommandParameter.newEnum("entity", false, arrayOf("entity")),
+            CommandParameter.newType("target", CommandParamType.TARGET),
+            CommandParameter.newEnum("slotType", false, slotTypes.toTypedArray()),
+            CommandParameter.newType("slotId", CommandParamType.INT),
+            CommandParameter.newEnum("itemName", CommandEnum.ENUM_ITEM),
+            CommandParameter.newType("amount", true, CommandParamType.INT),
+            CommandParameter.newType("data", true, CommandParamType.INT),
+            CommandParameter.newType("components", true, CommandParamType.JSON),
         )
         commandParameters["entity-oldItemHandling"] = arrayOf(
-            CommandParameter.Companion.newEnum("entity", false, arrayOf("entity")),
-            CommandParameter.Companion.newType("target", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("slotType", false, slotTypes.toTypedArray()),
-            CommandParameter.Companion.newType("slotId", CommandParamType.INT),
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum("entity", false, arrayOf("entity")),
+            CommandParameter.newType("target", CommandParamType.TARGET),
+            CommandParameter.newEnum("slotType", false, slotTypes.toTypedArray()),
+            CommandParameter.newType("slotId", CommandParamType.INT),
+            CommandParameter.newEnum(
                 "oldItemHandling",
                 false,
                 arrayOf("destroy", "keep")
             ),
-            CommandParameter.Companion.newEnum("itemName", CommandEnum.Companion.ENUM_ITEM),
-            CommandParameter.Companion.newType("amount", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("data", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("components", true, CommandParamType.JSON),
+            CommandParameter.newEnum("itemName", CommandEnum.ENUM_ITEM),
+            CommandParameter.newType("amount", true, CommandParamType.INT),
+            CommandParameter.newType("data", true, CommandParamType.INT),
+            CommandParameter.newType("components", true, CommandParamType.JSON),
         )
         this.enableParamTree()
     }

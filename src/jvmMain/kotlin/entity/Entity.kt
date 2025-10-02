@@ -39,7 +39,10 @@ import org.chorus_oss.chorus.nbt.tag.StringTag
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.scheduler.Task
 import org.chorus_oss.chorus.tags.ItemTags
-import org.chorus_oss.chorus.utils.*
+import org.chorus_oss.chorus.utils.Identifier
+import org.chorus_oss.chorus.utils.Loggable
+import org.chorus_oss.chorus.utils.PortalHelper
+import org.chorus_oss.chorus.utils.TextFormat
 import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.*
 import org.chorus_oss.protocol.types.ActorLink
@@ -452,9 +455,6 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     protected fun init(chunk: IChunk, nbt: CompoundTag?) {
-        if (chunk.provider.level == null) {
-            throw ChunkException("Invalid garbage Chunk given to Entity")
-        }
         this.runtimeId = entityCount.getAndIncrement()
         this.justCreated = true
         this.namedTag = nbt ?: CompoundTag()
@@ -462,17 +462,17 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
         this.level = (chunk.provider.level)
 
         this.chested = namedTag.getBoolean(TAG_CHESTED)
-        this.color = namedTag!!.getByte(TAG_COLOR)
-        this.color2 = namedTag!!.getByte(TAG_COLOR2)
-        this.customName = if (namedTag!!.contains(TAG_CUSTOM_NAME)) namedTag!!.getString(TAG_CUSTOM_NAME) else null
-        this.customNameVisible = namedTag!!.getBoolean(TAG_CUSTOM_NAME_VISIBLE)
+        this.color = namedTag.getByte(TAG_COLOR)
+        this.color2 = namedTag.getByte(TAG_COLOR2)
+        this.customName = if (namedTag.contains(TAG_CUSTOM_NAME)) namedTag.getString(TAG_CUSTOM_NAME) else null
+        this.customNameVisible = namedTag.getBoolean(TAG_CUSTOM_NAME_VISIBLE)
 
 
-        val posList: ListTag<FloatTag> = namedTag!!.getList(
+        val posList: ListTag<FloatTag> = namedTag.getList(
             TAG_POS,
             FloatTag::class.java
         )
-        val rotationList: ListTag<FloatTag> = namedTag!!.getList(
+        val rotationList: ListTag<FloatTag> = namedTag.getList(
             TAG_ROTATION,
             FloatTag::class.java
         )
@@ -487,8 +487,8 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
             rotationList.get(1).data.toDouble()
         )
 
-        if (namedTag!!.contains(TAG_MOTION)) {
-            val motionList: ListTag<FloatTag> = namedTag!!.getList(
+        if (namedTag.contains(TAG_MOTION)) {
+            val motionList: ListTag<FloatTag> = namedTag.getList(
                 TAG_MOTION,
                 FloatTag::class.java
             )
@@ -2301,7 +2301,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 for (x in minX..maxX) {
                     for (y in minY..maxY) {
                         val block: Block = level!!.getBlock(Vector3(x.toDouble(), y.toDouble(), z.toDouble()))
-                        if (block != null) blocksAround.add(block)
+                        blocksAround.add(block)
                     }
                 }
             }
@@ -2327,7 +2327,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
                 for (x in minX..maxX) {
                     for (y in minY..maxY) {
                         val block = level!!.getTickCachedBlock(Vector3(x.toDouble(), y.toDouble(), z.toDouble()))
-                        if (block != null) blocksAround.add(block)
+                        blocksAround.add(block)
                     }
                 }
             }
@@ -2831,6 +2831,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
     }
 
     fun <T : Any> getDataProperty(key: EntityDataType<T>, d: T): T {
+        @Suppress("UNCHECKED_CAST")
         return getEntityDataMap().getOrDefault(key, d) as T
     }
 
@@ -2858,6 +2859,7 @@ abstract class Entity(chunk: IChunk?, nbt: CompoundTag?) : IVector3 {
 
     fun setDataFlagExtend(entityFlag: EntityFlag, value: Boolean) {
         if (getEntityDataMap().existFlag(entityFlag) xor value) {
+            @Suppress("UNCHECKED_CAST")
             val entityFlags: EnumSet<EntityFlag> =
                 getEntityDataMap().getOrDefault(
                     EntityDataTypes.FLAGS_2, EnumSet.noneOf(

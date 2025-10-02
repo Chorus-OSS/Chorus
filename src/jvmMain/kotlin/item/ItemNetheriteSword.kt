@@ -1,7 +1,7 @@
 package org.chorus_oss.chorus.item
 
 class ItemNetheriteSword @JvmOverloads constructor(meta: Int = 0, count: Int = 1) :
-    ItemTool(ItemID.Companion.NETHERITE_SWORD, meta, count, "Netherite Sword") {
+    ItemTool(ItemID.NETHERITE_SWORD, meta, count, "Netherite Sword") {
     override val maxDurability: Int
         get() = DURABILITY_NETHERITE
 

@@ -4,7 +4,7 @@ import org.chorus_oss.chorus.nbt.tag.CompoundTag
 import org.chorus_oss.chorus.nbt.tag.ListTag
 
 class ItemWrittenBook @JvmOverloads constructor(meta: Int? = 0, count: Int = 1) :
-    ItemBookWritable(ItemID.Companion.WRITTEN_BOOK, 0, count, "Written Book") {
+    ItemBookWritable(ItemID.WRITTEN_BOOK, 0, count, "Written Book") {
     override val maxStackSize: Int
         get() = 16
 

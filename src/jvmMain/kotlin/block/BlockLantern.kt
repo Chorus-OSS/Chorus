@@ -33,7 +33,7 @@ open class BlockLantern @JvmOverloads constructor(blockstate: BlockState = prope
                     if (support is BlockStairs && !support.isUpsideDown) {
                         return true
                     }
-                    return BlockLever.Companion.isSupportValid(support, BlockFace.DOWN)
+                    return BlockLever.isSupportValid(support, BlockFace.DOWN)
                 }
             }
         }
@@ -47,7 +47,7 @@ open class BlockLantern @JvmOverloads constructor(blockstate: BlockState = prope
             if (support is BlockWallBase || support is BlockFence) {
                 return true
             }
-            return BlockLever.Companion.isSupportValid(support, BlockFace.UP)
+            return BlockLever.isSupportValid(support, BlockFace.UP)
         }
 
     override fun place(

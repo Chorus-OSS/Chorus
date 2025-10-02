@@ -21,21 +21,21 @@ object CommonStates {
 
     val attachedBit: BlockState<Boolean> = BlockState.from("attached_bit")
 
-    val attachment: BlockState<String> = BlockState.Companion.from(
+    val attachment: BlockState<String> = BlockState.from(
         "attachment", Attachment.entries
     )
 
-    val bambooLeafSize: BlockState<String> = BlockState.Companion.from(
+    val bambooLeafSize: BlockState<String> = BlockState.from(
         "bamboo_leaf_size", BambooLeafSize.entries
     )
 
-    val bambooStalkThickness: BlockState<String> = BlockState.Companion.from(
+    val bambooStalkThickness: BlockState<String> = BlockState.from(
         "bamboo_stalk_thickness", BambooStalkThickness.entries
     )
 
     val bigDripleafHead: BlockState<Boolean> = BlockState.from("big_dripleaf_head")
 
-    val bigDripleafTilt: BlockState<String> = BlockState.Companion.from(
+    val bigDripleafTilt: BlockState<String> = BlockState.from(
         "big_dripleaf_tilt", BigDripleafTilt.entries
     )
 
@@ -61,21 +61,21 @@ object CommonStates {
 
     val candles: BlockState<Int> = BlockState.from("candles", 3)
 
-    val cauldronLiquid: BlockState<String> = BlockState.Companion.from(
+    val cauldronLiquid: BlockState<String> = BlockState.from(
         "cauldron_liquid", CauldronLiquid.entries
     )
 
-    val chemistryTableType: BlockState<String> = BlockState.Companion.from(
+    val chemistryTableType: BlockState<String> = BlockState.from(
         "chemistry_table_type", ChemistryTableType.entries
     )
 
-    val chiselType: BlockState<String> = BlockState.Companion.from(
+    val chiselType: BlockState<String> = BlockState.from(
         "chisel_type", ChiselType.entries
     )
 
     val clusterCount: BlockState<Int> = BlockState.from("cluster_count", 3)
 
-    val color: BlockState<String> = BlockState.Companion.from(
+    val color: BlockState<String> = BlockState.from(
         "color", Color.entries
     )
 
@@ -93,17 +93,17 @@ object CommonStates {
 
     val coveredBit: BlockState<Boolean> = BlockState.from("covered_bit")
 
-    val crackedState: BlockState<String> = BlockState.Companion.from(
+    val crackedState: BlockState<String> = BlockState.from(
         "cracked_state", CrackedState.entries
     )
 
     val crafting: BlockState<Boolean> = BlockState.from("crafting")
 
-    val creakingHeartState: BlockState<String> = BlockState.Companion.from(
+    val creakingHeartState: BlockState<String> = BlockState.from(
         "creaking_heart_state", CreakingHeartState.entries
     )
 
-    val damage: BlockState<String> = BlockState.Companion.from(
+    val damage: BlockState<String> = BlockState.from(
         "damage", Damage.entries
     )
 
@@ -114,7 +114,7 @@ object CommonStates {
     // Horizontal-index based
     val direction: BlockState<Int> = BlockState.from("direction", 3)
 
-    val dirtType: BlockState<String> = BlockState.Companion.from(
+    val dirtType: BlockState<String> = BlockState.from(
         "dirt_type", DirtType.entries
     )
 
@@ -122,13 +122,13 @@ object CommonStates {
 
     val doorHingeBit: BlockState<Boolean> = BlockState.from("door_hinge_bit")
 
-    val doublePlantType: BlockState<String> = BlockState.Companion.from(
+    val doublePlantType: BlockState<String> = BlockState.from(
         "double_plant_type", DoublePlantType.entries
     )
 
     val dragDown: BlockState<Boolean> = BlockState.from("drag_down")
 
-    val dripstoneThickness: BlockState<String> = BlockState.Companion.from(
+    val dripstoneThickness: BlockState<String> = BlockState.from(
         "dripstone_thickness", DripstoneThickness.entries
     )
 
@@ -138,7 +138,7 @@ object CommonStates {
 
     val extinguished: BlockState<Boolean> = BlockState.from("extinguished")
 
-    val coralColor: BlockState<String> = BlockState.Companion.from(
+    val coralColor: BlockState<String> = BlockState.from(
         "coral_color", CoralColor.entries
     )
 
@@ -174,7 +174,7 @@ object CommonStates {
 
     val kelpAge: BlockState<Int> = BlockState.from("kelp_age", 25)
 
-    val leverDirection: BlockState<String> = BlockState.Companion.from(
+    val leverDirection: BlockState<String> = BlockState.from(
         "lever_direction", LeverDirection.entries
     )
 
@@ -182,44 +182,44 @@ object CommonStates {
 
     val lit: BlockState<Boolean> = BlockState.from("lit")
 
-    val minecraftBlockFace: BlockState<String> = BlockState.Companion.from(
+    val minecraftBlockFace: BlockState<String> = BlockState.from(
         "minecraft:block_face", BlockFace.entries
     )
 
     // CommonPropertyMap#CARDINAL_BLOCKFACE
-    val minecraftCardinalDirection: BlockState<String> = BlockState.Companion.from(
+    val minecraftCardinalDirection: BlockState<String> = BlockState.from(
         "minecraft:cardinal_direction", MinecraftCardinalDirection.entries
     )
 
-    val minecraftFacingDirection: BlockState<String> = BlockState.Companion.from(
+    val minecraftFacingDirection: BlockState<String> = BlockState.from(
         "minecraft:facing_direction", BlockFace.entries
     )
 
-    val minecraftVerticalHalf: BlockState<String> = BlockState.Companion.from(
+    val minecraftVerticalHalf: BlockState<String> = BlockState.from(
         "minecraft:vertical_half", MinecraftVerticalHalf.entries
     )
 
     val moisturizedAmount: BlockState<Int> = BlockState.from("moisturized_amount", 7)
 
-    val monsterEggStoneType: BlockState<String> = BlockState.Companion.from(
+    val monsterEggStoneType: BlockState<String> = BlockState.from(
         "monster_egg_stone_type", MonsterEggStoneType.entries
     )
 
     val multiFaceDirectionBits: BlockState<Int> = BlockState.from("multi_face_direction_bits", 63)
 
-    val newLeafType: BlockState<String> = BlockState.Companion.from(
+    val newLeafType: BlockState<String> = BlockState.from(
         "new_leaf_type", NewLeafType.entries
     )
 
     val occupiedBit: BlockState<Boolean> = BlockState.from("occupied_bit")
 
-    val oldLeafType: BlockState<String> = BlockState.Companion.from(
+    val oldLeafType: BlockState<String> = BlockState.from(
         "old_leaf_type", OldLeafType.entries
     )
 
     val openBit: BlockState<Boolean> = BlockState.from("open_bit")
 
-    val orientation: BlockState<String> = BlockState.Companion.from(
+    val orientation: BlockState<String> = BlockState.from(
         "orientation", Orientation.entries
     )
 
@@ -229,17 +229,17 @@ object CommonStates {
 
     val persistentBit: BlockState<Boolean> = BlockState.from("persistent_bit")
 
-    val pillarAxis: BlockState<String> = BlockState.Companion.from(
+    val pillarAxis: BlockState<String> = BlockState.from(
         "pillar_axis", BlockFace.Axis.entries
     )
 
-    val portalAxis: BlockState<String> = BlockState.Companion.from(
+    val portalAxis: BlockState<String> = BlockState.from(
         "portal_axis", PortalAxis.entries
     )
 
     val poweredBit: BlockState<Boolean> = BlockState.from("powered_bit")
 
-    val prismarineBlockType: BlockState<String> = BlockState.Companion.from(
+    val prismarineBlockType: BlockState<String> = BlockState.from(
         "prismarine_block_type", PrismarineBlockType.entries
     )
 
@@ -261,17 +261,17 @@ object CommonStates {
 
     val rotation: BlockState<Int> = BlockState.from("rotation", 3)
 
-    val sandType: BlockState<String> = BlockState.Companion.from(
+    val sandType: BlockState<String> = BlockState.from(
         "sand_type", SandType.entries
     )
 
     val sculkSensorPhase: BlockState<Int> = BlockState.from("sculk_sensor_phase", 2)
 
-    val seaGrassType: BlockState<String> = BlockState.Companion.from(
+    val seaGrassType: BlockState<String> = BlockState.from(
         "sea_grass_type", SeaGrassType.entries
     )
 
-    val spongeType: BlockState<String> = BlockState.Companion.from(
+    val spongeType: BlockState<String> = BlockState.from(
         "sponge_type", SpongeType.entries
     )
 
@@ -279,51 +279,51 @@ object CommonStates {
 
     val stabilityCheck: BlockState<Boolean> = BlockState.from("stability_check")
 
-    val stoneBrickType: BlockState<String> = BlockState.Companion.from(
+    val stoneBrickType: BlockState<String> = BlockState.from(
         "stone_brick_type", StoneBrickType.entries
     )
 
-    val stoneSlabType: BlockState<String> = BlockState.Companion.from(
+    val stoneSlabType: BlockState<String> = BlockState.from(
         "stone_slab_type", StoneSlabType.entries
     )
 
-    val stoneSlabType2: BlockState<String> = BlockState.Companion.from(
+    val stoneSlabType2: BlockState<String> = BlockState.from(
         "stone_slab_type_2", StoneSlabType2.entries
     )
 
-    val stoneSlabType3: BlockState<String> = BlockState.Companion.from(
+    val stoneSlabType3: BlockState<String> = BlockState.from(
         "stone_slab_type_3", StoneSlabType3.entries
     )
 
-    val stoneSlabType4: BlockState<String> = BlockState.Companion.from(
+    val stoneSlabType4: BlockState<String> = BlockState.from(
         "stone_slab_type_4", StoneSlabType4.entries
     )
 
     val strippedBit: BlockState<Boolean> = BlockState.from("stripped_bit")
 
-    val structureBlockType: BlockState<String> = BlockState.Companion.from(
+    val structureBlockType: BlockState<String> = BlockState.from(
         "structure_block_type", StructureBlockType.entries
     )
 
-    val structureVoidType: BlockState<String> = BlockState.Companion.from(
+    val structureVoidType: BlockState<String> = BlockState.from(
         "structure_void_type", StructureVoidType.entries
     )
 
     val suspendedBit: BlockState<Boolean> = BlockState.from("suspended_bit")
 
-    val tallGrassType: BlockState<String> = BlockState.Companion.from(
+    val tallGrassType: BlockState<String> = BlockState.from(
         "tall_grass_type", TallGrassType.entries
     )
 
     val toggleBit: BlockState<Boolean> = BlockState.from("toggle_bit")
 
-    val torchFacingDirection: BlockState<String> = BlockState.Companion.from(
+    val torchFacingDirection: BlockState<String> = BlockState.from(
         "torch_facing_direction", TorchFacingDirection.entries
     )
 
     val triggeredBit: BlockState<Boolean> = BlockState.from("triggered_bit")
 
-    val turtleEggCount: BlockState<String> = BlockState.Companion.from(
+    val turtleEggCount: BlockState<String> = BlockState.from(
         "turtle_egg_count", TurtleEggCount.entries
     )
 
@@ -337,39 +337,39 @@ object CommonStates {
 
     val vineDirectionBits: BlockState<Int> = BlockState.from("vine_direction_bits", 15)
 
-    val wallBlockType: BlockState<String> = BlockState.Companion.from(
+    val wallBlockType: BlockState<String> = BlockState.from(
         "wall_block_type", WallBlockType.entries
     )
 
-    val wallConnectionTypeEast: BlockState<String> = BlockState.Companion.from(
+    val wallConnectionTypeEast: BlockState<String> = BlockState.from(
         "wall_connection_type_east", WallConnectionType.entries
     )
 
-    val wallConnectionTypeNorth: BlockState<String> = BlockState.Companion.from(
+    val wallConnectionTypeNorth: BlockState<String> = BlockState.from(
         "wall_connection_type_north", WallConnectionType.entries
     )
 
-    val wallConnectionTypeSouth: BlockState<String> = BlockState.Companion.from(
+    val wallConnectionTypeSouth: BlockState<String> = BlockState.from(
         "wall_connection_type_south", WallConnectionType.entries
     )
 
-    val wallConnectionTypeWest: BlockState<String> = BlockState.Companion.from(
+    val wallConnectionTypeWest: BlockState<String> = BlockState.from(
         "wall_connection_type_west", WallConnectionType.entries
     )
 
-    val paleMossCarpetSideEast: BlockState<String> = BlockState.Companion.from(
+    val paleMossCarpetSideEast: BlockState<String> = BlockState.from(
         "pale_moss_carpet_side_east", PaleMossCarpetSide.entries
     )
 
-    val paleMossCarpetSideNorth: BlockState<String> = BlockState.Companion.from(
+    val paleMossCarpetSideNorth: BlockState<String> = BlockState.from(
         "pale_moss_carpet_side_north", PaleMossCarpetSide.entries
     )
 
-    val paleMossCarpetSideSouth: BlockState<String> = BlockState.Companion.from(
+    val paleMossCarpetSideSouth: BlockState<String> = BlockState.from(
         "pale_moss_carpet_side_south", PaleMossCarpetSide.entries
     )
 
-    val paleMossCarpetSideWest: BlockState<String> = BlockState.Companion.from(
+    val paleMossCarpetSideWest: BlockState<String> = BlockState.from(
         "pale_moss_carpet_side_west", PaleMossCarpetSide.entries
     )
 
@@ -383,13 +383,13 @@ object CommonStates {
 
     val weirdoDirection: BlockState<Int> = BlockState.from("weirdo_direction", 3)
 
-    val woodType: BlockState<String> = BlockState.Companion.from(
+    val woodType: BlockState<String> = BlockState.from(
         "wood_type", WoodType.entries
     )
 
     val trialSpawnerState: BlockState<Int> = BlockState.from("trial_spawner_state", 5)
 
-    val vaultState: BlockState<String> = BlockState.Companion.from(
+    val vaultState: BlockState<String> = BlockState.from(
         "vault_state", VaultState.entries
     )
 

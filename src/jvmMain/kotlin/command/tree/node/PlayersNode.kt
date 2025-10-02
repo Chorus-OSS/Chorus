@@ -18,10 +18,10 @@ class PlayersNode : TargetNode<Player?>() {
     override fun fill(arg: String) {
         if (arg.isBlank()) {
             this.error()
-        } else if (EntitySelectorAPI.Companion.api.checkValid(arg)) {
+        } else if (EntitySelectorAPI.api.checkValid(arg)) {
             val entities: List<Entity>
             try {
-                entities = EntitySelectorAPI.Companion.api.matchEntities(paramList.paramTree.sender!!, arg)
+                entities = EntitySelectorAPI.api.matchEntities(paramList.paramTree.sender!!, arg)
             } catch (exception: SelectorSyntaxException) {
                 error(exception.message)
                 return

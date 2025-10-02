@@ -14,10 +14,10 @@ class DifficultyCommand(name: String) :
         this.permission = "chorus.command.difficulty"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("difficulty", CommandParamType.INT)
+            CommandParameter.newType("difficulty", CommandParamType.INT)
         )
         commandParameters["byString"] = arrayOf(
-            CommandParameter.Companion.newEnum(
+            CommandParameter.newEnum(
                 "difficulty",
                 CommandEnum("Difficulty", "peaceful", "p", "easy", "e", "normal", "n", "hard", "h")
             )

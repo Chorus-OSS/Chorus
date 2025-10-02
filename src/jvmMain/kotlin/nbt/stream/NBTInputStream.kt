@@ -173,32 +173,32 @@ class NBTInputStream @JvmOverloads constructor(
         require(maxDepth >= 0) { "NBT compound is too deeply nested" }
         val arraySize: Int
         when (type.toByte()) {
-            Tag.Companion.TAG_END -> return EndTag()
-            Tag.Companion.TAG_BYTE -> return ByteTag(readByte().toInt())
-            Tag.Companion.TAG_SHORT -> return ShortTag(readShort().toInt())
-            Tag.Companion.TAG_INT -> return IntTag(readInt())
-            Tag.Companion.TAG_LONG -> return LongTag(readLong())
-            Tag.Companion.TAG_FLOAT -> return FloatTag(readFloat())
-            Tag.Companion.TAG_DOUBLE -> return DoubleTag(readDouble())
-            Tag.Companion.TAG_BYTE_ARRAY -> {
+            Tag.TAG_END -> return EndTag()
+            Tag.TAG_BYTE -> return ByteTag(readByte().toInt())
+            Tag.TAG_SHORT -> return ShortTag(readShort().toInt())
+            Tag.TAG_INT -> return IntTag(readInt())
+            Tag.TAG_LONG -> return LongTag(readLong())
+            Tag.TAG_FLOAT -> return FloatTag(readFloat())
+            Tag.TAG_DOUBLE -> return DoubleTag(readDouble())
+            Tag.TAG_BYTE_ARRAY -> {
                 arraySize = this.readInt()
                 val bytes = ByteArray(arraySize)
                 this.readFully(bytes)
                 return ByteArrayTag(bytes)
             }
 
-            Tag.Companion.TAG_STRING -> return StringTag(this.readUTF())
-            Tag.Companion.TAG_COMPOUND -> {
+            Tag.TAG_STRING -> return StringTag(this.readUTF())
+            Tag.TAG_COMPOUND -> {
                 val map = LinkedHashMap<String, Tag<*>>()
                 var nbtType: Int
-                while ((readUnsignedByte().also { nbtType = it }) != Tag.Companion.TAG_END.toInt()) {
+                while ((readUnsignedByte().also { nbtType = it }) != Tag.TAG_END.toInt()) {
                     val name = this.readUTF()
                     map[name] = deserialize(nbtType, maxDepth - 1)
                 }
                 return CompoundTag(map)
             }
 
-            Tag.Companion.TAG_LIST -> {
+            Tag.TAG_LIST -> {
                 val typeId = this.readUnsignedByte()
                 val listLength = this.readInt()
                 val list: MutableList<Tag<*>> = ArrayList(listLength)
@@ -211,7 +211,7 @@ class NBTInputStream @JvmOverloads constructor(
                 return ListTag(typeId, list)
             }
 
-            Tag.Companion.TAG_INT_ARRAY -> {
+            Tag.TAG_INT_ARRAY -> {
                 arraySize = this.readInt()
                 val ints = IntArray(arraySize)
 

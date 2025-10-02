@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.command.selector.args.impl
 
-import com.google.common.collect.ImmutableMap
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.command.CommandSender
 import org.chorus_oss.chorus.command.selector.ParseUtils
@@ -59,20 +58,16 @@ class Type : CachedSimpleSelectorArgument() {
     }
 
     protected fun isType(entity: Entity, type: String): Boolean {
-        return if (entity is Player)  //player需要特判，因为EntityHuman的getNetworkId()返回-1
-            type == "minecraft:player"
-        else if (entity is CustomEntity) entity.getEntityIdentifier() == type
-        else ENTITY_TYPE2ID.containsKey(type) && entity.getNetworkID() == ENTITY_TYPE2ID[type]
+        //player需要特判，因为EntityHuman的getNetworkId()返回-1
+        return when (entity) {
+            is Player -> type == "minecraft:player"
+            is CustomEntity -> entity.getEntityIdentifier() == type
+            else -> ENTITY_TYPE2ID.containsKey(type) && entity.getNetworkID() == ENTITY_TYPE2ID[type]
+        }
     }
 
     companion object {
         val ENTITY_ID2TYPE: Map<Int, String> = Registries.ENTITY.entityId2NetworkIdMap
-        val ENTITY_TYPE2ID: Map<String, Int>
-
-        init {
-            val builder = ImmutableMap.builder<String, Int>()
-            ENTITY_ID2TYPE.forEach { (id: Int?, name: String?) -> builder.put(name, id) }
-            ENTITY_TYPE2ID = builder.build()
-        }
+        val ENTITY_TYPE2ID: Map<String, Int> = ENTITY_ID2TYPE.entries.associate { it.value to it.key }
     }
 }

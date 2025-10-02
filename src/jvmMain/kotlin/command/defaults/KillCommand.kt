@@ -18,7 +18,7 @@ class KillCommand(name: String) : VanillaCommand(name, "commands.kill.descriptio
                 + "chorus.command.kill.other")
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", true, CommandParamType.TARGET)
+            CommandParameter.newType("player", true, CommandParamType.TARGET)
         )
         this.enableParamTree()
     }

@@ -91,7 +91,7 @@ abstract class BlockEntityEjectable(level: Level, nbt: CompoundTag) : BlockEntit
     override var name: String
         get() = if (this.hasName()) namedTag.getString("CustomName") else blockEntityName
         set(name) {
-            if (name == null || name == "") {
+            if (name == "") {
                 namedTag.remove("CustomName")
                 return
             }

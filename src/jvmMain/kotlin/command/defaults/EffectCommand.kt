@@ -17,15 +17,15 @@ class EffectCommand(name: String) : Command(name, "commands.effect.description",
         this.permission = "chorus.command.effect"
         commandParameters.clear()
         commandParameters["default"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("effect", CommandEnum.Companion.ENUM_EFFECT),
-            CommandParameter.Companion.newType("seconds", true, CommandParamType.INT),
-            CommandParameter.Companion.newType("amplifier", true, CommandParamType.INT),
-            CommandParameter.Companion.newEnum("hideParticle", true, CommandEnum.Companion.ENUM_BOOLEAN)
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("effect", CommandEnum.ENUM_EFFECT),
+            CommandParameter.newType("seconds", true, CommandParamType.INT),
+            CommandParameter.newType("amplifier", true, CommandParamType.INT),
+            CommandParameter.newEnum("hideParticle", true, CommandEnum.ENUM_BOOLEAN)
         )
         commandParameters["clear"] = arrayOf(
-            CommandParameter.Companion.newType("player", CommandParamType.TARGET),
-            CommandParameter.Companion.newEnum("clear", CommandEnum("ClearEffects", "clear"))
+            CommandParameter.newType("player", CommandParamType.TARGET),
+            CommandParameter.newEnum("clear", CommandEnum("ClearEffects", "clear"))
         )
         this.enableParamTree()
     }

@@ -20,16 +20,16 @@ class PlaySoundCommand(name: String) : VanillaCommand(name, "commands.playsound.
         this.addCommandParameters(
             "default",
             arrayOf(
-                CommandParameter.Companion.newEnum(
+                CommandParameter.newEnum(
                     "sound",
                     false,
                     CommandEnum("sound", Sound.entries.map { it.sound }.toList(), true)
                 ),
-                CommandParameter.Companion.newType("player", true, CommandParamType.TARGET, PlayersNode()),
-                CommandParameter.Companion.newType("position", true, CommandParamType.POSITION),
-                CommandParameter.Companion.newType("volume", true, CommandParamType.FLOAT),
-                CommandParameter.Companion.newType("pitch", true, CommandParamType.FLOAT),
-                CommandParameter.Companion.newType("minimumVolume", true, CommandParamType.FLOAT)
+                CommandParameter.newType("player", true, CommandParamType.TARGET, PlayersNode()),
+                CommandParameter.newType("position", true, CommandParamType.POSITION),
+                CommandParameter.newType("volume", true, CommandParamType.FLOAT),
+                CommandParameter.newType("pitch", true, CommandParamType.FLOAT),
+                CommandParameter.newType("minimumVolume", true, CommandParamType.FLOAT)
             )
         )
         this.enableParamTree()
