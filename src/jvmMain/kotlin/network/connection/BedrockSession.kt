@@ -199,7 +199,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     fun sendNetworkSettingsPacket(pk: NetworkSettingsPacket) {
-        peer.sendPacketImmediately(subClientId, 0, pk)
+        peer.sendPacket(subClientId, 0, pk)
     }
 
     fun setCompression(algorithm: PacketCompressionAlgorithm) {

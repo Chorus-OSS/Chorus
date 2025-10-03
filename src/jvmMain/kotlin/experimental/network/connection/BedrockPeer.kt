@@ -55,11 +55,11 @@ class BedrockPeer(val rakSession: RakSession) {
         } ?: stream
 
         val decompressed = compressor?.let { compressor ->
-            when (val alg = Proto.UByte.deserialize(decrypted).toUInt()) {
-                0u if compressor is DeflateCompressor -> Unit
-                1u if compressor is SnappyCompressor -> Unit
-                0xFFu if compressor is NOOPCompressor -> Unit
-                else -> throw IllegalStateException("mismatched compression algorithm: $alg")
+            val compressor = when (val alg = Proto.UByte.deserialize(decrypted).toUInt()) {
+                0x00u -> compressor as? DeflateCompressor ?: DeflateCompressor()
+                0x01u -> compressor as? SnappyCompressor ?: SnappyCompressor()
+                0xFFu -> compressor as? NOOPCompressor ?: NOOPCompressor()
+                else -> throw IllegalStateException("invalid compression algorithm: $alg")
             }
             val raw = compressor.decompress(decrypted.readByteString())
 
@@ -67,8 +67,6 @@ class BedrockPeer(val rakSession: RakSession) {
         } ?: decrypted
 
         val batch = BatchWrapper.deserialize(decompressed)
-
-        log.info("Batch from: ${rakSession.address}, $batch")
 
         for (packet in batch.packets) {
             val id = packet.header.targetSubClientID.toInt()
@@ -83,8 +81,8 @@ class BedrockPeer(val rakSession: RakSession) {
 
         val compressed = compressor?.let { compressor ->
             when (compressor) {
-                is DeflateCompressor -> Proto.UByte.serialize(0u, decrypted)
-                is SnappyCompressor -> Proto.UByte.serialize(1u, decrypted)
+                is DeflateCompressor -> Proto.UByte.serialize(0x00u, decrypted)
+                is SnappyCompressor -> Proto.UByte.serialize(0x01u, decrypted)
                 is NOOPCompressor -> Proto.UByte.serialize(0xFFu, decrypted)
             }
             compressor.compress(raw.readByteString())
@@ -111,8 +109,6 @@ class BedrockPeer(val rakSession: RakSession) {
         val stream = Buffer()
         val batch = BatchWrapper(packets.toList())
         BatchWrapper.serialize(batch, stream)
-
-        log.info("Sending batch to: ${rakSession.address}, $batch")
 
         sendRaw(priority, stream)
     }
