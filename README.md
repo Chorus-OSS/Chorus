@@ -54,6 +54,6 @@ Minecraft: Bedrock server software, open source and written in Kotlin
 [license_badge_url]: https://img.shields.io/github/license/Chorus-OSS/Chorus?style=flat-square
 [license_url]: LICENSE
 
-[discord_badge_url]: https://img.shields.io/discord/1383101812139098162?style=flat-square
+[discord_badge_url]: https://img.shields.io/discord/1383101812139098162?style=flat-square&logo=discord&label=discord&color=%235865F2
 [discord_url]: https://discord.gg/NaqYd9pHpv
 <!-- BADGES -->
