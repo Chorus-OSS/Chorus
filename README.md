@@ -39,8 +39,8 @@ Minecraft: Bedrock server software, open source and written in Kotlin
 
 Chorus is dual-licensed under the Apache License 2.0 (Apache-2.0) and the GNU Lesser General Public License v3.0 (LGPL-3.0)
 
-- Original Chorus code is licensed under Apache-2.0
-- Code derived from PowerNukkitX is licensed under LGPL-3.0
+- Original code is licensed under Apache-2.0
+- Derived code from PowerNukkitX is licensed under LGPL-3.0
 
 Refer to LICENSE and LICENSE-LGPL for details.
 
