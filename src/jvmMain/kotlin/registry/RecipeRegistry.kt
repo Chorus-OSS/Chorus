@@ -1,7 +1,6 @@
 package org.chorus_oss.chorus.registry
 
 
-import io.netty.util.collection.CharObjectHashMap
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
 import kotlinx.serialization.json.*
@@ -605,7 +604,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
                             val shape = (recipe["shape"]!!.jsonArray.map { it.jsonPrimitive.content }).toTypedArray()
 
-                            val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
+                            val ingredients: MutableMap<Char, ItemDescriptor> = mutableMapOf()
 
                             val inputs = recipe["input"]!!.jsonObject
 
@@ -888,7 +887,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
         val first = outputs.removeFirst()
         val shape = (recipeObject["pattern"] as List<String>).toTypedArray()
-        val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
+        val ingredients: MutableMap<Char, ItemDescriptor> = mutableMapOf()
 
         val priority = Utils.toInt(recipeObject["priority"]!!)
         val primaryResult = parseRecipeItem(first)

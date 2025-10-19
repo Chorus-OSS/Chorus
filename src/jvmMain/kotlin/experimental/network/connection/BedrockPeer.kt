@@ -101,7 +101,7 @@ class BedrockPeer(val rakSession: RakSession) {
         Proto.UByte.serialize(0xFEu, stream)
         stream.write(encrypted)
 
-        rakSession.send(stream, RakReliability.ReliableOrdered, priority)
+        rakSession.send(stream.readByteString(), RakReliability.ReliableOrdered, priority)
     }
 
     @OptIn(ExperimentalAtomicApi::class)

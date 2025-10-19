@@ -4,7 +4,7 @@ import com.github.oxo42.stateless4j.StateMachine
 import com.github.oxo42.stateless4j.StateMachineConfig
 import com.github.oxo42.stateless4j.delegates.Action
 import dev.whyoleg.cryptography.algorithms.AES
-import io.netty.util.internal.PlatformDependent
+import kotlinx.coroutines.channels.Channel
 import kotlinx.io.Buffer
 import kotlinx.io.readByteArray
 import org.chorus_oss.chorus.Player
@@ -33,13 +33,12 @@ import org.chorus_oss.protocol.packets.NetworkSettingsPacket
 import org.chorus_oss.protocol.types.DisconnectFailReason
 import org.chorus_oss.raknet.types.RakPriority
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     private val closed = AtomicBoolean()
-    private val inbound: Queue<Packet> = PlatformDependent.newSpscQueue()
+    private val inbound: Channel<Packet> = Channel(capacity = Channel.UNLIMITED)
     private val consumer = AtomicReference<((Packet) -> Unit)?>(null)
 
     @JvmField
@@ -216,7 +215,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         val packet = wrapper.packet
         this.logInbound(packet)
 
-        inbound.add(packet)
+        inbound.trySend(packet)
     }
 
     protected fun logOutbound(packet: Packet) {
@@ -378,13 +377,9 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
     fun tick() {
         val c = consumer.get()
-        if (c != null) {
-            while (true) {
-                val packet = inbound.poll() ?: break
-                c.invoke(packet)
-            }
-        } else {
-            inbound.clear()
+        while (true) {
+            val packet = inbound.tryReceive().getOrNull() ?: break
+            c?.invoke(packet)
         }
     }
 
