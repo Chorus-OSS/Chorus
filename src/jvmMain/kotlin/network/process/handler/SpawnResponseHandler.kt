@@ -29,6 +29,8 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
 
         this.startGame()
 
+        requireNotNull(player)
+
         log.debug("Sending item components")
         val entries = mutableSetOf<ItemEntry>()
 
@@ -53,7 +55,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             )
         }
 
-        player!!.sendPacket(
+        player.sendPacket(
             ItemRegistryPacket(
                 items = entries.toList()
             )
@@ -65,9 +67,6 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
                 ByteString(Registries.ENTITY.tag)
             )
         )
-
-        // 注册实体属性
-        // Register entity attributes
 
         log.debug("Sending actor properties")
         for (pk in getPacketCache()) {
@@ -233,7 +232,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             serverAuthoritativeSound = false,
             tickDeathSystemsEnabled = false,
         )
-        player.sendPacketImmediately(packet)
+        player.sendPacket(packet)
     }
 
     override fun handle(packet: Packet) {

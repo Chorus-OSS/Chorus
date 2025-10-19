@@ -42,7 +42,11 @@ class BedrockPeer(val rakSession: RakSession) {
     val address: InetSocketAddress
         get() = rakSession.address
 
-    fun close() {}
+    fun close() {
+        for (session in sessions.values) {
+            session.close(null)
+        }
+    }
 
     private fun onPacket(stream: Source) {
         val id = Proto.UByte.deserialize(stream)
