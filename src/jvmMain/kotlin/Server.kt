@@ -91,8 +91,6 @@ import org.jetbrains.annotations.ApiStatus
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
-import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.net.UnknownHostException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -514,8 +512,6 @@ class Server internal constructor(
         Runtime.getRuntime().addShutdownHook(Thread { this.shutdown() })
         this.start()
     }
-
-    val enabledNetworkEncryption: Boolean = settings.networkSettings.encryption
 
     private fun loadLevels() {
         val file = File(this.dataPath + "/worlds")

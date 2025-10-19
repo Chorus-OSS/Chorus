@@ -165,7 +165,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        if (server.enabledNetworkEncryption) {
+        if (server.settings.networkSettings.encryption) {
             this.enableEncryption(chainData)
         } else {
             session.machine.fire(SessionState.ResourcePack)

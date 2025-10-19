@@ -75,18 +75,12 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
             .onExit(Action { this.onSessionStartSuccess() })
             .permit(SessionState.Login, SessionState.Login)
 
-        cfg.configure(SessionState.Login).onEntry(Action {
-            this.packetHandler = (
-                    LoginHandler(
-                        this
-                    ) { info: PlayerInfo? ->
-                        this.info = info
-                    })
-        })
+        cfg.configure(SessionState.Login)
+            .onEntry(Action { this.packetHandler = LoginHandler(this) { this.info = it } })
             .onExit(Action { this.onServerLoginSuccess() })
             .permitIf(
                 SessionState.Encryption, SessionState.Encryption
-            ) { Server.instance.enabledNetworkEncryption }
+            ) { Server.instance.settings.networkSettings.encryption }
             .permit(SessionState.ResourcePack, SessionState.ResourcePack)
 
         cfg.configure(SessionState.Encryption)
