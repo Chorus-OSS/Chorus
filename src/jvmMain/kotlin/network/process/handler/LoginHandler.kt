@@ -3,7 +3,7 @@ package org.chorus_oss.chorus.network.process.handler
 
 import kotlinx.coroutines.runBlocking
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils
 import org.chorus_oss.chorus.experimental.network.protocol.utils.decode
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState

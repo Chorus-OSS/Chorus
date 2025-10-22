@@ -4,7 +4,7 @@ import dev.whyoleg.cryptography.algorithms.ECDSA
 import kotlinx.io.*
 import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.Server
-import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils
 import java.util.*
 import kotlin.io.encoding.Base64
 

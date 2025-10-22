@@ -1,13 +1,16 @@
 package org.chorus_oss.chorus.experimental.network.connection
 
+import dev.whyoleg.cryptography.DelicateCryptographyApi
 import dev.whyoleg.cryptography.algorithms.AES
 import io.ktor.network.sockets.InetSocketAddress
 import kotlinx.io.Buffer
 import kotlinx.io.Source
+import kotlinx.io.bytestring.ByteString
 import kotlinx.io.readByteArray
 import kotlinx.io.readByteString
-import kotlinx.io.write
-import org.chorus_oss.chorus.experimental.network.connection.EncryptionUtils.createTrailer
+import kotlinx.io.readUByte
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createIv
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createTrailer
 import org.chorus_oss.chorus.experimental.network.connection.compression.Compressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.NOOPCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.SnappyCompressor
@@ -48,29 +51,34 @@ class BedrockPeer(val rakSession: RakSession) {
         }
     }
 
+    @OptIn(DelicateCryptographyApi::class)
     private fun onPacket(stream: Source) {
-        val id = Proto.UByte.deserialize(stream)
-        if (id.toUInt() != 0xFEu) return
+        if (stream.exhausted()) return
+        if (stream.readUByte().toUInt() != 0xFEu) return
 
-        val decrypted = encryption?.let { key ->
-            val raw = key.cipher().decryptBlocking(stream.readByteArray())
+        var data = stream.readByteArray()
 
-            Buffer().also { it.write(raw, 0, raw.size - 8) }
-        } ?: stream
+        encryption?.let { key ->
+            val raw = key.cipher().decryptWithIvBlocking(createIv(key), data)
 
-        val decompressed = compressor?.let { compressor ->
-            val compressor = when (val alg = Proto.UByte.deserialize(decrypted).toUInt()) {
+            data = raw.copyOf(raw.size - 8)
+        }
+
+        compressor?.let { compressor ->
+            val compressor = when (val alg = data[0].toUByte().toUInt()) {
                 0x00u -> compressor as? DeflateCompressor ?: DeflateCompressor()
                 0x01u -> compressor as? SnappyCompressor ?: SnappyCompressor()
                 0xFFu -> compressor as? NOOPCompressor ?: NOOPCompressor()
                 else -> throw IllegalStateException("invalid compression algorithm: $alg")
             }
-            val raw = compressor.decompress(decrypted.readByteString())
 
-            Buffer().also { it.write(raw) }
-        } ?: decrypted
+            data = compressor.decompress(data.copyOfRange(1, data.size))
+        }
 
-        val batch = BatchWrapper.deserialize(decompressed)
+        val batch = Buffer().run {
+            write(data)
+            BatchWrapper.deserialize(this)
+        }
 
         for (packet in batch.packets) {
             val id = packet.header.targetSubClientID.toInt()
@@ -79,33 +87,38 @@ class BedrockPeer(val rakSession: RakSession) {
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
+    @OptIn(ExperimentalAtomicApi::class, DelicateCryptographyApi::class, ExperimentalUnsignedTypes::class)
     fun sendRaw(priority: RakPriority, raw: Buffer) {
-        val decrypted = Buffer()
+        var data = raw.readByteArray()
 
-        val compressed = compressor?.let { compressor ->
-            when (compressor) {
-                is DeflateCompressor -> Proto.UByte.serialize(0x00u, decrypted)
-                is SnappyCompressor -> Proto.UByte.serialize(0x01u, decrypted)
-                is NOOPCompressor -> Proto.UByte.serialize(0xFFu, decrypted)
-            }
-            compressor.compress(raw.readByteString())
-        } ?: raw.readByteString()
+        compressor?.let { compressor ->
+            val compressionByte = when (compressor) {
+                is DeflateCompressor -> 0x00u
+                is SnappyCompressor -> 0x01u
+                is NOOPCompressor -> 0xFFu
+            }.toByte()
 
-        decrypted.write(compressed)
+            data = byteArrayOf(compressionByte) + compressor.compress(data)
+        }
 
-        val encrypted = encryption?.let { key ->
-            val raw = decrypted.readByteArray()
-            val trailer = createTrailer(raw, key, encryptedCounter)
+        encryption?.let { key ->
+            val trailer = createTrailer(
+                data,
+                key,
+                encryptedCounter
+            )
 
-            key.cipher().encryptBlocking(raw + trailer)
-        } ?: decrypted.readByteArray()
+            data = key
+                .cipher()
+                .encryptWithIvBlocking(
+                    createIv(key),
+                    data + trailer
+                )
+        }
 
-        val stream = Buffer()
-        Proto.UByte.serialize(0xFEu, stream)
-        stream.write(encrypted)
+        data = byteArrayOf(0xFEu.toByte()) + data
 
-        rakSession.send(stream.readByteString(), RakReliability.ReliableOrdered, priority)
+        rakSession.send(ByteString(data), RakReliability.ReliableOrdered, priority)
     }
 
     @OptIn(ExperimentalAtomicApi::class)

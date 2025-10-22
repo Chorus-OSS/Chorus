@@ -1,15 +1,18 @@
-package org.chorus_oss.chorus.experimental.network.connection
+package org.chorus_oss.chorus.experimental.network.connection.encryption
 
 import dev.whyoleg.cryptography.CryptographyProvider
-import dev.whyoleg.cryptography.algorithms.*
+import dev.whyoleg.cryptography.algorithms.AES
+import dev.whyoleg.cryptography.algorithms.EC
+import dev.whyoleg.cryptography.algorithms.ECDH
+import dev.whyoleg.cryptography.algorithms.ECDSA
+import dev.whyoleg.cryptography.algorithms.SHA256
+import dev.whyoleg.cryptography.algorithms.SHA384
 import dev.whyoleg.cryptography.random.CryptographyRandom
 import kotlinx.io.Buffer
-import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToByteString
 import kotlinx.io.bytestring.encode
 import kotlinx.io.bytestring.encodeToByteString
 import kotlinx.io.readByteArray
-import kotlinx.io.readByteString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.chorus_oss.protocol.core.ProtoLE
@@ -26,10 +29,10 @@ object EncryptionUtils {
         parseKey("MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp")
     }
 
-    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA) }
+    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA.Companion) }
     val aes by lazy { CryptographyProvider.Default.get(AES.CTR) }
     val digest by lazy { CryptographyProvider.Default.get(SHA256) }
-    val ecdh by lazy { CryptographyProvider.Default.get(ECDH) }
+    val ecdh by lazy { CryptographyProvider.Default.get(ECDH.Companion) }
 
     val curve = EC.Curve.P384
     val publicFormat = EC.PublicKey.Format.DER
@@ -127,5 +130,14 @@ object EncryptionUtils {
         val keyBytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
 
         return hasher.hashBlocking(counterBytes + data + keyBytes).copyOf(8)
+    }
+
+    fun createIv(key: AES.CTR.Key): ByteArray {
+        val keyBytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
+
+        return ByteArray(16).apply {
+            keyBytes.copyInto(this, endIndex = 12)
+            this[15] = 2
+        }
     }
 }
