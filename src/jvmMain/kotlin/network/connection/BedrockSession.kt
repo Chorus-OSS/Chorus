@@ -28,6 +28,8 @@ import org.chorus_oss.chorus.registry.CreativeItemRegistry
 import org.chorus_oss.chorus.registry.Registries
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
+import org.chorus_oss.protocol.core.ProtoVAR
+import org.chorus_oss.protocol.core.types.UInt
 import org.chorus_oss.protocol.packets.CraftingDataPacket
 import org.chorus_oss.protocol.packets.NetworkSettingsPacket
 import org.chorus_oss.protocol.types.DisconnectFailReason
@@ -168,9 +170,14 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
             targetSubClientID = 0u,
         )
 
-        val raw = Buffer().also {
+        val wrapper = Buffer().also {
             PacketHeader.serialize(header, it)
             it.write(buf.readByteArray())
+        }
+
+        val raw = Buffer().apply {
+            ProtoVAR.UInt.serialize(wrapper.size.toUInt(), this)
+            write(wrapper, wrapper.size)
         }
 
         peer.sendRaw(RakPriority.Normal, raw)

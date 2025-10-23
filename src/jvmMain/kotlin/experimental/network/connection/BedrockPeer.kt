@@ -48,6 +48,7 @@ class BedrockPeer(val rakSession: RakSession) {
     fun close() {
         for (session in sessions.values) {
             session.close(null)
+            session.onClose()
         }
     }
 

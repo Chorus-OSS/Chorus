@@ -232,7 +232,7 @@ class SpawnResponseHandler(session: BedrockSession) : BedrockSessionPacketHandle
             serverAuthoritativeSound = false,
             tickDeathSystemsEnabled = false,
         )
-        player.sendPacket(packet)
+        player.sendPacketImmediately(packet)
     }
 
     override fun handle(packet: Packet) {
