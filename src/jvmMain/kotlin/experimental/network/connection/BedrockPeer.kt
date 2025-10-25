@@ -90,16 +90,15 @@ class BedrockPeer(val rakSession: RakSession) {
             data = compressor.decompress(data.copyOfRange(1, data.size))
         }
 
-        val batch = Buffer().run {
-            write(data)
-            BatchWrapper.deserialize(this)
-        }
+        val buf = Buffer()
+        buf.write(data)
+        val batch = BatchWrapper.deserialize(buf)
+        buf.clear()
 
         for (packet in batch.packets) {
-            val packet = Buffer().run {
-                write(packet)
-                PacketWrapper.deserialize(this)
-            }
+            buf.write(packet)
+            val packet = PacketWrapper.deserialize(buf)
+            buf.clear()
 
             val id = packet.header.targetSubClientID.toInt()
             val session = sessions.getOrPut(id) { BedrockSession(this, id) }
