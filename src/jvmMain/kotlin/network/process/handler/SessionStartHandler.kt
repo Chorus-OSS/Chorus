@@ -27,7 +27,7 @@ class SessionStartHandler(session: BedrockSession) : BedrockSessionPacketHandler
             return
         }
 
-        val server = session.server
+        val server = Server.instance
         if (server.bannedIPs.isBanned(session.addressString)) {
             val reason = server.bannedIPs.entries[session.addressString]!!.reason
             session.close(if (reason.isNotEmpty()) "You are banned. Reason: $reason" else "You are banned")

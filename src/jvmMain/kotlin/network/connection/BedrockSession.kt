@@ -50,12 +50,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     private var info: PlayerInfo? = null
     protected var packetHandler: PacketHandler? = null
 
-    @JvmField
-    var address: io.ktor.network.sockets.InetSocketAddress?
-
     var authenticated: Boolean = false
-        private set
-
 
     init {
         this.setPacketConsumer { pk ->
@@ -69,7 +64,6 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
             }
         }
 
-        this.address = socketAddress
         log.debug("creating session {}", peer.address.toString())
         val cfg = StateMachineConfig<SessionState, SessionState>()
 
@@ -306,7 +300,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
         }
         val player = this.player
         player?.close(BedrockDisconnectReasons.DISCONNECTED)
-        Server.instance.network.onSessionDisconnect(address!!)
+        Server.instance.network.onSessionDisconnect(socketAddress)
         peer.removeSession(this)
     }
 
@@ -315,7 +309,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
 
     fun onPlayerCreated(player: Player) {
         this.player = player
-        Server.instance.onPlayerLogin(address, player)
+        Server.instance.onPlayerLogin(socketAddress, player)
     }
 
     fun notifyTerrainReady() {
@@ -385,7 +379,7 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
     }
 
     val addressString: String
-        get() = address!!.hostname
+        get() = socketAddress.hostname
 
     fun syncAvailableCommands() {
         val data: MutableMap<String, CommandDataVersions> = HashMap()
@@ -442,13 +436,6 @@ class BedrockSession(val peer: BedrockPeer, val subClientId: Int) : Loggable {
             this.syncAvailableCommands()
         }
     }
-
-    fun setAuthenticated() {
-        authenticated = true
-    }
-
-    val server: Server
-        get() = Server.instance
 
     val packetManager: PacketManager?
         get() {

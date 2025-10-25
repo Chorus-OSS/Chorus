@@ -15,7 +15,6 @@ import org.chorus_oss.protocol.core.Packet
 import org.chorus_oss.protocol.packets.LoginPacket
 import org.chorus_oss.protocol.types.InputMode
 import org.chorus_oss.protocol.types.Platform
-import java.net.InetSocketAddress
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
@@ -24,8 +23,6 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
 
     override fun handle(packet: Packet) {
         if (packet !is LoginPacket) return
-
-        val server = session.server
 
         val packetData = packet.decode()
 
@@ -44,29 +41,29 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
         val chainData = ClientChainData.read(packet)
 
         //verify the player if enable the xbox-auth
-        if (!chainData.isXboxAuthed && server.settings.serverSettings.xboxAuth) {
+        if (!chainData.isXboxAuthed && Server.instance.settings.serverSettings.xboxAuth) {
             log.debug("disconnection due to notAuthenticated")
             session.close("disconnectionScreen.notAuthenticated")
             return
         }
 
         //Verify the number of server player
-        if (server.onlinePlayers.size >= server.maxPlayers) {
+        if (Server.instance.onlinePlayers.size >= Server.instance.maxPlayers) {
             log.debug("disconnection due to serverFull")
             session.close("disconnectionScreen.serverFull")
             return
         }
 
-        //set proxy ip
-        if (server.settings.baseSettings.waterdogpe && chainData.waterdogIP != null) {
-            val oldAddress = session.address
-            session.address = io.ktor.network.sockets.InetSocketAddress(chainData.waterdogIP!!, session.address!!.port)
-//            Server.instance.network.replaceSessionAddress(oldAddress, session.address!!, session)
-        }
+//        //set proxy ip
+//        if (server.settings.baseSettings.waterdogpe && chainData.waterdogIP != null) {
+//            val oldAddress = session.address
+//            session.address = io.ktor.network.sockets.InetSocketAddress(chainData.waterdogIP!!, session.address!!.port)
+////            Server.instance.network.replaceSessionAddress(oldAddress, session.address!!, session)
+//        }
 
         // Verify if the titleId match with DeviceOs
         val predictedDeviceOS = getPredictedDeviceOS(chainData)
-        if (predictedDeviceOS != chainData.deviceOS && server.settings.serverSettings.xboxAuth) {
+        if (predictedDeviceOS != chainData.deviceOS && Server.instance.settings.serverSettings.xboxAuth) {
             log.debug("disconnection due to mismatched device os, predicted: $predictedDeviceOS, actual: ${chainData.deviceOS}")
             session.close("§cPacket handling error")
             return
@@ -127,7 +124,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
         }
 
         val skin = packetData.skinData.skin
-        if (server.settings.playerSettings.forceSkinTrusted) {
+        if (Server.instance.settings.playerSettings.forceSkinTrusted) {
             skin.setTrusted(true)
         }
 
@@ -149,15 +146,15 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
         }
 
         consumer.accept(info)
-        session.setAuthenticated()
+        session.authenticated = true
 
-        if (!server.isWhitelisted((info.username).lowercase())) {
+        if (!Server.instance.isWhitelisted((info.username).lowercase())) {
             log.debug("disconnection due to white-listed")
             session.close("Server is white-listed")
             return
         }
 
-        val entry = server.bannedPlayers.entries[info.username.lowercase()]
+        val entry = Server.instance.bannedPlayers.entries[info.username.lowercase()]
         if (entry != null) {
             val reason = entry.reason
             log.debug("disconnection due to named ban")
@@ -165,7 +162,7 @@ class LoginHandler(session: BedrockSession, private val consumer: Consumer<Playe
             return
         }
 
-        if (server.settings.networkSettings.encryption) {
+        if (Server.instance.settings.networkSettings.encryption) {
             this.enableEncryption(chainData)
         } else {
             session.machine.fire(SessionState.ResourcePack)

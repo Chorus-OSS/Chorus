@@ -564,7 +564,7 @@ open class Player(
     init {
         this.perm = PermissibleBase(this)
         this.lastBreak = -1
-        this.socketAddress = session.address
+        this.socketAddress = session.socketAddress
         this.rawSocketAddress = socketAddress
         this.chunkSendCountPerTick = Server.instance.settings.chunkSettings.perTickSend
         this.spawnThreshold = Server.instance.settings.chunkSettings.spawnThreshold
