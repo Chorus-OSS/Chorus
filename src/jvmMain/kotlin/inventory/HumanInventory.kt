@@ -516,7 +516,7 @@ class HumanInventory(human: IHuman) //9+27+4
                     list = armor.toList().foldIndexed(mutableListOf()) { i, acc, item ->
                         if (!item.isNothing) acc.add(
                             PlayerArmorDamagePacket.Entry(
-                                slot = (i * 2).toByte(),
+                                slot = i,
                                 damage = item.damage.toShort()
                             )
                         )
@@ -586,7 +586,7 @@ class HumanInventory(human: IHuman) //9+27+4
                 val pk2 = PlayerArmorDamagePacket(
                     list = listOf(
                         PlayerArmorDamagePacket.Entry(
-                            slot = (index * 2).toByte(),
+                            slot = index,
                             damage = (if (!armor[index].isNothing) armor[index].damage else 0).toShort()
                         )
                     )

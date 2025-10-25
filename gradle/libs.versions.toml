@@ -36,7 +36,7 @@ disruptor = "4.0.0"
 caffeine-ver = "3.2.0"
 
 # Kotlin Multiplatform Libraries
-chorus-protocol = "v844.0"
+chorus-protocol = "v844.1"
 chorus-raknet = "0.0.3"
 chorus-kflate = "0.0.1"
 chorus-snappy = "0.0.1"
