@@ -2,25 +2,20 @@ package org.chorus_oss.chorus.experimental.network.connection
 
 import dev.whyoleg.cryptography.DelicateCryptographyApi
 import dev.whyoleg.cryptography.algorithms.AES
-import io.ktor.network.sockets.InetSocketAddress
-import kotlinx.io.Buffer
-import kotlinx.io.Source
+import io.ktor.network.sockets.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.io.*
 import kotlinx.io.bytestring.ByteString
-import kotlinx.io.readByteArray
-import kotlinx.io.readByteString
-import kotlinx.io.readUByte
-import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createIv
-import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createTrailer
 import org.chorus_oss.chorus.experimental.network.connection.compression.Compressor
+import org.chorus_oss.chorus.experimental.network.connection.compression.DeflateCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.NOOPCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.SnappyCompressor
-import org.chorus_oss.chorus.experimental.network.connection.compression.DeflateCompressor
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createIv
+import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createTrailer
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
 import org.chorus_oss.chorus.utils.Loggable
 import org.chorus_oss.protocol.core.Packet
-import org.chorus_oss.protocol.core.Proto
-import org.chorus_oss.protocol.core.types.UByte
 import org.chorus_oss.raknet.session.RakSession
 import org.chorus_oss.raknet.types.RakPriority
 import org.chorus_oss.raknet.types.RakReliability
@@ -30,6 +25,23 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 class BedrockPeer(val rakSession: RakSession) {
     init {
         rakSession.onPacket = this::onPacket
+
+        rakSession.onTick {
+            val packets = generateSequence { outbound.tryReceive().getOrNull() }.toList()
+            if (packets.isNotEmpty()) {
+                sendBytes(
+                    Buffer().apply {
+                        BatchWrapper.serialize(
+                            BatchWrapper(
+                                packets = packets,
+                            ),
+                            this
+                        )
+                    }.readByteString(),
+                    RakPriority.Normal
+                )
+            }
+        }
     }
 
     private var compressor: Compressor? = null
@@ -39,6 +51,8 @@ class BedrockPeer(val rakSession: RakSession) {
     private val encryptedCounter: AtomicLong = AtomicLong(0)
     @OptIn(ExperimentalAtomicApi::class)
     private val decryptedCounter: AtomicLong = AtomicLong(0)
+
+    private val outbound: Channel<ByteString> = Channel(capacity = Channel.UNLIMITED)
 
     private val sessions: MutableMap<Int, BedrockSession> = mutableMapOf()
 
@@ -82,15 +96,40 @@ class BedrockPeer(val rakSession: RakSession) {
         }
 
         for (packet in batch.packets) {
+            val packet = Buffer().run {
+                write(packet)
+                PacketWrapper.deserialize(this)
+            }
+
             val id = packet.header.targetSubClientID.toInt()
             val session = sessions.getOrPut(id) { BedrockSession(this, id) }
             session.onPacket(packet)
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class, DelicateCryptographyApi::class, ExperimentalUnsignedTypes::class)
     fun sendRaw(priority: RakPriority, raw: Buffer) {
-        var data = raw.readByteArray()
+        val data = raw.readByteString()
+        when (priority) {
+            RakPriority.Immediate -> {
+                sendBytes(
+                    Buffer().apply {
+                        BatchWrapper.serialize(
+                            BatchWrapper(
+                                packets = listOf(data)
+                            ),
+                            this
+                        )
+                    }.readByteString(),
+                    priority
+                )
+            }
+            else -> outbound.trySend(data)
+        }
+    }
+
+    @OptIn(ExperimentalAtomicApi::class, DelicateCryptographyApi::class, ExperimentalUnsignedTypes::class)
+    private fun sendBytes(bytes: ByteString, priority: RakPriority) {
+        var data = bytes.toByteArray()
 
         compressor?.let { compressor ->
             val compressionByte = when (compressor) {
@@ -122,13 +161,15 @@ class BedrockPeer(val rakSession: RakSession) {
         rakSession.send(ByteString(data), RakReliability.ReliableOrdered, priority)
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
     fun send(priority: RakPriority, vararg packets: PacketWrapper) {
-        val stream = Buffer()
-        val batch = BatchWrapper(packets.toList())
-        BatchWrapper.serialize(batch, stream)
-
-        sendRaw(priority, stream)
+        for (packet in packets) {
+            sendRaw(
+                priority,
+                Buffer().apply {
+                    PacketWrapper.serialize(packet, this)
+                }
+            )
+        }
     }
 
     fun sendPacket(sender: Int, target: Int, packet: Packet) {
