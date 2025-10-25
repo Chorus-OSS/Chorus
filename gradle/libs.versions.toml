@@ -37,7 +37,7 @@ caffeine-ver = "3.2.0"
 
 # Kotlin Multiplatform Libraries
 chorus-protocol = "v844.0"
-chorus-raknet = "0.0.2"
+chorus-raknet = "0.0.3"
 chorus-kflate = "0.0.1"
 chorus-snappy = "0.0.1"
 kotlinx-io = "0.8.0"
