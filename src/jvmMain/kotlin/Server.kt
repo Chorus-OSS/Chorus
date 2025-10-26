@@ -12,7 +12,6 @@ import org.chorus_oss.chorus.command.PluginIdentifiableCommand
 import org.chorus_oss.chorus.command.SimpleCommandMap
 import org.chorus_oss.chorus.command.defaults.WorldCommand
 import org.chorus_oss.chorus.command.function.FunctionManager
-import org.chorus_oss.chorus.compression.ZlibChooser.setProvider
 import org.chorus_oss.chorus.config.ChorusTOML
 import org.chorus_oss.chorus.console.ChorusConsole
 import org.chorus_oss.chorus.dispenser.DispenseBehaviorRegister
@@ -388,8 +387,6 @@ class Server internal constructor(
         }
         ServerScheduler.WORKERS = poolSizeNumber
         this.scheduler = ServerScheduler()
-
-        setProvider(settings.networkSettings.zlibProvider)
 
         this.serverAuthoritativeMovementMode =
             when (settings.serverSettings.serverAuthoritativeMovement) {

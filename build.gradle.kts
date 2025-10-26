@@ -1,7 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinJvm
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -39,7 +37,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(libs.chorus.protocol)
                 implementation(libs.chorus.raknet)
@@ -61,9 +59,9 @@ kotlin {
             }
         }
 
-        val commonTest by getting {}
+        commonTest {}
 
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 api(libs.bundles.netty)
                 api(libs.bundles.logging)
@@ -78,19 +76,15 @@ kotlin {
                 implementation(libs.bundles.leveldb)
                 implementation(libs.rng.simple)
                 implementation(libs.rng.sampling)
-                implementation(libs.asm)
-                implementation(libs.jose4j)
                 implementation(libs.sentry)
                 implementation(libs.sentry.log4j2)
-                implementation(libs.disruptor)
                 implementation(libs.oshi)
-                implementation(libs.bundles.compress)
                 implementation(libs.bundles.terminal)
                 implementation(libs.caffeine)
             }
         }
 
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
                 implementation(libs.bundles.test)
                 implementation(libs.commonsio)

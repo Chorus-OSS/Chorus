@@ -6,6 +6,7 @@ import io.ktor.network.sockets.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.io.*
 import kotlinx.io.bytestring.ByteString
+import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.experimental.network.connection.compression.Compressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.DeflateCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.NOOPCompressor
@@ -47,8 +48,10 @@ class BedrockPeer(val rakSession: RakSession) {
     private var compressor: Compressor? = null
 
     private var encryption: AES.CTR.Key? = null
+
     @OptIn(ExperimentalAtomicApi::class)
     private val encryptedCounter: AtomicLong = AtomicLong(0)
+
     @OptIn(ExperimentalAtomicApi::class)
     private val decryptedCounter: AtomicLong = AtomicLong(0)
 
@@ -81,7 +84,9 @@ class BedrockPeer(val rakSession: RakSession) {
 
         compressor?.let { compressor ->
             val compressor = when (val alg = data[0].toUByte().toUInt()) {
-                0x00u -> compressor as? DeflateCompressor ?: DeflateCompressor()
+                0x00u -> compressor as? DeflateCompressor
+                    ?: DeflateCompressor(Server.instance.settings.networkSettings.compressionLevel)
+
                 0x01u -> compressor as? SnappyCompressor ?: SnappyCompressor()
                 0xFFu -> compressor as? NOOPCompressor ?: NOOPCompressor()
                 else -> throw IllegalStateException("invalid compression algorithm: $alg")
@@ -122,6 +127,7 @@ class BedrockPeer(val rakSession: RakSession) {
                     priority
                 )
             }
+
             else -> outbound.trySend(data)
         }
     }
@@ -211,7 +217,7 @@ class BedrockPeer(val rakSession: RakSession) {
 
     fun setCompression(algorithm: PacketCompressionAlgorithm) {
         compressor = when (algorithm) {
-            PacketCompressionAlgorithm.ZLIB -> DeflateCompressor()
+            PacketCompressionAlgorithm.ZLIB -> DeflateCompressor(Server.instance.settings.networkSettings.compressionLevel)
             PacketCompressionAlgorithm.SNAPPY -> SnappyCompressor()
             PacketCompressionAlgorithm.NONE -> NOOPCompressor()
         }

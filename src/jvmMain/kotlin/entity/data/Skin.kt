@@ -1,12 +1,13 @@
 package org.chorus_oss.chorus.entity.data
 
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.chorus_oss.chorus.utils.PersonaPiece
 import org.chorus_oss.chorus.utils.PersonaPieceTint
 import org.chorus_oss.chorus.utils.SerializedImage
 import org.chorus_oss.chorus.utils.SkinAnimation
-import org.jose4j.json.internal.json_simple.JSONObject
-import org.jose4j.json.internal.json_simple.JSONValue
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -57,12 +58,10 @@ class Skin {
             return false
         }
         try {
-            val `object`: JSONObject = JSONValue.parseWithException(skinResourcePatch) as JSONObject
-            val geometry: JSONObject = `object`["geometry"] as JSONObject
-            return geometry.containsKey("default") && geometry["default"] is String
-        } catch (e: ClassCastException) {
-            return false
-        } catch (e: NullPointerException) {
+            val json = Json.parseToJsonElement(skinResourcePatch).jsonObject
+            val geometry = json["geometry"]!!.jsonObject
+            return geometry.containsKey("default") && geometry["default"]!!.jsonPrimitive.isString
+        } catch (_: Throwable) {
             return false
         }
     }

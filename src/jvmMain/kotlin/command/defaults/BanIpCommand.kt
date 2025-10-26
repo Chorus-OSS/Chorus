@@ -14,7 +14,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.io.UncheckedIOException
-import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.regex.Pattern
 

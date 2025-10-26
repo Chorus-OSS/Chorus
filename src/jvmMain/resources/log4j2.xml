@@ -14,10 +14,10 @@
         </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
-        <AsyncRoot level="INFO" includeLocation="true">
+        <Root level="INFO" includeLocation="true">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
-        </AsyncRoot>
+        </Root>
         <Logger name="oshi.hardware" level="info"/>
         <Logger name="org.jose4j" level="info"/>
         <Logger name="io.netty.channel.nio" level="info"/>
