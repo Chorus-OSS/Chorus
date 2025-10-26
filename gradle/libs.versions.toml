@@ -91,6 +91,7 @@ ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
 json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "json" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 fleks = { module = "io.github.quillraven.fleks:Fleks", version.ref = "fleks" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet"}
 rwmutex = { module = "com.mayakapps.rwmutex:rwmutex", version.ref = "rwmutex" }

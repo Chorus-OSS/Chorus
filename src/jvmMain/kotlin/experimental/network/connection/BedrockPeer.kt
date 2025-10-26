@@ -11,7 +11,8 @@ import org.chorus_oss.chorus.experimental.network.connection.compression.Compres
 import org.chorus_oss.chorus.experimental.network.connection.compression.DeflateCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.NOOPCompressor
 import org.chorus_oss.chorus.experimental.network.connection.compression.SnappyCompressor
-import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createIv
+import org.chorus_oss.chorus.experimental.network.connection.encryption.DuplexCipher
+import org.chorus_oss.chorus.experimental.network.connection.encryption.MonoCipher
 import org.chorus_oss.chorus.experimental.network.connection.encryption.EncryptionUtils.createTrailer
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.protocol.types.PacketCompressionAlgorithm
@@ -47,7 +48,7 @@ class BedrockPeer(val rakSession: RakSession) {
 
     private var compressor: Compressor? = null
 
-    private var encryption: AES.CTR.Key? = null
+    private var encryption: DuplexCipher? = null
 
     @OptIn(ExperimentalAtomicApi::class)
     private val encryptedCounter: AtomicLong = AtomicLong(0)
@@ -76,8 +77,8 @@ class BedrockPeer(val rakSession: RakSession) {
 
         var data = stream.readByteArray()
 
-        encryption?.let { key ->
-            val raw = key.cipher().decryptWithIvBlocking(createIv(key), data)
+        encryption?.let {
+            val raw = it.decrypt(data)
 
             data = raw.copyOf(raw.size - 8)
         }
@@ -146,19 +147,14 @@ class BedrockPeer(val rakSession: RakSession) {
             data = byteArrayOf(compressionByte) + compressor.compress(data)
         }
 
-        encryption?.let { key ->
+        encryption?.let {
             val trailer = createTrailer(
                 data,
-                key,
+                it.key,
                 encryptedCounter
             )
 
-            data = key
-                .cipher()
-                .encryptWithIvBlocking(
-                    createIv(key),
-                    data + trailer
-                )
+            data = it.encrypt(data + trailer)
         }
 
         data = byteArrayOf(0xFEu.toByte()) + data
@@ -210,7 +206,7 @@ class BedrockPeer(val rakSession: RakSession) {
     fun enableEncryption(key: AES.CTR.Key) {
         check(encryption == null) { "Encryption is already enabled" }
 
-        encryption = key
+        encryption = DuplexCipher(key)
 
         log.debug("Encryption enabled for {}", address)
     }
