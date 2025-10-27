@@ -6,7 +6,6 @@ import org.chorus_oss.chorus.command.data.CommandParamType
 import org.chorus_oss.chorus.command.data.CommandParameter
 import org.chorus_oss.chorus.command.tree.ParamList
 import org.chorus_oss.chorus.command.utils.CommandLogger
-import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.regex.Pattern
 
@@ -36,7 +35,7 @@ class PardonIpCommand(name: String) : VanillaCommand(name, "unban an IP") {
         ) {
             Server.instance.bannedIPs.remove(value)
             try {
-                Server.instance.network.unblockAddress(InetAddress.getByName(value))
+//                Server.instance.network.unblockAddress(InetAddress.getByName(value))
             } catch (e: UnknownHostException) {
                 log.addError("commands.unbanip.invalid").output()
                 return 0

@@ -1,13 +1,20 @@
-package org.chorus_oss.chorus.experimental.network.connection
+package org.chorus_oss.chorus.experimental.network.connection.encryption
 
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.*
 import dev.whyoleg.cryptography.random.CryptographyRandom
+import kotlinx.io.Buffer
 import kotlinx.io.bytestring.decodeToByteString
 import kotlinx.io.bytestring.encode
 import kotlinx.io.bytestring.encodeToByteString
+import kotlinx.io.readByteArray
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.chorus_oss.protocol.core.ProtoLE
+import org.chorus_oss.protocol.core.types.Long
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -17,10 +24,10 @@ object EncryptionUtils {
         parseKey("MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp")
     }
 
-    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA) }
+    val ecdsa by lazy { CryptographyProvider.Default.get(ECDSA.Companion) }
     val aes by lazy { CryptographyProvider.Default.get(AES.CTR) }
     val digest by lazy { CryptographyProvider.Default.get(SHA256) }
-    val ecdh by lazy { CryptographyProvider.Default.get(ECDH) }
+    val ecdh by lazy { CryptographyProvider.Default.get(ECDH.Companion) }
 
     val curve = EC.Curve.P384
     val publicFormat = EC.PublicKey.Format.DER
@@ -81,32 +88,45 @@ object EncryptionUtils {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun createHandshakeJWT(serverKeyPair: ECDSA.KeyPair, token: ByteArray): String {
+        val b64 = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT)
+
         val header = JWTHeader(
             alg = "ES384",
             x5u = Base64.encode(
                 serverKeyPair.publicKey.encodeToByteString(EC.PublicKey.Format.DER)
             )
-        )
+        ).let { b64.encode(Json.encodeToString(it).toByteArray()) }
 
         val claims = JWTClaims(
             salt = Base64.encode(token)
-        )
+        ).let { b64.encode(Json.encodeToString(it).toByteArray()) }
 
-        val headerJSON = Json.encodeToString(header)
-        val claimsJSON = Json.encodeToString(claims)
+        return "$header.$claims".let {
+            val signature = serverKeyPair.privateKey.signatureGenerator(
+                digest = SHA384,
+                format = ECDSA.SignatureFormat.RAW
+            ).generateSignature(it.toByteArray())
 
-        val headerB64 = Base64.UrlSafe.encode(headerJSON.encodeToByteString())
-        val claimsB64 = Base64.UrlSafe.encode(claimsJSON.encodeToByteString())
+            "$it.${b64.encode(signature)}"
+        }
+    }
 
-        val unsigned = "$headerB64.$claimsB64"
+    @OptIn(ExperimentalAtomicApi::class)
+    fun createTrailer(data: ByteArray, key: AES.CTR.Key, counter: AtomicLong): ByteArray {
+        val hasher = digest.hasher()
 
-        val signature = serverKeyPair.privateKey.signatureGenerator(
-            digest = SHA384,
-            format = ECDSA.SignatureFormat.DER
-        ).generateSignature(unsigned.encodeToByteString())
+        val counterBytes = Buffer().also { ProtoLE.Long.serialize(counter.fetchAndIncrement(), it) }.readByteArray()
+        val keyBytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
 
-        val signatureB64 = Base64.UrlSafe.encode(signature)
+        return hasher.hashBlocking(counterBytes + data + keyBytes).copyOf(8)
+    }
 
-        return "$unsigned.$signatureB64"
+    fun createIv(key: AES.CTR.Key): ByteArray {
+        val keyBytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
+
+        return ByteArray(16).apply {
+            keyBytes.copyInto(this, endIndex = 12)
+            this[15] = 2
+        }
     }
 }

@@ -140,8 +140,8 @@ class LevelDBChunkSerializer private constructor() {
                             }
                             section = SubChunk(sectionY.toByte(), palettes)
                         }
-                        var layer = 0
-                        while (layer < layers) {
+
+                        for (layer in 0 until layers) {
                             section.layers[layer].readFromStoragePersistent(
                                 byteBuf
                             ) { hash: Int ->
@@ -149,7 +149,6 @@ class LevelDBChunkSerializer private constructor() {
                                     ?: return@readFromStoragePersistent BlockUnknown.properties.defaultState
                                 blockState
                             }
-                            layer++
                         }
                         sections[sectionY - minSectionY] = section
                     }

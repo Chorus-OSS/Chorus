@@ -21,7 +21,6 @@ import org.chorus_oss.protocol.types.BlockPos
 import org.chorus_oss.protocol.types.ContainerType
 import org.chorus_oss.protocol.types.item.ItemStack
 import org.jetbrains.annotations.Range
-import kotlin.experimental.or
 import kotlin.math.min
 
 /**
@@ -516,7 +515,7 @@ class HumanInventory(human: IHuman) //9+27+4
                     list = armor.toList().foldIndexed(mutableListOf()) { i, acc, item ->
                         if (!item.isNothing) acc.add(
                             PlayerArmorDamagePacket.Entry(
-                                slot = i.toByte(),
+                                slot = i,
                                 damage = item.damage.toShort()
                             )
                         )
@@ -586,7 +585,7 @@ class HumanInventory(human: IHuman) //9+27+4
                 val pk2 = PlayerArmorDamagePacket(
                     list = listOf(
                         PlayerArmorDamagePacket.Entry(
-                            slot = index.toByte(),
+                            slot = index,
                             damage = (if (!armor[index].isNothing) armor[index].damage else 0).toShort()
                         )
                     )

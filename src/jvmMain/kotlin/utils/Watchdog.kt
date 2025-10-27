@@ -29,8 +29,6 @@ class Watchdog(private val server: Server, private val time: Long) : Thread() {
     override fun run() {
         while (this.running) {
             //Refresh the advanced network information in watchdog, as this is time-consuming operate and will block the main thread
-            server.network.resetStatistics()
-
             val current = server.nextTick
             if (current != 0L) {
                 val now = System.currentTimeMillis()

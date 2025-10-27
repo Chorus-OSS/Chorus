@@ -1,6 +1,7 @@
 package org.chorus_oss.chorus.network.process.handler
 
 import kotlinx.io.bytestring.ByteString
+import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.network.connection.BedrockSession
 import org.chorus_oss.chorus.network.process.SessionState
@@ -21,13 +22,13 @@ import kotlin.uuid.Uuid
 class ResourcePackHandler(session: BedrockSession) : BedrockSessionPacketHandler(session) {
     init {
         val infoPacket = org.chorus_oss.protocol.packets.ResourcePacksInfoPacket(
-            texturePackRequired = session.server.forceResources,
+            texturePackRequired = Server.instance.forceResources,
             hasAddons = false,
             hasScripts = false,
             forceDisableVibrantVisuals = false,
             worldTemplateUuid = Uuid.random(),
             worldTemplateVersion = "",
-            texturePacks = session.server.resourcePackManager.resourceStack.map(TexturePackInfo::invoke)
+            texturePacks = Server.instance.resourcePackManager.resourceStack.map(TexturePackInfo::invoke)
         )
         session.sendPacket(infoPacket)
     }
@@ -40,7 +41,7 @@ class ResourcePackHandler(session: BedrockSession) : BedrockSessionPacketHandler
     }
 
     fun handleResponse(packet: org.chorus_oss.protocol.packets.ResourcePackClientResponsePacket) {
-        val server = session.server
+        val server = Server.instance
         when (packet.response) {
             org.chorus_oss.protocol.packets.ResourcePackClientResponsePacket.Companion.Response.Refused -> {
                 log.debug("ResourcePackClientResponsePacket STATUS_REFUSED")
@@ -100,7 +101,7 @@ class ResourcePackHandler(session: BedrockSession) : BedrockSessionPacketHandler
 
     fun handleRequest(packet: ResourcePackChunkRequestPacket) {
         // TODO: Pack version check
-        val mgr = session.server.resourcePackManager
+        val mgr = Server.instance.resourcePackManager
         val packID = UUID.fromString(packet.resourceName.split("_", limit = 2)[0])
         val resourcePack = mgr.getPackById(packID)
         if (resourcePack == null) {

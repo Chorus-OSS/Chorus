@@ -14,7 +14,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.io.UncheckedIOException
-import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.regex.Pattern
 
@@ -107,7 +106,7 @@ class BanIpCommand(name: String) : VanillaCommand(name, "commands.banip.descript
         }
 
         try {
-            Server.instance.network.blockAddress(InetAddress.getByName(ip), -1)
+//            Server.instance.network.blockAddress(InetAddress.getByName(ip), -1)
         } catch (e: UnknownHostException) {
             // ignore
         }

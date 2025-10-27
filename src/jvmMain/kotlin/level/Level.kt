@@ -710,7 +710,7 @@ class Level(
     }
 
     fun doTick(currentTick: Int) {
-        players.values.forEach(Consumer { player: Player -> player.session.tick() })
+        players.values.forEach { it.session.tick() }
         requireProvider()
         try {
             scheduler.mainThreadHeartbeat(currentTick)

@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.inventory.request
 
-import io.netty.util.internal.StringUtil
 import org.chorus_oss.chorus.Player
 import org.chorus_oss.chorus.Server
 import org.chorus_oss.chorus.block.BlockID
@@ -178,7 +177,7 @@ class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipe
                         val usedEnch = if (sacrificeEnchantment.identifier == null) {
                             Enchantment.getEnchantment(sacrificeEnchantment.id)
                         } else {
-                            Enchantment.getEnchantment(sacrificeEnchantment.identifier!!)
+                            Enchantment.getEnchantment(sacrificeEnchantment.identifier)
                         }
                         enchantments.add(usedEnch.setLevel(resultLevel))
                         var rarity: Int
@@ -206,7 +205,7 @@ class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipe
         }
 
         //Anvil - rename
-        if (StringUtil.isNullOrEmpty(filterString)) {
+        if (filterString.isNullOrEmpty()) {
             player.level!!.addSound(player.position, Sound.RANDOM_ANVIL_USE, 1f, 1f)
             if (target.hasCustomName()) {
                 costHelper = 1
@@ -311,7 +310,7 @@ class CraftRecipeOptionalProcessor : ItemStackRequestActionProcessor<CraftRecipe
             result = item
         }
 
-        if (!StringUtil.isNullOrEmpty(filterString)) {
+        if (!filterString.isNullOrEmpty()) {
             result.setCustomName(filterString)
         } else {
             result.clearCustomName()

@@ -100,15 +100,6 @@ class ChorusTOML {
         @SerialName("compression-level")
         var compressionLevel: Int = 7
 
-        @TomlComments(
-            "0 - KFlate",
-            "1 - Single-threaded low mem usage algorithm",
-            "2 - Multi-threaded caching algorithm",
-            "3 - Hardware-accelerated algorithm",
-        )
-        @SerialName("zlib-provider")
-        var zlibProvider: Int = 0
-
         @TomlComments("Use Snappy compression (Not recommended)")
         var snappy: Boolean = false
 

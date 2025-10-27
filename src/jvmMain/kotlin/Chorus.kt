@@ -1,9 +1,6 @@
 package org.chorus_oss.chorus
 
 import com.github.ajalt.clikt.core.main
-import io.netty.util.ResourceLeakDetector
-import io.netty.util.internal.logging.InternalLoggerFactory
-import io.netty.util.internal.logging.Log4J2LoggerFactory
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
@@ -29,12 +26,9 @@ object Chorus : Loggable {
     val START_TIME: Long = System.currentTimeMillis()
     var ANSI: Boolean = true
     var TITLE: Boolean = false
-    var shortTitle: Boolean = requiresShortTitle()
 
     @JvmStatic
     fun main(args: Array<String>) {
-        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED)
-
 //        val disableSentry = AtomicBoolean(false)
 //        disableSentry.set(System.getProperty("disableSentry", "false").toBoolean())
 //
@@ -55,17 +49,10 @@ object Chorus : Loggable {
 //            }
 //        }
 
-        // Force IPv4 since Chorus is not compatible with IPv6
-        System.setProperty("java.net.preferIPv4Stack", "true")
         System.setProperty("log4j.skipJansi", "false")
-        System.getProperties()
-            .putIfAbsent("io.netty.allocator.type", "unpooled") // Disable memory pooling unless specified
 
         // Force Mapped ByteBuffers for LevelDB till fixed.
         System.setProperty("leveldb.mmap", "true")
-
-        // Netty logger for debug info
-        InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE)
 
         val opts = ChorusOpts().also { it.main(args) }
 
@@ -103,12 +90,6 @@ object Chorus : Loggable {
         }
         LogManager.shutdown()
         Runtime.getRuntime().halt(0) // force exit
-    }
-
-    private fun requiresShortTitle(): Boolean {
-        //Shorter title for Windows 8/2012
-        val osName = System.getProperty("os.name").lowercase()
-        return osName.contains("windows") && (osName.contains("windows 8") || osName.contains("2012"))
     }
 
     var logLevel: Level?

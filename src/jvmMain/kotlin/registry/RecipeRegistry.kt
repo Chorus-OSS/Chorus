@@ -1,12 +1,8 @@
 package org.chorus_oss.chorus.registry
 
 
-import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
-import io.netty.util.collection.CharObjectHashMap
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
-import kotlinx.io.readByteArray
 import kotlinx.serialization.json.*
 import org.chorus_oss.chorus.experimental.network.protocol.utils.invoke
 import org.chorus_oss.chorus.generated.resources.Res
@@ -309,11 +305,6 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
         return null
     }
 
-    val craftingPacket: ByteBuf
-        get() = Unpooled.buffer().apply {
-            this.writeBytes(packet.readByteArray())
-        }
-
     val packet: Buffer
         get() = Companion.packet.copy()
 
@@ -613,7 +604,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
                             val shape = (recipe["shape"]!!.jsonArray.map { it.jsonPrimitive.content }).toTypedArray()
 
-                            val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
+                            val ingredients: MutableMap<Char, ItemDescriptor> = mutableMapOf()
 
                             val inputs = recipe["input"]!!.jsonObject
 
@@ -896,7 +887,7 @@ class RecipeRegistry : IRegistry<String, Recipe?, Recipe> {
 
         val first = outputs.removeFirst()
         val shape = (recipeObject["pattern"] as List<String>).toTypedArray()
-        val ingredients: MutableMap<Char, ItemDescriptor> = CharObjectHashMap()
+        val ingredients: MutableMap<Char, ItemDescriptor> = mutableMapOf()
 
         val priority = Utils.toInt(recipeObject["priority"]!!)
         val primaryResult = parseRecipeItem(first)

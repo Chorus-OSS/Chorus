@@ -1,6 +1,5 @@
 package org.chorus_oss.chorus.recipe
 
-import io.netty.util.collection.CharObjectHashMap
 import org.chorus_oss.chorus.item.Item
 import org.chorus_oss.chorus.network.protocol.types.RecipeUnlockingRequirement
 import org.chorus_oss.chorus.recipe.descriptor.DefaultDescriptor
@@ -29,7 +28,7 @@ class ShapedRecipe @JvmOverloads constructor(
             ), priority, recipeUnlockingRequirement
     ) {
     val shape: Array<String>
-    private val shapedIngredients = CharObjectHashMap<ItemDescriptor>()
+    private val shapedIngredients = mutableMapOf<Char, ItemDescriptor>()
     val height: Int
     val width: Int
     val isMirror: Boolean

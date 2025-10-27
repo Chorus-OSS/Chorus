@@ -6,7 +6,8 @@ import com.google.common.base.Strings
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.Sets
-import io.netty.util.internal.PlatformDependent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.io.bytestring.ByteString
 import org.chorus_oss.chorus.block.*
 import org.chorus_oss.chorus.block.customblock.CustomBlock
@@ -211,7 +212,7 @@ open class Player(
      *
      * @return [InetSocketAddress]
      */
-    val rawSocketAddress: InetSocketAddress?
+    val rawSocketAddress: io.ktor.network.sockets.InetSocketAddress?
     val hiddenPlayers: MutableMap<UUID, Player> = HashMap()
     val chunkSendCountPerTick: Int
     val spawnThreshold: Int
@@ -226,7 +227,7 @@ open class Player(
      *
      * @return [InetSocketAddress]
      */
-    var socketAddress: InetSocketAddress?
+    var socketAddress: io.ktor.network.sockets.InetSocketAddress?
     /**
      * 得到[.removeFormat]
      *
@@ -334,7 +335,7 @@ open class Player(
      */
     @JvmField
     var lastInAirTick: Int = 0
-    private val clientMovements: Queue<Transform> = PlatformDependent.newMpscQueue(4)
+    private val clientMovements: Channel<Transform> = Channel(capacity = 4)
 
     @get:Synchronized
     @set:Synchronized
@@ -564,7 +565,7 @@ open class Player(
     init {
         this.perm = PermissibleBase(this)
         this.lastBreak = -1
-        this.socketAddress = session.address
+        this.socketAddress = session.socketAddress
         this.rawSocketAddress = socketAddress
         this.chunkSendCountPerTick = Server.instance.settings.chunkSettings.perTickSend
         this.spawnThreshold = Server.instance.settings.chunkSettings.spawnThreshold
@@ -1126,6 +1127,7 @@ open class Player(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun handleMovement(clientPos: Transform) {
         if (this.firstMove) this.firstMove = false
         var invalidMotion = false
@@ -1213,7 +1215,7 @@ open class Player(
         }
 
         if (!this.firstMove) {
-            if (clientMovements.isEmpty()) {
+            if (clientMovements.isEmpty) {
                 this.blocksAround = null
                 this.collisionBlocks = null
             }
@@ -1315,7 +1317,7 @@ open class Player(
                 if (dis < MOVEMENT_DISTANCE_THRESHOLD) return
             }
             this.newPosition = newPosition.position
-            clientMovements.offer(newPosition)
+            clientMovements.trySend(newPosition)
         }
     }
 
@@ -2159,7 +2161,7 @@ open class Player(
          *
          * @return [String]
          */
-        get() = rawSocketAddress!!.address.hostAddress
+        get() = rawSocketAddress!!.hostname
 
     val rawPort: Int
         /**
@@ -2187,7 +2189,7 @@ open class Player(
          *
          * @return [String]
          */
-        get() = socketAddress!!.address.hostAddress
+        get() = socketAddress!!.hostname
 
     val port: Int
         /**
@@ -2399,17 +2401,6 @@ open class Player(
     fun sendPacket(packet: Packet) {
         session.sendPacket(packet)
     }
-
-    val ping: Int
-        /**
-         * 得到该玩家的网络延迟。
-         *
-         *
-         * Get the network latency of the player.
-         *
-         * @return int
-         */
-        get() = session.ping.toInt()
 
     fun sleepOn(pos: Vector3): Boolean {
         if (!this.isOnline) {
@@ -2811,9 +2802,9 @@ open class Player(
                 motion.setComponents(0.0, 0.0, 0.0)
             }
 
-            while (!clientMovements.isEmpty()) {
+            while (true) {
                 this.positionChanged = true
-                this.handleMovement(clientMovements.poll())
+                this.handleMovement(clientMovements.tryReceive().getOrNull() ?: break)
             }
 
             if (!this.isSpectator) {
@@ -3714,7 +3705,7 @@ open class Player(
             message = reason1,
             filteredMessage = reason1
         )
-        session.sendPacketSync(packet)
+        session.sendPacketImmediately(packet)
 
         //call quit event
         var ev: PlayerQuitEvent? = null
@@ -4514,7 +4505,8 @@ open class Player(
             Arrays.stream(from.level.getEntities()).forEach { e: Entity -> e.despawnFrom(this) }
         }
 
-        clientMovements.clear()
+        while (true) clientMovements.tryReceive().getOrNull() ?: break
+
         //switch level, update pos and rotation, update aabb
         if (setPositionAndRotation(to.locator, to.yaw, to.pitch, to.headYaw)) {
             //if switch level or the distance teleported is too far
@@ -4995,7 +4987,7 @@ open class Player(
 
     public override fun switchLevel(targetLevel: Level): Boolean {
         if (super.switchLevel(targetLevel)) {
-            clientMovements.clear()
+            while (true) clientMovements.tryReceive().getOrNull() ?: break
             val spawnPosition = SetSpawnPositionPacket(
                 spawnType = SetSpawnPositionPacket.Companion.SpawnType.World,
                 position = BlockPos(targetLevel.spawnLocation.position),
