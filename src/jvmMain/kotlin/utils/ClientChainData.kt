@@ -114,7 +114,7 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
             Buffer().apply {
                 stream.readAtMostTo(this, stream.readIntLe().toLong())
             }.readString()
-        ) ?: return
+        )
         if (skinToken.contains("ClientRandomId")) this.clientId = skinToken["ClientRandomId"]!!.jsonPrimitive.long
         if (skinToken.contains("ServerAddress")) this.serverAddress = skinToken["ServerAddress"]!!.jsonPrimitive.content
         if (skinToken.contains("DeviceModel")) this.deviceModel = skinToken["DeviceModel"]!!.jsonPrimitive.content
@@ -165,17 +165,15 @@ class ClientChainData private constructor(private val stream: Source) : LoginCha
         }
 
         for (c in chain) {
-            val chainMap = decodeToken(c) ?: continue
-            if (chainMap.contains("extraData")) {
-                val extra = chainMap["extraData"]!!.jsonObject
-                if (extra.contains("displayName")) this.username = extra["displayName"]!!.jsonPrimitive.content
-                if (extra.contains("identity")) this.clientUUID =
-                    UUID.fromString(extra["identity"]!!.jsonPrimitive.content)
-                if (extra.contains("XUID")) this.xuid = extra["XUID"]!!.jsonPrimitive.content
-                if (extra.contains("titleId")) this.titleId = extra["titleId"]!!.jsonPrimitive.content
+            val chainMap = decodeToken(c)
+
+            chainMap["extraData"]?.jsonObject?.let { extra ->
+                this.username = extra["displayName"]?.jsonPrimitive?.content
+                this.clientUUID = extra["identity"]?.jsonPrimitive?.content?.let { UUID.fromString(it) }
+                this.xuid = extra["XUID"]?.jsonPrimitive?.content
+                this.titleId = extra["titleId"]?.jsonPrimitive?.content
             }
-            if (chainMap.contains("identityPublicKey")) this.identityPublicKey =
-                chainMap["identityPublicKey"]!!.jsonPrimitive.content
+            this.identityPublicKey = chainMap["identityPublicKey"]?.jsonPrimitive?.content
         }
 
         if (!isXboxAuthed) {

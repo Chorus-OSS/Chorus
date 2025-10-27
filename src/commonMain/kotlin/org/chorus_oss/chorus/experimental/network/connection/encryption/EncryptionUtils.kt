@@ -88,33 +88,27 @@ object EncryptionUtils {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun createHandshakeJWT(serverKeyPair: ECDSA.KeyPair, token: ByteArray): String {
+        val b64 = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT)
+
         val header = JWTHeader(
             alg = "ES384",
             x5u = Base64.encode(
                 serverKeyPair.publicKey.encodeToByteString(EC.PublicKey.Format.DER)
             )
-        )
+        ).let { b64.encode(Json.encodeToString(it).toByteArray()) }
 
         val claims = JWTClaims(
             salt = Base64.encode(token)
-        )
+        ).let { b64.encode(Json.encodeToString(it).toByteArray()) }
 
-        val headerJSON = Json.encodeToString(header)
-        val claimsJSON = Json.encodeToString(claims)
+        return "$header.$claims".let {
+            val signature = serverKeyPair.privateKey.signatureGenerator(
+                digest = SHA384,
+                format = ECDSA.SignatureFormat.RAW
+            ).generateSignature(it.toByteArray())
 
-        val headerB64 = Base64.UrlSafe.encode(headerJSON.encodeToByteString())
-        val claimsB64 = Base64.UrlSafe.encode(claimsJSON.encodeToByteString())
-
-        val unsigned = "$headerB64.$claimsB64"
-
-        val signature = serverKeyPair.privateKey.signatureGenerator(
-            digest = SHA384,
-            format = ECDSA.SignatureFormat.DER
-        ).generateSignature(unsigned.encodeToByteString())
-
-        val signatureB64 = Base64.UrlSafe.encode(signature)
-
-        return "$unsigned.$signatureB64"
+            "$it.${b64.encode(signature)}"
+        }
     }
 
     @OptIn(ExperimentalAtomicApi::class)
